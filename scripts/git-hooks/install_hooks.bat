@@ -14,13 +14,18 @@ if not exist ".git" (
 echo [INFO] 安裝 erpilot git hooks...
 
 copy /Y "scripts\git-hooks\pre-commit" ".git\hooks\pre-commit" >nul
-if errorlevel 1 (
-    echo [ERROR] copy 失敗
-    exit /b 1
-)
+if errorlevel 1 ( echo [ERROR] copy pre-commit fail & exit /b 1 )
 echo   [OK] pre-commit
 
+copy /Y "scripts\git-hooks\pre-push" ".git\hooks\pre-push" >nul
+if errorlevel 1 ( echo [ERROR] copy pre-push fail & exit /b 1 )
+echo   [OK] pre-push
+
 echo.
-echo [DONE] 完成。每次 git commit 都會自動掃 secrets。
-echo        跳過：git commit --no-verify (不建議)
+echo [DONE]
+echo   git commit  -^> auto-scan secrets / .env / hardcoded password
+echo   git push    -^> auto-run 8 gates before pushing main/develop
+echo                  (markdown-only changes skipped)
+echo.
+echo   Bypass: git commit --no-verify ^| git push --no-verify (not recommended)
 popd

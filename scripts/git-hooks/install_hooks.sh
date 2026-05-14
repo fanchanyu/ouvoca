@@ -16,7 +16,7 @@ fi
 
 echo "📦 安裝 erpilot git hooks..."
 
-for hook in pre-commit; do
+for hook in pre-commit pre-push; do
     if [ -f "$HOOKS_SRC/$hook" ]; then
         cp "$HOOKS_SRC/$hook" "$HOOKS_DST/$hook"
         chmod +x "$HOOKS_DST/$hook"
@@ -24,5 +24,9 @@ for hook in pre-commit; do
     fi
 done
 
-echo "✅ 完成。從現在起每次 git commit 都會自動掃 secrets。"
-echo "   跳過機制：git commit --no-verify（不建議）"
+echo "✅ 完成。"
+echo "   git commit  → 自動掃 secrets / .env / hardcoded password"
+echo "   git push   → 推 main/develop 前自動跑 8 道 gate"
+echo "                (純 .md / docs 變更自動跳過)"
+echo ""
+echo "   跳過：git commit --no-verify | git push --no-verify（不建議）"

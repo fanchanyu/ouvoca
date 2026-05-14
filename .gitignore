@@ -57,7 +57,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# 移除 lib/ — 太廣，會誤殺 frontend-desktop/src/lib/
+# Python venv 的 lib 已被 venv/ .venv/ 規則擋掉
 lib64/
 parts/
 sdist/
