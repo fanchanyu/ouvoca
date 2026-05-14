@@ -27,6 +27,51 @@ scripts\git-hooks\install_hooks.bat
 
 ---
 
+## 🚀 一鍵啟動開發環境（30 秒）
+
+無需 Docker。Windows 雙擊 `start_dev.bat`，會自動完成：
+
+```
+[1/5] 檢查 Python 3.12+ / Node 20+
+[2/5] 若無 backend/.env → 從 .env.example 複製
+[2/5] 若無 backend/erp.db → 自動 seed（admin/admin123 + 10 零件 + 4 客戶/供應商）
+[2/5] 若無 frontend-desktop/node_modules → 自動 npm install
+[3/5] 釋放占用的 :8000 / :5173 port
+[3/5] 開新視窗起 backend uvicorn :8000
+[4/5] 等 backend healthcheck 綠燈
+[4/5] 開新視窗起 frontend vite :5173
+[5/5] 等 frontend ready
+      → 自動打開瀏覽器 http://localhost:5173
+
+登入：admin / admin123
+```
+
+**關閉**：雙擊 `stop_dev.bat`（會用 port 5173/8000 精準找 PID 殺，不會誤殺其他 Python/Node）。
+
+### 啟用 AI 對話（選做，5 分鐘）
+
+```bash
+# backend/.env
+LLM_API_KEY=<YOUR_REAL_KEY_HERE_FROM_PROVIDER_CONSOLE>
+
+# Windows 開發環境若 SSL 證書驗證失敗（DeepSeek 常見）
+LLM_VERIFY_SSL=false
+```
+
+改完跑 `stop_dev.bat` → `start_dev.bat` 重啟。
+
+### 想用 Docker 完整正式模式？
+
+```bash
+docker compose up -d --build
+docker compose exec backend python -m scripts.seed
+open http://localhost:5173
+```
+
+詳見 [`docs/INSTALLATION_ZH.md`](./docs/INSTALLATION_ZH.md)。
+
+---
+
 ## What's inside
 - **FastAPI backend** with 12 business domains (Inventory, Purchase, Production, MPS/MRP, Quality, Sales, Accounting, Warehouse, CRM, HR, AI Governance)
 - **Multi-Agent LLM Engine** that classifies user intent and routes to a domain agent (10 agents, 25+ tools)
