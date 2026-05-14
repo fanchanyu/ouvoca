@@ -1,0 +1,58 @@
+name: CI · Self-Verification Gates
+
+# 每次 push 或 PR 都自動跑 run_gates 全套 — 紅燈不准 merge。
+# 本機開發也能跑：`bash scripts/run_gates.sh`
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  gates:
+    name: Run all gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install backend deps
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install mobile deps
+        run: cd frontend-mobile && npm install --no-audit --no-fund --ignore-scripts
+
+      - name: Install desktop deps
+        if: ${{ hashFiles('frontend-desktop/package.json') != '' }}
+        run: cd frontend-desktop && npm install --no-audit --no-fund
+
+      - name: Install PDF builder deps
+        run: cd scripts/build-pdfs && npm install --no-audit --no-fund
+
+      - name: Run Self-Verification Gates
+        run: bash scripts/run_gates.sh
+
+      - name: Upload PDFs as artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: customer-manuals-pdf
+          path: docs/pdf/*.pdf
+          retention-days: 30
