@@ -1,6 +1,33 @@
-# LLM-ERP — AI-Native Enterprise Resource Planning
+# erpilot — AI-Native ERP for SMB Manufacturers
 
-A production-grade ERP system with:
+> **The LINE-native ERP that lets your boss run the factory by chat.**
+> 給小型製造業的 LINE 原生 ERP — 老闆用 LINE 就能管整個工廠。
+
+[![Tests](https://img.shields.io/badge/tests-126%20passing-brightgreen)]()
+[![Gates](https://img.shields.io/badge/self--verify-8%2F8%20green-brightgreen)]()
+[![Docs](https://img.shields.io/badge/PDFs-28%20bilingual-blue)]()
+[![License](https://img.shields.io/badge/license-internal-lightgrey)]()
+
+---
+
+## 🔐 First-time setup: install secret-scanning hook (10 秒)
+
+**這是強制流程。** 避免 API key / DB / .env 被誤推：
+
+```bash
+# Mac / Linux / Git Bash
+bash scripts/git-hooks/install_hooks.sh
+
+# Windows
+scripts\git-hooks\install_hooks.bat
+```
+
+之後每次 `git commit` 都會自動掃 `sk-` / `ghp_` / hardcoded password 等樣式，
+偵測到立刻拒絕 commit。詳見 `scripts/git-hooks/pre-commit`。
+
+---
+
+## What's inside
 - **FastAPI backend** with 12 business domains (Inventory, Purchase, Production, MPS/MRP, Quality, Sales, Accounting, Warehouse, CRM, HR, AI Governance)
 - **Multi-Agent LLM Engine** that classifies user intent and routes to a domain agent (10 agents, 25+ tools)
 - **Event Engine** with EventBus, 16+ ConstraintChecker rules, and SSE broadcasting
