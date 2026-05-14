@@ -79,6 +79,12 @@ const DOCS_TO_BUILD = [
   { src: 'ARCHITECTURE_BLUEPRINT_EN.md', out: '13_Architecture_Blueprint_EN.pdf',          title: 'Architecture Blueprint' },
   { src: 'SECRETS_ROTATION_SOP_ZH.md',   out: '14_Secrets輪換SOP_中文.pdf',                title: 'Secrets 輪換 SOP' },
   { src: 'SECRETS_ROTATION_SOP_EN.md',   out: '14_Secrets_Rotation_SOP_EN.pdf',            title: 'Secrets Rotation SOP' },
+
+  // === 15-16 對話式 ERP 北極星文件（v2.8）===
+  { src: 'CONVERSATIONAL_ERP_DESIGN_ZH.md',     out: '15_對話式ERP架構_中文.pdf',           title: '對話式 ERP 架構設計' },
+  { src: 'CONVERSATIONAL_ERP_DESIGN_EN.md',     out: '15_Conversational_ERP_Architecture_EN.pdf', title: 'Conversational ERP Architecture' },
+  { src: 'CONVERSATIONAL_ERP_PHASE1_SPEC_ZH.md',out: '16_Phase1_實作Spec_中文.pdf',          title: 'Phase 1 實作 Spec' },
+  { src: 'CONVERSATIONAL_ERP_PHASE1_SPEC_EN.md',out: '16_Phase1_Implementation_Spec_EN.pdf', title: 'Phase 1 Implementation Spec' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────

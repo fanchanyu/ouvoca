@@ -34,6 +34,8 @@
 | **LLM 評比報告** | [中文 LLM_BENCHMARK_REPORT_ZH](./docs/LLM_BENCHMARK_REPORT_ZH.md) / [EN](./docs/LLM_BENCHMARK_REPORT_EN.md)（DeepSeek 10/10 + 開源閉源比較） |
 | **產品說明書（給採購決策者）** | [中文 PRODUCT_OVERVIEW_ZH.md](./docs/PRODUCT_OVERVIEW_ZH.md) / [English EN](./docs/PRODUCT_OVERVIEW_EN.md)（**13 章選購指南**） |
 | **使用者操作手冊** | [中文 USER_MANUAL_ZH.md](./docs/USER_MANUAL_ZH.md) / [English EN](./docs/USER_MANUAL_EN.md)（**含 Mobile / MESH / PDF**）|
+| **🎯 對話式 ERP 北極星（必讀）** | [中文 CONVERSATIONAL_ERP_DESIGN_ZH](./docs/CONVERSATIONAL_ERP_DESIGN_ZH.md) / [English EN](./docs/CONVERSATIONAL_ERP_DESIGN_EN.md)（**6 層架構 + 7 設計原則 + 4 階段**）|
+| **🎯 Phase 1 Day-1 to Day-5 Spec** | [中文 PHASE1_SPEC_ZH](./docs/CONVERSATIONAL_ERP_PHASE1_SPEC_ZH.md) / [English EN](./docs/CONVERSATIONAL_ERP_PHASE1_SPEC_EN.md)（**動工 spec / 介面契約 / 驗收標準**）|
 | **系統架構藍圖（網路架構師）** | [中文 ARCHITECTURE_BLUEPRINT_ZH](./docs/ARCHITECTURE_BLUEPRINT_ZH.md) / [English EN](./docs/ARCHITECTURE_BLUEPRINT_EN.md)（**7 層防禦 + Port Matrix + HA + DR + Cost**）|
 | **Secrets 輪換 SOP** | [中文 SECRETS_ROTATION_SOP_ZH](./docs/SECRETS_ROTATION_SOP_ZH.md) / [English EN](./docs/SECRETS_ROTATION_SOP_EN.md)（**6 種 secret + 15 分鐘緊急應變**）|
 | **生產 Docker Compose** | [`docker-compose.prod.yml`](./docker-compose.prod.yml)（**healthcheck + 資源限制 + non-root + read-only**）|
@@ -44,7 +46,7 @@
 | **備份還原 SOP** | [中文 BACKUP_RESTORE_SOP_ZH](./docs/BACKUP_RESTORE_SOP_ZH.md) / [English EN](./docs/BACKUP_RESTORE_SOP_EN.md)（**3-2-1 + DRP**） |
 | **安裝指南（給老闆）** | [中文 INSTALLATION_ZH.md](./docs/INSTALLATION_ZH.md) / [English EN](./docs/INSTALLATION_EN.md)（**3 分鐘消費者立場**） |
 | **一鍵安裝腳本** | `install.sh`（Mac/Linux）/ `install.bat`（Windows）/ `load_industry.sh` |
-| **客戶手冊 PDF（28 份雙語）** | 跑 `build_pdfs.bat`（Win）或 `./build_pdfs.sh`（Mac/Linux）→ 輸出至 `docs/pdf/`。詳見 [scripts/build-pdfs/README.md](./scripts/build-pdfs/README.md) |
+| **客戶手冊 PDF（32 份雙語）** | 跑 `build_pdfs.bat`（Win）或 `./build_pdfs.sh`（Mac/Linux）→ 輸出至 `docs/pdf/`。詳見 [scripts/build-pdfs/README.md](./scripts/build-pdfs/README.md) |
 | **PR 模板** | [`.github/PULL_REQUEST_TEMPLATE.md`](./.github/PULL_REQUEST_TEMPLATE.md)（**強制貼 run_gates 輸出**） |
 | **Mobile App（Expo）** | [`frontend-mobile/README.md`](./frontend-mobile/README.md) + [`VERIFY_MOBILE.md`](./frontend-mobile/VERIFY_MOBILE.md)（**Phase 1 重點**，5 tab 骨架完成） |
 | **🛡️ 自證閘（必跑）** | `bash scripts/run_gates.sh` — 8 道閘 ~271 秒，**綠燈才能說完成**。CI: [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) |
@@ -347,6 +349,6 @@ OEE                     ❌ [          ]   0%   P5+ 待客戶反饋
 
 ---
 
-**最後更新**：2026-05-14（會話 #15：GitHub 上傳 erpilot / CI 救援 / 抓 3 個本機隱形 bug / 第一次 PR 流程就緒）
+**最後更新**：2026-05-15（會話 #16：對話式 ERP 北極星文件中英 + Phase 1 Day-1 to Day-5 動工 spec）
 **維護者**：使用者 + Claude
-**版本**：2.7
+**版本**：2.8

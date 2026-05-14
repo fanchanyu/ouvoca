@@ -38,6 +38,98 @@
 
 ---
 
+## 2026-05-15｜會話 #16｜🎯 產品 DNA 重新對齊：對話式 ERP 北極星文件（中英）
+
+**目標**：使用者點醒「自然語言操作 ERP」核心承諾完成度只有 1.5/8（19%）—— 寫入類 UI/AI 全空白。今天寫北極星設計文件 + Phase 1 動工 spec，把另外 81% 的補完路徑文件化。
+
+### 🪞 核心領悟
+
+使用者問：「我們希望這套系統是用自然語言可以取代教育訓練的時間並且透過自然語言就可以操作（查詢/新增/刪除/修改）」
+
+我整天加 read tool / Test / 安全防線 / 隔離 / 文件，**離核心承諾越來越遠**。
+今天起回到「為對話設計系統」的初衷，重新對齊產品 DNA。
+
+### 📦 4 個重磅文件交付
+
+| 文件 | 內容 | 行數 |
+|---|---|---|
+| `docs/CONVERSATIONAL_ERP_DESIGN_ZH.md` | 9 章願景 + 6 層架構 + 7 個設計原則 + 4 階段 roadmap + KPIs + 風險 + 代碼層級對應 | ~530 |
+| `docs/CONVERSATIONAL_ERP_DESIGN_EN.md` | 中英對稱 | ~520 |
+| `docs/CONVERSATIONAL_ERP_PHASE1_SPEC_ZH.md` | Day 1-5 開工 spec（每天交付清單 / 介面契約 / 驗收標準）+ DoD + 跨日 test 矩陣 | ~440 |
+| `docs/CONVERSATIONAL_ERP_PHASE1_SPEC_EN.md` | 中英對稱 | ~430 |
+
+### 🏗️ 核心架構決定
+
+**6 層管線**（每層解一個 naive 設計災難）：
+
+1. Intent + Slot Extraction（已有 IntentClassifier）
+2. Disambiguation（歧義解析）
+3. Risk Classification + RBAC
+4. **Confirmation Card**（hard-write 不直接執行）
+5. Execute + Audit + Undo Token（5 分鐘可撤回）
+6. Conversational Memory（「剛才那筆」/ 公司術語學習）
+
+**7 個設計原則**：
+- Tool Risk-Tier 三分類（read / soft-write / hard-write）
+- Confirmation Card 模式（JSON schema + 前端 inline card）
+- Slot-filling 對話機（缺欄位主動反問）
+- Disambiguation 流程（多 candidate 主動問）
+- Undo Token（5 分鐘 window + ActionHistory 表）
+- 教育替代三件套（glossary / workflow guide / learn-our-term）
+- RBAC × AI 整合（tool 註冊帶 required_permission）
+
+### 📅 4 階段 Roadmap
+
+| Phase | 週數 | 目標 |
+|---|---|---|
+| **1 Foundation** | Week 1 | 框架 + 1 個 hard-write tool e2e |
+| **2 寫入 tools** | Week 2 | 16 個核心寫入 tool（每 domain 1-3 個）|
+| **3 對話智慧** | Week 3 | disambiguation / glossary / workflow guide / undo |
+| **4 規模化** | Week 4 | 個人化 / mobile / UI Edit-Delete 保底 / 整套 demo |
+
+### ✅ Phase 1 Day 1-5 Spec（明天動工）
+
+每天有：
+- 交付檔案清單
+- 介面契約（schema / function signature）
+- 驗收標準（Acceptance Criteria）
+- pytest 新增測試數
+
+Day 5 Definition of Done 8 項全勾才算完工：
+- 7 步劇本 e2e PASS
+- 30-60 秒 demo 影片
+- gate 全綠 / CI 綠燈
+- 174 tests / 0 退化
+
+### 📊 整體狀態
+
+| 維度 | 之前 | 現在 |
+|---|---|---|
+| 客戶面向 PDF | 28 | **32**（+4 對話式 ERP 中英）|
+| 自證閘耗時 | 207s | 303s（多 4 PDF 渲染）|
+| 自然語言操作 ERP 完成度 | 19%（1.5/8）| 仍 19%（**但有路徑表了**）|
+| 核心承諾「2 小時教育訓練」 | 行銷講的 | **架構文件白紙黑字證明可達** |
+
+### 📁 影響檔案
+
+新增：
+- `docs/CONVERSATIONAL_ERP_DESIGN_ZH.md` + `_EN.md`
+- `docs/CONVERSATIONAL_ERP_PHASE1_SPEC_ZH.md` + `_EN.md`
+- `docs/pdf/15_*.pdf` + `16_*.pdf` 4 個（自動產出）
+
+修改：
+- `scripts/build-pdfs/build.mjs`（PDF 清單 14 → 16 條目，28 → 32 份）
+- `scripts/run_gates.sh`（EXPECTED 28 → 32）
+
+**Blocker**：無。Phase 1 Day 1 立刻可動工 — 但建議先讓使用者 review 設計文件再開始。
+
+### 🪞 給未來自己的提醒
+
+每次想「加 tool / 加文件 / 加 test」之前，先問：**這對核心承諾的 19% → 100% 有幫助嗎？**
+沒有的話，是 yak shaving。
+
+---
+
 ## 2026-05-14｜會話 #15｜🚀 GitHub 上傳 → CI 救援 → 抓到 3 個本機 cache 隱藏的瑕疵
 
 **目標**：使用者：「決定今天做哪件：a) 修 Vite 6.4.2 漏洞 / b) 加 workflow scope 補 CI / c) 設 main branch protection」→ 我建議三件全做（20 分鐘）→ 使用者：「動工」。
