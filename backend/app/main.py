@@ -28,12 +28,29 @@ async def lifespan(app: FastAPI):
     if settings.demo_bypass_active:
         log.warning("⚠️  Demo bypass ACTIVE — Bearer 'demo' grants super-admin. "
                     "Set a real JWT_SECRET to disable.")
-    # Production 環境安全檢查
+    # Production 環境安全檢查 — 致命項直接 exit，警告項 log 紀錄
     if not settings.DEBUG:
+        fatal_errors: list[str] = []
+
+        if "change-me" in settings.JWT_SECRET or len(settings.JWT_SECRET) < 32:
+            fatal_errors.append(
+                "JWT_SECRET 是預設值或太短。production 不准跑。\n"
+                "  立刻執行：  openssl rand -hex 32  → 寫進 backend/.env"
+            )
         if "*" in settings.CORS_ORIGINS:
-            log.error("🔴 SECURITY: CORS_ORIGINS contains '*' in production. This is unsafe.")
-        if "change-me" in settings.JWT_SECRET:
-            log.error("🔴 SECURITY: JWT_SECRET is still default. RUN: openssl rand -hex 32")
+            fatal_errors.append(
+                "CORS_ORIGINS 含 '*'。production 必須改為明確 domain，例如：\n"
+                "  CORS_ORIGINS=https://app.example.com,https://api.example.com"
+            )
+
+        if fatal_errors:
+            log.error("🚨 FATAL production config errors:")
+            for i, e in enumerate(fatal_errors, 1):
+                log.error("  %d) %s", i, e)
+            log.error("拒絕啟動以保護資料。如為本機演練：設 DEBUG=true。")
+            raise SystemExit(1)
+
+        # 非致命的警告
         if settings.DATABASE_DRIVER == "sqlite":
             log.warning("⚠️  Using SQLite in non-debug mode. Consider PostgreSQL for multi-user.")
 
@@ -45,9 +62,14 @@ async def lifespan(app: FastAPI):
     import app.events  # noqa: F401
     import app.agents  # noqa: F401
 
-    # Install tenant auto-injection（新建 ORM 物件自動帶 tenant_id）
-    from app.core.tenant_context import install_tenant_auto_injection
+    # Tenant 雙向防線：
+    #   ① 寫入自動填 tenant_id
+    #   ② 讀取自動加 WHERE tenant_id（覆蓋所有 87 endpoint，不必手動套）
+    from app.core.tenant_context import (
+        install_tenant_auto_injection, install_auto_tenant_filter,
+    )
     install_tenant_auto_injection()
+    install_auto_tenant_filter()
 
     yield
     log.info("Shutting down %s", settings.APP_NAME)
