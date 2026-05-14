@@ -38,6 +38,163 @@
 
 ---
 
+## 2026-05-14｜會話 #15｜🚀 GitHub 上傳 → CI 救援 → 抓到 3 個本機 cache 隱藏的瑕疵
+
+**目標**：使用者：「決定今天做哪件：a) 修 Vite 6.4.2 漏洞 / b) 加 workflow scope 補 CI / c) 設 main branch protection」→ 我建議三件全做（20 分鐘）→ 使用者：「動工」。
+
+實際時程：50 分鐘（CI 第一次紅燈、修 3 個 bug、重跑驗證）。
+
+---
+
+### 🎯 三件原訂工作
+
+**(a) Vite CVE 修復** ✅ 6 分鐘
+- `frontend-desktop/package.json`: `vite ^5.3.1 → ^6.4.2`
+- 修補：GHSA-67mh-4wv8-2f99 (esbuild dev server SSRF) + Vite path traversal in `.map`
+- 驗證：`npm audit` 2 moderate → **0 vulnerability**
+- 驗證：`npm run build` 69 modules / 2.27s
+- GitHub Dependabot alert: state=`fixed`
+- commit `942dca6`
+
+**(b) CI workflow** ✅ 推上去 + **3m30s 綠燈**
+- 將原本 push 被擋下的 `.github/workflows/ci.yml`（從 `/tmp/ci.yml.pending` 還原）
+- 使用者 `gh auth refresh -s workflow` 後權限到位
+- 第一次 CI 紅燈 → 修 3 個 bug 後第二次綠燈
+- Workflow ID 25881123573
+
+**(c) Branch protection** ⚠️ → 改用 pre-push hook
+- GitHub API 回 403：「Upgrade to GitHub Pro or make this repository public」
+- 試 modern Rulesets API：同樣 403
+- 結論：**免費 private repo 不支援 server-side branch protection**
+- 替代方案：`scripts/git-hooks/pre-push` 推 main/develop 前強制跑 `run_gates.sh`
+  - 純文件變更（`.md` / `docs/`）自動 skip
+  - 比 GitHub-side branch protection 更早攔截（push 前 vs push 後）
+
+---
+
+### 🐛 CI 第一次紅燈揪出 3 個架構級疏漏
+
+**Bug-10：`slowapi` 漏列在 `requirements.txt`**
+- 症狀：CI fresh install 後 `ModuleNotFoundError: No module named 'slowapi'`，22 個測試炸
+- 根因：之前加 `rate_limit.py` 時，我本機 manual `pip install slowapi`，但**沒同步更新 requirements.txt**
+- 嚴重：「本機跑得起來、新環境跑不起來」的經典本機-CI 分歧
+- 修：補一行 `slowapi>=0.1.9` 到 `backend/requirements.txt`
+
+**Bug-11：`.gitignore` 的 `lib/` 規則太廣（致命）**
+- 症狀：CI tsc 報 `Cannot find module '../lib/api'`（5 個前端檔案）
+- 根因：我用 Python 通用 `.gitignore` 模板，含 `lib/` 規則（原意 Python venv 的 lib），但**同時誤殺**：
+  - `frontend-desktop/src/lib/api.ts`（前端 API client）
+  - `frontend-mobile/src/lib/api.ts`（手機 API client）
+- 為什麼本機沒抓到：本機檔案存在於 working dir、tsc 能讀；但 `git check-ignore` 顯示一直被擋、`git ls-files` 看不到。**只有 fresh clone 才會炸**。
+- 嚴重：**如果不是 CI 強制 fresh，這個 bug 會藏到第一個外部協作者 clone 才爆**
+- 修：移除 `lib/` 規則（Python venv 的 lib 已被 `venv/` + `.venv/` 規則涵蓋）
+
+**Bug-12：沒有 push-time 自證閘**
+- 症狀：本機 `bash run_gates.sh` 要主動跑，靠紀律
+- 修：新增 `scripts/git-hooks/pre-push`
+  - 推 main / develop 前自動跑 `run_gates.sh`
+  - 純文件變更自動跳過
+  - 緊急可 `--no-verify` 跳過（但不建議）
+
+---
+
+### 🛡️ 現在多了三道架構級防線
+
+```
+程式碼修改
+   ↓
+[pre-commit hook]  → 掃 secret / .env / hardcoded password
+   ↓ 通過
+git commit
+   ↓
+[pre-push hook]    → 強制跑 8 道 gate（main/develop only）
+   ↓ 通過
+git push
+   ↓
+[GitHub Actions]   → fresh clone 重跑（catches local cache 漏網之魚）
+                      + 上傳 PDF artifact (30 天保留)
+   ↓ 綠燈
+合併 / 部署
+```
+
+每一道都會抓到不同類型的 bug。本次三 bug 中：
+- Bug-10（slowapi）：**只有 fresh install 才會抓到** → GitHub Actions 抓
+- Bug-11（lib/）：**只有 fresh clone 才會抓到** → GitHub Actions 抓
+- Bug-12（push 防線）：本來就靠紀律 → pre-push hook 自動化
+
+---
+
+### 🔧 額外加分項：`scripts/git-hooks/`
+
+- `pre-commit`：13 種 secret pattern + sensitive file + hardcoded password + build dir 4 道掃描
+- `pre-push`：跑 `run_gates.sh`，main/develop only，docs-only skip
+- `install_hooks.sh` / `install_hooks.bat`：一鍵把 hook 從 `scripts/` copy 到 `.git/hooks/`
+- README.md 加入「First-time setup: install secret-scanning hook」指引
+
+協作者 clone 後跑：
+
+```bash
+bash scripts/git-hooks/install_hooks.sh
+```
+
+---
+
+### 📊 GitHub 上的最終狀態
+
+| 項目 | 值 |
+|---|---|
+| Repo | `github.com/fanchanyu/erpilot` 🔒 private |
+| Commits | 4（init / hook+dependabot / vite / ci-fix）|
+| Languages | Python（多）+ TypeScript |
+| CI | ✅ 最近一次 3m30s success |
+| Dependabot | ✅ 1/1 警報 state=fixed |
+| Security | ✅ Dependabot enabled + automated security fixes enabled |
+| Branch protection | ⚠️ 不可用（免費 private）→ pre-push hook 替代 |
+
+---
+
+### 影響檔案（共 8 個）
+
+**新增**：
+- `.gitignore`
+- `.github/workflows/ci.yml`
+- `scripts/git-hooks/pre-commit`
+- `scripts/git-hooks/pre-push`
+- `scripts/git-hooks/install_hooks.sh`
+- `scripts/git-hooks/install_hooks.bat`
+- `frontend-desktop/src/lib/api.ts`（救回，本來就有但被 gitignore 誤擋）
+- `frontend-mobile/src/lib/api.ts`（救回，同上）
+
+**修改**：
+- `backend/requirements.txt`（加 `slowapi>=0.1.9`）
+- `frontend-desktop/package.json`（vite 6.4.2）
+- `README.md`（加 erpilot 品牌標題 + hook 安裝指引）
+
+---
+
+### 🪞 本次學到 3 個關鍵教訓
+
+1. **「本機跑得起來」≠「乾淨環境跑得起來」**
+   永遠要有「CI fresh clone」把關，否則自己永遠看不到本機 cache / manual install 的副作用。
+
+2. **`.gitignore` 規則太寬會無聲毀掉專案**
+   `lib/` 是 Python 通用模板的標準項目，但前端專案大量用 `src/lib/`。
+   未來開新專案：先掃描 source tree 哪些路徑會被 ignore 規則命中，再決定要不要保留該規則。
+
+3. **沒有「強制執行」的紀律遲早會破功**
+   `run_gates.sh` 寫好不等於有用 — 要有 hook 強制跑。
+   commit 規則寫好不等於有用 — 要有 pre-commit 強制掃。
+   程式設計師的「我會記得」是世界上最不可靠的承諾。
+
+**Blocker**：無。
+
+下一波（待客戶/使用者觸發）：
+- 第一個 PR 流程演練（建 feature branch → 開 PR → CI 跑 → squash merge）
+- OpenTelemetry tracing
+- LINE Bot Webhook
+
+---
+
 ## 2026-05-14｜會話 #10｜📄 12 份雙語客戶手冊一鍵轉 PDF
 
 **目標**：使用者反饋「給使用者讀的手冊應該都要轉 PDF，不然下載了也看不懂；重點都要雙語版」。盤點所有客戶面向文件、確認雙語齊全、建立一鍵 MD→PDF 轉換系統。
