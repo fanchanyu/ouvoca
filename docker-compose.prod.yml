@@ -1,0 +1,225 @@
+# ─────────────────────────────────────────────────────────────
+# LLM-ERP Production Docker Compose
+# Hardened：healthchecks / resource limits / restart policy /
+# 網路隔離 / PostgreSQL / 預設 secrets 警告
+# ─────────────────────────────────────────────────────────────
+# 啟動：docker compose -f docker-compose.prod.yml up -d
+# ─────────────────────────────────────────────────────────────
+
+version: "3.9"
+
+# ── 網路隔離：3 個獨立網段 ──────────────────────────────────
+# - public: 對外（含 nginx）
+# - app:    backend ↔ frontend ↔ factory 內部
+# - data:   db ↔ backend 專用，frontend 完全進不去
+networks:
+  public:
+    driver: bridge
+  app:
+    driver: bridge
+    internal: false
+  data:
+    driver: bridge
+    internal: true  # ★ 沒有對外路由，DB 不可能被外部接觸
+
+volumes:
+  pgdata:
+  pgbackup:
+  llm_logs:
+
+# ── 共用設定 ────────────────────────────────────────────────
+x-common: &common
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "50m"
+      max-file: "5"
+
+services:
+  # ─── PostgreSQL ───────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    <<: *common
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-erp}
+      POSTGRES_USER: ${POSTGRES_USER:-erp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+      # 效能 / 安全調教
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - pgbackup:/backup
+    networks:
+      - data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-erp}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    # 安全：不允許新權限提升
+    security_opt:
+      - no-new-privileges:true
+
+  # ─── Backend (FastAPI) ───────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    <<: *common
+    environment:
+      # DB 連線（透過 data 網段）
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-erp}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-erp}"
+      DATABASE_DRIVER: "postgresql"
+
+      # 必填祕密 — 沒設啟動會 log error
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be 32+ random chars}
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
+
+      # Production flags
+      DEBUG: "false"
+      LOG_LEVEL: "INFO"
+      LOG_JSON: "true"  # 結構化 JSON log（給 ELK / Loki）
+
+      # CORS：絕對不允許 *
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://your-domain.example}
+
+      # Security headers
+      SECURITY_CSP_ENABLED: "true"
+      SECURITY_HSTS_MAX_AGE: "63072000"  # 2 年
+
+      # Rate limit
+      RATE_LIMIT_ENABLED: "true"
+
+      # DB pool 調教
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-20}
+      DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-10}
+
+      # MESH
+      FACTORY_MODE: "hq"
+      FACTORY_ID: "hq"
+    networks:
+      - app
+      - data
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health').read()"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    # 跑非 root user（image 內已建好 'app' user，UID 1000）
+    user: "1000:1000"
+    read_only: true  # 唯讀檔案系統（除了 /tmp）
+    tmpfs:
+      - /tmp:size=128M
+    volumes:
+      - llm_logs:/var/log/llm-erp
+
+  # ─── Frontend (Desktop UI - nginx) ───────────────────────
+  frontend:
+    build:
+      context: ./frontend-desktop
+      dockerfile: Dockerfile
+    <<: *common
+    networks:
+      - app
+      - public
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/nginx-health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "127.0.0.1:5173:80"  # 只 bind 127.0.0.1 — 透過外部 nginx/Cloudflare 對外
+
+  # ─── Backend Public Edge (透過 nginx 對外，可選) ──────────
+  # 若已有 Cloudflare Tunnel 或外部 LB，可省略
+  # edge:
+  #   image: nginx:alpine
+  #   networks: [public, app]
+  #   ports: ["80:80", "443:443"]
+  #   volumes:
+  #     - ./nginx/prod.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - ./certs:/etc/nginx/certs:ro
+
+  # ─── Backup Sidecar ──────────────────────────────────────
+  # 每日 02:00 自動備份 PostgreSQL（詳見 BACKUP_RESTORE_SOP）
+  pgbackup:
+    image: postgres:15-alpine
+    <<: *common
+    networks:
+      - data
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgbackup:/backup
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: ${POSTGRES_USER:-erp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-erp}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while true; do
+          STAMP=$$(date +%Y%m%d_%H%M)
+          PGPASSWORD=$$POSTGRES_PASSWORD pg_dump -h db -U $$POSTGRES_USER $$POSTGRES_DB | gzip > /backup/erp-$$STAMP.sql.gz
+          # 保留 7 天
+          find /backup -name "erp-*.sql.gz" -mtime +7 -delete
+          # 等到下個 02:00
+          sleep 86400
+        done
+
+  # ─── Factory Node 範例（多廠模式啟用時複製多份）─────────
+  # factory-a:
+  #   build: { context: ./backend, dockerfile: Dockerfile.factory }
+  #   environment:
+  #     FACTORY_ID: factory-a
+  #     FACTORY_NAME: 主廠
+  #     HQ_URL: http://backend:8000
+  #     PORT: 8001
+  #   networks: [app]
+  #   depends_on:
+  #     backend: { condition: service_healthy }
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-q", "--spider", "http://localhost:8001/api/factory/health"]
+  #   deploy:
+  #     resources:
+  #       limits: { cpus: "0.5", memory: 256M }

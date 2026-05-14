@@ -1,0 +1,197 @@
+# ════════════════════════════════════════════════════════════
+# erpilot · .gitignore
+# 規則優先級：securityrisk > buildartifact > localcache
+# ════════════════════════════════════════════════════════════
+
+# ─── 🚨 SECRETS（絕對不可推）───────────────────────────────
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+secrets/
+**/credentials.json
+**/service-account*.json
+# GitHub tokens / API keys / Slack — 即使檔名前綴也擋
+gho_*
+ghp_*
+sk-*
+xoxb-*
+# WireGuard 私鑰
+wg0.conf
+privatekey
+# .env-style files everywhere
+*/backend/.env
+*/frontend/.env
+*/frontend-desktop/.env
+*/frontend-mobile/.env
+
+# ─── 💾 資料庫 / 持久化（不可推）─────────────────────────
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+erp.db*
+factory_*.db
+# PostgreSQL backup
+*.sql.gz
+/backup/
+/opt/backup/
+
+# ─── 🐍 Python ───────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 虛擬環境
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.pyenv
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# mypy / ruff
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# ─── 🟦 Node.js / 前端 ───────────────────────────────────
+node_modules/
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+# 各機器自行 lock，避免衝突
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+dist/
+build/
+.next/
+out/
+.nuxt/
+.cache/
+.parcel-cache/
+.vite/
+*.local
+
+# Expo
+.expo/
+.expo-shared/
+web-build/
+
+# ─── 🐳 Docker ───────────────────────────────────────────
+.docker/
+
+# ─── 📄 產出（會被 build_pdfs 重新產，不入版控）──────────
+docs/pdf/*.pdf
+!docs/pdf/.gitkeep
+!docs/pdf/README.md
+
+# 但 SVG 是手繪資產，留住
+!docs/*.svg
+
+# ─── 🛠 IDE / Editor ─────────────────────────────────────
+.idea/
+.vscode/
+!.vscode/settings.example.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── 📊 Log ──────────────────────────────────────────────
+*.log
+logs/
+/var/log/llm-erp/
+
+# ─── 🔁 暫存 / 平台 ──────────────────────────────────────
+*.tmp
+*.bak
+*.orig
+.~lock.*
+*.lnk
+
+# ─── 🧪 演練資料 / 測試產生物 ────────────────────────────
+test-results/
+playwright-report/
+mobile-evidence/*.png
+mobile-evidence/*.mp4
+!mobile-evidence/README.md
+
+# ─── 🔐 內部專案文件（暫不公開的）────────────────────────
+# 若這些文件之後決定公開，移除對應行即可
+# docs/PRICING_INTERNAL.md
+# docs/REVENUE_PROJECTION.md
+
+# ─── 📦 PDF 中間檔（mermaid 暫存）────────────────────────
+scripts/build-pdfs/.tmp/
+**/llm-erp-mermaid-*/
+
+# ─── 大檔案（避免誤推）───────────────────────────────────
+*.iso
+*.zip
+*.tar.gz
+*.7z
+*.rar
+*.dmg
+*.exe
+*.msi

@@ -1,0 +1,278 @@
+/*
+ * LLM-ERP PDF Styling
+ * - Light theme, eye-friendly
+ * - Chinese font support (Noto Sans CJK / Microsoft JhengHei)
+ * - Print-optimized
+ */
+
+@page {
+  size: A4;
+  margin: 18mm 16mm 20mm 16mm;
+  @bottom-center {
+    content: "LLM-ERP · " counter(page) " / " counter(pages);
+    font-size: 9pt;
+    color: #94a3b8;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans CJK TC",
+               "Source Han Sans TC", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.7;
+  color: #0f172a;
+  background: #ffffff;
+  margin: 0;
+  padding: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ───────────── Cover-ish first heading ───────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  /* 防止超長標題被切掉 */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+h1 {
+  font-size: 24pt;
+  font-weight: 700;
+  color: #1e3a8a;
+  border-bottom: 3px solid #2563eb;
+  padding-bottom: 10px;
+  margin-top: 0;
+  margin-bottom: 18px;
+  page-break-after: avoid;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 17pt;
+  font-weight: 600;
+  color: #1e40af;
+  margin-top: 28px;
+  margin-bottom: 12px;
+  padding-left: 12px;
+  padding-right: 8px;
+  border-left: 5px solid #2563eb;
+  page-break-after: avoid;
+  line-height: 1.35;
+}
+
+h3 {
+  font-size: 13pt;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  page-break-after: avoid;
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 12pt;
+  font-weight: 600;
+  color: #334155;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  page-break-after: avoid;
+}
+
+h5, h6 {
+  font-size: 11pt;
+  font-weight: 600;
+  color: #475569;
+}
+
+p {
+  margin: 8px 0;
+  text-align: justify;
+}
+
+/* ───────────── Blockquote (callouts) ───────────── */
+
+blockquote {
+  border-left: 4px solid #3b82f6;
+  background: #eff6ff;
+  padding: 10px 16px;
+  margin: 12px 0;
+  color: #1e3a8a;
+  border-radius: 0 6px 6px 0;
+}
+
+blockquote p {
+  margin: 4px 0;
+}
+
+/* ───────────── Code ───────────── */
+
+code {
+  font-family: "Consolas", "Menlo", "Monaco", "Cascadia Code", monospace;
+  background: #f1f5f9;
+  color: #be123c;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 9.5pt;
+}
+
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-size: 8.5pt;
+  line-height: 1.55;
+  page-break-inside: avoid;
+  margin: 12px 0;
+  /* 關鍵：長行折行不被切掉，保留 pre 的空白縮排 */
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: 8.5pt;
+  white-space: inherit;
+  word-break: inherit;
+  overflow-wrap: inherit;
+}
+
+/* ───────────── Tables ───────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 10pt;
+  page-break-inside: avoid;
+}
+
+thead {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  border: 1px solid #1e40af;
+}
+
+td {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+tbody tr:hover {
+  background: #eff6ff;
+}
+
+/* ───────────── Lists ───────────── */
+
+ul, ol {
+  margin: 8px 0;
+  padding-left: 26px;
+}
+
+li {
+  margin: 4px 0;
+}
+
+ul li::marker {
+  color: #2563eb;
+}
+
+ol li::marker {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* ───────────── Inline ───────────── */
+
+strong {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+em {
+  color: #475569;
+}
+
+a {
+  color: #2563eb;
+  text-decoration: none;
+  border-bottom: 1px dashed #93c5fd;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #cbd5e1;
+  margin: 24px 0;
+}
+
+/* ───────────── Images / SVG ───────────── */
+
+img, svg {
+  max-width: 100%;
+  height: auto;
+  page-break-inside: avoid;
+  display: block;
+  margin: 12px auto;
+}
+
+/* ───────────── Mermaid diagrams (預渲染為 SVG，內嵌) ───────────── */
+
+.mermaid-wrap {
+  text-align: center;
+  margin: 18px 0;
+  page-break-inside: avoid;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.mermaid-wrap svg {
+  max-width: 100%;
+  max-height: 230mm;  /* 避免單張圖超過 A4 一頁 */
+  height: auto;
+  display: inline-block;
+}
+
+/* ───────────── Page breaks ───────────── */
+
+h1, h2 {
+  page-break-after: avoid;
+}
+
+h1 + p, h2 + p, h3 + p {
+  page-break-before: avoid;
+}
+
+/* 只對「不可中斷」的小區塊做 avoid；blockquote/ul/ol 太大時硬擠在一頁會被截掉，移除 */
+table, pre {
+  page-break-inside: avoid;
+}
+
+/* 表格太大允許跨頁，但避免標題列孤立 */
+table thead {
+  display: table-header-group;
+}

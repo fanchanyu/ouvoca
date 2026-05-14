@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body { @apply font-sans antialiased; }
+  body { @apply bg-ink-50 text-ink-800 text-body; margin: 0; }
+  /* 老闆大字模式（透過 .text-large 切換） */
+  .text-large { font-size: 1.125rem; }
+  .text-large h1 { @apply text-h1 !text-3xl; }
+  .text-large h2 { @apply text-h2 !text-2xl; }
+  /* 中文字防止斷字（公司名/料號等不該被切） */
+  .nowrap-cjk { word-break: keep-all; }
+  /* 表格 hover */
+  tbody tr { @apply transition-colors; }
+}
+
+@layer components {
+  /* 共用：focus ring (a11y) */
+  .focus-ring { @apply focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2; }
+
+  /* Skeleton shimmer 動畫 */
+  .skeleton {
+    background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s linear infinite;
+    @apply rounded;
+  }
+}

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM-ERP War Room</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Courier New', Consolas, monospace; background: #0a0e17; color: #00ff9d; height: 100vh; overflow: hidden; }
+    .header { background: #111827; padding: 12px 24px; border-bottom: 2px solid #00ff9d; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 20px; letter-spacing: 4px; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .status-dot.online { background: #00ff9d; animation: pulse 2s infinite; }
+    .status-dot.offline { background: #ef4444; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; grid-template-rows: 1fr 1fr; gap: 8px; padding: 8px; height: calc(100vh - 60px); }
+    .panel { background: #111827; border: 1px solid #1f2937; border-radius: 6px; padding: 16px; overflow: hidden; display: flex; flex-direction: column; }
+    .panel h2 { font-size: 14px; color: #00ff9d; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
+    .stat-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; border-bottom: 1px solid #1f2937; }
+    .stat-value { color: #fff; font-weight: bold; }
+    .warning { color: #fbbf24; }
+    .danger { color: #ef4444; }
+    .log-line { font-size: 11px; padding: 3px 4px; border-bottom: 1px solid #1a1f2e; color: #9ca3af; display: flex; gap: 6px; align-items: center; }
+    .log-line .time { color: #6b7280; flex-shrink: 0; }
+    .log-line .tag { padding: 1px 6px; border-radius: 8px; font-size: 9px; flex-shrink: 0; }
+    .tag-inv { background: #1e3a5f; color: #60a5fa; }
+    .tag-prod { background: #064e3b; color: #34d399; }
+    .tag-pur { background: #581c87; color: #c084fc; }
+    .tag-sale { background: #78350f; color: #fbbf24; }
+    .tag-qual { background: #7f1d1d; color: #f87171; }
+    .tag-acct { background: #312e81; color: #a5b4fc; }
+    .tag-other { background: #1f2937; color: #d1d5db; }
+    .event-stream { flex: 1; overflow-y: auto; }
+    table { width: 100%; font-size: 11px; border-collapse: collapse; }
+    th { text-align: left; color: #6b7280; padding: 3px 0; border-bottom: 1px solid #1f2937; }
+    td { padding: 3px 0; border-bottom: 1px solid #111827; color: #d1d5db; }
+    .badge { padding: 1px 6px; border-radius: 10px; font-size: 10px; }
+    .badge-green { background: #065f46; color: #00ff9d; }
+    .badge-yellow { background: #713f12; color: #fbbf24; }
+    .new-event { animation: flash 0.8s ease-out; }
+    @keyframes flash { 0% { background: #064e3b; } 100% { background: transparent; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>LLM-ERP WAR ROOM</h1>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="color:#6b7280;font-size:12px;" id="clock"></span>
+      <div class="status-dot" id="statusDot"></div>
+      <span style="font-size:12px;" id="statusText">連線中…</span>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="panel">
+      <h2>事件統計 (本次連線)</h2>
+      <div class="stat-row"><span>總事件數</span><span class="stat-value" id="cnt-total">0</span></div>
+      <div class="stat-row"><span>📦 庫存</span><span class="stat-value" id="cnt-inv">0</span></div>
+      <div class="stat-row"><span>🛒 採購</span><span class="stat-value" id="cnt-pur">0</span></div>
+      <div class="stat-row"><span>🏭 生產</span><span class="stat-value" id="cnt-prod">0</span></div>
+      <div class="stat-row"><span>💰 銷售</span><span class="stat-value" id="cnt-sale">0</span></div>
+      <div class="stat-row"><span>🔬 品質</span><span class="stat-value danger" id="cnt-qual">0</span></div>
+      <div class="stat-row"><span>💳 會計</span><span class="stat-value" id="cnt-acct">0</span></div>
+      <div class="stat-row"><span>📂 其他</span><span class="stat-value" id="cnt-other">0</span></div>
+      <div class="stat-row" style="margin-top:8px;"><span>最後事件</span><span class="stat-value" id="last-evt">—</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>系統健康</h2>
+      <div class="stat-row"><span>API</span><span class="stat-value" id="health-api">—</span></div>
+      <div class="stat-row"><span>DB</span><span class="stat-value" id="health-db">—</span></div>
+      <div class="stat-row"><span>LLM Provider</span><span class="stat-value" id="health-llm">—</span></div>
+      <div class="stat-row"><span>版本</span><span class="stat-value" id="health-ver">—</span></div>
+      <div class="stat-row"><span>Demo Bypass</span><span class="stat-value" id="health-demo">—</span></div>
+      <div style="margin-top:12px;font-size:11px;color:#6b7280;">
+        Polling /api/health every 10s.
+      </div>
+    </div>
+
+    <div class="panel" style="grid-row: span 2;">
+      <h2>即時事件流</h2>
+      <div class="event-stream" id="eventStream">
+        <div class="log-line" style="color:#6b7280;">等待事件…</div>
+      </div>
+    </div>
+
+    <div class="panel" style="grid-column: span 2;">
+      <h2>工廠 MESH 節點狀態</h2>
+      <div style="display:flex;gap:12px;">
+        <div style="flex:1;background:#1a1f2e;padding:12px;border-radius:4px;">
+          <div style="font-size:13px;margin-bottom:8px;">HQ <span class="badge badge-green">CENTRAL</span></div>
+          <div class="stat-row"><span>角色</span><span>協調節點</span></div>
+          <div class="stat-row"><span>事件 buffer</span><span class="stat-value" id="hq-buf">0</span></div>
+        </div>
+        <div style="flex:1;background:#1a1f2e;padding:12px;border-radius:4px;">
+          <div style="font-size:13px;margin-bottom:8px;">工廠 A <span class="badge badge-green">ONLINE</span></div>
+          <div class="stat-row"><span>本地模型</span><span>Qwen2.5:7B</span></div>
+          <div class="stat-row"><span>狀態</span><span>已註冊</span></div>
+        </div>
+        <div style="flex:1;background:#1a1f2e;padding:12px;border-radius:4px;">
+          <div style="font-size:13px;margin-bottom:8px;">工廠 B <span class="badge badge-green">ONLINE</span></div>
+          <div class="stat-row"><span>本地模型</span><span>Qwen2.5:7B</span></div>
+          <div class="stat-row"><span>狀態</span><span>已註冊</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const API_BASE = window.location.origin.includes(':8080') || window.location.origin.includes('war-room')
+      ? 'http://localhost:8000' : '';
+
+    function updateClock() {
+      document.getElementById('clock').textContent =
+        new Date().toLocaleTimeString('zh-TW', { hour12: false });
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    // Health polling
+    async function pollHealth() {
+      try {
+        const r = await fetch(API_BASE + '/api/health');
+        const h = await r.json();
+        document.getElementById('health-api').textContent = h.status;
+        document.getElementById('health-db').textContent = h.db;
+        document.getElementById('health-llm').textContent = h.llm_provider;
+        document.getElementById('health-ver').textContent = 'v' + h.version;
+        document.getElementById('health-demo').textContent = h.demo_bypass ? 'ON' : 'OFF';
+      } catch {
+        document.getElementById('health-api').textContent = 'fail';
+      }
+    }
+    pollHealth(); setInterval(pollHealth, 10000);
+
+    // SSE
+    const stream = document.getElementById('eventStream');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+
+    const counts = { total: 0, inv: 0, pur: 0, prod: 0, sale: 0, qual: 0, acct: 0, other: 0 };
+    function bump(key) {
+      counts[key]++; counts.total++;
+      document.getElementById('cnt-' + key).textContent = counts[key];
+      document.getElementById('cnt-total').textContent = counts.total;
+    }
+    function tagOf(domain) {
+      if (domain === 'inventory') return ['tag-inv', '📦', 'inv'];
+      if (domain === 'purchase')  return ['tag-pur', '🛒', 'pur'];
+      if (domain === 'production') return ['tag-prod', '🏭', 'prod'];
+      if (domain === 'sales')     return ['tag-sale', '💰', 'sale'];
+      if (domain === 'quality')   return ['tag-qual', '🔬', 'qual'];
+      if (domain === 'accounting') return ['tag-acct', '💳', 'acct'];
+      return ['tag-other', '📂', 'other'];
+    }
+
+    function addEvent(name, payload) {
+      const [cls, icon, key] = tagOf(payload.domain || '');
+      const div = document.createElement('div');
+      div.className = 'log-line new-event';
+      const time = new Date(payload.ts || Date.now()).toLocaleTimeString('zh-TW', { hour12: false });
+      const data = JSON.stringify(payload.data || {});
+      div.innerHTML = `
+        <span class="time">${time}</span>
+        <span class="tag ${cls}">${icon} ${payload.domain || '?'}</span>
+        <span style="color:#d1d5db;">${name}</span>
+        <span style="color:#6b7280;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${data}</span>
+      `;
+      if (stream.firstChild && stream.firstChild.style && stream.firstChild.style.color === 'rgb(107, 114, 128)') {
+        stream.innerHTML = ''; // clear placeholder
+      }
+      stream.prepend(div);
+      if (stream.children.length > 200) stream.lastChild.remove();
+      bump(key);
+      document.getElementById('last-evt').textContent = name;
+      document.getElementById('hq-buf').textContent = counts.total;
+    }
+
+    function connect() {
+      const es = new EventSource(API_BASE + '/api/events/stream');
+      es.addEventListener('open', () => {
+        statusDot.className = 'status-dot online'; statusText.textContent = '已連線';
+      });
+      es.addEventListener('error', () => {
+        statusDot.className = 'status-dot offline'; statusText.textContent = '中斷,5 秒後重連';
+        es.close();
+        setTimeout(connect, 5000);
+      });
+
+      // Listen to a broad set of event names
+      const names = [
+        'inventory.changed', 'stock.below_safety', 'transfer.requested',
+        'part.created', 'po.created', 'po.approved', 'po.received',
+        'wo.created', 'wo.released', 'wo.completed', 'dispatch.created',
+        'so.created', 'so.confirmed', 'so.shipped',
+        'inspection.created', 'quality.inspected', 'nc.created', 'capa.created',
+        'journal.created', 'journal.posted', 'month.end_close',
+        'mrp.generated', 'pick.created', 'pick.completed', 'cycle_count.created',
+        'lead.converted', 'opportunity.stage_changed',
+        'ready', 'ping',
+      ];
+      names.forEach(n => es.addEventListener(n, (ev) => {
+        if (n === 'ping' || n === 'ready') return;
+        try { addEvent(n, JSON.parse(ev.data)); } catch {/* ignore */}
+      }));
+    }
+    connect();
+  </script>
+</body>
+</html>

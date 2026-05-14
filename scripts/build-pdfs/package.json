@@ -1,0 +1,15 @@
+{
+  "name": "llm-erp-pdf-builder",
+  "version": "1.0.0",
+  "description": "Convert customer-facing Markdown docs to PDFs (ZH+EN, Chinese-friendly)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "clean": "node -e \"const fs=require('fs');const p='../../docs/pdf';if(fs.existsSync(p))fs.rmSync(p,{recursive:true,force:true});fs.mkdirSync(p,{recursive:true});\""
+  },
+  "dependencies": {
+    "md-to-pdf": "^5.2.4",
+    "@mermaid-js/mermaid-cli": "^11.4.2"
+  }
+}

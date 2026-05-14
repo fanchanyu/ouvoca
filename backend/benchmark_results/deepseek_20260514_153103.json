@@ -1,0 +1,237 @@
+{
+  "provider": "deepseek",
+  "model": "deepseek-chat",
+  "timestamp": "2026-05-14T15:31:03.174792",
+  "label": "DeepSeek-V3 (deepseek-chat)",
+  "summary": {
+    "total": 10,
+    "success": 10,
+    "success_rate": 1.0,
+    "avg_time_sec": 12.93,
+    "total_tools_called": 26,
+    "avg_tools_per_query": 2.6
+  },
+  "cases": [
+    {
+      "id": "T01",
+      "intent": "inventory",
+      "elapsed_sec": 4.21,
+      "tool_count": 1,
+      "tools_called": [
+        "list_below_safety"
+      ],
+      "expected_tools": [
+        "list_below_safety"
+      ],
+      "expected_match": true,
+      "reply_chars": 362,
+      "reply_preview": "以下是目前庫存低於安全庫存的零件清單：\n\n| 料號 | 零件名稱 | 當前庫存 | 安全庫存 | 短缺量 |\n|------|---------|---------|---------|-------|\n| M6-BOLT-20 | M6 不銹鋼螺絲 20mm | **300** | 1,000 | **700** |\n\n**庫存狀態解讀：**\n- 目前僅有 **1 項零件** 低於安全庫存水位。\n- **M6 不銹鋼螺絲 20mm** 當前庫存僅 300 個，遠低於安全庫存 1,000 個，短缺達 700 個，屬於 **庫存不足警訊**，建議立即安排採購或生產補貨。\n\n若需進一步查看該零件的",
+      "success": true,
+      "error": null,
+      "query": "請列出庫存低於安全庫存的零件",
+      "category": "simple_query",
+      "difficulty": "easy"
+    },
+    {
+      "id": "T02",
+      "intent": "inventory",
+      "elapsed_sec": 3.17,
+      "tool_count": 1,
+      "tools_called": [
+        "query_inventory"
+      ],
+      "expected_tools": [
+        "query_inventory"
+      ],
+      "expected_match": true,
+      "reply_chars": 260,
+      "reply_preview": "以下是 **M6-BOLT-20**（M6 不銹鋼螺絲 20mm）的庫存狀態：\n\n| 項目 | 數值 |\n|------|------|\n| 現有庫存 | **300** |\n| 已分配量 | 0 |\n| 可用庫存 | **300** |\n| 安全庫存 | **1,000** |\n| 交貨天數 | 7 天 |\n| 狀態 | ⚠️ **低於安全庫存** |\n\n目前庫存 **300 個**，已低於安全庫存水位 **1,000 個**，建議盡快安排採購補貨。若需要進一步操作，可切換至 **採購單建立頁面** 開立採購單。",
+      "success": true,
+      "error": null,
+      "query": "幫我查 M6-BOLT-20 還剩多少",
+      "category": "specific_lookup",
+      "difficulty": "easy"
+    },
+    {
+      "id": "T03",
+      "intent": "warehouse",
+      "elapsed_sec": 6.67,
+      "tool_count": 4,
+      "tools_called": [
+        "list_warehouse_zones",
+        "list_pick_tasks",
+        "list_cycle_counts",
+        "query_inventory"
+      ],
+      "expected_tools": [
+        "list_below_safety",
+        "list_parts"
+      ],
+      "expected_match": false,
+      "reply_chars": 426,
+      "reply_preview": "看起來目前系統中查到的資料如下：\n\n### 📦 倉庫庫存現況\n\n| 項目 | 結果 |\n|------|------|\n| **倉儲區域** | 目前無任何區域資料 |\n| **待處理揀貨任務** | 0 筆 |\n| **盤點記錄** | 0 筆 |\n| **庫存查詢** | 無法查詢到任何零件資料 |\n\n---\n\n### ⚠️ 分析結論\n\n目前系統中**沒有建立任何倉儲區域、零件庫存或揀貨任務**，這可能表示：\n\n1. **系統尚未初始化** — 倉庫資料尚未匯入 ERP 系統。\n2. **權限限制** — 當前帳號（測試 / admin）可能無法讀取完整庫存資料。\n3. **資料庫無資料*",
+      "success": true,
+      "error": null,
+      "query": "我們倉庫現在缺什麼料?",
+      "category": "fuzzy_query",
+      "difficulty": "medium"
+    },
+    {
+      "id": "T04",
+      "intent": "crm",
+      "elapsed_sec": 70.33,
+      "tool_count": 3,
+      "tools_called": [
+        "list_customers",
+        "list_leads",
+        "list_opportunities"
+      ],
+      "expected_tools": [
+        "list_products_tool",
+        "get_bom",
+        "query_inventory"
+      ],
+      "expected_match": false,
+      "reply_chars": 813,
+      "reply_preview": "目前系統中沒有看到特定的潛在客戶或商機與「變速齒輪組 A」相關的資料。不過，針對您提出的問題——**客戶要訂 100 台變速齒輪組 A，我們現在可以做嗎？**——我建議先檢查以下幾個面向：\n\n---\n\n## ✅ 出貨前需檢查的重點\n\n### 1️⃣ 庫存狀況\n- **成品庫存**：目前倉庫是否有 100 台變速齒輪組 A 的現貨？\n- **半成品/零件庫存**：若無成品，關鍵零件（如齒輪、軸承、外殼等）是否足夠組裝？\n\n### 2️⃣ 產能與交期\n- **生產排程**：目前產線是否有空檔？100 台的生產週期需要多久？\n- **交期評估**：客戶期望何時交貨？能否在期限內完成？\n\n### 3️",
+      "success": true,
+      "error": null,
+      "query": "如果客戶要訂 100 台變速齒輪組 A,我們現在可以做嗎?要先檢查什麼?",
+      "category": "multi_step",
+      "difficulty": "hard"
+    },
+    {
+      "id": "T05",
+      "intent": "general",
+      "elapsed_sec": 5.82,
+      "tool_count": 6,
+      "tools_called": [
+        "list_below_safety",
+        "query_purchase_order",
+        "query_work_order",
+        "list_inspections",
+        "list_non_conformances",
+        "list_pick_tasks"
+      ],
+      "expected_tools": [
+        "list_below_safety",
+        "query_work_order"
+      ],
+      "expected_match": true,
+      "reply_chars": 449,
+      "reply_preview": "以下是今日工廠營運狀況摘要：\n\n---\n\n### 📊 今日工廠營運總覽\n\n| 項目 | 狀態 |\n|------|------|\n| **生產工單** | ✅ 無進行中的工單 |\n| **待檢驗單** | ✅ 無待處理檢驗 |\n| **不良品記錄 (NC)** | ✅ 無不良記錄 |\n| **待揀貨任務** | ✅ 無待揀貨任務 |\n| **已發出採購單** | ✅ 無待跟催訂單 |\n\n### ⚠️ 庫存預警（1 項）\n\n| 料號 | 名稱 | 現有庫存 | 安全庫存 | 短缺 |\n|------|------|---------|---------|------|\n| M6-BOLT-20 ",
+      "success": true,
+      "error": null,
+      "query": "今天工廠營運狀況如何?簡單總結",
+      "category": "cross_domain",
+      "difficulty": "hard"
+    },
+    {
+      "id": "T06",
+      "intent": "crm",
+      "elapsed_sec": 4.77,
+      "tool_count": 2,
+      "tools_called": [
+        "list_customers",
+        "list_customers"
+      ],
+      "expected_tools": [
+        "query_sales_order",
+        "list_customers"
+      ],
+      "expected_match": true,
+      "reply_chars": 168,
+      "reply_preview": "看起來系統中沒有直接以「PRD-GEAR-A」作為客戶名稱的資料。請問您是指：\n\n1. **產品代碼 PRD-GEAR-A** 的最近交易單價？\n2. 還是某個 A 級客戶（如鴻海科技集團或台積電精密）與產品 PRD-GEAR-A 相關的最近單價？\n\n能否請您提供更多資訊，例如是哪個客戶？這樣我可以幫您查詢該客戶的互動歷程或交易紀錄。",
+      "success": true,
+      "error": null,
+      "query": "A 客戶 PRD-GEAR-A 最近的單價?",
+      "category": "business_scenario",
+      "difficulty": "medium"
+    },
+    {
+      "id": "T07",
+      "intent": "inventory",
+      "elapsed_sec": 6.47,
+      "tool_count": 3,
+      "tools_called": [
+        "query_inventory",
+        "list_parts",
+        "list_parts"
+      ],
+      "expected_tools": [
+        "query_inventory",
+        "list_below_safety"
+      ],
+      "expected_match": true,
+      "reply_chars": 208,
+      "reply_preview": "目前系統中沒有找到名稱為 **「M6 螺絲」** 的零件。我查詢了所有已建立的零件類別（原料、半成品、組件、耗材、包材），均未包含此料號。\n\n建議您：\n1. **確認料號是否正確** — 例如是否為 `M6-SCREW`、`SCREW-M6` 或其他編碼方式。\n2. 若您知道正確的料號或零件 ID，請提供給我，我立即為您查詢庫存量。\n3. 或者，您可以前往 **零件管理頁面** 新增 M6 螺絲的料號與庫存資料。",
+      "success": true,
+      "error": null,
+      "query": "礦存還剩多少 M6 螺絲?",
+      "category": "typo_tolerance",
+      "difficulty": "medium"
+    },
+    {
+      "id": "T08",
+      "intent": "inventory",
+      "elapsed_sec": 8.94,
+      "tool_count": 2,
+      "tools_called": [
+        "list_below_safety",
+        "list_parts"
+      ],
+      "expected_tools": [],
+      "expected_match": true,
+      "reply_chars": 943,
+      "reply_preview": "根據目前的庫存數據，以下是我為您整理的 **庫存周轉改善建議**：\n\n---\n\n## 📊 當前庫存概況\n\n| 類別 | 零件數 | 低於安全庫存 |\n|------|--------|-------------|\n| 原料 (raw_material) | 3 項 | **M6 螺絲**（短缺 700 件） |\n| 半成品 (semi_finished) | 1 項 | 正常 |\n| 組件 (component) | 2 項 | 正常 |\n| 耗材 (consumable) | 3 項 | 正常 |\n| 包材 (packaging) | 1 項 | 正常 |\n\n---\n\n## 🚀 改善庫存周轉",
+      "success": true,
+      "error": null,
+      "query": "給我一些改善庫存周轉的建議",
+      "category": "open_dialog",
+      "difficulty": "medium"
+    },
+    {
+      "id": "T09",
+      "intent": "purchase",
+      "elapsed_sec": 3.87,
+      "tool_count": 1,
+      "tools_called": [
+        "query_supplier"
+      ],
+      "expected_tools": [
+        "query_supplier"
+      ],
+      "expected_match": true,
+      "reply_chars": 484,
+      "reply_preview": "以下是我們系統中目前登記的 **4 家供應商**：\n\n| 供應商代碼 | 供應商名稱 | 供應商等級 | 前置天數 | 是否核准 |\n|------------|------------|------------|----------|----------|\n| SUP-001 | **大華精密工業** | T1 | 7 天 | ✅ 已核准 |\n| SUP-002 | **建興五金** | T2 | 5 天 | ✅ 已核准 |\n| SUP-003 | **達美電子** | T1 | 10 天 | ✅ 已核准 |\n| SUP-004 | **新光包材** | T3 | 3 天 | ❌ 未核准 |",
+      "success": true,
+      "error": null,
+      "query": "查一下我們的供應商有哪些",
+      "category": "supplier_query",
+      "difficulty": "easy"
+    },
+    {
+      "id": "T10",
+      "intent": "quality",
+      "elapsed_sec": 15.02,
+      "tool_count": 3,
+      "tools_called": [
+        "list_non_conformances",
+        "list_inspections",
+        "list_capa"
+      ],
+      "expected_tools": [
+        "list_non_conformances",
+        "list_inspections"
+      ],
+      "expected_match": true,
+      "reply_chars": 379,
+      "reply_preview": "目前系統中查無任何資料，說明如下：\n\n---\n\n## 📋 品質狀況報告\n\n| 項目 | 數量 |\n|------|:----:|\n| **檢驗單** | 0 筆 |\n| **不良品記錄 (NC)** | 0 筆 |\n| **矯正預防措施 (CAPA)** | 0 筆 |\n\n### 結論\n目前系統中 **沒有任何不良品記錄、檢驗單或 CAPA 記錄**，可能原因為：\n\n1. **系統剛上線或資料尚未匯入** — 暫無品質數據可供分析。\n2. **近期無檢驗活動** — 尚未執行任何品檢作業。\n3. **資料庫過濾條件** — 若您預期應有資料，請確認查詢範圍或權限設定。\n\n### 建議\n- 若您",
+      "success": true,
+      "error": null,
+      "query": "最近有哪些不良品?品質狀況如何?",
+      "category": "quality_query",
+      "difficulty": "medium"
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+name: llm-erp
+
+services:
+  # ─── HQ backend ───────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: llm-erp-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_DRIVER: ${DATABASE_DRIVER:-sqlite}
+      DATABASE_URL: ${DATABASE_URL:-sqlite+aiosqlite:////app/data/erp.db}
+      DATABASE_URL_PROD: ${DATABASE_URL_PROD:-postgresql+asyncpg://erp:erp@postgres:5432/erp}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-please-use-openssl-rand-hex-32}
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ALLOW_DEMO_BYPASS: ${ALLOW_DEMO_BYPASS:-true}
+      CORS_ORIGINS: '["http://localhost:5173","http://localhost:3000","http://localhost:8080"]'
+    volumes:
+      - backend-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    # Uncomment when DATABASE_DRIVER=postgresql:
+    # depends_on:
+    #   postgres:
+    #     condition: service_healthy
+
+  # ─── Factory nodes (MESH) ─────────────────────────────────────────────
+  factory-a:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: llm-erp-factory-a
+    command: ["python", "factory_node.py"]
+    ports: ["8001:8001"]
+    environment:
+      FACTORY_ID: factory-a
+      FACTORY_NAME: Factory A
+      PORT: 8001
+      HQ_URL: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  factory-b:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: llm-erp-factory-b
+    command: ["python", "factory_node.py"]
+    ports: ["8002:8002"]
+    environment:
+      FACTORY_ID: factory-b
+      FACTORY_NAME: Factory B
+      PORT: 8002
+      HQ_URL: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # ─── Desktop frontend ─────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend-desktop
+      dockerfile: Dockerfile
+    container_name: llm-erp-frontend
+    ports: ["5173:80"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # ─── War-room dashboard ───────────────────────────────────────────────
+  war-room:
+    build:
+      context: ./war-room
+      dockerfile: Dockerfile
+    container_name: llm-erp-warroom
+    ports: ["8080:80"]
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # ─── Optional: PostgreSQL (uncomment for prod-style local dev) ───────
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: llm-erp-postgres
+  #   environment:
+  #     POSTGRES_USER: erp
+  #     POSTGRES_PASSWORD: erp
+  #     POSTGRES_DB: erp
+  #   ports: ["5432:5432"]
+  #   volumes:
+  #     - pg-data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U erp"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+volumes:
+  backend-data:
+  # pg-data:
