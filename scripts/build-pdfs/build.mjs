@@ -88,6 +88,10 @@ const DOCS_TO_BUILD = [
   // === 17 v3.1 外部 DB 串接設計 ===
   { src: 'EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md', out: '17_外部DB串接設計_中文.pdf',           title: '外部 DB 串接設計' },
   { src: 'EXTERNAL_DB_INTEGRATION_DESIGN_EN.md', out: '17_External_DB_Integration_Design_EN.pdf', title: 'External DB Integration Design' },
+
+  // === 18 v3.5 Sales killer moments 一頁紙 ===
+  { src: 'SALES_KILLER_MOMENTS_ZH.md', out: '18_業務demo一頁紙_中文.pdf',                title: '業務 demo 一頁紙 — 9 killer moments' },
+  { src: 'SALES_KILLER_MOMENTS_EN.md', out: '18_Sales_Killer_Moments_EN.pdf',          title: 'Sales Demo One-Pager — 9 killer moments' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────

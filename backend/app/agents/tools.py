@@ -12,4 +12,5 @@ from app.agents.domains import (  # noqa: F401
     glossary_tools,     # v3.3 同義詞 / 別名解析
     undo_tools,         # v3.3 90 秒撤銷
     migration_tools,    # v3.4 Schema Mapping AI + migrate_from_external_with_confirm
+    email_digest_tools, # v3.5 每日摘要 preview + send_with_confirm
 )

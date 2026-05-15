@@ -51,7 +51,8 @@
 | **安裝指南（給老闆）** | [中文 INSTALLATION_ZH.md](./docs/INSTALLATION_ZH.md) / [English EN](./docs/INSTALLATION_EN.md) |
 | **一鍵安裝腳本** | `install.sh`（Mac/Linux）/ `install.bat`（Windows）/ `load_industry.sh` |
 | **🆕 外部 DB 串接設計** | [中文 EXTERNAL_DB_INTEGRATION_DESIGN_ZH](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md) / [English EN](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_EN.md)（**v3.1 補強：鼎新 / 正航 / Excel 接得到**） |
-| **客戶手冊 PDF（33 份雙語）** | 跑 `build_pdfs.bat`（Win）或 `./build_pdfs.sh`（Mac/Linux）→ 輸出至 `docs/pdf/` |
+| **🆕 業務 demo 一頁紙** | [中文 SALES_KILLER_MOMENTS_ZH](./docs/SALES_KILLER_MOMENTS_ZH.md) / [English EN](./docs/SALES_KILLER_MOMENTS_EN.md)（**v3.5 — 9 個 killer moments，銷售背稿用**） |
+| **客戶手冊 PDF（35 份雙語）** | 跑 `build_pdfs.bat`（Win）或 `./build_pdfs.sh`（Mac/Linux）→ 輸出至 `docs/pdf/` |
 | **PR 模板** | [`.github/PULL_REQUEST_TEMPLATE.md`](./.github/PULL_REQUEST_TEMPLATE.md)（**強制貼 run_gates 輸出**） |
 | **🛡️ 自證閘（必跑）** | `bash scripts/run_gates.sh` — 7 道閘 ~310 秒，**綠燈才能說完成**。CI: [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) |
 | **測試套件** | `backend/tests/` — **~186 tests**（含 ConfirmCard 16 + Connector 21 + 既有 148） |
@@ -177,7 +178,7 @@
 1. AI 自然語言查詢          🟢 [████████  ]  80%   ✅ 12/12 query 實機 PASS
 2. AI 自然語言寫入（CRUD）  🟢 [█████████ ]  92%   ✅ ConfirmCard + 4 hard-write tools + Slot-filling 反問 + Undo 90s（v3.3）
 3. 即時庫存同步             🟢 [██████████] 100%   ✅ Phase 0 已備
-4. AI 主動推播（Toast/Email）🟢 [████████  ]  80%   ✅ 桌面 Toast + in-app banner（v3.3），Email 摘要待補
+4. AI 主動推播（Toast/Email）🟢 [██████████] 100%  ✅ Toast (v3.3) + Email digest preview/send + ConfirmCard (v3.5)
 5. 基礎訂單到出貨閉環       🟢 [█████████ ]  95%   ✅ O2C/P2P/P2I 全測過
 6. USB 條碼槍盤點/報工      ❌ [          ]   0%   Phase 2
 7. 🆕 外部 DB 串接 + Migration 🟢 [█████████ ]  85%   ✅ sqlite+csv connector + Schema Mapping AI + migrate_with_confirm（39 tests）
@@ -406,6 +407,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #23：demo moment 3 解鎖——Schema Mapping AI + migrate_from_external + 18 tests）
+**最後更新**：2026-05-15（會話 #24：MVP #4 收尾 + Sales 戰備——Email digest + 9 killer moments 一頁紙）
 **維護者**：使用者 + Claude
-**版本**：3.4
+**版本**：3.5

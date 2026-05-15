@@ -38,6 +38,106 @@
 
 ---
 
+## 2026-05-15｜會話 #24｜📧 MVP #4 收尾 + Sales 戰備（v3.5）
+
+**目標**：使用者連推 7 個 sprint 後，CEO 視角還剩兩個 P0：
+- MVP #4「AI 主動推播」只到 80% — Email 摘要 cron 補完即 100%
+- 業務沒有一頁紙 demo 簡報 — 銷售團隊不知道怎麼推
+
+### ✅ 60 分鐘交付（後端 30 + 文件 20 + ship 10）
+
+#### Track 1 — Email digest service + API + AI tool
+
+**`backend/app/services/email_digest.py`**（320 行）：
+- `Digest` dataclass + `DigestSection`（標題 / icon / items / text_lines）
+- `build_digest(db, recipient, period_hours)` 組裝 3 段：
+  1. 關鍵警示（低於安全庫存、逾期應收、逾期工單）
+  2. 今日事件（從 EventBus history 統計依 domain）
+  3. KPI 快照（30 日出貨筆數/金額、進行中 PO/WO）
+- `to_dict() / to_markdown() / to_html()` 三種輸出
+- `send_email()` SMTP 寄送（沒設定 SMTP_* 環境變數時 dry_run）
+
+**`backend/app/api/email_digest.py`**：
+- `GET /api/email-digest/preview` 看 JSON
+- `GET /api/email-digest/preview.html` 看 HTML
+- `POST /api/email-digest/send?to=...` 真寄
+
+**`backend/app/agents/domains/email_digest_tools.py`**：
+- `preview_email_digest` (READ) — AI 預覽摘要
+- `send_email_digest_with_confirm` (HARD_WRITE) — 出 ConfirmCard 後寄送
+- 接到 general / purchase / sales / production 4 個 agent
+
+#### Track 2 — Sales killer moments 一頁紙
+
+**`docs/SALES_KILLER_MOMENTS_ZH.md` + EN**（各 ~250 行）：
+- 一句話 pitch + 痛點對照表
+- **9 個 killer moments 完整劇本**：
+  1. Read（preview_email_digest）
+  2. Hard-write（create_po_with_confirm）
+  3. Slot-filling 反問
+  4. Glossary 智能對映
+  5. Undo 90s
+  6. 跨 DB Federated Query
+  7. Schema Mapping + Migration（重磅）
+  8. 桌面 Toast 推播
+  9. Email 每日摘要
+- 簽約後 14 天 onboarding 行程
+- 競品比較表
+- 30 秒結尾推銷話術
+
+#### Tests
+
+`backend/tests/smoke/test_email_digest.py`（18 個 test）：
+- BuildDigest 6 個：basic / markdown / html / json / clamp / low_stock alert
+- SendEmail 2 個：dry_run / preview
+- API endpoints 4 個：preview / preview.html / invalid email / dry_run send
+- AI tools 4 個：preview_tool / send_emits_card / invalid_email_no_card / confirm_dry_run
+- Registry 2 個：4 個 tool 接 4 個 agent / send 是 hard-write
+
+**18/18 PASS / 3.92 秒**。
+
+### 📊 數字變化
+
+| 維度 | #23 結束 | #24 結束 |
+|---|---|---|
+| 註冊 tools | 38 | **40** (+2: preview + send_with_confirm) |
+| pytest tests | 187 | **205** (+18 digest) |
+| MVP 功能 #4（AI 推播） | 80% | **100%** |
+| 整體 MVP | ~91% | **~93%** |
+| Demo killer moments | 8 | **9** |
+| PDF 雙語 | 33 | **35**（+SALES_KILLER_MOMENTS ZH+EN） |
+| Sales 簡報素材 | 0 | **完整 demo 腳本** |
+
+### 🎬 v3.5 完整 9 個 demo moments
+
+```
+1. 老闆儀表板「今天工廠狀況」     [v3.0+v3.5]
+2. 阿玲「跟長江下 100 個 M6」     [v3.2]
+3. 阿玲「下單」AI 反問           [v3.3]
+4. 阿玲「跟長江下 100 個鋼釘」    [v3.3 glossary]
+5. 阿玲「取消剛剛那筆」           [v3.3 undo]
+6. 王董「鼎新 5 月份訂單?」      [v3.1 federated]
+7. 阿玲「把鼎新客戶搬過來」 ★★★  [v3.4 migration]
+8. 缺料 → 桌面 Toast            [v3.3]
+9. 王董「以後每天 7 點寄摘要給我」 [v3.5]
+```
+
+### 🪞 教訓 #9（CEO 視角）
+
+**做完功能 ≠ 賣得出去**。
+業務在客戶面前如果沒有 demo 腳本，做再多技術都沒用。
+
+「Email digest + Sales 一頁紙」是商業面的最後拼圖：
+- Email digest 是「老闆下班也能看狀況」（產品功能）
+- Sales 一頁紙是「銷售知道怎麼開口」（商業武器）
+
+**Blocker**：無。剩下：
+- 真實 DeepSeek 跑完整 9 moments 錄影（demo video）
+- SqlServerConnector (鼎新/正航 driver)
+- 真實客戶 pilot
+
+---
+
 ## 2026-05-15｜會話 #23｜🔌 Demo moment 3 解鎖：Schema Mapping AI + Migration（v3.4）
 
 **目標**：使用者連推 5 個 sprint 後一鼓作氣——解鎖最後一個 demo killer moment「把鼎新的客戶搬過來」。
