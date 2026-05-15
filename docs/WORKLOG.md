@@ -38,6 +38,110 @@
 
 ---
 
+## 2026-05-15｜會話 #23｜🔌 Demo moment 3 解鎖：Schema Mapping AI + Migration（v3.4）
+
+**目標**：使用者連推 5 個 sprint 後一鼓作氣——解鎖最後一個 demo killer moment「把鼎新的客戶搬過來」。
+
+### 🪞 CEO 戰略
+
+前面 v3.0-v3.3 解鎖了：
+- moment 1：對話式 read（v3.0 已 done）
+- moment 2：對話式 hard-write（v3.2 ConfirmCard）
+
+剩 moment 3：**「鼎新搬資料」**。這是真實簽 30 萬合約的關鍵——客戶最怕「我舊資料怎麼辦」。
+
+### ✅ 60 分鐘交付
+
+#### Backend
+
+**`backend/app/agents/schema_mapping.py`**（180 行核心邏輯）：
+- `FieldMapping` dataclass + `TARGET_SCHEMAS` 對映表（customer / supplier / part 三個 domain，含中英文別名）
+- `suggest_mapping(source_schema, target_domain)` 演算法：
+  - exact match → confidence 1.0
+  - alias match → 0.9（含 CustNo / 客戶編號 / SupplierName 等常見舊系統欄位名）
+  - partial substring → 0.7
+  - 找不到 → 0.0
+- 回 `mappings` / `unmapped_source_fields` / `confidence_summary` / `required_satisfied`
+
+**`backend/app/agents/domains/migration_tools.py`**（230 行）：
+- `preview_schema_mapping` (READ) — AI 推薦對映預覽
+- `migrate_from_external_with_confirm` (HARD_WRITE) — 出 ConfirmCard 列出：
+  - 高/中/低信心對映數
+  - 高信心欄位逐筆列出
+  - 中信心欄位 + 推薦理由（「已知別名 CustNo」）
+  - 來源額外欄位（不會匯入）
+  - **前 5 筆預覽**讓使用者看真資料
+- 確認後執行 `_do_migration()`：
+  - 衝突策略：skip / overwrite
+  - 自動處理 type coercion（CSV 字串 → int/float/bool）
+  - 回 inserted / updated / skipped / failed 統計
+
+接到 `ExternalDbAgent.tool_names`。
+
+#### Tests
+
+**`backend/tests/smoke/test_schema_mapping.py`**（18 個 test）：
+- TestSuggestMapping 9 個（演算法層）：exact / alias / unknown domain / required check / unmapped / supplier / part / domains list / get_schema
+- TestPreviewTool 3 個：unknown connection / unknown domain / 鼎新 customer 真實對映
+- TestMigration 4 個：emits ConfirmCard / 真實寫入 3 筆 / skip 衝突 / overwrite 衝突
+- Registry sanity 2 個
+
+**18/18 PASS / 4.98 秒**。
+
+加 db fixture cleanup 避免 test pollution（DX-* customer 刪除）。
+
+### 📊 數字變化
+
+| 維度 | #22 結束 | #23 結束 |
+|---|---|---|
+| 註冊 tools | 36 | **38** (+2: preview + migrate) |
+| pytest tests | 170 | **187** (+17，含 1 個 part_id key 修正) |
+| MVP 功能 #7（外部 DB） | 60% | **85%** |
+| Demo killer moments | 7 個 | **8 個**（moment 3 解鎖） |
+| Schema Mapping AI | 0% | **90%** |
+| Migration with ConfirmCard | 0% | **90%** |
+
+### 🎬 Demo moment 3 完整劇本
+
+```
+阿玲打字：「把鼎新的客戶都搬過來」
+
+AI（自動 chain）：
+  1. list_external_connections → 找到 legacy_dingxin
+  2. list_external_tables → 找到 Customer
+  3. preview_schema_mapping(connection=legacy_dingxin, source_table=Customer, target_domain=customer)
+       → CustNo  → code  (0.95) ✅ 別名匹配
+         CustName→ name  (0.95)
+         Grade   → grade (1.0)  ✅ 精確匹配
+         Phone   → contact_phone (0.85) ⚠️ 中信心
+  4. migrate_from_external_with_confirm(...)
+       → 出 ConfirmCard：
+          來源：legacy_dingxin.Customer
+          目標：customer
+          總筆數：124 筆
+          對映：高 6 / 中 2 / 找不到 1
+          預覽前 5 筆…
+          [取消]   [✓ 確認執行]
+
+阿玲：點確認
+
+AI：「✅ 匯入完成：新增 124 筆 / 更新 0 筆 / 略過 0 筆 / 失敗 0 筆」
+
+★ 客戶眼睛發亮：「我舊資料有救了」★★★
+```
+
+### 🪞 教訓 #8
+
+**Schema Mapping AI 是純規則 + 演算法**，不需要呼叫 LLM。
+ConfirmCard 機制讓「AI 推薦 + 人類複核」變成預設行為——這就是「敢給員工用」的關鍵。
+
+**Blocker**：無。下次可動：
+- 真實 DeepSeek E2E 跑完 8 個 demo moment 錄影
+- SqlServerConnector（鼎新/正航 driver，pyodbc 安裝痛）
+- Email 每日摘要 cron
+
+---
+
 ## 2026-05-15｜會話 #22｜⚡ 5 條並行戰線：Slot-filling + Glossary + Undo + Toast（v3.3）
 
 **目標**：使用者「這些事很多可以平行處理 / 一個小時可以做很多事」。

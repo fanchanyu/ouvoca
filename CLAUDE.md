@@ -180,7 +180,7 @@
 4. AI 主動推播（Toast/Email）🟢 [████████  ]  80%   ✅ 桌面 Toast + in-app banner（v3.3），Email 摘要待補
 5. 基礎訂單到出貨閉環       🟢 [█████████ ]  95%   ✅ O2C/P2P/P2I 全測過
 6. USB 條碼槍盤點/報工      ❌ [          ]   0%   Phase 2
-7. 🆕 外部 DB 串接（PoC）   🟢 [██████    ]  60%   ✅ v3.1 sqlite+csv connector + 3 read tool（21 tests）
+7. 🆕 外部 DB 串接 + Migration 🟢 [█████████ ]  85%   ✅ sqlite+csv connector + Schema Mapping AI + migrate_with_confirm（39 tests）
 ```
 
 **MVP 整體進度**：**~62%**（Phase 1-3 完成後達 100%）
@@ -189,7 +189,9 @@
 
 ```
 Tool registry framework  🟢 [██████████] 100%  ✅ @register_tool + RiskTier + Slot
-Tool 入 registry         🟢 [██████████] 100%  ✅ 36/36（read 29 + hard-write 4 + soft-write 1 + 6 v3.3）
+Tool 入 registry         🟢 [██████████] 100%  ✅ 38/38（v3.4 + Schema Mapping AI + migrate_with_confirm）
+Schema Mapping AI        🟢 [█████████ ]  90%  ✅ exact/alias/partial 3 級 confidence + 3 domain 對映
+Migration ConfirmCard    🟢 [█████████ ]  90%  ✅ skip/overwrite 衝突策略 + 真實 customer/supplier/part 寫入
 Slot-filling 反問         🟢 [██████████] 100%  ✅ engine.execute_tool 偵測缺欄位 → needs_input
 Glossary 同義詞           🟢 [████████  ]  80%  ✅ in-memory + 3 tools（DB 表 Phase 2 收尾）
 Undo 90 秒撤銷            🟢 [███████   ]  70%  ✅ undo_last_purchase_order PoC（其它 entity 待補）
@@ -404,6 +406,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #22：5 條並行戰線——Slot-filling + Glossary + Undo + 桌面 Toast + 23 tests）
+**最後更新**：2026-05-15（會話 #23：demo moment 3 解鎖——Schema Mapping AI + migrate_from_external + 18 tests）
 **維護者**：使用者 + Claude
-**版本**：3.3
+**版本**：3.4

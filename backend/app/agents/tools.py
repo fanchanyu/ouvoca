@@ -11,4 +11,5 @@ from app.agents.domains import (  # noqa: F401
     hard_write_tools,   # v3.2 ConfirmCard 包裝的 hard-write tools
     glossary_tools,     # v3.3 同義詞 / 別名解析
     undo_tools,         # v3.3 90 秒撤銷
+    migration_tools,    # v3.4 Schema Mapping AI + migrate_from_external_with_confirm
 )
