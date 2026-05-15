@@ -105,6 +105,27 @@ Wave 4 sed 批次替換漏掉「函式內縮排 import」 → 37 個 test 紅燈
 
 **Blocker**：無。Phase 1 Day 1 剩 70%（22 個 tool refactor）可隨時動工。
 
+### 🔁 收工後追加（10 分鐘）— commit `be71405`
+
+使用者問「剩十分鐘還能做什麼」→ 推 Phase 1 Day 1 從 30% → ~60%：
+
+`backend/app/agents/domains/purchase_tools.py`：3 tool 改 `@register_tool`
+- `query_supplier` / `query_purchase_order` / `supplier_price_history`
+- 全部 `risk_tier=READ` + `required_permission` + Slot 中文描述
+
+`backend/app/agents/domains/production_tools.py`：4 tool 改 `@register_tool`
+- `query_work_order` / `list_products_tool` / `get_bom` / `list_work_centers`
+
+驗證：109/109 smoke + 10/10 registry tests 綠 / pre-push gates 跑完 / push 上 origin。
+
+**Phase 1 Day 1 累計 11/26 tools 入新 registry（42%）**。剩 15 個 read tool 散在
+accounting / quality / warehouse / crm / mps_mrp / general / sales 後半段，明天線性收尾。
+
+### 🪞 工作節奏教訓 #2
+
+「先做工作日誌」是對的—— commit 不寫 WORKLOG 就像 git push 沒寫 commit message。
+這是專案儀表板，下次會話開機要靠它快速 onboarding。
+
 ---
 
 ## 2026-05-15｜會話 #16｜🎯 產品 DNA 重新對齊：對話式 ERP 北極星文件（中英）
