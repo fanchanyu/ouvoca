@@ -98,6 +98,47 @@ export const apiLogin = (username: string, password: string) =>
 export const apiChat = (message: string, session_id: string) =>
   api.post<ChatResponse>('/chat-v2', { message, session_id })
 
+// ============================================================
+// ConfirmCard (對話式 hard-write 確認卡，v3.1)
+// ============================================================
+
+export interface ConfirmCardData {
+  id: string
+  tool_name: string
+  title: string
+  summary: string[]
+  slots_preview?: Record<string, unknown>
+  risk_tier: 'read' | 'soft-write' | 'hard-write'
+  created_at: string
+  expires_at: string
+  ttl_seconds: number
+}
+
+export interface ConfirmCardPayload {
+  type: 'confirm_card'
+  card: ConfirmCardData
+}
+
+export interface ConfirmCardResult {
+  status: 'executed'
+  card_id: string
+  tool_name: string
+  title: string
+  result: Record<string, unknown> | string
+}
+
+export const apiConfirmCard = (cardId: string) =>
+  api.post<ConfirmCardResult>(`/agents/confirm/${cardId}`)
+
+export const apiCancelCard = (cardId: string) =>
+  api.post<{ status: 'cancelled'; card_id: string }>(`/agents/cancel/${cardId}`)
+
+export const apiGetCard = (cardId: string) =>
+  api.get<ConfirmCardData>(`/agents/confirm/${cardId}`)
+
+export const apiPendingCards = () =>
+  api.get<{ total: number; cards: ConfirmCardData[] }>('/agents/pending')
+
 export const apiListParts = () => api.get<Part[]>('/inventory/parts')
 export const apiCreatePart = (data: Partial<Part>) => api.post<Part>('/inventory/parts', data)
 export const apiBelowSafety = () => api.get<Array<{ part_no: string; name: string; qty_available: number; safety_stock: number; shortage: number }>>('/inventory/below-safety')

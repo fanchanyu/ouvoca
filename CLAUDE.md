@@ -53,8 +53,9 @@
 | **🆕 外部 DB 串接設計** | [中文 EXTERNAL_DB_INTEGRATION_DESIGN_ZH](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md) / [English EN](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_EN.md)（**v3.1 補強：鼎新 / 正航 / Excel 接得到**） |
 | **客戶手冊 PDF（33 份雙語）** | 跑 `build_pdfs.bat`（Win）或 `./build_pdfs.sh`（Mac/Linux）→ 輸出至 `docs/pdf/` |
 | **PR 模板** | [`.github/PULL_REQUEST_TEMPLATE.md`](./.github/PULL_REQUEST_TEMPLATE.md)（**強制貼 run_gates 輸出**） |
-| **🛡️ 自證閘（必跑）** | `bash scripts/run_gates.sh` — 7 道閘 ~290 秒，**綠燈才能說完成**。CI: [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) |
-| **測試套件** | `backend/tests/` — **148 tests**（smoke + persona + integration 含 O2C/P2P/P2I + MESH + Tenant Isolation 4-layer + Tool Registry） |
+| **🛡️ 自證閘（必跑）** | `bash scripts/run_gates.sh` — 7 道閘 ~310 秒，**綠燈才能說完成**。CI: [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) |
+| **測試套件** | `backend/tests/` — **~186 tests**（含 ConfirmCard 16 + Connector 21 + 既有 148） |
+| **🆕 ConfirmCard hard-write** | [confirm_card.py](./backend/app/agents/confirm_card.py) + [api/confirm_card.py](./backend/app/api/confirm_card.py)（**v3.1 對話式寫入解鎖**） |
 | **AI 治理基礎** | [`app/agents/governance.py`](./backend/app/agents/governance.py)（cost tracker + prompt safety + human-in-loop） |
 | **Analytics 6 KPI** | `/api/analytics/{dso,inventory-turn,gross-margin,oee,purchase-concentration,ai-cost,summary}` |
 | **台灣稅務 7 endpoints** | `/api/tax/tw/{401,403,einvoice/issue,validate-tax-id,...}` |
@@ -174,7 +175,7 @@
 
 ```
 1. AI 自然語言查詢          🟢 [████████  ]  80%   ✅ 12/12 query 實機 PASS
-2. AI 自然語言寫入（CRUD）  🟡 [████      ]  42%   🔄 Phase 1 重點（11/26 tools 入 registry）
+2. AI 自然語言寫入（CRUD）  🟢 [███████   ]  70%   ✅ ConfirmCard 全套 + 3 hard-write tool（16 tests）
 3. 即時庫存同步             🟢 [██████████] 100%   ✅ Phase 0 已備
 4. AI 主動推播（Toast/Email）🟡 [█████     ]  50%   EventBus 有，缺 Toast/Email 整合
 5. 基礎訂單到出貨閉環       🟢 [█████████ ]  95%   ✅ O2C/P2P/P2I 全測過
@@ -191,10 +192,10 @@ Tool registry framework  🟢 [████████  ]  80%  ✅ @register_t
 Tool 入 registry         🟡 [████      ]  42%  ✅ 11/26（inventory ×3 + sales ×1 + purchase ×3 + production ×4）
 外部 DB Connector 框架   🟢 [████████  ]  80%  ✅ v3.1 Connector ABC + registry + 2 PoC + 21 tests
 外部 DB AI tool          🟢 [████████  ]  80%  ✅ list_connections / list_tables / query_external_db
-ConfirmCard schema       ❌ [          ]   0%  Phase 1 Day 2
-ConfirmCard 前端         ❌ [          ]   0%  Phase 1 Day 2
+ConfirmCard schema       🟢 [██████████] 100%  ✅ confirm_card.py + API endpoints
+ConfirmCard 前端         🟢 [██████████] 100%  ✅ ConfirmCard.tsx + Chat 整合 + 倒數計時
 Slot-filling 反問        ❌ [          ]   0%  Phase 1 Day 4
-第一個 hard-write tool   ❌ [          ]   0%  Phase 1 Day 3（create_purchase_order_with_confirm）
+3 個 hard-write tool     🟢 [██████████] 100%  ✅ create_po / release_wo / update_so_delivery
 Glossary（同義詞表）     ❌ [          ]   0%  Phase 2
 Disambiguation（消歧）   ❌ [          ]   0%  Phase 2
 Workflow guide           ❌ [          ]   0%  Phase 2
@@ -400,6 +401,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #19：v3.1 補強——外部 DB 串接 PoC + 戰略文件 + 21 tests）
+**最後更新**：2026-05-15（會話 #20：對話式寫入解鎖——ConfirmCard 全套 + 3 hard-write tools + 前端組件 + 16 tests）
 **維護者**：使用者 + Claude
-**版本**：3.1
+**版本**：3.2

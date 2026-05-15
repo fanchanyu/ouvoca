@@ -38,6 +38,101 @@
 
 ---
 
+## 2026-05-15｜會話 #20｜🎯 對話式寫入解鎖：ConfirmCard 全套（v3.2）
+
+**目標**：使用者鞭策「LLM 能做的事就讓 LLM 做、商業競爭很現實、不完美就被超越」。
+PM 視角：對話式 ERP 從「會查」進化到「**會做**」，這是 30 萬簽約的關鍵躍升。
+ConfirmCard 是 hard-write 的共用基石——做完一個 tool，後續每個只要 30 分鐘。
+
+### 🪞 CEO 戰略決策
+
+3 個 demo moments 才能簽約：
+1. 阿玲打字「跟長江廠下 100 個 M6 螺絲」→ ConfirmCard → 確認 → PO 建好
+2. 王董打字「鼎新 5 月份訂單?」→ 跨 DB 查（v3.1 已備）
+3. 阿玲打字「把鼎新客戶搬過來」→ Schema Mapping ConfirmCard（Phase 2）
+
+今天攻 moment 1——讓 AI 從「能查」進化到「能下單，含人類確認」。
+
+### ✅ 2 小時交付（後端 60 min + 前端 60 min）
+
+#### 後端（Hour 1）
+
+**`backend/app/agents/confirm_card.py`** — ConfirmCard 核心
+- `ConfirmCard` dataclass（id / tool_name / title / summary / slots / risk_tier / ttl / expires_at / created_by）
+- In-memory `_PENDING` dict + asyncio.Lock 守護
+- `make_card / stash_card / peek_card / consume_card / cancel_card / _gc_expired / list_pending_cards`
+- `to_chat_payload()` 給前端用（不洩漏 executor closure）
+
+**`backend/app/api/confirm_card.py`** — 4 個 endpoints
+- `GET  /api/agents/pending` — 列出當前 pending（含過期 GC）
+- `GET  /api/agents/confirm/{card_id}` — peek 看卡
+- `POST /api/agents/confirm/{card_id}` — 確認執行 + 結果序列化
+- `POST /api/agents/cancel/{card_id}` — 取消
+
+**`backend/app/agents/domains/hard_write_tools.py`** — 3 個 hard-write tool 範本
+- `create_purchase_order_with_confirm` — CREATE 樣板（supplier keyword lookup → ConfirmCard → service）
+- `release_work_order_with_confirm` — 狀態轉換樣板（draft→released，前置狀態檢查）
+- `update_sales_order_delivery_with_confirm` — 欄位更新樣板（直接 SQLAlchemy update）
+- 新 agent `HardWriteAgent` 註冊
+
+**`backend/tests/smoke/test_confirm_card.py`** — 16 個 test
+- 儲存層（make/stash/peek/consume/cancel/TTL/GC/filter，6 tests）
+- create_po 出卡 / supplier 找不到 / confirm 後執行（3 tests）
+- release_wo 出卡 / 工單不存在 / 狀態不對（3 tests）
+- update_so 出卡 / confirm 後執行（2 tests）
+- registry sanity（2 tests）
+- **全部 16/16 PASS / 3.78 秒**
+
+#### 前端（Hour 2）
+
+**`frontend-desktop/src/lib/api.ts`** — 加 4 個 API helper
+- `apiConfirmCard / apiCancelCard / apiGetCard / apiPendingCards`
+- TypeScript interfaces：`ConfirmCardData / ConfirmCardPayload / ConfirmCardResult`
+
+**`frontend-desktop/src/components/ConfirmCard.tsx`**（130 行新組件）
+- 倒數計時（< 30 秒變紅）
+- 風險等級色彩標籤（hard-write 琥珀色）
+- summary 條列顯示「將執行的內容」
+- 確認 / 取消按鈕（busy 狀態 + error handling）
+- 過期自動觸發 onExpired
+
+**`frontend-desktop/src/pages/Chat.tsx`** — 擴充支援 ConfirmCard
+- `extractCard()` helper 從 tool_calls 撈確認卡 payload
+- Msg interface 加 `card / cardSettled` 欄位
+- Chat 訊息泡泡下方內嵌 ConfirmCard 組件
+- 3 個回呼：handleCardResult / handleCardCancel / handleCardExpired
+- 結算後顯示「✅ 已確認執行 / 🚫 已取消 / ⏰ 已過期」
+
+#### 主控檔 sync
+
+- CLAUDE.md：版本 3.1 → **3.2**，§4.2 ConfirmCard 進度看板 100%
+- §4.1 MVP 功能 #2「AI 自然語言寫入 CRUD」42% → **70%**
+- main.py 註冊 confirm_card.router
+- tools.py 加 hard_write_tools import
+
+### 📊 數字變化
+
+| 維度 | #19 結束 | #20 結束 |
+|---|---|---|
+| pytest tests | 169 | **~186** (+16 ConfirmCard) |
+| MVP 功能 #2（AI 寫入） | 42% | **70%** |
+| Hard-write tools | 0 | **3** + 1 共用框架 |
+| Demo moment 1（阿玲下單） | ❌ | ✅ |
+| 前端 ConfirmCard 體驗 | 0 | **倒數 + 結算狀態** |
+
+### 🪞 教訓 #5（CEO 視角）
+
+**「LLM 能做的事就讓 LLM 做」**這句話翻譯成架構決策：
+- LLM 填 slots → ConfirmCard 出卡 → 人類點確認 → service 執行
+- 同樣的 ConfirmCard 機制給 Phase 2 的 Schema Mapping / Undo 共用
+- **一個 ConfirmCard 框架解鎖了所有未來 hard-write**
+
+「做完 1 個 hard-write tool，剩下都是 30 分鐘 copy-paste」——這是基石型投資的回報。
+
+**Blocker**：無。明天從 Slot-filling 反問機制（Phase 1 Day 4）+ 剩 15 個 read tool refactor 動工。
+
+---
+
 ## 2026-05-15｜會話 #19｜🔌 外部 DB 串接戰略 + PoC（v3.1 補強）
 
 **目標**：使用者點明「串聯其它資料庫這事很重要」——50-100 人廠 90% 都已用過鼎新 / 正航 / 叡揚 / Excel，**「能不能讀我的舊資料」是 ERP 採購 #1 殺手**。沒這能力 demo 過不去；有了 → 「鼎新不用砍，AI 慢慢幫你搬」。

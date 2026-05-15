@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { apiChat } from '../lib/api'
+import type { ConfirmCardData, ConfirmCardResult } from '../lib/api'
+import ConfirmCard from '../components/ConfirmCard'
 
 interface Msg {
   role: 'user' | 'assistant' | 'system'
@@ -9,6 +11,30 @@ interface Msg {
   agent?: string
   timestamp?: number
   isError?: boolean
+  /** v3.1：hard-write tool 在此 turn 出的確認卡（若有） */
+  card?: ConfirmCardData
+  /** 是否已處理（確認 / 取消 / 過期） — 決定是否還可互動 */
+  cardSettled?: 'confirmed' | 'cancelled' | 'expired'
+}
+
+/**
+ * 從 chat-v2 回傳的 tool_calls 內找最後一張 ConfirmCard。
+ * 每個 tool_call.result 是 JSON-stringified；若 parse 結果含 {type: "confirm_card"}，
+ * 就把卡撈出來給前端 render。
+ */
+function extractCard(tool_calls?: Array<{ tool: string; result: string | unknown }>): ConfirmCardData | undefined {
+  if (!tool_calls || tool_calls.length === 0) return undefined
+  // 反向找最後一張（最新）
+  for (let i = tool_calls.length - 1; i >= 0; i--) {
+    const r = tool_calls[i].result
+    try {
+      const parsed = typeof r === 'string' ? JSON.parse(r) : r
+      if (parsed && typeof parsed === 'object' && (parsed as { type?: string }).type === 'confirm_card') {
+        return (parsed as { card: ConfirmCardData }).card
+      }
+    } catch { /* not JSON, skip */ }
+  }
+  return undefined
 }
 
 const HISTORY_KEY = 'erpilot_chat_history'
@@ -59,11 +85,13 @@ export default function Chat() {
     setLoading(true)
     try {
       const data = await apiChat(text, sessionId)
+      const card = extractCard(data.tool_calls)
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: data.reply || '(無回應)',
+        content: data.reply || (card ? '請確認以下操作：' : '(無回應)'),
         agent: data.agent,
         timestamp: Date.now(),
+        card,
       }])
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : '連線錯誤'
@@ -100,6 +128,42 @@ export default function Chat() {
 
   const copyToClipboard = useCallback(async (text: string) => {
     try { await navigator.clipboard.writeText(text) } catch {/* ignore */}
+  }, [])
+
+  // v3.1: ConfirmCard 回呼
+  const handleCardResult = useCallback((cardId: string, result: ConfirmCardResult) => {
+    // 標記原訊息為 confirmed
+    setMessages(prev =>
+      prev.map(m => (m.card?.id === cardId ? { ...m, cardSettled: 'confirmed' as const } : m))
+    )
+    // 附一則 assistant 訊息顯示執行結果
+    const r = result.result as Record<string, unknown>
+    const message =
+      (typeof r === 'object' && r !== null && typeof r.message === 'string'
+        ? r.message
+        : `✅ 已執行 ${result.tool_name}`)
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: message,
+      timestamp: Date.now(),
+    }])
+  }, [])
+
+  const handleCardCancel = useCallback((cardId: string) => {
+    setMessages(prev =>
+      prev.map(m => (m.card?.id === cardId ? { ...m, cardSettled: 'cancelled' as const } : m))
+    )
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: '🚫 已取消此操作',
+      timestamp: Date.now(),
+    }])
+  }, [])
+
+  const handleCardExpired = useCallback((cardId: string) => {
+    setMessages(prev =>
+      prev.map(m => (m.card?.id === cardId && !m.cardSettled ? { ...m, cardSettled: 'expired' as const } : m))
+    )
   }, [])
 
   return (
@@ -166,6 +230,27 @@ export default function Chat() {
                 <div className="whitespace-pre-wrap break-words">{msg.content}</div>
               )}
             </div>
+
+            {/* v3.1: ConfirmCard 內嵌（在訊息泡泡下方） */}
+            {msg.card && !msg.cardSettled && (
+              <div className="w-full max-w-[85%]">
+                <ConfirmCard
+                  card={msg.card}
+                  onResult={(r) => handleCardResult(msg.card!.id, r)}
+                  onCancel={(id) => handleCardCancel(id)}
+                  onExpired={(id) => handleCardExpired(id)}
+                />
+              </div>
+            )}
+            {msg.card && msg.cardSettled && (
+              <div className="w-full max-w-[85%] mt-1">
+                <div className="text-xs text-gray-500 italic px-3 py-1">
+                  {msg.cardSettled === 'confirmed' && '✅ 已確認執行'}
+                  {msg.cardSettled === 'cancelled' && '🚫 已取消'}
+                  {msg.cardSettled === 'expired' && '⏰ 已過期（未執行）'}
+                </div>
+              </div>
+            )}
 
             {/* Footer chips */}
             <div className={`flex items-center gap-2 mt-1 px-2 text-xs text-gray-400 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
