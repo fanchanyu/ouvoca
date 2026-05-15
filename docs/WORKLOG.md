@@ -38,6 +38,109 @@
 
 ---
 
+## 2026-05-15｜會話 #22｜⚡ 5 條並行戰線：Slot-filling + Glossary + Undo + Toast（v3.3）
+
+**目標**：使用者「這些事很多可以平行處理 / 一個小時可以做很多事」。
+CEO 視角：把 Phase 2 對話智能 + Phase 3 桌機體驗 一次推進 4 個維度。
+
+### 🪞 5 條並行戰線
+
+#### Track A — Slot-filling 反問機制（30 min）
+
+**`backend/app/agents/engine.py`**：
+- `_missing_required_slots(name, args)` — 查新 registry 取 slots metadata，偵測缺漏
+- `_build_reverse_ask(name, missing)` — 組 LLM 友善的反問提示字串
+- `execute_tool` 前置驗證：若缺 required slot，**不執行 tool**，回 `{needs_input, missing, ask}` JSON
+- LLM 收到 needs_input 結果後會自動反問使用者，不會自編預設值
+
+**Demo killer**：使用者說「下單」沒給供應商，AI 自動回「請問是哪一家供應商?」
+
+#### Track B — Glossary 同義詞（25 min）
+
+**`backend/app/agents/glossary.py`**：
+- `GlossaryEntry` dataclass + in-memory `_GLOSSARY` dict
+- `register_term / resolve_term / list_glossary`
+- 精確比對 confidence=1.0，包含比對 0.7，alias 0.9
+- `seed_default_glossary()` 內建 4 個 demo 詞（螺絲/螺帽/長江/大華）
+
+**`backend/app/agents/domains/glossary_tools.py`**：
+- `lookup_term` (READ) — 查同義詞對映
+- `list_glossary_terms` (READ) — 列出所有詞彙
+- `register_glossary_term` (SOFT_WRITE) — 新增詞彙（「以後我說鋼釘就是 M6」）
+- 新 `GlossaryAgent` 註冊
+
+**Demo killer**：使用者「螺絲」→ AI 知道是 M6-BOLT-20
+
+#### Track C — Undo 90 秒撤銷（20 min）
+
+**`backend/app/agents/domains/undo_tools.py`**：
+- `undo_last_purchase_order` (HARD_WRITE) — 找 90 秒內由該使用者建的非 cancelled PO
+- 出反向 ConfirmCard 列出「將撤銷 PO-XXX、金額、剩餘可撤銷時間」
+- TTL 動態 = min(60, 剩餘 undo window)
+- 確認後 status → cancelled + audit remark
+- 自動接到 PurchaseAgent.tool_names
+
+**Demo killer**：「取消剛剛那筆」→ AI 找到 + 反向 ConfirmCard + 確認 → 撤銷
+
+#### Track D — 桌機通知（25 min）
+
+**`frontend-desktop/src/components/DesktopNotifications.tsx`**（180 行新組件）：
+- 訂閱 `/api/events/stream` SSE，反正 13 個 event name 都掛 listener
+- 8 條 NotificationRule 把 backend event payload 轉成桌面通知（標題 + 描述）
+- Browser Notification API + 權限請求
+- onToast callback 給父層做 in-app toast banner
+
+**`frontend-desktop/src/components/Layout.tsx`** 整合：
+- 移除舊的 inline SSE useEffect（DesktopNotifications 取代）
+- 加 in-app toast banner：最近 5 則，5 秒自動消失
+- 與右上角 🔔 badge 計數整合
+
+**Demo killer**：「M6 螺絲低於安全庫存」自動跳桌面通知 + Chat 右上角 banner
+
+#### Track E — Tests + Ship（10 min）
+
+**`backend/tests/smoke/test_phase2_intelligence.py`**（23 個 test）：
+- TestSlotFilling 7 個（missing detect / optional / unknown tool safe / empty string / reverse-ask string / execute_tool needs_input / proceeds-when-complete）
+- TestGlossary 8 個（register + resolve / alias / unknown / type-isolation / partial match / list filter / 3 tool 整合）
+- TestUndo 4 個（no-recent / no-user / emits ConfirmCard + execute / skips old）
+- Registry sanity 2 個（4 個新 tool / undo 接上 PurchaseAgent）
+
+**全部 23/23 PASS / 5.24 秒**。
+
+### 📊 數字變化
+
+| 維度 | #21 結束 | #22 結束 |
+|---|---|---|
+| 註冊 tools | 32 | **36** (+4: 3 glossary + 1 undo) |
+| pytest tests | 147 | **170** (+23 Phase 2) |
+| MVP 功能 #2（AI 寫入） | 85% | **92%** |
+| MVP 功能 #4（AI 推播） | 50% | **80%** |
+| 桌面通知 | 0 | ✅ Browser Notification + in-app banner |
+| Slot-filling 反問 | 0% | **100%** |
+| Glossary 同義詞 | 0% | **80%** |
+| Undo 撤銷 | 0% | **70%** (PoC PO only) |
+
+### 🪞 教訓 #7（CEO 視角）
+
+**並行作戰的關鍵是「橫向解耦」**：
+- A 改 engine.py（不動其它檔）
+- B 新增 glossary.py + glossary_tools.py（獨立 module）
+- C 新增 undo_tools.py（獨立 module）
+- D 新增 DesktopNotifications.tsx + 改 Layout（前端獨立）
+
+4 條 track 各自獨立 → 並行 60 分鐘完成而非 4 小時串行。
+
+「LLM 能做的事就讓 LLM 做」更深的意思是：
+**讓 LLM 自己反問、自己消歧、自己撤銷**——機制建好，LLM 變超能力放大器。
+
+**Blocker**：無。下次可動：
+- SqlServerConnector（鼎新實戰）
+- Schema Mapping AI（preview_schema_mapping）
+- Email 摘要 cron
+- 真實 DeepSeek E2E 錄影
+
+---
+
 ## 2026-05-15｜會話 #21｜🛡️ Demo bulletproof：Phase 1 Day 1 收尾 + E2E 腳本
 
 **目標**：使用者 #20 後一句「還沒有完丫」——CEO 視角檢視發現 demo flow 有 3 個 critical gaps，這次一次補完。

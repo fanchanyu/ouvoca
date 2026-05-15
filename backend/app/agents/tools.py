@@ -8,5 +8,7 @@ from app.agents.domains import (  # noqa: F401
     quality_tools, sales_tools, accounting_tools, warehouse_tools,
     crm_tools, general_tools,
     external_db_tools,  # v3.1 外部 DB connectors
-    hard_write_tools,   # v3.1 ConfirmCard 包裝的 hard-write tools
+    hard_write_tools,   # v3.2 ConfirmCard 包裝的 hard-write tools
+    glossary_tools,     # v3.3 同義詞 / 別名解析
+    undo_tools,         # v3.3 90 秒撤銷
 )

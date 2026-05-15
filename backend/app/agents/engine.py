@@ -112,6 +112,26 @@ async def execute_tool(name: str, args: dict, db=None, user=None) -> str:
     tool = TOOL_FUNCTIONS.get(name)
     if not tool:
         return json.dumps({"error": f"Unknown tool: {name}"}, ensure_ascii=False)
+
+    # v3.3 Slot-filling reverse-ask：
+    # 若 tool 有在新 registry 註冊 slots metadata，先驗 required slots。
+    # 缺欄位時不執行 tool，回 structured `needs_input` 讓 LLM 自動反問使用者。
+    missing = _missing_required_slots(name, args)
+    if missing:
+        return json.dumps({
+            "needs_input": True,
+            "missing": [
+                {"name": s.name, "type": s.type, "description": s.description}
+                for s in missing
+            ],
+            "ask": _build_reverse_ask(name, missing),
+            "guidance": (
+                "缺少必要欄位。請直接問使用者這些欄位，不要編造預設值。"
+                "如果使用者用同義詞或關鍵字（如「螺絲」、「長江」），"
+                "考慮先呼叫 lookup_term / query_supplier 解析。"
+            ),
+        }, ensure_ascii=False)
+
     try:
         result = await tool["func"](db=db, user=user, **args)
         if hasattr(result, "__dict__") and not isinstance(result, (dict, list)):
@@ -120,6 +140,39 @@ async def execute_tool(name: str, args: dict, db=None, user=None) -> str:
     except Exception as exc:
         log.exception("Tool %s execution failed", name)
         return json.dumps({"error": str(exc)}, ensure_ascii=False)
+
+
+def _missing_required_slots(name: str, args: dict) -> list:
+    """檢查 args 是否缺少 required slot（從新 registry 取 slots metadata）。
+
+    回值：缺少的 Slot 物件 list；若 tool 未在新 registry 註冊則回空 list（向後相容）。
+    """
+    try:
+        from app.agents.registry import get_tool
+        meta = get_tool(name)
+        if meta is None:
+            return []  # 舊註冊方式：跳過驗證
+        return [
+            s for s in meta.slots
+            if s.required and (s.name not in args or args.get(s.name) in (None, "", []))
+        ]
+    except Exception:
+        return []  # registry 載入失敗就跳過
+
+
+def _build_reverse_ask(tool_name: str, missing: list) -> str:
+    """組一段 LLM 友善的反問提示字串。"""
+    if len(missing) == 1:
+        s = missing[0]
+        return (
+            f"執行 {tool_name} 需要先知道「{s.description or s.name}」。"
+            f"請反問使用者。"
+        )
+    items = "、".join(f"「{s.description or s.name}」" for s in missing)
+    return (
+        f"執行 {tool_name} 需要先知道 {len(missing)} 個欄位：{items}。"
+        f"請反問使用者，**一次問完所有缺漏項**。"
+    )
 
 
 def register_agent(domain: str, name: str, system_prompt: str, tool_names: list[str]) -> None:

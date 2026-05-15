@@ -8,11 +8,12 @@
  * - 觸控 44px+
  * - 中英文切換器（國旗 icon）
  */
-import { useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { Outlet, Link, useLocation, Navigate, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/auth'
 import { useToast } from './ui'
 import { useTranslation, type Lang } from '../i18n'
+import DesktopNotifications, { type ToastEntry } from './DesktopNotifications'
 
 const navConfig = [
   { path: '/',                key: 'dashboard',      icon: '📊', group: 'overview' },
@@ -55,18 +56,17 @@ export default function Layout() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  useEffect(() => {
-    if (!token) return
-    let es: EventSource | null = null
-    try {
-      es = new EventSource('/api/events/stream')
-      const handler = () => setNotifCount(c => c + 1)
-      ;['stock.below_safety', 'wo.completed', 'nc.created', 'po.approved'].forEach(n =>
-        es!.addEventListener(n, handler as EventListener)
-      )
-    } catch {/* ignore */}
-    return () => { es?.close() }
-  }, [token])
+  // v3.3：把 SSE 訂閱委派給 <DesktopNotifications />（同時負責桌面 Notification）。
+  // 這裡只保留 in-app toast banner（最近 5 則）+ badge 計數。
+  const [recentToasts, setRecentToasts] = useState<ToastEntry[]>([])
+  const handleToast = useCallback((entry: ToastEntry) => {
+    setNotifCount((c) => c + 1)
+    setRecentToasts((prev) => [entry, ...prev].slice(0, 5))
+    // 5 秒後自動移除這條 banner
+    setTimeout(() => {
+      setRecentToasts((prev) => prev.filter((t) => t.id !== entry.id))
+    }, 5000)
+  }, [])
 
   if (!token) return <Navigate to="/login" replace />
 
@@ -238,6 +238,27 @@ export default function Layout() {
         <main className="flex-1 p-4 sm:p-6 overflow-x-hidden">
           <Outlet />
         </main>
+
+        {/* v3.3 桌機通知（背景 SSE + Browser Notification） */}
+        {token && <DesktopNotifications onToast={handleToast} />}
+
+        {/* v3.3 in-app toast banner（最近 5 則，5 秒後自動消失） */}
+        {recentToasts.length > 0 && (
+          <div className="fixed top-20 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+            {recentToasts.map((t) => (
+              <div
+                key={t.id}
+                className="bg-white border border-brand-200 shadow-pop rounded-card px-4 py-3 max-w-sm pointer-events-auto animate-slide-up"
+              >
+                <div className="font-semibold text-ink-900 text-body-sm">{t.title}</div>
+                <div className="text-caption text-ink-600 mt-0.5">{t.body}</div>
+                <div className="text-caption text-ink-400 mt-1 font-mono">
+                  {new Date(t.ts).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

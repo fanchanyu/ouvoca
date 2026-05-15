@@ -175,9 +175,9 @@
 
 ```
 1. AI 自然語言查詢          🟢 [████████  ]  80%   ✅ 12/12 query 實機 PASS
-2. AI 自然語言寫入（CRUD）  🟢 [████████  ]  85%   ✅ ConfirmCard + 3 hard-write tools 接上 agents + part lookup（17 tests）
+2. AI 自然語言寫入（CRUD）  🟢 [█████████ ]  92%   ✅ ConfirmCard + 4 hard-write tools + Slot-filling 反問 + Undo 90s（v3.3）
 3. 即時庫存同步             🟢 [██████████] 100%   ✅ Phase 0 已備
-4. AI 主動推播（Toast/Email）🟡 [█████     ]  50%   EventBus 有，缺 Toast/Email 整合
+4. AI 主動推播（Toast/Email）🟢 [████████  ]  80%   ✅ 桌面 Toast + in-app banner（v3.3），Email 摘要待補
 5. 基礎訂單到出貨閉環       🟢 [█████████ ]  95%   ✅ O2C/P2P/P2I 全測過
 6. USB 條碼槍盤點/報工      ❌ [          ]   0%   Phase 2
 7. 🆕 外部 DB 串接（PoC）   🟢 [██████    ]  60%   ✅ v3.1 sqlite+csv connector + 3 read tool（21 tests）
@@ -189,7 +189,10 @@
 
 ```
 Tool registry framework  🟢 [██████████] 100%  ✅ @register_tool + RiskTier + Slot
-Tool 入 registry         🟢 [██████████] 100%  ✅ 32/32（含 3 hard-write + 3 external_db）
+Tool 入 registry         🟢 [██████████] 100%  ✅ 36/36（read 29 + hard-write 4 + soft-write 1 + 6 v3.3）
+Slot-filling 反問         🟢 [██████████] 100%  ✅ engine.execute_tool 偵測缺欄位 → needs_input
+Glossary 同義詞           🟢 [████████  ]  80%  ✅ in-memory + 3 tools（DB 表 Phase 2 收尾）
+Undo 90 秒撤銷            🟢 [███████   ]  70%  ✅ undo_last_purchase_order PoC（其它 entity 待補）
 外部 DB Connector 框架   🟢 [████████  ]  80%  ✅ v3.1 Connector ABC + registry + 2 PoC + 21 tests
 外部 DB AI tool          🟢 [████████  ]  80%  ✅ list_connections / list_tables / query_external_db
 ConfirmCard schema       🟢 [██████████] 100%  ✅ confirm_card.py + API endpoints
@@ -401,6 +404,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #21：demo bulletproof——Phase 1 Day 1 收尾 + part lookup + agent wiring + E2E 腳本 6/6 場景全綠）
+**最後更新**：2026-05-15（會話 #22：5 條並行戰線——Slot-filling + Glossary + Undo + 桌面 Toast + 23 tests）
 **維護者**：使用者 + Claude
-**版本**：3.2.1
+**版本**：3.3
