@@ -1,9 +1,24 @@
-"""PurchaseAgent — query suppliers, POs, prices."""
+"""PurchaseAgent — query suppliers, POs, prices.
+
+✨ Phase 1 Day 1: refactored to use @register_tool decorator with risk_tier.
+"""
 from sqlalchemy import select
-from app.agents.engine import register_tool, register_agent
+from app.agents.engine import register_agent
+from app.agents.registry import register_tool, RiskTier, Slot
 from app.models.purchase import Supplier, PurchaseOrder, SupplierPrice
 
 
+@register_tool(
+    name="query_supplier",
+    domain="purchase",
+    risk_tier=RiskTier.READ,
+    description="查詢供應商資訊。可按關鍵字（名稱/編號）或等級過濾。",
+    slots=[
+        Slot("keyword", "string", required=False, description="搜尋名稱或編號片段"),
+        Slot("tier", "string", required=False, description="供應商等級 T1/T2/T3"),
+    ],
+    required_permission="purchase.supplier.read",
+)
 async def _query_supplier(db, user, keyword: str = "", tier: str = None):
     q = select(Supplier)
     if keyword:
@@ -18,6 +33,18 @@ async def _query_supplier(db, user, keyword: str = "", tier: str = None):
     ]}
 
 
+@register_tool(
+    name="query_purchase_order",
+    domain="purchase",
+    risk_tier=RiskTier.READ,
+    description="查詢採購單。可按單號或狀態過濾。",
+    slots=[
+        Slot("po_no", "string", required=False, description="採購單號"),
+        Slot("status", "string", required=False,
+             description="draft/approved/sent/partial_received/received/cancelled"),
+    ],
+    required_permission="purchase.po.read",
+)
 async def _query_purchase_order(db, user, po_no: str = None, status: str = None):
     q = select(PurchaseOrder)
     if po_no:
@@ -33,6 +60,14 @@ async def _query_purchase_order(db, user, po_no: str = None, status: str = None)
     ]}
 
 
+@register_tool(
+    name="supplier_price_history",
+    domain="purchase",
+    risk_tier=RiskTier.READ,
+    description="查詢某零件的歷史報價清單，含 MOQ 與交期。",
+    slots=[Slot("part_id", "string", required=True, description="零件 UUID")],
+    required_permission="purchase.price.read",
+)
 async def _supplier_price_history(db, user, part_id: str):
     rows = (await db.execute(
         select(SupplierPrice).where(SupplierPrice.part_id == part_id).limit(20)
@@ -43,31 +78,6 @@ async def _supplier_price_history(db, user, part_id: str):
         for p in rows
     ]}
 
-
-register_tool(
-    "query_supplier",
-    "查詢供應商資訊。",
-    {"type": "object", "properties": {
-        "keyword": {"type": "string"},
-        "tier": {"type": "string", "description": "T1/T2/T3"},
-    }},
-    _query_supplier,
-)
-register_tool(
-    "query_purchase_order",
-    "查詢採購單。",
-    {"type": "object", "properties": {
-        "po_no": {"type": "string"},
-        "status": {"type": "string", "description": "draft/approved/sent/received/cancelled"},
-    }},
-    _query_purchase_order,
-)
-register_tool(
-    "supplier_price_history",
-    "查詢某零件的歷史報價清單。",
-    {"type": "object", "properties": {"part_id": {"type": "string"}}, "required": ["part_id"]},
-    _supplier_price_history,
-)
 
 register_agent(
     "purchase", "PurchaseAgent",

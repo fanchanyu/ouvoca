@@ -1,11 +1,27 @@
-"""ProductionAgent — query work orders, BOM, work centers."""
+"""ProductionAgent — query work orders, BOM, work centers.
+
+✨ Phase 1 Day 1: refactored to use @register_tool decorator with risk_tier.
+"""
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload, selectinload
-from app.agents.engine import register_tool, register_agent
-from app.models.production import ProductionOrder, WorkCenter, Operation
+from sqlalchemy.orm import joinedload
+from app.agents.engine import register_agent
+from app.agents.registry import register_tool, RiskTier, Slot
+from app.models.production import ProductionOrder, WorkCenter
 from app.models.product import Product, BOMItem
 
 
+@register_tool(
+    name="query_work_order",
+    domain="production",
+    risk_tier=RiskTier.READ,
+    description="查詢生產工單，可按單號或狀態過濾。回傳含進度（已完成 / 不良）。",
+    slots=[
+        Slot("wo_no", "string", required=False, description="工單號"),
+        Slot("status", "string", required=False,
+             description="draft/released/in_progress/completed/cancelled"),
+    ],
+    required_permission="production.wo.read",
+)
 async def _query_wo(db, user, wo_no: str = None, status: str = None):
     q = select(ProductionOrder).options(joinedload(ProductionOrder.product))
     if wo_no:
@@ -23,6 +39,14 @@ async def _query_wo(db, user, wo_no: str = None, status: str = None):
     ]}
 
 
+@register_tool(
+    name="list_products_tool",
+    domain="production",
+    risk_tier=RiskTier.READ,
+    description="列出產品/成品清單，含售價與標準成本。",
+    slots=[Slot("limit", "integer", required=False, description="回傳上限，預設 20")],
+    required_permission="production.product.list",
+)
 async def _list_products(db, user, limit: int = 20):
     rows = (await db.execute(select(Product).limit(limit))).scalars().all()
     return {"total": len(rows), "products": [
@@ -32,6 +56,14 @@ async def _list_products(db, user, limit: int = 20):
     ]}
 
 
+@register_tool(
+    name="get_bom",
+    domain="production",
+    risk_tier=RiskTier.READ,
+    description="查詢產品 BOM 結構（多階展開），含每階用量與耗損率。",
+    slots=[Slot("product_id", "string", required=True, description="產品 UUID")],
+    required_permission="production.bom.read",
+)
 async def _get_bom(db, user, product_id: str):
     rows = (await db.execute(
         select(BOMItem)
@@ -46,6 +78,14 @@ async def _get_bom(db, user, product_id: str):
     ]}
 
 
+@register_tool(
+    name="list_work_centers",
+    domain="production",
+    risk_tier=RiskTier.READ,
+    description="列出所有 active 工作站/機台，含日產能與效率。",
+    slots=[],
+    required_permission="production.workcenter.list",
+)
 async def _list_work_centers(db, user):
     rows = (await db.execute(select(WorkCenter).where(WorkCenter.is_active == True))).scalars().all()
     return {"total": len(rows), "work_centers": [
@@ -54,19 +94,6 @@ async def _list_work_centers(db, user):
         for wc in rows
     ]}
 
-
-register_tool("query_work_order", "查詢生產工單。",
-              {"type": "object", "properties": {"wo_no": {"type": "string"},
-                                                "status": {"type": "string"}}},
-              _query_wo)
-register_tool("list_products_tool", "列出產品/成品清單。",
-              {"type": "object", "properties": {"limit": {"type": "integer"}}},
-              _list_products)
-register_tool("get_bom", "查詢產品 BOM 結構。",
-              {"type": "object", "properties": {"product_id": {"type": "string"}}, "required": ["product_id"]},
-              _get_bom)
-register_tool("list_work_centers", "列出所有工作站/機台。",
-              {"type": "object", "properties": {}}, _list_work_centers)
 
 register_agent(
     "production", "ProductionAgent",
