@@ -52,6 +52,7 @@
 | **一鍵安裝腳本** | `install.sh`（Mac/Linux）/ `install.bat`（Windows）/ `load_industry.sh` |
 | **🆕 外部 DB 串接設計** | [中文 EXTERNAL_DB_INTEGRATION_DESIGN_ZH](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md) / [English EN](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_EN.md)（**v3.1 補強：鼎新 / 正航 / Excel 接得到**） |
 | **🆕 業務 demo 一頁紙** | [中文 SALES_KILLER_MOMENTS_ZH](./docs/SALES_KILLER_MOMENTS_ZH.md) / [English EN](./docs/SALES_KILLER_MOMENTS_EN.md)（**v3.5 — 9 個 killer moments，銷售背稿用**） |
+| **🎬 真實 DeepSeek E2E transcript** | [docs/demos/deepseek_e2e_latest.md](./docs/demos/deepseek_e2e_latest.md)（**v3.6 — 9/9 moments 跑真實 LLM 全通，50 秒 / 21 tool calls**） |
 | **客戶手冊 PDF（35 份雙語）** | 跑 `build_pdfs.bat`（Win）或 `./build_pdfs.sh`（Mac/Linux）→ 輸出至 `docs/pdf/` |
 | **PR 模板** | [`.github/PULL_REQUEST_TEMPLATE.md`](./.github/PULL_REQUEST_TEMPLATE.md)（**強制貼 run_gates 輸出**） |
 | **🛡️ 自證閘（必跑）** | `bash scripts/run_gates.sh` — 7 道閘 ~310 秒，**綠燈才能說完成**。CI: [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) |
@@ -407,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #24：MVP #4 收尾 + Sales 戰備——Email digest + 9 killer moments 一頁紙）
+**最後更新**：2026-05-15（會話 #25：真實 DeepSeek E2E 9/9 moments 跑通 + Sales transcript 到位）
 **維護者**：使用者 + Claude
-**版本**：3.5
+**版本**：3.6

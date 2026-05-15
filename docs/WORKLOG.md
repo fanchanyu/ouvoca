@@ -38,6 +38,78 @@
 
 ---
 
+## 2026-05-15｜會話 #25｜🎬 真實 DeepSeek E2E 錄影：9 moments 全跑通（v3.6）
+
+**目標**：使用者選 "再一個衝刺：DeepSeek E2E 錄影" — 拿真實 LLM transcript 給銷售團隊。
+證明 v3.0-v3.5 累積的 40 個 tool 不只測試通，**LLM 真的會挑對、會反問、會出 ConfirmCard**。
+
+### ✅ 30 分鐘交付
+
+**`scripts/demo_deepseek_e2e.py`**（300 行）：
+- 不走 uvicorn，直接呼叫 `chat_completion` + `execute_tool` pipeline（簡化 demo）
+- 9 個 moment script + DEMO_USER + seed（含長江/大華供應商、M6 螺絲低於安全、鼎新 SQLite 3 客戶）
+- 真實 DeepSeek API call（用 .env 內的 sk-621...）
+- hard-write moment 後自動 consume_card → 模擬使用者點確認
+- 輸出 markdown 含 transcript + tool calls + latency
+
+**`docs/demos/deepseek_e2e_latest.md`**（341 行真實 transcript）：
+
+### 🎬 9 個 moments 全跑通結果
+
+| # | Moment | LLM 選了什麼 tool | 結果 |
+|---|---|---|---|
+| 1 | 「今天工廠狀況」 | `preview_email_digest` | ✅ AI 出「⚠️ M6 螺絲庫存 300 < 安全 500」+ 主動建議補貨 |
+| 2 | 「我們有哪些供應商」 | `query_supplier` | ✅ 列出長江/大華 |
+| 3 | 「幫我跟長江下單」（缺欄位） | `lookup_term` 解析長江 | ✅ AI 反問「料件、數量、交期」 |
+| 4 | 「跟長江下 100 個 M6 螺絲，5/20，單價 5」 | 6 個 tool chain | ✅ 出 ConfirmCard，**模擬點確認**真寫入 PO |
+| 5 | 「最近的採購單」 | `query_purchase_order` 等 | ✅ 看到剛建的 PO |
+| 6 | 「鋼釘有多少庫存」 | `lookup_term` 對到 M6-BOLT-20 | ✅ Glossary 走通 |
+| 7 | 「鼎新裡的客戶有幾家」 | `query_external_db` | ✅ federated query 走通 |
+| 8 | 「鼎新客戶搬過來會對到什麼」 | `preview_schema_mapping` | ✅ 出 3 個對映候選 |
+| 9 | 「用一句話告訴我今天的狀況」 | `preview_email_digest` 簡短版 | ✅ AI 自動精簡 |
+
+**指標**：
+- Tool calls 累計：**21 個**
+- LLM 累計延遲：**50 秒**
+- 平均延遲：**5.6 秒/moment**（DeepSeek 速度可接受）
+- 失敗：**0 / 9**
+
+### 🪞 真實 LLM 行為觀察
+
+**好的部分**：
+- LLM 自動挑對 agent（purchase 意圖路由到 PurchaseAgent 8/9 對）
+- ConfirmCard pipeline 完整：tool 出卡 → consume → executor → PO 真寫入
+- Slot-filling 反問機制有觸發：moment 3「下單」LLM 真的反問細節而不亂猜
+- glossary 解析「鋼釘」→ M6-BOLT-20 走通
+
+**發現的 1 個小 bug**：
+- LLM 偶爾把 `part_keyword` 當作 `query_inventory` 的 arg（但 query_inventory 只接 part_no / part_id）
+- 工具 schema 與 LLM 直覺不符 — 下次 sprint 補上 `part_keyword` slot
+
+### 📊 數字變化
+
+| 維度 | #24 | #25 |
+|---|---|---|
+| Demo evidence | crud_pipeline.md（模擬）| **+deepseek_e2e_latest.md（真實 LLM）** |
+| 平均 LLM 延遲 | n/a | **5.6 秒**（可接受） |
+| 真實 LLM 9 moment 通過率 | n/a | **9/9 = 100%** |
+
+### 🪞 教訓 #10
+
+**真實 LLM 跑過才知道 prompt engineering 還有空間**。
+今天看到的：
+- LLM 會偶爾用「直覺」args（part_keyword）— 對策：tool 的 slot 描述要更聰明（aliases）
+- LLM 有時跨 agent 越界（讓 general agent 處理 purchase 場景）— 對策：intent classifier 強化
+
+但 **9/9 pass + 自動點確認 + 客戶能看的 transcript** = sales 武器到位。
+
+**Blocker**：無。剩下：
+- SqlServerConnector（pyodbc / 鼎新實戰）
+- USB 條碼槍輸入頁
+- 第一個試點客戶
+
+---
+
 ## 2026-05-15｜會話 #24｜📧 MVP #4 收尾 + Sales 戰備（v3.5）
 
 **目標**：使用者連推 7 個 sprint 後，CEO 視角還剩兩個 P0：
