@@ -297,10 +297,12 @@
 | ID | 標題 | 日期 | 狀態 |
 |---|---|---|---|
 | ADR-012 | Demo Bypass 自動偵測 | 2026-05-14 | Accepted |
+| **ADR-013** | **戰略軸轉：砍 mobile，全力對話式 ERP** | **2026-05-15** | **Accepted** |
+| ADR-012 | （reserved） | – | – |
 | ADR-011 | Tailwind + 自製 Design System | 2026-05-14 | Accepted |
 | ADR-010 | DB 冷熱分層 | 2026-05-14 | Proposed |
 | ADR-009 | 權限走 Audit 而非審批 | 2026-05-14 | Accepted |
-| ADR-008 | Expo Native + LINE Bot 雙軌 | 2026-05-14 | Accepted |
+| ADR-008 | Expo Native + LINE Bot 雙軌 | 2026-05-14 | **Deprecated（ADR-013 取代）** |
 | ADR-007 | Multi-Agent Tool-Scoping | 2026-05-14 | Accepted |
 | ADR-006 | LLM Provider Abstraction | 2026-05-13 | Accepted |
 | ADR-005 | MESH 為一等公民 | 2026-05-14 | Accepted |
@@ -313,7 +315,74 @@
 
 ## 如何新增 ADR
 
-1. 編號往下接（ADR-013, ADR-014, ...）
+1. 編號往下接（ADR-014, ADR-015, ...）
 2. 用同樣的 5 段格式：脈絡 / 決策 / 選項評估（可選）/ 後果 / 狀態
 3. 必須有日期
 4. 若取代舊 ADR，舊的標記 Superseded by ADR-XXX
+
+---
+
+## ADR-013：戰略軸轉——砍 mobile，全力對話式 ERP
+
+**日期**：2026-05-15
+**狀態**：Accepted（取代 ADR-008）
+
+### 脈絡（Context）
+
+從 #10 到 #17 多次會話，產品同時並存兩條 DNA：
+- 舊 DNA：「LINE 原生 ERP」（手機 + LINE Bot + 外協 QR）— 行銷導向
+- 新 DNA：「對話式 ERP」（桌機 Chat + ConfirmCard + Slot-filling）— 產品導向
+
+桌機 Chat 完成度只有 1.5/8（read 工作但 write 不工作），同時又分散精力建 Expo + LINE Bot，結果三條線都未到位。
+使用者在 #18 直接點出：「不要手機連線的功能，把這個功能拿掉，其它的缺失補上。」
+
+### 決策（Decision）
+
+**收斂到單一 DNA：桌機 Chat 全 CRUD**。
+
+具體：
+1. `git rm -r frontend-mobile/`（16 個 tracked file 全刪）
+2. ROADMAP Phase 1（LINE-Native + 行動化）整段廢，改成「對話式 CRUD」
+3. ROADMAP Phase 2（行動化深化）改成「對話智能」
+4. Persona 5（老吳 / 外協廠）整個砍
+5. KPI「手機使用比例」「LINE Bot 互動」「外協回報率」砍
+6. PDF 32 份 → 31 份（Mobile App 使用指南刪）
+7. 後端 `outsource.*` 4 個權限 + `outsource_partner` 角色刪
+8. CI 的 mobile tsc 步驟刪
+9. ADR-008（Expo + LINE Bot 雙軌）標記 Deprecated
+
+舊功能（LINE Bot / Mobile / 外協）下架到 ROADMAP Phase 7「行動化重啟」，等 5+ 客戶反饋觸發再開發。
+
+### 選項評估
+
+| 選項 | 評分 | 為什麼 |
+|---|---|---|
+| A. 三條線同步推（維持 v2） | ❌ | 桌機 Chat 都 1.5/8，再分散就死定了 |
+| B. 砍 mobile，全力桌機（採用） | ✅ | 單一 DNA 收斂、工程能量集中、客戶簡報乾淨 |
+| C. 砍桌機，全力 LINE Bot | ❌ | LINE 是入口非核心；CRUD on LINE 體驗極差 |
+| D. 三線並重但延後 mobile 一年 | ⚠️ | 不夠決絕，文件還是兩條 DNA 並存 |
+
+### 後果（Consequences）
+
+**好處**：
+- 工程能量集中（少維護 frontend-mobile + node_modules）
+- 文件單一 DNA，銷售故事乾淨
+- MVP 累計工時從 ~50d 降到 ~33d（省 17 天）
+- pre-push gates 從 8 道減到 7 道（mobile tsc 砍）
+- 32 PDF → 31 PDF（少維護 1 份）
+
+**壞處**：
+- 5 persona 變 4 persona（老吳砍）
+- 「行動端」競爭優勢暫時不存在（但 v3.0 也不主打）
+- 若客戶簽約後要 LINE，要重新建 Phase 7（但屆時可從 0 開始用 PWA 更省）
+
+### 復活路徑
+
+ROADMAP Phase 7「行動化重啟」：
+- 5+ 客戶要 LINE → 復活 LINE Bot Webhook
+- 5+ 客戶要行動端 → 復活 Mobile（建議改 PWA，省 Expo 學習）
+- 5+ 客戶要外協 → 復活 OutsourceOrder model + Web QR token 入口
+
+### 教訓
+
+「mediocre × 3 不如 excellent × 1」——專案有限資源時，**收斂比擴張更需要勇氣**。

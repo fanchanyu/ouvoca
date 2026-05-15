@@ -50,7 +50,6 @@ const DOCS_TO_BUILD = [
   { src: 'QUICK_START.md',               out: '02_快速入門_Quick_Start.pdf',               title: '快速入門 / Quick Start' },
   { src: 'USER_MANUAL_ZH.md',            out: '03_使用者操作手冊_中文.pdf',                title: 'LLM-ERP 使用者操作手冊' },
   { src: 'USER_MANUAL_EN.md',            out: '03_User_Manual_EN.pdf',                     title: 'LLM-ERP User Manual' },
-  { src: '../frontend-mobile/README.md', out: '04_Mobile_App_使用指南_Guide.pdf',          title: 'LLM-ERP Mobile App 指南 / Guide' },
   { src: 'NETWORK_DEPLOYMENT_ZH.md',     out: '05_網路部署規劃_中文.pdf',                  title: 'LLM-ERP 網路部署規劃' },
   { src: 'NETWORK_DEPLOYMENT_EN.md',     out: '05_Network_Deployment_EN.pdf',              title: 'LLM-ERP Network Deployment' },
   { src: 'SYSTEM_TOPOLOGY_ZH.md',        out: '06_系統架構流程拓樸_中文.pdf',              title: 'LLM-ERP 系統架構流程拓樸圖' },

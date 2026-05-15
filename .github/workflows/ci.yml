@@ -36,9 +36,6 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install mobile deps
-        run: cd frontend-mobile && npm install --no-audit --no-fund --ignore-scripts
-
       - name: Install desktop deps
         if: ${{ hashFiles('frontend-desktop/package.json') != '' }}
         run: cd frontend-desktop && npm install --no-audit --no-fund

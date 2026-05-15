@@ -1,7 +1,9 @@
-# LLM-ERP Support Runbook (English)
+# LLM-ERP Support Runbook (English) — v3.0
 
 > **What to do when things break — for customer IT or our support staff**
 > Designed so you can self-resolve 90% by following this; only the last 10% needs us.
+
+> ⚡ **v3.0 Strategic Pivot Notice**: §6.3 "LINE Bot Webhook not receiving" is deprecated in v3.0 (LINE Bot is no longer a product feature).
 
 ---
 

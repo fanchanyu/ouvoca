@@ -1,7 +1,10 @@
-# LLM-ERP Implementation Playbook (Consultant Edition · English)
+# LLM-ERP Implementation Playbook (Consultant Edition · English) — v3.0
 
 > **2-week go-live, day-by-day SOP**
 > For implementation consultants / integrators / internal IT
+
+> ⚡ **v3.0 Strategic Pivot Notice**: All "Mobile App / LINE Bot / Outsource QR" steps in Day 1-14 are skipped in v3.0.
+> v3.0 deploys only: backend + frontend-desktop + PostgreSQL + Redis + MinIO (no Expo, no LINE Channel application).
 
 ---
 

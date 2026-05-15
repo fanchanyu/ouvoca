@@ -38,6 +38,94 @@
 
 ---
 
+## 2026-05-15｜會話 #18｜🪓 戰略軸轉 v3.0：砍 mobile / LINE / 外協，全力對話式 ERP
+
+**目標**：使用者明確指令「不要手機連線的功能，把這個功能拿掉，其它的缺失補上，你看一下完善要多久，修正到好要多久」——把專案從「LINE-Native + 對話式 ERP」雙軌 DNA 收斂到「桌機對話式 ERP」單軌。
+
+### 🪞 PM 視角的戰略分析
+
+從 #10 到 #17 累積一條暗線：使用者多次點到核心承諾「自然語言取代教育訓練」，但工程上同時並存兩條 DNA：
+- 舊：LINE Bot + Mobile App + 外協 QR（行銷導向）
+- 新：桌機 Chat 全 CRUD（產品導向）
+
+桌機 Chat 才 1.5/8 完成度，再分散精力建 Expo + LINE Bot，三線都不到位。**收斂到單一 DNA 是把專案從「mediocre × 3」變「excellent × 1」**。
+
+### ✅ Wave A 完整版（4 小時）— 一次到位
+
+#### 程式碼層面
+
+- `git rm -r frontend-mobile/` — 16 個 Expo 檔案全刪（不留 archive branch）
+- `scripts/run_gates.sh` / `.bat`：移除 `mobile tsc` 步驟（8 gates → 7 gates）
+- `.github/workflows/ci.yml`：移除「Install mobile deps」step
+- `scripts/build-pdfs/build.mjs`：移除 Mobile App 使用指南 PDF entry（32→31）
+- `.gitignore`：移除 Expo / mobile-evidence / frontend-mobile/.env
+- `.github/PULL_REQUEST_TEMPLATE.md`：移除 mobile tsc 勾選
+
+#### 後端清理
+
+- `backend/scripts/seed_permissions.py`：刪 `outsource.*` 4 個權限 + `outsource_partner` 角色 + boss/plant_manager 中的 `outsource.*` 引用
+- `backend/app/models/permission.py`：docstring 移除「外協廠」描述
+- `backend/app/api/analytics.py` L413：comment「LINE Bot / Mobile Dashboard」→「桌機 Chat / Email 摘要」
+- `backend/tests/integration/test_mesh.py`：fixture「測試外協」→「測試分廠」（保持測試通過）
+
+#### 前端清理
+
+- `frontend-desktop/src/pages/Permissions.tsx`：移除 `outsource: '🔗 外協'` 模組標籤
+- `frontend-desktop/src/i18n/locales/zh-TW.ts`：同上
+- `frontend-desktop/src/i18n/locales/en.ts`：同上
+
+#### 文件大改
+
+- **CLAUDE.md v2.10 → v3.0**：完整改寫 §0/§1/§2/§4/§6/§7/§8 + 新增 §10「v3.0 戰略軸轉紀錄」
+  - 5 persona → 4 persona（老吳砍）
+  - 8 大功能 → 6 大功能
+  - 「行動化 & LINE 整合進度」整段刪
+  - KPI：手機 / LINE / 外協 → CRUD 對話完整度 / 誤操作率 / 下單速度
+  - 五問：「能在手機上嗎」→「能用 Chat 一句話講出來嗎」
+- **CUSTOMER_POSITIONING.md v3.0**：4 persona 全桌機；新增 ConfirmCard / Undo 主張
+- **MVP_DEFINITION.md v3.0**：6 大功能；Phase 1 改為對話式 CRUD
+- **ROADMAP.md v3.0**：Phase 1-4 全部重排；mobile 砍到 Phase 7
+- **GAP_ANALYSIS.md v3.0**：22 個 mobile/LINE/外協 gap 砍到 Phase 7；新增 16 個對話式 ERP gap
+- **ARCHITECTURE_DECISIONS.md**：新增 ADR-013（戰略軸轉），ADR-008 標記 Deprecated
+- **USER_MANUAL ZH/EN, PRODUCT_OVERVIEW ZH/EN, ADMIN_GUIDE**：加 v3.0 banner
+- **ARCHITECTURE_DIAGRAM, BLUEPRINT ZH/EN, NETWORK_DEPLOYMENT ZH/EN, SUPPORT_RUNBOOK ZH/EN, SYSTEM_TOPOLOGY ZH/EN, IMPLEMENTATION_PLAYBOOK ZH/EN**：加 v3.0 戰略軸轉通知 banner
+
+#### PDF 重生
+
+- 32 PDF → 31 PDF（Mobile App 使用指南刪）
+
+### 📊 時間表估算（PM 報告）
+
+| 階段 | 工時 | 累計 | 預計完成 |
+|---|---|---|---|
+| **Wave A（今天）** | 4 hr | 4 hr | ✅ 2026-05-15 |
+| Phase 1 收尾 Day 1-5 | 5 day | 5d | ~ 2026-05-22 |
+| Phase 2 對話智能 | 12 day | 17d | ~ 2026-06-10 |
+| Phase 3 桌機體驗補完 | 5.5 day | 22.5d | ~ 2026-06-18 |
+| Phase 4 MESH 收尾 | 5 day | 27.5d | ~ 2026-06-25 |
+| **MVP 完成** | — | — | **~ 2026-07 月** |
+
+**修正到好（demo-ready）**：~7 個工作天（1.5 週）
+**完善（production-grade）**：~5-6 週
+
+vs v2 規劃的 10-12 週，省 4-5 週。
+
+### ✅ 驗證
+
+- 109/109 smoke + 10/10 registry tests 全綠
+- 7 道閘綠（mobile tsc 砍掉後）
+- 31/31 PDF 重生
+- git rm -r frontend-mobile 完成
+
+### 🪞 教訓 #3
+
+**收斂比擴張更需要勇氣**。專案有限資源時，能砍就砍——mediocre × 3 永遠不如 excellent × 1。
+使用者比我先看到這點，我事後才補強。
+
+**Blocker**：無。明天動工 Phase 1 Day 1 收尾（剩 15 個 read tool refactor）。
+
+---
+
 ## 2026-05-15｜會話 #17｜⚡ 兩小時並行衝刺：Phase 1 Day 1 框架 + AI demo + Chat UX + 技術債
 
 **目標**：使用者「理想是全部到位、平行操作下努力完成」— 4 個 wave 在 2 小時內並行交付。

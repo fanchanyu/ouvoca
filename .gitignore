@@ -29,7 +29,7 @@ privatekey
 */backend/.env
 */frontend/.env
 */frontend-desktop/.env
-*/frontend-mobile/.env
+# (frontend-mobile/ removed in v3.0 — desktop-only DNA)
 
 # ─── 💾 資料庫 / 持久化（不可推）─────────────────────────
 *.db
@@ -131,11 +131,6 @@ out/
 .vite/
 *.local
 
-# Expo
-.expo/
-.expo-shared/
-web-build/
-
 # ─── 🐳 Docker ───────────────────────────────────────────
 .docker/
 
@@ -174,10 +169,6 @@ logs/
 # ─── 🧪 演練資料 / 測試產生物 ────────────────────────────
 test-results/
 playwright-report/
-mobile-evidence/*.png
-mobile-evidence/*.mp4
-!mobile-evidence/README.md
-
 # ─── 🔐 內部專案文件（暫不公開的）────────────────────────
 # 若這些文件之後決定公開，移除對應行即可
 # docs/PRICING_INTERNAL.md

@@ -1,8 +1,11 @@
-# LLM-ERP System Architecture Blueprint (English)
+# LLM-ERP System Architecture Blueprint (English) — v3.0
 
 > **For IT directors / system architects / security consultants**
 > From 1 to 1000 customers — how does this system grow?
 > Defense in depth, HA, DR, observability — fully exposed.
+
+> ⚡ **v3.0 Strategic Pivot Notice**: Port matrix may still show Expo (8081) / LINE Webhook (TLS) etc.
+> v3.0 removes mobile / LINE. Actual deployment only needs: 80/443 (Web) / 5432 (PostgreSQL) / 6379 (Redis) / 9000-9001 (MinIO).
 
 ---
 

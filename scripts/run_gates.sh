@@ -3,7 +3,7 @@
 # LLM-ERP · 自證閘 (Self-Verification Gates)
 # 在說「完成」之前必須跑這個腳本，並看到全綠。
 # ────────────────────────────────────────────────────────────
-# Gate 1 · 編譯閘  Backend ruff + mypy + pytest smoke / Mobile tsc
+# Gate 1 · 編譯閘  Backend ruff + mypy + pytest smoke / Desktop tsc
 # Gate 2 · 行為閘  Backend persona (王董一天)
 # Gate 3 · 文件閘  PDF builder 跑得起來、12 份產出
 # ────────────────────────────────────────────────────────────
@@ -75,14 +75,6 @@ fi
 run_check "backend app import sanity" \
   "cd backend && python -c 'from app.main import app; print(len(app.routes))'"
 
-# Mobile TypeScript
-if [ -d frontend-mobile/node_modules ]; then
-  run_check "mobile tsc --noEmit" \
-    "cd frontend-mobile && npx --no-install tsc --noEmit"
-else
-  skip_check "mobile tsc" "node_modules not installed"
-fi
-
 # Frontend desktop (若存在)
 if [ -d frontend-desktop ] && [ -d frontend-desktop/node_modules ]; then
   run_check "desktop tsc --noEmit" \
@@ -118,8 +110,8 @@ echo -e "${B}[Gate 3 · 文件閘 / Doc Gate]${N}"
 if [ -d scripts/build-pdfs/node_modules ]; then
   run_check "PDF builder dry-run (產 12 份)" \
     "cd scripts/build-pdfs && node build.mjs"
-  # Verify all 32 PDFs exist (28 + 4 conversational ERP v2.8 docs)
-  EXPECTED=32
+  # Verify all 31 PDFs exist (32 - Mobile App guide, removed v3.0)
+  EXPECTED=31
   ACTUAL=$(ls docs/pdf/*.pdf 2>/dev/null | wc -l)
   if [ "$ACTUAL" -ge "$EXPECTED" ]; then
     printf "  ${B}▶${N} %-50s ${G}✓${N} (%d/%d files)\n" "PDF count check" "$ACTUAL" "$EXPECTED"

@@ -1,7 +1,10 @@
-# LLM-ERP 導入實施手冊（顧問用 · 繁體中文）
+# LLM-ERP 導入實施手冊（顧問用 · 繁體中文）— v3.0
 
 > **2 週上線、Day-by-Day SOP**
 > 適用：導入顧問 / 整合商 / 內部 IT
+
+> ⚡ **v3.0 戰略軸轉通知**：Day 1-14 中所有「Mobile App / LINE Bot / 外協 QR」步驟在 v3.0 跳過。
+> v3.0 只需部署：backend + frontend-desktop + PostgreSQL + Redis + MinIO（無 Expo、無 LINE Channel 申請）。
 
 ---
 

@@ -1,4 +1,4 @@
-# System Topology & Flow Diagram (English)
+# System Topology & Flow Diagram (English) — v3.0
 
 > **Six perspectives from shallow to deep, static to dynamic** — making LLM-ERP understandable to both technical and non-technical readers.
 >
@@ -6,6 +6,9 @@
 > - **Static legacy**: [`architecture_diagram.svg`](./architecture_diagram.svg) (5-layer)
 >
 > **Chinese version**: [`SYSTEM_TOPOLOGY_ZH.md`](./SYSTEM_TOPOLOGY_ZH.md)
+
+> ⚡ **v3.0 Strategic Pivot Notice**: SVG may still show "👴 Outsource LINE / Plating Outsource / Inspection Outsource" nodes.
+> v3.0 deprecates outsource / LINE / Mobile (moved to Phase 7). SVG redraw pending Phase 1 completion.
 
 ---
 

@@ -53,7 +53,7 @@ def two_factories(tmp_path_factory):
     tmpdir = tmp_path_factory.mktemp("mesh")
 
     factories = []
-    for i, (fid, fname) in enumerate([("ftest-a", "測試主廠"), ("ftest-b", "測試外協")]):
+    for i, (fid, fname) in enumerate([("ftest-a", "測試主廠"), ("ftest-b", "測試分廠")]):
         port = _free_port()
         db_path = tmpdir / f"{fid}.db"
         env = {
@@ -109,7 +109,7 @@ def test_factory_insert_then_aggregate_locally(two_factories):
     # 主廠 M8 = 500
     httpx.post(f"{a['url']}/api/factory/inventory/upsert",
                json={"part_no": "M8-BOLT", "qty_on_hand": 500})
-    # 外協 M6 = 1500
+    # 分廠 M6 = 1500
     httpx.post(f"{b['url']}/api/factory/inventory/upsert",
                json={"part_no": "M6-BOLT", "qty_on_hand": 1500})
 
@@ -151,7 +151,7 @@ def test_hq_aggregate_across_factories(two_factories, client):
     assert r.status_code == 200, r.text
     data = r.json()
 
-    # 主廠 3000 + 外協 1500 = 4500
+    # 主廠 3000 + 分廠 1500 = 4500
     assert data["total"] == 4500, f"聚合錯誤：期望 4500，實得 {data['total']}, per_factory={data['per_factory']}"
     assert data["factories_queried"] == 2
     assert data["factories_responded"] == 2

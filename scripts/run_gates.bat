@@ -21,10 +21,10 @@ echo [Gate 1 - Compile]
 
 call :run "backend pytest tests/smoke/"  cd backend ^&^& python -m pytest tests/smoke/ -q --tb=line
 call :run "backend app import"           cd backend ^&^& python -c "from app.main import app; print(len(app.routes))"
-if exist frontend-mobile\node_modules (
-    call :run "mobile tsc --noEmit"      cd frontend-mobile ^&^& npx --no-install tsc --noEmit
+if exist frontend-desktop\node_modules (
+    call :run "desktop tsc --noEmit"     cd frontend-desktop ^&^& npx --no-install tsc --noEmit
 ) else (
-    call :skip "mobile tsc" "node_modules missing"
+    call :skip "desktop tsc" "node_modules missing"
 )
 
 echo.

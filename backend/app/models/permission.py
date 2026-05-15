@@ -25,15 +25,16 @@ from app.core.base import Base
 # ============================================================
 
 class Tenant(Base):
-    """租戶（HQ / 主廠 / 外協廠 / 客戶 portal）。
+    """租戶（HQ / 主廠 / 分廠 / 客戶 portal）。
 
-    這是多廠 MESH 戰略的基石。所有業務表都應有 tenant_id 欄位（Phase 1 同步遷移）。
+    這是多廠 MESH 戰略的基石。所有業務表都應有 tenant_id 欄位。
 
     tenant_type 取值:
       - hq:              總部
-      - factory:         自有工廠
-      - outsource:       外協廠（部分權限）
+      - factory:         自有工廠 / 分廠
       - customer_portal: 客戶端 portal（僅自己訂單）
+
+    v3.0 移除 outsource 類型（外協 persona 砍掉），如客戶要回外協協同見 ROADMAP Phase 7。
     """
     __tablename__ = "tenants"
 
@@ -81,9 +82,10 @@ class PermissionDef(Base):
 # ============================================================
 
 class RoleDef(Base):
-    """角色（boss / sales_rep / outsource_partner / ...）。
+    """角色（boss / sales_rep / plant_manager / purchaser / ...）。
 
     tenant_id 為 NULL 表示系統共用角色（如 super_admin）。
+    v3.0 移除 outsource_partner 角色。
     """
     __tablename__ = "rbac_roles"
 

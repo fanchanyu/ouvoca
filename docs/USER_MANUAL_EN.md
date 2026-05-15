@@ -1,8 +1,16 @@
-# LLM-ERP User Manual (English)
+# LLM-ERP User Manual (English) — v3.0
 
-> **Version**: v2.0.0
-> **Audience**: Owner, Sales, Plant Manager, Purchaser/Warehouse, Inspector, Accountant, Outsource Partners
+> **Version**: v3.0.0 (Conversational ERP)
+> **Audience**: Owner, Sales, Plant Manager, Purchaser/Warehouse, Inspector, Accountant
 > **Language**: System supports both 繁體中文 and English with on-the-fly switching
+
+> ⚡ **v3.0 Strategic Pivot Notice (2026-05-15)**
+> The following features have been removed in v3.0:
+> - **Mobile App chapter**: replaced by desktop Chat full CRUD
+> - **Outsource partner chapter (formerly §5.5)**: outsource persona deprecated
+> - **LINE Bot chapter**: replaced by desktop Toast + Email digest
+>
+> If other chapters still mention mobile/LINE/outsource, treat them as deprecated (moved to Phase 7 pending customer feedback).
 
 ---
 

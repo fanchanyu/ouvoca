@@ -128,11 +128,7 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("mps_mrp", "mrp", "read", "查看 MRP", False, "low"),
     ("mps_mrp", "mrp", "run", "執行 MRP 計算", False, "medium"),
 
-    # --- outsource (4) ---
-    ("outsource", "order", "read", "查看外協工單", False, "low"),
-    ("outsource", "order", "create", "建立外協工單", False, "medium"),
-    ("outsource", "order", "dispatch", "派發外協工單", False, "medium"),
-    ("outsource", "order", "complete", "回報外協完工", False, "medium"),
+    # --- outsource (v3.0 移除：外協 persona 砍掉) ---
 
     # --- organization (8) ---
     ("organization", "employee", "read", "查看員工", False, "low"),
@@ -193,7 +189,7 @@ ROLES: list[dict] = [
             ("production.*", "tenant"), ("inventory.*", "tenant"),
             ("accounting.*", "tenant"), ("mps_mrp.*", "tenant"),
             ("quality.*", "tenant"), ("warehouse.*", "tenant"),
-            ("crm.*", "tenant"), ("outsource.*", "tenant"),
+            ("crm.*", "tenant"),
             ("organization.employee.read", "tenant"),
             ("organization.employee.list", "tenant"),
             ("mesh.*", "all"), ("ai.agent.use", "tenant"),
@@ -207,11 +203,11 @@ ROLES: list[dict] = [
         "icon": "👨‍🏭",
         "color": "blue",
         "priority": 70,
-        "description": "生產 + 品質 + 倉儲 + 外協協同",
+        "description": "生產 + 品質 + 倉儲（v3.0 移除外協）",
         "permissions": [
             ("production.*", "tenant"), ("inventory.*", "tenant"),
             ("quality.*", "tenant"), ("warehouse.*", "tenant"),
-            ("outsource.*", "tenant"), ("mps_mrp.*", "tenant"),
+            ("mps_mrp.*", "tenant"),
             ("purchase.*.read", "tenant"), ("purchase.*.list", "tenant"),
             ("sales.order.read", "tenant"), ("sales.order.list", "tenant"),
             ("ai.agent.use", "tenant"),
@@ -340,19 +336,7 @@ ROLES: list[dict] = [
             ("ai.agent.use", "tenant"),
         ],
     },
-    {
-        "code": "outsource_partner",
-        "name_zh": "外協廠",
-        "icon": "🔗",
-        "color": "orange",
-        "priority": 20,
-        "description": "外協廠：只看派給自己的工單（老吳）",
-        "permissions": [
-            ("outsource.order.read", "assigned"),
-            ("outsource.order.complete", "assigned"),
-            ("ai.agent.use", "tenant"),  # LINE Bot 限定工具集
-        ],
-    },
+    # outsource_partner 角色於 v3.0 移除（外協 persona 老吳砍掉）
 ]
 
 

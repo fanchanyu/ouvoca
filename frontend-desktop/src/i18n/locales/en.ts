@@ -199,7 +199,7 @@ export const en = {
       inventory: '📦 Inventory', purchase: '🛒 Purchase', production: '🏭 Production',
       sales: '💰 Sales', quality: '🔬 Quality', accounting: '💳 Accounting',
       warehouse: '📍 Warehouse', crm: '👥 CRM', mps_mrp: '📊 MPS/MRP',
-      outsource: '🔗 Outsource', organization: '🏛️ Organization',
+      organization: '🏛️ Organization',
       system: '⚙️ System', ai: '🤖 AI', mesh: '🌐 MESH',
     },
   },

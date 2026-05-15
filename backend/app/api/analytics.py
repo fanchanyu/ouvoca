@@ -410,7 +410,7 @@ async def summary(
     db: AsyncSession = Depends(get_db),
     user: UserContext = Depends(require_permission("analytics.view")),
 ):
-    """老闆儀表板：一頁所有 KPI（給 LINE Bot / Mobile Dashboard 用）。"""
+    """老闆儀表板：一頁所有 KPI（給桌機 Chat / Email 摘要用）。"""
     # 平行（為了示意，這裡先序列拿）
     results: Dict[str, Any] = {}
     for name, fn in [

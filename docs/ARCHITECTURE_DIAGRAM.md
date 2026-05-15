@@ -1,8 +1,11 @@
-# LLM-ERP 系統架構拓樸圖
+# LLM-ERP 系統架構拓樸圖 — v3.0
 
 > 兩個版本：
 > - **`architecture_diagram.svg`**：精美視覺版（可貼簡報、印 A3）
 > - **下方 Mermaid**：技術文件版（GitHub / Notion / Markdown 渲染）
+
+> ⚡ **v3.0 戰略軸轉通知**：SVG 與 Mermaid 內仍可能顯示「📱 LINE Bot」「鍍鋅外協」等舊節點。
+> v3.0 已刪 mobile / LINE / 外協（功能下架到 Phase 7）。圖示更新待下次重畫，文字描述以本 v3.0 banner 為準。
 
 ---
 

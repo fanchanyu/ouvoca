@@ -1,7 +1,11 @@
-# Admin Guide 管理員指南
+# Admin Guide 管理員指南 — v3.0
 
 > **本文件給：** IT 管理員 / 系統管理者 / 部署人員
 > **For:** IT admins, system administrators, deployers
+
+> ⚡ **v3.0 戰略軸轉通知 / Strategic Pivot Notice**
+> §4.2「外協廠加入 / Outsource partner onboarding」於 v3.0 下架（外協 persona 砍掉）。
+> 客戶反饋觸發後復活，詳見 ROADMAP Phase 7。
 
 ---
 

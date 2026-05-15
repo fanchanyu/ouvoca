@@ -25,7 +25,7 @@ const SCOPE_OPTIONS = ['all', 'tenant', 'department', 'team', 'own', 'assigned']
 const MODULE_LABELS: Record<string, string> = {
   inventory: '📦 庫存', purchase: '🛒 採購', production: '🏭 生產', sales: '💰 銷售',
   quality: '🔬 品質', accounting: '💳 會計', warehouse: '📍 倉儲', crm: '👥 CRM',
-  mps_mrp: '📊 MPS/MRP', outsource: '🔗 外協', organization: '🏛️ 組織',
+  mps_mrp: '📊 MPS/MRP', organization: '🏛️ 組織',
   system: '⚙️ 系統', ai: '🤖 AI', mesh: '🌐 多廠',
 }
 

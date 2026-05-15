@@ -1,10 +1,14 @@
-# Network Deployment Guide (English)
+# Network Deployment Guide (English) — v3.0
 
 > **This document serves two audiences**:
 > - 🧑‍💼 **Owner / General users**: see diagrams, analogies, and "where is my data?"
 > - 🧑‍💻 **Technical engineers / IT**: see configs, ports, nginx / VPN examples
 >
-> **Core promise**: This is a **LINE-Native ERP for small manufacturers**. Main factory data stays on-premise, outsource partners use LINE without registration, salespeople check from mobile anywhere, owner asks via LINE. All network design serves this core.
+> **v3.0 core promise**: This is a **desktop conversational ERP for small manufacturers**. Employees open Chrome in the office, do all CRUD with one-sentence Chat. Main factory data stays on-premise, MESH multi-factory data does not leak.
+
+> ⚡ **v3.0 Strategic Pivot Notice (2026-05-15)**
+> The "LINE Bot Webhook: Reaching You via LINE" chapter is **deprecated** in v3.0.
+> "Outsource partners use LINE without registration" / "salespeople check from mobile" are v2 legacy.
 
 ---
 

@@ -1,4 +1,4 @@
-# 系統架構流程關聯拓樸圖（繁體中文）
+# 系統架構流程關聯拓樸圖（繁體中文）— v3.0
 
 > **本檔提供六種視角**，由淺入深、由靜態到動態，讓技術與非技術讀者都能掌握 LLM-ERP 全貌。
 >
@@ -6,6 +6,9 @@
 > - **舊版靜態圖**：[`architecture_diagram.svg`](./architecture_diagram.svg)（5 層分層）
 >
 > **對應英文版**：[`SYSTEM_TOPOLOGY_EN.md`](./SYSTEM_TOPOLOGY_EN.md)
+
+> ⚡ **v3.0 戰略軸轉通知**：SVG 中仍可能顯示「👴 外協廠 LINE / 鍍鋅外協 / 檢驗外協」等節點。
+> v3.0 已砍外協 / LINE / Mobile（功能下架到 Phase 7）。SVG 重繪待 Phase 1 完成後處理。
 
 ---
 

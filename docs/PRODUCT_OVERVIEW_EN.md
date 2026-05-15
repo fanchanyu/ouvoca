@@ -1,7 +1,14 @@
-# LLM-ERP Product Overview (English)
+# LLM-ERP Product Overview (English) — v3.0 Conversational ERP
 
 > **One-page snapshot → Full buying guide for decision makers**
 > Audience: Owners / Procurement managers / IT directors / System integrators / Consultants
+
+> ⚡ **v3.0 Strategic Pivot Notice (2026-05-15)**
+> Pitch updated: **"Conversational ERP for 50-100 person factories — open Chrome, type one sentence to Chat, do CRUD on all documents at 1/10 the cost of SAP."**
+>
+> Deprecated sections (moved to Phase 7 pending customer feedback):
+> - "Outsource LINE Coordination" chapter
+> - Mobile App / LINE Bot marketing content
 
 ---
 
