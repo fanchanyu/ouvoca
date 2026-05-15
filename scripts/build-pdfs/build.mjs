@@ -84,6 +84,10 @@ const DOCS_TO_BUILD = [
   { src: 'CONVERSATIONAL_ERP_DESIGN_EN.md',     out: '15_Conversational_ERP_Architecture_EN.pdf', title: 'Conversational ERP Architecture' },
   { src: 'CONVERSATIONAL_ERP_PHASE1_SPEC_ZH.md',out: '16_Phase1_實作Spec_中文.pdf',          title: 'Phase 1 實作 Spec' },
   { src: 'CONVERSATIONAL_ERP_PHASE1_SPEC_EN.md',out: '16_Phase1_Implementation_Spec_EN.pdf', title: 'Phase 1 Implementation Spec' },
+
+  // === 17 v3.1 外部 DB 串接設計 ===
+  { src: 'EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md', out: '17_外部DB串接設計_中文.pdf',           title: '外部 DB 串接設計' },
+  { src: 'EXTERNAL_DB_INTEGRATION_DESIGN_EN.md', out: '17_External_DB_Integration_Design_EN.pdf', title: 'External DB Integration Design' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────

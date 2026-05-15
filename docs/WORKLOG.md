@@ -38,6 +38,92 @@
 
 ---
 
+## 2026-05-15｜會話 #19｜🔌 外部 DB 串接戰略 + PoC（v3.1 補強）
+
+**目標**：使用者點明「串聯其它資料庫這事很重要」——50-100 人廠 90% 都已用過鼎新 / 正航 / 叡揚 / Excel，**「能不能讀我的舊資料」是 ERP 採購 #1 殺手**。沒這能力 demo 過不去；有了 → 「鼎新不用砍，AI 慢慢幫你搬」。
+
+### 🪞 PM 戰略分析
+
+舊資料整合不是分散精力——這正是「自然語言取代教育訓練」的延伸：
+- 王董打字：「鼎新 5 月份訂單金額多少？」→ AI 跨 DB 查
+- 阿玲打字：「把鼎新的客戶搬過來」→ AI 出 Schema Mapping ConfirmCard
+- 小陳打字：「客戶 A 的 PO 批檔每 5 分鐘同步進來」→ AI 設定 watch folder
+
+Tool registry / RiskTier / ConfirmCard 全部複用 Phase 1 投資，**1+1 > 2**。
+
+### ✅ 2 小時交付物
+
+#### 文件層（30 分）
+
+- `docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md`（~500 行）：
+  - 戰略定位（為什麼比 mobile 還重要）
+  - 客戶常見舊系統清單（鼎新 / 正航 / 叡揚 / SAP B1 / Odoo / Excel / CSV）
+  - 4 種連接模式（Federated / Migration / Two-way / CDC）
+  - Connector 介面契約 + 4 層安全防線
+  - AI Tool 規格（3 個 read + 4 個 Phase 1.5）
+  - 3 個 killer 對話場景
+  - Schema Mapping AI 設計
+  - Phase 規劃 + 風險
+  - 商業故事 + 客戶 FAQ
+- `docs/EXTERNAL_DB_INTEGRATION_DESIGN_EN.md`（condensed ~200 行）
+
+#### 程式碼層（60 分）
+
+`backend/app/integrations/connectors/`：
+- `base.py` — `Connector` ABC + `ConnectorMeta` dataclass
+- `registry.py` — `@register_connector` decorator + `get_connector()` / `list_connectors()`
+- `exceptions.py` — `ConnectorError` / `ConnectionTestFailed` / `TableNotFound` / `SchemaIncompatible`
+- `sqlite_connector.py` — SQLite PoC（含 SQL injection 防線：whitelist + identifier validation）
+- `csv_connector.py` — CSV 資料夾（每檔當 table）
+- `__init__.py` — 自動觸發內建 connector 註冊
+
+`backend/app/agents/domains/external_db_tools.py`：
+- `list_external_connections` (READ)
+- `list_external_tables` (READ)
+- `query_external_db` (READ)
+- 新 agent `ExternalDbAgent` 註冊
+
+#### 測試層（30 分）
+
+`backend/tests/smoke/test_connectors.py`：21 個 test
+- registry 註冊驗證（3）
+- SqliteConnector：test_connection / list_tables / query / filter / 安全防線（7）
+- CsvFolderConnector：同上（5）
+- E2E AI tool 整合（6）
+
+**全部 21/21 PASS / 1.36 秒**。
+
+#### 主控檔 sync
+
+- CLAUDE.md：版本 3.0 → **3.1**，MVP 6 大功能 → **7 大功能**（加「外部 DB 串接」），§4.2 加 connector 進度看板
+- ROADMAP.md：新增「Phase 1.5：外部 DB 串接」（並行 Phase 1）— 4/10 完成
+- GAP_ANALYSIS.md：新增 G-501 ~ G-510（10 個外部 DB gap）
+- build.mjs：32 → 33 PDF
+- run_gates.sh：EXPECTED=31 → 33
+- PR_TEMPLATE：31 → 33 PDF
+
+### 📊 數字變化
+
+| 維度 | #18 結束 | #19 結束 |
+|---|---|---|
+| pytest tests | 148 | **169** (+21) |
+| MVP 功能 | 6 大 | **7 大** |
+| PDF | 31 | **33** (+2) |
+| Connector framework | 0% | **80%**（PoC 完成） |
+| GAP 條目 | 27 項 | **37 項** |
+| docs | 33 份 | **35 份** |
+
+### 🪞 教訓 #4
+
+**客戶最大的恐懼不是「新系統好不好用」，是「我舊資料怎麼辦」**。
+這個發現翻轉了我對「對話式 ERP MVP」的定義——光做漂亮的 Chat 沒用，必須有「不用砍舊系統」的承諾。
+
+「外部 DB 串接」+ 「對話式 ERP」 = 真正的 killer combo。
+
+**Blocker**：無。下次 Phase 1.5 收尾從 G-505 SqlServerConnector（鼎新 / 正航實戰）開工。
+
+---
+
 ## 2026-05-15｜會話 #18｜🪓 戰略軸轉 v3.0：砍 mobile / LINE / 外協，全力對話式 ERP
 
 **目標**：使用者明確指令「不要手機連線的功能，把這個功能拿掉，其它的缺失補上，你看一下完善要多久，修正到好要多久」——把專案從「LINE-Native + 對話式 ERP」雙軌 DNA 收斂到「桌機對話式 ERP」單軌。

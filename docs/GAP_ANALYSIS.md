@@ -218,7 +218,63 @@
 
 ---
 
-## 5. Phase 4 — MESH 多廠收尾
+## 5. Phase 1.5 — 外部 DB 串接（v3.1 補強）
+
+### G-501 Connector framework
+- **嚴重度**：P0 Critical
+- **狀態**：✅ 已完成（會話 #19）
+- **檔案**：`backend/app/integrations/connectors/{base,registry,exceptions}.py`
+- **工時**：0.5 天
+
+### G-502 SqliteConnector + CsvFolderConnector PoC
+- **嚴重度**：P0 Critical
+- **狀態**：✅ 已完成
+- **檔案**：`backend/app/integrations/connectors/{sqlite,csv}_connector.py`
+- **工時**：0.5 天
+
+### G-503 3 個 read tool（list_conn / list_tables / query）
+- **嚴重度**：P0 Critical
+- **狀態**：✅ 已完成
+- **檔案**：`backend/app/agents/domains/external_db_tools.py`
+- **工時**：0.5 天
+
+### G-504 Smoke tests
+- **嚴重度**：P0 Critical
+- **狀態**：✅ 已完成（21 tests, 1.36s）
+- **檔案**：`backend/tests/smoke/test_connectors.py`
+- **工時**：0.5 天
+
+### G-505 SqlServerConnector（pyodbc）
+- **嚴重度**：P0 Critical
+- **解決誰**：阿玲、王董（接鼎新 / 正航）
+- **工時**：1 天
+
+### G-506 Postgres + MySQL connectors
+- **嚴重度**：P1 High
+- **工時**：1 天
+
+### G-507 RestApiConnector + 叡揚 / SAP B1 profile
+- **嚴重度**：P1 High
+- **工時**：2 天
+
+### G-508 Schema mapping AI（preview_schema_mapping tool）
+- **嚴重度**：P0 Critical
+- **應有**：AI 看外部 table schema → 自動推薦 LLM-ERP domain 對映
+- **工時**：2 天
+
+### G-509 migrate_from_external_with_confirm
+- **嚴重度**：P0 Critical
+- **應有**：hard-write tool，出 ConfirmCard 給人類確認筆數 + 衝突策略
+- **工時**：1.5 天
+
+### G-510 external_connection DB 表 + 加密儲存
+- **嚴重度**：P1 High
+- **應有**：把 in-memory dict 換成 DB 表，password / connection string AES 加密
+- **工時**：1 天
+
+---
+
+## 6. Phase 4 — MESH 多廠收尾
 
 ### G-401 Factory Node 本地 LLM
 - **嚴重度**：P2 Medium

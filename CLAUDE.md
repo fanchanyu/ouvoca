@@ -50,7 +50,8 @@
 | **備份還原 SOP** | [中文 BACKUP_RESTORE_SOP_ZH](./docs/BACKUP_RESTORE_SOP_ZH.md) / [English EN](./docs/BACKUP_RESTORE_SOP_EN.md) |
 | **安裝指南（給老闆）** | [中文 INSTALLATION_ZH.md](./docs/INSTALLATION_ZH.md) / [English EN](./docs/INSTALLATION_EN.md) |
 | **一鍵安裝腳本** | `install.sh`（Mac/Linux）/ `install.bat`（Windows）/ `load_industry.sh` |
-| **客戶手冊 PDF（31 份雙語）** | 跑 `build_pdfs.bat`（Win）或 `./build_pdfs.sh`（Mac/Linux）→ 輸出至 `docs/pdf/` |
+| **🆕 外部 DB 串接設計** | [中文 EXTERNAL_DB_INTEGRATION_DESIGN_ZH](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md) / [English EN](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_EN.md)（**v3.1 補強：鼎新 / 正航 / Excel 接得到**） |
+| **客戶手冊 PDF（33 份雙語）** | 跑 `build_pdfs.bat`（Win）或 `./build_pdfs.sh`（Mac/Linux）→ 輸出至 `docs/pdf/` |
 | **PR 模板** | [`.github/PULL_REQUEST_TEMPLATE.md`](./.github/PULL_REQUEST_TEMPLATE.md)（**強制貼 run_gates 輸出**） |
 | **🛡️ 自證閘（必跑）** | `bash scripts/run_gates.sh` — 7 道閘 ~290 秒，**綠燈才能說完成**。CI: [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) |
 | **測試套件** | `backend/tests/` — **148 tests**（smoke + persona + integration 含 O2C/P2P/P2I + MESH + Tenant Isolation 4-layer + Tool Registry） |
@@ -169,7 +170,7 @@
 
 > **每次完成工作後請更新此看板**——這是專案的儀表板。
 
-### 4.1 MVP 6 大核心功能進度（v3.0 收斂）
+### 4.1 MVP 7 大核心功能進度（v3.0 收斂 + v3.1 外部 DB 串接）
 
 ```
 1. AI 自然語言查詢          🟢 [████████  ]  80%   ✅ 12/12 query 實機 PASS
@@ -178,6 +179,7 @@
 4. AI 主動推播（Toast/Email）🟡 [█████     ]  50%   EventBus 有，缺 Toast/Email 整合
 5. 基礎訂單到出貨閉環       🟢 [█████████ ]  95%   ✅ O2C/P2P/P2I 全測過
 6. USB 條碼槍盤點/報工      ❌ [          ]   0%   Phase 2
+7. 🆕 外部 DB 串接（PoC）   🟢 [██████    ]  60%   ✅ v3.1 sqlite+csv connector + 3 read tool（21 tests）
 ```
 
 **MVP 整體進度**：**~62%**（Phase 1-3 完成後達 100%）
@@ -187,6 +189,8 @@
 ```
 Tool registry framework  🟢 [████████  ]  80%  ✅ @register_tool + RiskTier + Slot
 Tool 入 registry         🟡 [████      ]  42%  ✅ 11/26（inventory ×3 + sales ×1 + purchase ×3 + production ×4）
+外部 DB Connector 框架   🟢 [████████  ]  80%  ✅ v3.1 Connector ABC + registry + 2 PoC + 21 tests
+外部 DB AI tool          🟢 [████████  ]  80%  ✅ list_connections / list_tables / query_external_db
 ConfirmCard schema       ❌ [          ]   0%  Phase 1 Day 2
 ConfirmCard 前端         ❌ [          ]   0%  Phase 1 Day 2
 Slot-filling 反問        ❌ [          ]   0%  Phase 1 Day 4
@@ -396,6 +400,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #18：v3.0 戰略軸轉——砍 mobile + 重定對話式 ERP DNA）
+**最後更新**：2026-05-15（會話 #19：v3.1 補強——外部 DB 串接 PoC + 戰略文件 + 21 tests）
 **維護者**：使用者 + Claude
-**版本**：3.0
+**版本**：3.1

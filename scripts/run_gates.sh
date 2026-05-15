@@ -110,8 +110,8 @@ echo -e "${B}[Gate 3 · 文件閘 / Doc Gate]${N}"
 if [ -d scripts/build-pdfs/node_modules ]; then
   run_check "PDF builder dry-run (產 12 份)" \
     "cd scripts/build-pdfs && node build.mjs"
-  # Verify all 31 PDFs exist (32 - Mobile App guide, removed v3.0)
-  EXPECTED=31
+  # Verify all 33 PDFs exist (31 + 2 v3.1 EXTERNAL_DB_INTEGRATION_DESIGN ZH+EN)
+  EXPECTED=33
   ACTUAL=$(ls docs/pdf/*.pdf 2>/dev/null | wc -l)
   if [ "$ACTUAL" -ge "$EXPECTED" ]; then
     printf "  ${B}▶${N} %-50s ${G}✓${N} (%d/%d files)\n" "PDF count check" "$ACTUAL" "$EXPECTED"

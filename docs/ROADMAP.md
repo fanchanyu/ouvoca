@@ -60,6 +60,36 @@
 
 ---
 
+## Phase 1.5 🔌 **外部 DB 串接**（v3.1 並行加入）
+
+**時間**：2 週並行 Phase 1（10.5 工作日）
+**目標**：客戶舊系統（鼎新 / 正航 / 叡揚 / Excel）讀得到，AI 對話即可跨 DB 查 + 一次性遷移。
+
+詳見 [EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md](./EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md)。
+
+### Phase 1.5 為什麼最重要
+
+**遷移恐懼是 ERP 採購第一殺手**。沒這能力 demo 過不去；有了 → 「鼎新不用砍，AI 慢慢幫你搬」。
+
+### Phase 1.5 交付清單
+
+| # | 任務 | 工時 | 狀態 |
+|---|---|---|---|
+| 1.5.1 | Connector framework（base + registry + exceptions） | 0.5d | ✅ 完成（會話 #19） |
+| 1.5.2 | SqliteConnector + CsvFolderConnector（PoC） | 0.5d | ✅ 完成 |
+| 1.5.3 | external_db_tools.py（list_conn / list_tables / query） | 0.5d | ✅ 完成 |
+| 1.5.4 | test_connectors.py（21 tests, 1.36s） | 0.5d | ✅ 完成 |
+| 1.5.5 | SqlServerConnector（pyodbc + 鼎新/正航 profile） | 1d | ❌ |
+| 1.5.6 | Postgres + MySQL connectors | 1d | ❌ |
+| 1.5.7 | RestApiConnector + 叡揚 / SAP B1 profile | 2d | ❌ |
+| 1.5.8 | Schema mapping AI（preview_schema_mapping tool） | 2d | ❌ |
+| 1.5.9 | migrate_from_external_with_confirm（hard-write） | 1.5d | ❌ |
+| 1.5.10 | external_connection DB 表 + 加密儲存 | 1d | ❌ |
+
+**目前**：4/10 完成（PoC 階段 ~40%）。
+
+---
+
 ## Phase 1 🔥 **對話式 CRUD**（最高優先）— v3.0
 
 **時間**：2 週（10 工作日）

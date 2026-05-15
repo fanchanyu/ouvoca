@@ -43,7 +43,7 @@
 
 - [ ] Gate 1 編譯閘：pytest smoke + import + desktop tsc 全綠
 - [ ] Gate 2 行為閘：persona「王董一天」+ MESH 整合測試全綠
-- [ ] Gate 3 文件閘：PDF builder 跑通、31 份 PDF 全產出
+- [ ] Gate 3 文件閘：PDF builder 跑通、33 份 PDF 全產出
 
 ## 🧪 New Tests / 新增測試
 
