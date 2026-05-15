@@ -1,9 +1,22 @@
-"""AccountingAgent — journals, AR, month-end."""
+"""AccountingAgent — journals, AR, month-end (refactored to @register_tool v3.2.1)."""
 from sqlalchemy import select
-from app.agents.engine import register_tool, register_agent
+from app.agents.engine import register_agent
+from app.agents.registry import register_tool, RiskTier, Slot
 from app.models.accounting import JournalEntry, AccountsReceivable, MonthEndClose
 
 
+@register_tool(
+    name="list_journals",
+    domain="accounting",
+    risk_tier=RiskTier.READ,
+    description="列出傳票。可依期間 (YYYY-MM) 或狀態過濾。",
+    slots=[
+        Slot("period", "string", required=False, description="會計期間 YYYY-MM"),
+        Slot("status", "string", required=False, description="draft/posted/reversed"),
+        Slot("limit", "integer", required=False, description="回傳上限，預設 20"),
+    ],
+    required_permission="accounting.journal.list",
+)
 async def _list_journals(db, user, period: str = None, status: str = None, limit: int = 20):
     q = select(JournalEntry).order_by(JournalEntry.entry_date.desc()).limit(limit)
     if period:
@@ -18,6 +31,17 @@ async def _list_journals(db, user, period: str = None, status: str = None, limit
     ]}
 
 
+@register_tool(
+    name="list_receivables",
+    domain="accounting",
+    risk_tier=RiskTier.READ,
+    description="列出應收帳款（AR）。可只看逾期。",
+    slots=[
+        Slot("overdue_only", "boolean", required=False, description="只看逾期未付"),
+        Slot("limit", "integer", required=False, description="回傳上限，預設 20"),
+    ],
+    required_permission="accounting.ar.list",
+)
 async def _list_ar(db, user, overdue_only: bool = False, limit: int = 20):
     from datetime import datetime, UTC
     q = select(AccountsReceivable).order_by(AccountsReceivable.due_date)
@@ -34,6 +58,16 @@ async def _list_ar(db, user, overdue_only: bool = False, limit: int = 20):
     ]}
 
 
+@register_tool(
+    name="check_month_close",
+    domain="accounting",
+    risk_tier=RiskTier.READ,
+    description="檢查某月份結帳狀態。",
+    slots=[
+        Slot("period", "string", required=True, description="會計期間 YYYY-MM"),
+    ],
+    required_permission="accounting.month_close.read",
+)
 async def _check_month_close(db, user, period: str):
     rec = (await db.execute(
         select(MonthEndClose).where(MonthEndClose.period == period)
@@ -41,19 +75,6 @@ async def _check_month_close(db, user, period: str):
     return {"period": period, "status": rec.status if rec else "open",
             "closed_at": str(rec.closed_at) if (rec and rec.closed_at) else None}
 
-
-register_tool("list_journals", "列出傳票。",
-              {"type": "object", "properties": {"period": {"type": "string", "description": "YYYY-MM"},
-                                                "status": {"type": "string"},
-                                                "limit": {"type": "integer"}}},
-              _list_journals)
-register_tool("list_receivables", "列出應收帳款。",
-              {"type": "object", "properties": {"overdue_only": {"type": "boolean"},
-                                                "limit": {"type": "integer"}}},
-              _list_ar)
-register_tool("check_month_close", "檢查某月份結帳狀態。",
-              {"type": "object", "properties": {"period": {"type": "string"}}, "required": ["period"]},
-              _check_month_close)
 
 register_agent(
     "accounting", "AccountingAgent",

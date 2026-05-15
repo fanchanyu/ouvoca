@@ -175,7 +175,7 @@
 
 ```
 1. AI 自然語言查詢          🟢 [████████  ]  80%   ✅ 12/12 query 實機 PASS
-2. AI 自然語言寫入（CRUD）  🟢 [███████   ]  70%   ✅ ConfirmCard 全套 + 3 hard-write tool（16 tests）
+2. AI 自然語言寫入（CRUD）  🟢 [████████  ]  85%   ✅ ConfirmCard + 3 hard-write tools 接上 agents + part lookup（17 tests）
 3. 即時庫存同步             🟢 [██████████] 100%   ✅ Phase 0 已備
 4. AI 主動推播（Toast/Email）🟡 [█████     ]  50%   EventBus 有，缺 Toast/Email 整合
 5. 基礎訂單到出貨閉環       🟢 [█████████ ]  95%   ✅ O2C/P2P/P2I 全測過
@@ -188,8 +188,8 @@
 ### 4.2 桌機對話 ERP 進度（v3.0 新看板，取代舊「行動化 & LINE」）
 
 ```
-Tool registry framework  🟢 [████████  ]  80%  ✅ @register_tool + RiskTier + Slot
-Tool 入 registry         🟡 [████      ]  42%  ✅ 11/26（inventory ×3 + sales ×1 + purchase ×3 + production ×4）
+Tool registry framework  🟢 [██████████] 100%  ✅ @register_tool + RiskTier + Slot
+Tool 入 registry         🟢 [██████████] 100%  ✅ 32/32（含 3 hard-write + 3 external_db）
 外部 DB Connector 框架   🟢 [████████  ]  80%  ✅ v3.1 Connector ABC + registry + 2 PoC + 21 tests
 外部 DB AI tool          🟢 [████████  ]  80%  ✅ list_connections / list_tables / query_external_db
 ConfirmCard schema       🟢 [██████████] 100%  ✅ confirm_card.py + API endpoints
@@ -401,6 +401,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #20：對話式寫入解鎖——ConfirmCard 全套 + 3 hard-write tools + 前端組件 + 16 tests）
+**最後更新**：2026-05-15（會話 #21：demo bulletproof——Phase 1 Day 1 收尾 + part lookup + agent wiring + E2E 腳本 6/6 場景全綠）
 **維護者**：使用者 + Claude
-**版本**：3.2
+**版本**：3.2.1

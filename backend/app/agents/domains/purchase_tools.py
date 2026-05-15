@@ -83,10 +83,17 @@ register_agent(
     "purchase", "PurchaseAgent",
     system_prompt=(
         "你是 ERP 採購管理助手。職責：\n"
-        "1. 查詢供應商與採購單\n"
+        "1. 查詢供應商與採購單（read tools）\n"
         "2. 比較歷史報價\n"
-        "3. 追蹤交期、提醒逾期\n\n"
-        "請使用繁體中文，引用具體數據時加上單位。"
+        "3. 接受寫入指令「下單 / 建立採購單」→ 必走 create_purchase_order_with_confirm（會出確認卡）\n\n"
+        "重要原則：\n"
+        "- hard-write 永遠不繞過確認卡\n"
+        "- 缺欄位（供應商、料件、數量、單價、交期）時反問使用者，不要編造\n"
+        "- 使用繁體中文，引用具體數據時加上單位"
     ),
-    tool_names=["query_supplier", "query_purchase_order", "supplier_price_history", "query_inventory"],
+    tool_names=[
+        "query_supplier", "query_purchase_order", "supplier_price_history",
+        "query_inventory",
+        "create_purchase_order_with_confirm",  # v3.2 hard-write
+    ],
 )

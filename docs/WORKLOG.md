@@ -38,6 +38,90 @@
 
 ---
 
+## 2026-05-15｜會話 #21｜🛡️ Demo bulletproof：Phase 1 Day 1 收尾 + E2E 腳本
+
+**目標**：使用者 #20 後一句「還沒有完丫」——CEO 視角檢視發現 demo flow 有 3 個 critical gaps，這次一次補完。
+
+### 🪞 PM Trace — 3 個 critical bugs
+
+| Gap | 影響 |
+|---|---|
+| #1 hard-write tools 沒接到 domain agents | 意圖「下單」→ PurchaseAgent，但 PurchaseAgent 沒有 create_po_with_confirm → **LLM 根本看不到** |
+| #2 create_po tool 要 part_id UUID | LLM 說「M6 螺絲」拿不到 UUID → **流程卡在 lookup** |
+| #3 Phase 1 Day 1 還剩 15 個 read tools 沒進新 registry | LLM 看不到部分工具，會跳錯 path |
+
+### ✅ 90 分鐘交付
+
+#### Hour 1 — 修 3 個 bugs
+
+**修 Gap #2：part keyword auto-lookup**
+- `_resolve_part(db, raw)` helper：part_id / part_no / part_keyword 3 種輸入支援
+- 多個 match 時回 candidates 列表 → LLM 自動反問使用者消歧
+- unit_price 省略時 fallback 到 Part.unit_cost
+- 修 PurchaseOrderItem 不認 `part_no` keyword 的 bug
+
+**修 Gap #1：hard-write 接入 domain agents**
+- 移除獨立 HardWriteAgent（intent classifier 不會走到）
+- `create_purchase_order_with_confirm` → PurchaseAgent.tool_names
+- `release_work_order_with_confirm` → ProductionAgent.tool_names
+- `update_sales_order_delivery_with_confirm` → SalesAgent.tool_names
+- 3 個 agent 的 system_prompt 都更新提醒「hard-write 必走 ConfirmCard」
+
+**修 Gap #3：Phase 1 Day 1 收尾**
+- `accounting_tools.py`：3 個 read tools 改 @register_tool（list_journals / list_receivables / check_month_close）
+- `quality_tools.py`：3 個 tools（list_inspections / list_non_conformances / list_capa）
+- `warehouse_tools.py`：3 個 tools（list_warehouse_zones / list_pick_tasks / list_cycle_counts）
+- `crm_tools.py`：3 個 tools（list_leads / list_opportunities / customer_events）
+- `mps_mrp_tools.py`：2 個 tools（list_mps / list_mrp）
+- `sales_tools.py`：list_customers 也改 @register_tool（舊 register_tool 那段刪）
+- `general_tools.py`：tool_names 從 15 個 → 28 個（涵蓋全 domain）
+- **總計 32/32 tools 全在新 registry，每個都有 risk_tier + required_permission + Slot 描述**
+
+#### Hour 2 — E2E demo
+
+**`scripts/demo_crud_pipeline.py`**（300+ 行）
+- 不需 LLM API key，直接模擬 LLM 解析後的 tool call
+- 6 個場景全跑通：
+  1. 阿玲查供應商（read）
+  2. 阿玲查 M6 庫存（read）
+  3. 阿玲下單「跟長江下 100 個 M6 螺絲」→ ConfirmCard
+  4. 阿玲點確認 → PO 真的建好
+  5. query_purchase_order 驗證新 PO 在 DB
+  6. 王董跨 DB 查鼎新客戶（federated query）
+
+**輸出**：`docs/demos/crud_pipeline_demo.md`（262 行，乾淨無 SQL 噪音）
+- 可直接給銷售看的 demo 證據
+- 證明「對話 → ConfirmCard → 寫入」整個 pipeline 通了
+
+### 📊 數字變化
+
+| 維度 | #20 結束 | #21 結束 |
+|---|---|---|
+| Tool registry 進度 | 11/26 = 42% | **32/32 = 100%** |
+| MVP 功能 #2（AI 寫入） | 70% | **85%** |
+| Hard-write tool LLM 可見 | ❌（孤立 HardWriteAgent） | ✅（接到 3 個 domain agent） |
+| part_keyword 支援 | ❌（要 UUID） | ✅（part_no / 模糊比對 / 多選反問） |
+| E2E demo 證據 | 0 | **6/6 場景錄製成 markdown** |
+| pytest tests | 146 | **147**（+1 agent wiring test） |
+
+### 🪞 教訓 #6（CEO 視角）
+
+**Demo 過不去比 feature 沒做完更可怕**。
+
+我做完 ConfirmCard 後以為 demo OK 了，沒實際跑一遍。直到使用者說「還沒有完丫」我才警覺：
+- LLM 在 PurchaseAgent 裡看不到 create_po tool（沒接上）
+- LLM 在 ProductionAgent 裡看不到 release_wo tool
+- 「M6 螺絲」轉不成 part_id
+
+這些都是 1-line bug 但會讓 demo 全敗。**E2E script 是強迫自己走完整 path 的鏡子**——以後做任何 hard-write 都要寫 demo script 證明 LLM 真能用。
+
+**Blocker**：無。下次可以：
+- 跑真實 DeepSeek E2E（驗 LLM 解析能力）
+- Slot-filling 反問機制
+- SqlServerConnector（鼎新實戰）
+
+---
+
 ## 2026-05-15｜會話 #20｜🎯 對話式寫入解鎖：ConfirmCard 全套（v3.2）
 
 **目標**：使用者鞭策「LLM 能做的事就讓 LLM 做、商業競爭很現實、不完美就被超越」。

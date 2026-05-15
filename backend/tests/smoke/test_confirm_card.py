@@ -397,8 +397,15 @@ def test_all_3_hard_write_tools_registered():
     assert expected.issubset(TOOL_FUNCTIONS.keys())
 
 
-def test_hard_write_agent_registered():
+def test_hard_write_tools_wired_into_domain_agents():
+    """v3.2.1: hard-write tools 接到對應 domain agent（不再有獨立 HardWriteAgent）。
+
+    這樣 intent classifier 走「下單」→ purchase → 看得到 create_po_with_confirm。
+    """
     from app.agents import AGENT_REGISTRY
-    assert "hard_write" in AGENT_REGISTRY
-    agent = AGENT_REGISTRY["hard_write"]
-    assert len(agent["tool_names"]) == 3
+    # PurchaseAgent 有 create_purchase_order_with_confirm
+    assert "create_purchase_order_with_confirm" in AGENT_REGISTRY["purchase"]["tool_names"]
+    # ProductionAgent 有 release_work_order_with_confirm
+    assert "release_work_order_with_confirm" in AGENT_REGISTRY["production"]["tool_names"]
+    # SalesAgent 有 update_sales_order_delivery_with_confirm
+    assert "update_sales_order_delivery_with_confirm" in AGENT_REGISTRY["sales"]["tool_names"]

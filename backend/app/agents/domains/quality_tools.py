@@ -1,9 +1,21 @@
-"""QualityAgent — inspections, non-conformances, CAPA."""
+"""QualityAgent — inspections, non-conformances, CAPA (refactored v3.2.1)."""
 from sqlalchemy import select
-from app.agents.engine import register_tool, register_agent
+from app.agents.engine import register_agent
+from app.agents.registry import register_tool, RiskTier, Slot
 from app.models.quality import InspectionOrder, NonConformance, CAPARecord
 
 
+@register_tool(
+    name="list_inspections",
+    domain="quality",
+    risk_tier=RiskTier.READ,
+    description="列出檢驗單。可按狀態過濾。",
+    slots=[
+        Slot("status", "string", required=False, description="pending/in_progress/passed/failed"),
+        Slot("limit", "integer", required=False, description="預設 20"),
+    ],
+    required_permission="quality.inspection.list",
+)
 async def _list_inspections(db, user, status: str = None, limit: int = 20):
     q = select(InspectionOrder).order_by(InspectionOrder.created_at.desc()).limit(limit)
     if status:
@@ -17,6 +29,17 @@ async def _list_inspections(db, user, status: str = None, limit: int = 20):
     ]}
 
 
+@register_tool(
+    name="list_non_conformances",
+    domain="quality",
+    risk_tier=RiskTier.READ,
+    description="列出不良品 (NC) 記錄。可按嚴重度過濾。",
+    slots=[
+        Slot("severity", "string", required=False, description="minor / major / critical"),
+        Slot("limit", "integer", required=False, description="預設 20"),
+    ],
+    required_permission="quality.nc.list",
+)
 async def _list_nc(db, user, severity: str = None, limit: int = 20):
     q = select(NonConformance).order_by(NonConformance.reported_at.desc()).limit(limit)
     if severity:
@@ -30,6 +53,17 @@ async def _list_nc(db, user, severity: str = None, limit: int = 20):
     ]}
 
 
+@register_tool(
+    name="list_capa",
+    domain="quality",
+    risk_tier=RiskTier.READ,
+    description="列出矯正預防措施 (CAPA) 記錄。",
+    slots=[
+        Slot("status", "string", required=False, description="open/in_progress/closed/verified"),
+        Slot("limit", "integer", required=False, description="預設 20"),
+    ],
+    required_permission="quality.capa.list",
+)
 async def _list_capa(db, user, status: str = None, limit: int = 20):
     q = select(CAPARecord).order_by(CAPARecord.created_at.desc()).limit(limit)
     if status:
@@ -41,17 +75,6 @@ async def _list_capa(db, user, status: str = None, limit: int = 20):
         for c in rows
     ]}
 
-
-register_tool("list_inspections", "列出檢驗單。",
-              {"type": "object", "properties": {"status": {"type": "string"}, "limit": {"type": "integer"}}},
-              _list_inspections)
-register_tool("list_non_conformances", "列出不良 (NC) 記錄。",
-              {"type": "object", "properties": {"severity": {"type": "string", "description": "minor/major/critical"},
-                                                "limit": {"type": "integer"}}},
-              _list_nc)
-register_tool("list_capa", "列出矯正預防措施 (CAPA) 記錄。",
-              {"type": "object", "properties": {"status": {"type": "string"}, "limit": {"type": "integer"}}},
-              _list_capa)
 
 register_agent(
     "quality", "QualityAgent",

@@ -1,10 +1,19 @@
-"""MpsMrpAgent — query MPS / MRP plans."""
+"""MpsMrpAgent — query MPS / MRP plans (refactored v3.2.1)."""
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from app.agents.engine import register_tool, register_agent
+from app.agents.engine import register_agent
+from app.agents.registry import register_tool, RiskTier, Slot
 from app.models.mps_mrp import MpsMaster, MrpMaster
 
 
+@register_tool(
+    name="list_mps",
+    domain="mps_mrp",
+    risk_tier=RiskTier.READ,
+    description="列出已建立的 MPS 主排程。",
+    slots=[Slot("limit", "integer", required=False, description="預設 20")],
+    required_permission="mps_mrp.mps.list",
+)
 async def _list_mps(db, user, limit: int = 20):
     rows = (await db.execute(
         select(MpsMaster).options(selectinload(MpsMaster.entries))
@@ -18,6 +27,14 @@ async def _list_mps(db, user, limit: int = 20):
     ]}
 
 
+@register_tool(
+    name="list_mrp",
+    domain="mps_mrp",
+    risk_tier=RiskTier.READ,
+    description="列出已產生的 MRP 計算結果，含建議的計畫訂單。",
+    slots=[Slot("limit", "integer", required=False, description="預設 20")],
+    required_permission="mps_mrp.mrp.list",
+)
 async def _list_mrp(db, user, limit: int = 20):
     rows = (await db.execute(
         select(MrpMaster).options(selectinload(MrpMaster.items))
@@ -29,11 +46,6 @@ async def _list_mrp(db, user, limit: int = 20):
         for m in rows
     ]}
 
-
-register_tool("list_mps", "列出已建立的 MPS 主排程。",
-              {"type": "object", "properties": {"limit": {"type": "integer"}}}, _list_mps)
-register_tool("list_mrp", "列出已產生的 MRP 計算結果。",
-              {"type": "object", "properties": {"limit": {"type": "integer"}}}, _list_mrp)
 
 register_agent(
     "mps_mrp", "MpsMrpAgent",

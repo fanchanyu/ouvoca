@@ -1,9 +1,18 @@
-"""WarehouseAgent — zones, bins, pick tasks."""
+"""WarehouseAgent — zones, bins, pick tasks (refactored v3.2.1)."""
 from sqlalchemy import select
-from app.agents.engine import register_tool, register_agent
+from app.agents.engine import register_agent
+from app.agents.registry import register_tool, RiskTier, Slot
 from app.models.warehouse import WarehouseZone, BinLocation, PickTask, CycleCount
 
 
+@register_tool(
+    name="list_warehouse_zones",
+    domain="warehouse",
+    risk_tier=RiskTier.READ,
+    description="列出所有倉儲區域。",
+    slots=[],
+    required_permission="warehouse.zone.list",
+)
 async def _list_zones(db, user):
     rows = (await db.execute(select(WarehouseZone))).scalars().all()
     return {"total": len(rows), "zones": [
@@ -12,6 +21,17 @@ async def _list_zones(db, user):
     ]}
 
 
+@register_tool(
+    name="list_pick_tasks",
+    domain="warehouse",
+    risk_tier=RiskTier.READ,
+    description="列出揀貨任務。可按狀態過濾。",
+    slots=[
+        Slot("status", "string", required=False, description="pending/in_progress/completed"),
+        Slot("limit", "integer", required=False, description="預設 20"),
+    ],
+    required_permission="warehouse.pick.list",
+)
 async def _list_pick_tasks(db, user, status: str = None, limit: int = 20):
     q = select(PickTask).order_by(PickTask.created_at.desc()).limit(limit)
     if status:
@@ -24,6 +44,14 @@ async def _list_pick_tasks(db, user, status: str = None, limit: int = 20):
     ]}
 
 
+@register_tool(
+    name="list_cycle_counts",
+    domain="warehouse",
+    risk_tier=RiskTier.READ,
+    description="列出盤點記錄，含系統量 / 實點量 / 差異。",
+    slots=[Slot("limit", "integer", required=False, description="預設 20")],
+    required_permission="warehouse.cycle_count.list",
+)
 async def _list_cycle_counts(db, user, limit: int = 20):
     rows = (await db.execute(
         select(CycleCount).order_by(CycleCount.created_at.desc()).limit(limit)
@@ -34,14 +62,6 @@ async def _list_cycle_counts(db, user, limit: int = 20):
         for c in rows
     ]}
 
-
-register_tool("list_warehouse_zones", "列出倉儲區域。",
-              {"type": "object", "properties": {}}, _list_zones)
-register_tool("list_pick_tasks", "列出揀貨任務。",
-              {"type": "object", "properties": {"status": {"type": "string"}, "limit": {"type": "integer"}}},
-              _list_pick_tasks)
-register_tool("list_cycle_counts", "列出盤點記錄。",
-              {"type": "object", "properties": {"limit": {"type": "integer"}}}, _list_cycle_counts)
 
 register_agent(
     "warehouse", "WarehouseAgent",

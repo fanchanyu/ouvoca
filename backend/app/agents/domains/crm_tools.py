@@ -1,9 +1,21 @@
-"""CrmAgent — leads, opportunities, events."""
+"""CrmAgent — leads, opportunities, events (refactored v3.2.1)."""
 from sqlalchemy import select
-from app.agents.engine import register_tool, register_agent
+from app.agents.engine import register_agent
+from app.agents.registry import register_tool, RiskTier, Slot
 from app.models.crm_sales import Lead, Opportunity, CrmEvent
 
 
+@register_tool(
+    name="list_leads",
+    domain="crm",
+    risk_tier=RiskTier.READ,
+    description="列出潛在客戶。可按狀態過濾。",
+    slots=[
+        Slot("status", "string", required=False, description="new/qualified/lost/converted"),
+        Slot("limit", "integer", required=False, description="預設 20"),
+    ],
+    required_permission="crm.lead.list",
+)
 async def _list_leads(db, user, status: str = None, limit: int = 20):
     q = select(Lead).order_by(Lead.created_at.desc()).limit(limit)
     if status:
@@ -16,6 +28,18 @@ async def _list_leads(db, user, status: str = None, limit: int = 20):
     ]}
 
 
+@register_tool(
+    name="list_opportunities",
+    domain="crm",
+    risk_tier=RiskTier.READ,
+    description="列出商機 pipeline，按預計成交日排序。",
+    slots=[
+        Slot("stage", "string", required=False,
+             description="prospecting/qualified/proposal/negotiation/closed_won/closed_lost"),
+        Slot("limit", "integer", required=False, description="預設 20"),
+    ],
+    required_permission="crm.opportunity.list",
+)
 async def _list_opportunities(db, user, stage: str = None, limit: int = 20):
     q = select(Opportunity).order_by(Opportunity.expected_close_date).limit(limit)
     if stage:
@@ -23,11 +47,23 @@ async def _list_opportunities(db, user, stage: str = None, limit: int = 20):
     rows = (await db.execute(q)).scalars().all()
     return {"total": len(rows), "opportunities": [
         {"id": o.id, "name": o.name, "stage": o.stage, "amount": o.amount,
-         "probability": o.probability, "expected_close": str(o.expected_close_date) if o.expected_close_date else None}
+         "probability": o.probability,
+         "expected_close": str(o.expected_close_date) if o.expected_close_date else None}
         for o in rows
     ]}
 
 
+@register_tool(
+    name="customer_events",
+    domain="crm",
+    risk_tier=RiskTier.READ,
+    description="列出特定客戶的互動歷程（通話 / 拜訪 / Email）。",
+    slots=[
+        Slot("customer_id", "string", required=True, description="客戶 UUID"),
+        Slot("limit", "integer", required=False, description="預設 20"),
+    ],
+    required_permission="crm.event.list",
+)
 async def _customer_events(db, user, customer_id: str, limit: int = 20):
     rows = (await db.execute(
         select(CrmEvent).where(CrmEvent.customer_id == customer_id)
@@ -39,17 +75,6 @@ async def _customer_events(db, user, customer_id: str, limit: int = 20):
         for e in rows
     ]}
 
-
-register_tool("list_leads", "列出潛在客戶。",
-              {"type": "object", "properties": {"status": {"type": "string"}, "limit": {"type": "integer"}}},
-              _list_leads)
-register_tool("list_opportunities", "列出商機 pipeline。",
-              {"type": "object", "properties": {"stage": {"type": "string"}, "limit": {"type": "integer"}}},
-              _list_opportunities)
-register_tool("customer_events", "列出特定客戶的互動歷程。",
-              {"type": "object", "properties": {"customer_id": {"type": "string"},
-                                                "limit": {"type": "integer"}}, "required": ["customer_id"]},
-              _customer_events)
 
 register_agent(
     "crm", "CrmAgent",

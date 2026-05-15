@@ -20,9 +20,9 @@ from datetime import datetime, UTC
 from sqlalchemy import select
 
 from app.agents.confirm_card import make_card, stash_card
-from app.agents.engine import register_agent
 from app.agents.registry import register_tool, RiskTier, Slot
 from app.models.crm_sales import SalesOrder
+from app.models.inventory import Part
 from app.models.production import ProductionOrder
 from app.models.purchase import Supplier
 
@@ -44,7 +44,14 @@ from app.models.purchase import Supplier
         Slot("supplier_keyword", "string", required=True,
              description="供應商名稱或編號（如「長江」或「SUP-001」）"),
         Slot("items", "array", required=True,
-             description='品項清單。格式 [{"part_id": "...", "ordered_qty": 100, "unit_price": 5}]'),
+             description=(
+                 '品項清單。每筆可用以下任一格式：\n'
+                 '  • {"part_id": "uuid...", "ordered_qty": 100, "unit_price": 5}\n'
+                 '  • {"part_no": "M6-BOLT-20", "ordered_qty": 100, "unit_price": 5}\n'
+                 '  • {"part_keyword": "M6 螺絲", "ordered_qty": 100, "unit_price": 5}\n'
+                 'AI 會自動把 part_no / part_keyword lookup 成 part_id。'
+                 'unit_price 可省略；省略時用 Part.unit_cost 預設。'
+             )),
         Slot("expected_delivery_date", "string", required=True,
              description="預期交期 YYYY-MM-DD"),
         Slot("remark", "string", required=False, description="備註"),
@@ -66,21 +73,44 @@ async def _create_po_with_confirm(
             "hint": "請先用 query_supplier 查可用清單。",
         }
 
-    # 2. Validate items
+    # 2. Resolve + validate items — 支援 part_id / part_no / part_keyword 3 種輸入
     if not items:
         return {"error": "items 不能為空。至少需要 1 項。"}
     total_amount = 0.0
     item_lines: list[str] = []
-    for it in items:
-        qty = float(it.get("ordered_qty", 0))
-        price = float(it.get("unit_price", 0))
-        if qty <= 0 or price <= 0:
-            return {"error": f"無效的 item：qty={qty}, price={price}", "item": it}
-        line_total = qty * price
+    resolved_items: list[dict] = []
+    for raw in items:
+        part = await _resolve_part(db, raw)
+        if isinstance(part, dict) and "error" in part:
+            # 多筆同名要求人類消歧 — 回 error 給 LLM 反問
+            return part
+        if part is None:
+            kw = raw.get("part_no") or raw.get("part_keyword") or raw.get("part_id") or "?"
+            return {
+                "error": f"找不到料件「{kw}」",
+                "hint": "請先用 query_inventory 確認料號。",
+            }
+        qty = float(raw.get("ordered_qty", 0))
+        unit_price = float(raw.get("unit_price") or part.unit_cost or 0)
+        if qty <= 0:
+            return {"error": f"無效的數量: {qty}", "part_no": part.part_no}
+        if unit_price <= 0:
+            return {
+                "error": f"無效的單價: {unit_price}（料件 {part.part_no} 也沒設 unit_cost）",
+                "hint": "請在 items 中傳 unit_price，或先設定 Part.unit_cost。",
+            }
+        line_total = qty * unit_price
         total_amount += line_total
         item_lines.append(
-            f"  • {it.get('part_id', '?')} × {qty:g} @ ${price:g} = ${line_total:,.0f}"
+            f"  • {part.part_no} {part.name} × {qty:g} @ ${unit_price:g} = ${line_total:,.0f}"
         )
+        resolved_items.append({
+            "part_id": part.id,
+            "ordered_qty": qty,
+            "unit_price": unit_price,
+        })
+    # 取代原 items 為已解析版本（給 service 用 — 只含 PurchaseOrderItem 認得的欄位）
+    items = resolved_items
 
     # 3. Build summary（人類可讀）
     summary = [
@@ -303,25 +333,54 @@ async def _find_supplier(db, keyword: str):
     return s
 
 
+async def _resolve_part(db, raw: dict):
+    """把 items 中的單一 raw 解析成 Part 物件。
+
+    優先順序：part_id > part_no > part_keyword（name LIKE）
+    回值：
+      - Part 物件：找到 1 個
+      - {"error": ...}：找到多個（需要人類消歧）
+      - None：找不到
+    """
+    # part_id 直接命中
+    if pid := raw.get("part_id"):
+        return (await db.execute(
+            select(Part).where(Part.id == pid)
+        )).scalar_one_or_none()
+    # part_no 精確比對
+    if pno := raw.get("part_no"):
+        return (await db.execute(
+            select(Part).where(Part.part_no == pno)
+        )).scalar_one_or_none()
+    # part_keyword 模糊比對（name + part_no LIKE）
+    if kw := raw.get("part_keyword"):
+        like = f"%{kw}%"
+        rows = (await db.execute(
+            select(Part)
+            .where((Part.name.like(like)) | (Part.part_no.like(like)))
+            .limit(5)
+        )).scalars().all()
+        if len(rows) == 0:
+            return None
+        if len(rows) == 1:
+            return rows[0]
+        # 多個 — 回 error 列出選項給 LLM 反問使用者
+        return {
+            "error": f"關鍵字「{kw}」找到 {len(rows)} 個料件，請指明 part_no：",
+            "candidates": [
+                {"part_no": p.part_no, "name": p.name, "category": p.category}
+                for p in rows
+            ],
+        }
+    return None
+
+
 # ============================================================
 # Agent 註冊（共用 hard-write agent）
 # ============================================================
 
-register_agent(
-    "hard_write", "HardWriteAgent",
-    system_prompt=(
-        "你是 ERP 寫入操作助手。職責：\n"
-        "1. 接受使用者的寫入指令（建單、改單、釋放工單、刪除等）\n"
-        "2. 解析所需欄位、做必要的 lookup（如供應商關鍵字 → ID）\n"
-        "3. 呼叫對應的 *_with_confirm tool（會自動出 ConfirmCard）\n\n"
-        "重要原則：\n"
-        "- 永遠不直接執行 hard-write，必走 *_with_confirm tool\n"
-        "- 缺欄位時反問使用者，不要編造\n"
-        "- 使用繁體中文回覆"
-    ),
-    tool_names=[
-        "create_purchase_order_with_confirm",
-        "release_work_order_with_confirm",
-        "update_sales_order_delivery_with_confirm",
-    ],
-)
+#
+# Note：v3.2.1 起，hard-write tools 不再放在獨立的 HardWriteAgent，
+# 而是各自接到對應的 domain agent（PurchaseAgent / ProductionAgent / SalesAgent），
+# 因為 intent classifier 走關鍵字（「下單」→ purchase），不會路由到 hard_write。
+# 詳見 purchase_tools.py / production_tools.py / sales_tools.py 各自的 register_agent。

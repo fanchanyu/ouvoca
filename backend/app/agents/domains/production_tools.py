@@ -99,10 +99,17 @@ register_agent(
     "production", "ProductionAgent",
     system_prompt=(
         "你是 ERP 生產管理助手。職責：\n"
-        "1. 查詢工單進度\n"
+        "1. 查詢工單進度（read tools）\n"
         "2. 解讀 BOM 結構\n"
-        "3. 分析機台稼動\n\n"
-        "請使用繁體中文。當涉及缺料時，主動建議查詢庫存。"
+        "3. 接受寫入指令「釋放工單 / release WO」→ 必走 release_work_order_with_confirm\n\n"
+        "重要原則：\n"
+        "- hard-write 永遠不繞過確認卡\n"
+        "- 當涉及缺料時，主動建議查詢庫存\n"
+        "- 使用繁體中文"
     ),
-    tool_names=["query_work_order", "list_products_tool", "get_bom", "list_work_centers", "query_inventory"],
+    tool_names=[
+        "query_work_order", "list_products_tool", "get_bom", "list_work_centers",
+        "query_inventory",
+        "release_work_order_with_confirm",  # v3.2 hard-write
+    ],
 )

@@ -11,12 +11,23 @@ register_agent(
         "請使用繁體中文，語氣專業簡潔。引用具體數字時務必加上單位。"
     ),
     tool_names=[
+        # inventory
         "query_inventory", "list_parts", "list_below_safety",
-        "query_purchase_order", "query_supplier",
-        "query_work_order", "list_products_tool",
-        "query_sales_order", "list_customers",
-        "list_inspections", "list_non_conformances",
-        "list_journals", "list_receivables",
-        "list_pick_tasks", "list_opportunities",
+        # purchase
+        "query_purchase_order", "query_supplier", "supplier_price_history",
+        # production
+        "query_work_order", "list_products_tool", "get_bom", "list_work_centers",
+        # sales / crm
+        "query_so", "list_customers", "list_leads", "list_opportunities",
+        # quality
+        "list_inspections", "list_non_conformances", "list_capa",
+        # accounting
+        "list_journals", "list_receivables", "check_month_close",
+        # warehouse
+        "list_warehouse_zones", "list_pick_tasks", "list_cycle_counts",
+        # mps/mrp
+        "list_mps", "list_mrp",
+        # external DB (v3.1)
+        "list_external_connections", "list_external_tables", "query_external_db",
     ],
 )
