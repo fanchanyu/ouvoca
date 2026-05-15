@@ -104,9 +104,9 @@ async def _load_user_permissions(db: AsyncSession, user_id: str) -> dict[str, st
     from app.models.permission import (
         UserRoleAssignment, RolePermissionLink, PermissionDef, PermissionOverride,
     )
-    from datetime import datetime
+    from datetime import datetime, UTC
 
-    now = datetime.utcnow()
+    now = datetime.now(UTC).replace(tzinfo=None)
     result: dict[str, str] = {}
 
     # 1) Role-based permissions

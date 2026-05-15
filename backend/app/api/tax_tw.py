@@ -9,7 +9,7 @@
 所有 endpoint 走 RBAC，需要 `accounting.tax_report` 權限。
 """
 from __future__ import annotations
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -120,7 +120,7 @@ async def form_401(
         input_tax_general=input_tax_general,
         input_tax_fixed_asset=0,
         tax_payable=output_tax - input_tax_general,
-        generated_at=datetime.utcnow(),
+        generated_at=datetime.now(UTC).replace(tzinfo=None),
     )
 
 
@@ -166,7 +166,7 @@ async def form_403(
                 }
                 for so, cust in rows
             ],
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
         }
     else:  # purchase
         q = (
@@ -195,7 +195,7 @@ async def form_403(
                 }
                 for po, sup in rows
             ],
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
         }
 
 
@@ -232,8 +232,8 @@ async def issue_einvoice(
 
     inv = EInvoice(
         invoice_no=req.invoice_no,
-        invoice_date=datetime.utcnow().strftime("%Y%m%d"),
-        invoice_time=datetime.utcnow().strftime("%H:%M:%S"),
+        invoice_date=datetime.now(UTC).replace(tzinfo=None).strftime("%Y%m%d"),
+        invoice_time=datetime.now(UTC).replace(tzinfo=None).strftime("%H:%M:%S"),
         seller_tax_id=req.seller_tax_id,
         seller_name=req.seller_name,
         buyer_tax_id=req.buyer_tax_id,

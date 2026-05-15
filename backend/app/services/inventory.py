@@ -4,7 +4,7 @@ Emits domain events on every state-changing operation so the event engine
 can apply constraints, send notifications and broadcast SSE.
 """
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional
 
 from sqlalchemy import select
@@ -129,7 +129,7 @@ async def add_inventory_transaction(db: AsyncSession, data: dict, user: Optional
     elif txn_type == "deallocate":
         inv.qty_allocated = max(0.0, inv.qty_allocated - qty)
     inv.qty_available = inv.qty_on_hand - inv.qty_allocated
-    inv.updated_at = datetime.utcnow()
+    inv.updated_at = datetime.now(UTC).replace(tzinfo=None)
 
     await db.commit()
     await db.refresh(txn)
@@ -159,7 +159,7 @@ async def add_inventory_transaction(db: AsyncSession, data: dict, user: Optional
 async def create_transfer(db: AsyncSession, data: dict, user: Optional[dict] = None) -> InventoryTransfer:
     transfer = InventoryTransfer(
         id=str(uuid.uuid4()),
-        transfer_no=f"TRF-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        transfer_no=f"TRF-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
         requested_by=(user or {}).get("employee_id") if user else None,
         **{k: v for k, v in data.items() if k != "requested_by"},
     )

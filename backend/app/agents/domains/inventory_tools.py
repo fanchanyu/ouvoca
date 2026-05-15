@@ -1,8 +1,24 @@
-"""InventoryAgent — query inventory, parts, stock health."""
-from app.agents.engine import register_tool, register_agent
+"""InventoryAgent — query inventory, parts, stock health.
+
+✨ Phase 1 Day 1: refactored to use new @register_tool decorator with risk_tier.
+   See docs/CONVERSATIONAL_ERP_DESIGN_ZH.md §5 原則 #1.
+"""
+from app.agents.engine import register_agent
+from app.agents.registry import register_tool, RiskTier, Slot
 from app.services.inventory import get_part_by_no, get_inventory, list_parts, list_inventory_below_safety
 
 
+@register_tool(
+    name="query_inventory",
+    domain="inventory",
+    risk_tier=RiskTier.READ,
+    description="查詢特定零件的當前庫存量。可提供 part_no 或 part_id 任一。",
+    slots=[
+        Slot("part_no", "string", required=False, description="零件料號（如 M6-BOLT-20）"),
+        Slot("part_id", "string", required=False, description="零件 UUID"),
+    ],
+    required_permission="inventory.part.read",
+)
 async def _query_inventory(db, user, part_no: str = None, part_id: str = None):
     part = None
     if part_no:
@@ -24,6 +40,18 @@ async def _query_inventory(db, user, part_no: str = None, part_id: str = None):
     }
 
 
+@register_tool(
+    name="list_parts",
+    domain="inventory",
+    risk_tier=RiskTier.READ,
+    description="列出零件清單，可按類別過濾。",
+    slots=[
+        Slot("category", "string", required=False,
+             description="raw_material / semi_finished / component / consumable / packaging"),
+        Slot("limit", "integer", required=False, description="回傳上限，預設 20"),
+    ],
+    required_permission="inventory.part.list",
+)
 async def _list_parts(db, user, category: str = None, limit: int = 20):
     parts = await list_parts(db, limit=limit, category=category)
     return {
@@ -36,6 +64,14 @@ async def _list_parts(db, user, category: str = None, limit: int = 20):
     }
 
 
+@register_tool(
+    name="list_below_safety",
+    domain="inventory",
+    risk_tier=RiskTier.READ,
+    description="列出庫存低於安全庫存的零件，每筆含短缺量。",
+    slots=[Slot("limit", "integer", required=False, description="回傳上限，預設 20")],
+    required_permission="inventory.part.list",
+)
 async def _below_safety(db, user, limit: int = 20):
     rows = await list_inventory_below_safety(db, limit=limit)
     return {
@@ -48,31 +84,6 @@ async def _below_safety(db, user, limit: int = 20):
         ],
     }
 
-
-register_tool(
-    "query_inventory",
-    "查詢特定零件的當前庫存量。可以提供 part_no 或 part_id 任一。",
-    {"type": "object", "properties": {
-        "part_no": {"type": "string", "description": "零件料號"},
-        "part_id": {"type": "string", "description": "零件 ID"},
-    }},
-    _query_inventory,
-)
-register_tool(
-    "list_parts",
-    "列出零件清單，可按類別過濾。",
-    {"type": "object", "properties": {
-        "category": {"type": "string", "description": "raw_material / semi_finished / component / consumable / packaging"},
-        "limit": {"type": "integer", "description": "回傳上限，預設 20"},
-    }},
-    _list_parts,
-)
-register_tool(
-    "list_below_safety",
-    "列出庫存低於安全庫存的零件。",
-    {"type": "object", "properties": {"limit": {"type": "integer"}}},
-    _below_safety,
-)
 
 register_agent(
     "inventory", "InventoryAgent",

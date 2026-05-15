@@ -17,7 +17,7 @@ KPI 清單：
 - /summary          老闆儀表板（一頁所有重點）
 """
 from __future__ import annotations
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Optional, List, Dict, Any
 
 from fastapi import APIRouter, Depends, Query
@@ -32,7 +32,7 @@ router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 
 def _period_dates(period_days: int) -> tuple[datetime, datetime]:
     """回 (period_start, period_end_inclusive)。"""
-    end = datetime.utcnow()
+    end = datetime.now(UTC).replace(tzinfo=None)
     start = end - timedelta(days=period_days)
     return start, end
 
@@ -84,7 +84,7 @@ async def dso(
             else "期間內無銷售或 AR — 不適用"
         ),
         "period": {"start": start.isoformat(), "end": end.isoformat()},
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
     }
 
 
@@ -140,7 +140,7 @@ async def inventory_turn(
             "電子業健康 6-12；金屬加工 3-6；食品 12+；< 2 表庫存過剩"
         ),
         "period": {"start": start.isoformat(), "end": end.isoformat()},
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
     }
 
 
@@ -202,7 +202,7 @@ async def gross_margin(
             "製造業 20-40% 健康；< 15% 警訊；> 50% 待驗證售價是否合理"
         ),
         "period": {"start": start.isoformat(), "end": end.isoformat()},
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
     }
 
 
@@ -233,7 +233,7 @@ async def oee(
             "interpretation": "期間內無工單，無法計算",
             "breakdown": {"work_orders": 0},
             "period": {"start": start.isoformat(), "end": end.isoformat()},
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
         }
 
     total_ordered = sum(w.ordered_qty for w in wos)
@@ -264,7 +264,7 @@ async def oee(
             "世界級 85%；製造業健康 60-75%；< 50% 需深度檢討"
         ),
         "period": {"start": start.isoformat(), "end": end.isoformat()},
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
     }
 
 
@@ -322,7 +322,7 @@ async def purchase_concentration(
             "> 60% 高度集中（議價弱、風險集中）；30-60% 健康；< 30% 過度分散"
         ),
         "period": {"start": start.isoformat(), "end": end.isoformat()},
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
     }
 
 
@@ -381,7 +381,7 @@ async def ai_cost(
                 "並由 LLM provider adapter 寫入"
             ),
             "period": {"start": start.isoformat(), "end": end.isoformat()},
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
         }
 
     return {
@@ -400,7 +400,7 @@ async def ai_cost(
             "超量請檢查：(1) 是否被攻擊 (2) cache 是否生效 (3) prompt 是否冗長"
         ),
         "period": {"start": start.isoformat(), "end": end.isoformat()},
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
     }
 
 
@@ -440,5 +440,5 @@ async def summary(
         "metric": "boss_summary",
         "kpis": {k: v.get("value") if isinstance(v, dict) else None for k, v in results.items()},
         "full": results,
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
     }

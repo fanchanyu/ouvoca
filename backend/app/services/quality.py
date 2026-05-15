@@ -1,6 +1,6 @@
 """Quality service — Inspection / Non-conformance / CAPA."""
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional
 
 from sqlalchemy import select
@@ -15,7 +15,7 @@ from app.core.exceptions import NotFoundError, BusinessRuleError
 async def create_inspection(db: AsyncSession, data: dict, user: Optional[dict] = None) -> InspectionOrder:
     insp = InspectionOrder(
         id=str(uuid.uuid4()),
-        inspection_no=f"INSP-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6]}",
+        inspection_no=f"INSP-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d')}-{uuid.uuid4().hex[:6]}",
         inspector_id=(user or {}).get("employee_id"),
         **data,
     )
@@ -42,7 +42,7 @@ async def complete_inspection(db: AsyncSession, inspection_id: str,
     insp.rejected_qty = rejected_qty
     insp.inspected_qty = accepted_qty + rejected_qty
     insp.status = "completed" if rejected_qty == 0 else "rejected"
-    insp.inspected_at = datetime.utcnow()
+    insp.inspected_at = datetime.now(UTC).replace(tzinfo=None)
     await db.commit()
     await EventBus.emit(DomainEvent(
         name="quality.inspected", domain="quality",
@@ -54,7 +54,7 @@ async def complete_inspection(db: AsyncSession, inspection_id: str,
         # Auto-create NC
         nc = NonConformance(
             id=str(uuid.uuid4()),
-            nc_no=f"NC-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6]}",
+            nc_no=f"NC-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d')}-{uuid.uuid4().hex[:6]}",
             inspection_order_id=insp.id,
             part_id=insp.part_id,
             severity="minor" if rejected_qty < insp.inspected_qty * 0.05 else "major",

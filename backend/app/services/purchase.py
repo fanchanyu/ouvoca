@@ -1,6 +1,6 @@
 """Purchase service — Supplier / PO / PO-receipt business logic."""
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional
 
 from sqlalchemy import select
@@ -50,7 +50,7 @@ async def create_purchase_order(db: AsyncSession, data: dict, user: Optional[dic
 
     po = PurchaseOrder(
         id=str(uuid.uuid4()),
-        po_no=f"PO-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        po_no=f"PO-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
         created_by=(user or {}).get("employee_id"),
         **data,
     )
@@ -140,7 +140,7 @@ async def receive_purchase_order(db: AsyncSession, po_id: str,
         if rec_qty <= 0:
             continue
         item.received_qty += rec_qty
-        item.received_date = datetime.utcnow()
+        item.received_date = datetime.now(UTC).replace(tzinfo=None)
         # Push to inventory
         await add_inventory_transaction(db, {
             "part_id": item.part_id,
@@ -154,7 +154,7 @@ async def receive_purchase_order(db: AsyncSession, po_id: str,
             all_received = False
 
     po.status = "received" if all_received else "partial_received"
-    po.actual_delivery_date = datetime.utcnow() if all_received else po.actual_delivery_date
+    po.actual_delivery_date = datetime.now(UTC).replace(tzinfo=None) if all_received else po.actual_delivery_date
     await db.commit()
     await db.refresh(po, attribute_names=["supplier"])
     await EventBus.emit(DomainEvent(

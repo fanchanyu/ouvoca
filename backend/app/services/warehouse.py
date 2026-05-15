@@ -1,6 +1,6 @@
 """Warehouse service — Zone / Bin / PickTask / CycleCount."""
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional
 
 from sqlalchemy import select
@@ -41,7 +41,7 @@ async def list_bins(db: AsyncSession, zone_id: Optional[str] = None) -> List[Bin
 async def create_pick_task(db: AsyncSession, data: dict, user: Optional[dict] = None) -> PickTask:
     task = PickTask(
         id=str(uuid.uuid4()),
-        pick_no=f"PICK-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        pick_no=f"PICK-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
         assigned_to=(user or {}).get("employee_id"),
         **data,
     )
@@ -62,7 +62,7 @@ async def complete_pick(db: AsyncSession, pick_id: str, picked_qty: float, user:
         raise NotFoundError("揀貨任務不存在", pick_id=pick_id)
     task.qty_picked = picked_qty
     task.status = "completed" if picked_qty >= task.qty_to_pick else "partial"
-    task.completed_at = datetime.utcnow()
+    task.completed_at = datetime.now(UTC).replace(tzinfo=None)
     await db.commit()
     await EventBus.emit(DomainEvent(
         name="pick.completed", domain="warehouse",
@@ -83,7 +83,7 @@ async def list_pick_tasks(db: AsyncSession, status: Optional[str] = None,
 async def create_cycle_count(db: AsyncSession, data: dict, user: Optional[dict] = None) -> CycleCount:
     cc = CycleCount(
         id=str(uuid.uuid4()),
-        count_no=f"CC-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        count_no=f"CC-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
         counted_by=(user or {}).get("employee_id"),
         **data,
     )

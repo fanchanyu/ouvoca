@@ -38,6 +38,75 @@
 
 ---
 
+## 2026-05-15｜會話 #17｜⚡ 兩小時並行衝刺：Phase 1 Day 1 框架 + AI demo + Chat UX + 技術債
+
+**目標**：使用者「理想是全部到位、平行操作下努力完成」— 4 個 wave 在 2 小時內並行交付。
+
+### ✅ Wave 1 — Phase 1 Day 1 框架（30%）
+
+`backend/app/agents/registry.py`：
+- `RiskTier` enum（read / soft-write / hard-write）
+- `Slot` + `ToolMeta` + `@register_tool` decorator
+- 強制檢查：hard-write 必有 required_permission（不傳直接 raise）
+- 向後兼容：同步註冊到舊 engine.TOOL_FUNCTIONS
+
+10 個 smoke test PASS / 4 個 tool 用新 decorator 改造（inventory × 3 + sales × 1）。
+剩 22 個 tool 是線性投入，明天可批次推進。
+
+### ✅ Wave 2 — AI 對話 demo
+
+`scripts/demo_ai_conversation.py` 跑 12 個典型問題（6 domain）。
+**實機跑過 12/12 PASS / 平均 3.6 秒/題**。
+輸出 `docs/demos/ai_conversation_YYYYMMDD_HHMM.md`，**直接拿給客戶看的行銷素材**。
+
+### ✅ Wave 3 — Chat 頁 UX 大改造
+
+`frontend-desktop/src/pages/Chat.tsx` 85 行 → 180 行：
+- ✅ Markdown render（react-markdown + remark-gfm + Tailwind typography）→ AI 回的表格漂亮渲染
+- ✅ Session history（localStorage 持久化最近 200 則）
+- ✅ 🔄 重新生成 / 📋 複製 / 🗑 清空 對話
+- ✅ Enter 送出 / Shift+Enter 換行
+- ✅ 3 球彈跳載入動畫
+- ✅ 訊息時戳
+
+### ✅ Wave 4 — 技術債清理
+
+`datetime.utcnow()` → `datetime.now(UTC).replace(tzinfo=None)`：
+- 16 個檔案、~54 處
+- sed 批次 + 兩個函式內縮排 import 手動補
+- **Warnings 449 → 328 (-27%)**
+
+### 📊 自證閘 8/8 全綠 / 32 PDF / 494 秒
+
+```
+Gate 1  smoke (148 tests) / import / mobile tsc / desktop tsc
+Gate 2  persona / MESH integration
+Gate 3  PDF builder × 32 + count check
+
+8 pass / 0 fail / 0 skip
+🟢 ALL GATES PASSED
+```
+
+### 📈 數字變化
+
+| 維度 | #16 結束 | #17 結束 |
+|---|---|---|
+| pytest tests | 138 | **148** (+10) |
+| Deprecation warnings | 449 | **328** (-27%) |
+| 自然語言操作完成度 | 19% | **22%** (+framework) |
+| Phase 1 Day 1 完成度 | 0% | **30%** |
+| Chat UX | 「能用」 | 「**敢給客戶看**」 |
+| AI demo 素材 | 0 | **1 份 12 query md** |
+
+### 🪞 教訓
+
+Wave 4 sed 批次替換漏掉「函式內縮排 import」 → 37 個 test 紅燈。
+**批次操作後立刻跑 test 才能收工**，不可迷信 sed。
+
+**Blocker**：無。Phase 1 Day 1 剩 70%（22 個 tool refactor）可隨時動工。
+
+---
+
 ## 2026-05-15｜會話 #16｜🎯 產品 DNA 重新對齊：對話式 ERP 北極星文件（中英）
 
 **目標**：使用者點醒「自然語言操作 ERP」核心承諾完成度只有 1.5/8（19%）—— 寫入類 UI/AI 全空白。今天寫北極星設計文件 + Phase 1 動工 spec，把另外 81% 的補完路徑文件化。

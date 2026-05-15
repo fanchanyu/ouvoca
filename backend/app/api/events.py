@@ -5,7 +5,7 @@ and receives DomainEvents as they happen via the SSE protocol.
 """
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import AsyncGenerator
 
 from fastapi import APIRouter, Request, Query
@@ -68,7 +68,7 @@ async def event_stream(request: Request) -> EventSourceResponse:
                     }, default=str, ensure_ascii=False),
                 }
 
-            yield {"event": "ready", "data": json.dumps({"ts": datetime.utcnow().isoformat()})}
+            yield {"event": "ready", "data": json.dumps({"ts": datetime.now(UTC).replace(tzinfo=None).isoformat()})}
 
             while True:
                 if await request.is_disconnected():
@@ -88,7 +88,7 @@ async def event_stream(request: Request) -> EventSourceResponse:
                     }
                 except asyncio.TimeoutError:
                     # heartbeat to keep connection alive
-                    yield {"event": "ping", "data": json.dumps({"ts": datetime.utcnow().isoformat()})}
+                    yield {"event": "ping", "data": json.dumps({"ts": datetime.now(UTC).replace(tzinfo=None).isoformat()})}
         finally:
             EventBus.unsubscribe_all(on_event)
 

@@ -1,6 +1,6 @@
 """Production service — Product / BOM / WO / Operation / Dispatch."""
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional
 
 from sqlalchemy import select
@@ -59,7 +59,7 @@ async def create_production_order(db: AsyncSession, data: dict, user: Optional[d
 
     wo = ProductionOrder(
         id=str(uuid.uuid4()),
-        wo_no=f"WO-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        wo_no=f"WO-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
         created_by=(user or {}).get("employee_id"),
         **data,
     )
@@ -106,7 +106,7 @@ async def release_production_order(db: AsyncSession, wo_id: str, user: Optional[
 
     wo.status = "released"
     wo.released_by = (user or {}).get("employee_id")
-    wo.actual_start = datetime.utcnow()
+    wo.actual_start = datetime.now(UTC).replace(tzinfo=None)
     await db.commit()
     await EventBus.emit(DomainEvent(
         name="wo.released", domain="production",
@@ -130,7 +130,7 @@ async def complete_production_order(db: AsyncSession, wo_id: str,
     wo.completed_qty += completed_qty
     if wo.completed_qty >= wo.ordered_qty:
         wo.status = "completed"
-        wo.actual_end = datetime.utcnow()
+        wo.actual_end = datetime.now(UTC).replace(tzinfo=None)
 
     # 把成品實際入庫（之前是註解 TODO 沒做 → 完工不會增加庫存的沉默 bug）
     # 約定：product.product_no == part.part_no（同編號對齊）
@@ -193,7 +193,7 @@ async def create_dispatch_log(db: AsyncSession, data: dict, user: Optional[dict]
     log = DispatchLog(
         id=str(uuid.uuid4()),
         operator_id=(user or {}).get("employee_id") or data.get("operator_id"),
-        started_at=datetime.utcnow(),
+        started_at=datetime.now(UTC).replace(tzinfo=None),
         **{k: v for k, v in data.items() if k != "operator_id"},
     )
     db.add(log)

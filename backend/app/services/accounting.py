@@ -1,6 +1,6 @@
 """Accounting service — Journal entries (debit/credit balance) + AR + month-end close."""
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional
 
 from sqlalchemy import select, func
@@ -47,7 +47,7 @@ async def create_journal_entry(db: AsyncSession, data: dict, user: Optional[dict
         )
 
     # Period lock check
-    period = data.get("period") or datetime.utcnow().strftime("%Y-%m")
+    period = data.get("period") or datetime.now(UTC).replace(tzinfo=None).strftime("%Y-%m")
     closed = (await db.execute(
         select(MonthEndClose).where(MonthEndClose.period == period, MonthEndClose.status == "closed")
     )).scalar_one_or_none()
@@ -56,8 +56,8 @@ async def create_journal_entry(db: AsyncSession, data: dict, user: Optional[dict
 
     je = JournalEntry(
         id=str(uuid.uuid4()),
-        entry_no=f"JE-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
-        entry_date=data.get("entry_date", datetime.utcnow()),
+        entry_no=f"JE-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        entry_date=data.get("entry_date", datetime.now(UTC).replace(tzinfo=None)),
         period=period,
         created_by=(user or {}).get("employee_id"),
         **{k: v for k, v in data.items() if k not in ("entry_date", "period")},
@@ -88,7 +88,7 @@ async def post_journal(db: AsyncSession, entry_id: str, user: dict) -> JournalEn
     if je.status != "draft":
         raise BusinessRuleError(f"傳票狀態 '{je.status}' 不可過帳")
     je.status = "posted"
-    je.posted_at = datetime.utcnow()
+    je.posted_at = datetime.now(UTC).replace(tzinfo=None)
     await db.commit()
     await EventBus.emit(DomainEvent(
         name="journal.posted", domain="accounting",
@@ -125,7 +125,7 @@ async def list_receivables(db: AsyncSession, status: Optional[str] = None,
     if status:
         q = q.where(AccountsReceivable.status == status)
     if overdue_only:
-        q = q.where(AccountsReceivable.due_date < datetime.utcnow(),
+        q = q.where(AccountsReceivable.due_date < datetime.now(UTC).replace(tzinfo=None),
                     AccountsReceivable.status != "paid")
     return list((await db.execute(q.limit(limit).order_by(AccountsReceivable.due_date))).scalars().all())
 
@@ -141,7 +141,7 @@ async def close_month(db: AsyncSession, period: str, user: dict) -> MonthEndClos
     if existing:
         existing.status = "closed"
         existing.closed_by = user.get("employee_id")
-        existing.closed_at = datetime.utcnow()
+        existing.closed_at = datetime.now(UTC).replace(tzinfo=None)
         rec = existing
     else:
         rec = MonthEndClose(
@@ -149,7 +149,7 @@ async def close_month(db: AsyncSession, period: str, user: dict) -> MonthEndClos
             period=period,
             status="closed",
             closed_by=user.get("employee_id"),
-            closed_at=datetime.utcnow(),
+            closed_at=datetime.now(UTC).replace(tzinfo=None),
         )
         db.add(rec)
     await db.commit()

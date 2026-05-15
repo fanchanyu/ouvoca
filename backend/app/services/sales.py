@@ -1,6 +1,6 @@
 """Sales service — Customer / SalesOrder business logic."""
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional
 
 from sqlalchemy import select
@@ -39,7 +39,7 @@ async def create_sales_order(db: AsyncSession, data: dict, user: Optional[dict] 
 
     so = SalesOrder(
         id=str(uuid.uuid4()),
-        so_no=f"SO-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        so_no=f"SO-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
         created_by=(user or {}).get("employee_id"),
         **data,
     )
@@ -127,7 +127,7 @@ async def ship_sales_order(db: AsyncSession, so_id: str, user: dict) -> SalesOrd
         shipped_items.append({"part_id": part.id, "qty": float(item.ordered_qty)})
 
     so.status = "shipped"
-    so.actual_delivery_date = datetime.utcnow()
+    so.actual_delivery_date = datetime.now(UTC).replace(tzinfo=None)
     await db.commit()
     await db.refresh(so, attribute_names=["customer"])
     await EventBus.emit(DomainEvent(
@@ -135,7 +135,7 @@ async def ship_sales_order(db: AsyncSession, so_id: str, user: dict) -> SalesOrd
         entity_type="SalesOrder", entity_id=so.id,
         data={
             "so_no": so.so_no,
-            "shipped_at": datetime.utcnow().isoformat(),
+            "shipped_at": datetime.now(UTC).replace(tzinfo=None).isoformat(),
             "items": shipped_items,
             "total_amount": float(so.total_amount or 0),
             "customer_id": so.customer_id,

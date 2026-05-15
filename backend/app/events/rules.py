@@ -6,7 +6,7 @@ or None to skip.
 
 BLOCK results raise BusinessRuleError in callers that opt in.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from sqlalchemy import select
 
@@ -63,7 +63,7 @@ async def check_month_not_closed(domain: str, action: str, data: dict, user: dic
     from app.database import AsyncSessionLocal
     from app.models.accounting import MonthEndClose
 
-    period = data.get("period") or datetime.utcnow().strftime("%Y-%m")
+    period = data.get("period") or datetime.now(UTC).replace(tzinfo=None).strftime("%Y-%m")
     async with AsyncSessionLocal() as db:
         closed = (await db.execute(
             select(MonthEndClose).where(MonthEndClose.period == period, MonthEndClose.status == "closed")
@@ -124,8 +124,8 @@ async def check_po_not_overdue(domain: str, action: str, data: dict, user: dict 
         return None
     async with AsyncSessionLocal() as db:
         po = (await db.execute(select(PurchaseOrder).where(PurchaseOrder.id == po_id))).scalar_one_or_none()
-        if po and po.expected_delivery_date and po.expected_delivery_date < datetime.utcnow():
-            days_late = (datetime.utcnow() - po.expected_delivery_date).days
+        if po and po.expected_delivery_date and po.expected_delivery_date < datetime.now(UTC).replace(tzinfo=None):
+            days_late = (datetime.now(UTC).replace(tzinfo=None) - po.expected_delivery_date).days
             return {"rule": "check_po_not_overdue", "status": "WARN",
                     "message": f"PO {po.po_no} 已逾期 {days_late} 天"}
 
@@ -241,7 +241,7 @@ async def check_payment_terms(domain: str, action: str, data: dict, user: dict |
         overdue = (await db.execute(
             select(AccountsReceivable).where(
                 AccountsReceivable.customer_id == cust_id,
-                AccountsReceivable.due_date < datetime.utcnow() - timedelta(days=30),
+                AccountsReceivable.due_date < datetime.now(UTC).replace(tzinfo=None) - timedelta(days=30),
                 AccountsReceivable.status != "paid",
             )
         )).scalars().all()

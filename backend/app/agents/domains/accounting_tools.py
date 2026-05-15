@@ -19,10 +19,10 @@ async def _list_journals(db, user, period: str = None, status: str = None, limit
 
 
 async def _list_ar(db, user, overdue_only: bool = False, limit: int = 20):
-    from datetime import datetime
+    from datetime import datetime, UTC
     q = select(AccountsReceivable).order_by(AccountsReceivable.due_date)
     if overdue_only:
-        q = q.where(AccountsReceivable.due_date < datetime.utcnow(),
+        q = q.where(AccountsReceivable.due_date < datetime.now(UTC).replace(tzinfo=None),
                     AccountsReceivable.status != "paid")
     rows = (await db.execute(q.limit(limit))).scalars().all()
     return {"total": len(rows), "receivables": [

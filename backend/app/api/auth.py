@@ -1,6 +1,6 @@
 """Auth + Organization API — login 公開、其餘加 RBAC。"""
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -49,7 +49,7 @@ async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
         "roles": user_roles,  # 只放此使用者真正擁有的角色 code
         "permissions": [],     # 權限走 RBAC，不放 JWT（避免 token 過大）
     })
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.now(UTC).replace(tzinfo=None)
     await db.commit()
     return TokenResponse(
         access_token=token,

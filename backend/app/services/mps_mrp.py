@@ -8,7 +8,7 @@ MRP algorithm (simplified):
 """
 import uuid
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional
 
 from sqlalchemy import select
@@ -68,9 +68,9 @@ async def run_mrp(db: AsyncSession, mps_id: str, user: Optional[dict] = None) ->
     mrp = MrpMaster(
         id=str(uuid.uuid4()),
         mps_master_id=mps.id,
-        mrp_name=f"MRP-{mps.mps_name}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+        mrp_name=f"MRP-{mps.mps_name}-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}",
         status="generated",
-        generated_at=datetime.utcnow(),
+        generated_at=datetime.now(UTC).replace(tzinfo=None),
     )
     db.add(mrp)
 
