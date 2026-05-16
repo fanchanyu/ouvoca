@@ -224,5 +224,5 @@ export const en = {
     noPerms: 'No permissions',
   },
   userMenu: { profile: 'Profile', myPerms: 'My permissions', logout: 'Sign out' },
-  footer: { version: 'v3.12', languageZh: '繁體中文', languageEn: 'English', madeBy: 'Made by Peter ❤️' },
+  footer: { version: 'v3.12', languageZh: '繁體中文', languageEn: 'English', madeBy: 'by Peter' },
 }

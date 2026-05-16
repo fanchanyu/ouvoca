@@ -137,17 +137,9 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-white/10 text-caption text-white/40 space-y-1">
-          <p>{t('footer.version')} · {new Date().getFullYear()}</p>
-          <p className="text-white/30">
-            <a
-              href="https://github.com/fanchanyu/erpilot"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-brand-300 transition-colors"
-            >
-              {t('footer.madeBy')}
-            </a>
+        <div className="p-4 border-t border-white/10 text-caption text-white/40">
+          <p>
+            {t('footer.version')} · {new Date().getFullYear()} · <span className="text-white/30">{t('footer.madeBy')}</span>
           </p>
         </div>
       </aside>

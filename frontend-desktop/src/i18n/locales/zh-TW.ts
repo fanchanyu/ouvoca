@@ -273,5 +273,5 @@ export const zhTW = {
   // 使用者選單
   userMenu: { profile: '個人設定', myPerms: '我的權限', logout: '登出' },
   // Footer / 雜項
-  footer: { version: 'v3.12', languageZh: '繁體中文', languageEn: 'English', madeBy: 'Made by Peter ❤️' },
+  footer: { version: 'v3.12', languageZh: '繁體中文', languageEn: 'English', madeBy: 'by Peter' },
 }

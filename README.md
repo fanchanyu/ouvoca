@@ -9,8 +9,7 @@
 [![Docs](https://img.shields.io/badge/PDFs-35%20bilingual-blue)]()
 [![License](https://img.shields.io/badge/license-AGPL--3.0%20%2B%20SBL%20%2B%20Commercial-blue)](./LICENSE)
 [![Version](https://img.shields.io/badge/version-3.12-blueviolet)]()
-[![Made by Peter](https://img.shields.io/badge/made%20by-Peter%20%E2%9D%A4%EF%B8%8F-ff69b4)](https://github.com/fanchanyu)
-[![Taiwan SMB](https://img.shields.io/badge/built%20for-Taiwan%20SMB-red)]()
+[![Author](https://img.shields.io/badge/by-Peter-lightgrey)](https://github.com/fanchanyu)
 
 > ⚡ **v3.0 戰略軸轉 / Strategic Pivot (2026-05-15)**
 > 🇹🇼 砍 LINE Bot / Mobile App / 外協協同三線，全力做桌機對話式 ERP。
@@ -368,12 +367,4 @@ CLA Section 2(b) is the lifeline of the dual-license model: your contributions g
 
 ---
 
-<div align="center">
-
-**Made by [Peter](https://github.com/fanchanyu) ❤️ in Taiwan**
-
-🇹🇼 為台灣中小製造業而生 · Built for Taiwan SMB Manufacturers 🇹🇼
-
-[GitHub](https://github.com/fanchanyu/erpilot) · [Issues](https://github.com/fanchanyu/erpilot/issues) · [Discussions](https://github.com/fanchanyu/erpilot/discussions) · [Commercial License](./LICENSE-COMMERCIAL.md)
-
-</div>
+<sub>by [Peter](https://github.com/fanchanyu) · [Issues](https://github.com/fanchanyu/erpilot/issues) · [Commercial License](./LICENSE-COMMERCIAL.md)</sub>
