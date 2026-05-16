@@ -80,42 +80,91 @@ def classify_intent(message: str) -> str:
 # --------------------------------------------------------------------------
 # Tool & Agent registries
 # --------------------------------------------------------------------------
+# v3.8 fix #3：殺掉舊 register_tool / TOOL_FUNCTIONS dual-registration。
+# 唯一真相來源 = app.agents.registry._REGISTRY（每個 tool 含 risk_tier / slots / 權限）。
+# TOOL_FUNCTIONS 名稱保留為 read-only proxy，不再接受註冊。
 
-TOOL_FUNCTIONS: dict[str, dict] = {}
 AGENT_REGISTRY: dict[str, dict] = {}
 
 
-def register_tool(name: str, description: str, parameters: dict, func: Callable) -> None:
-    TOOL_FUNCTIONS[name] = {
-        "name": name,
-        "description": description,
-        "parameters": parameters,
-        "func": func,
-    }
+class _ToolFunctionsProxy:
+    """Read-only dict-like view 對映新 registry，給既有 caller / tests 用。
+
+    新代碼請直接用 `app.agents.registry._REGISTRY` 或 `get_tool(name)`。
+    """
+
+    def _data(self) -> dict[str, dict]:
+        from app.agents.registry import _REGISTRY
+        return {
+            name: {
+                "name": meta.name,
+                "description": meta.description,
+                "parameters": meta.to_llm_dict()["function"]["parameters"],
+                "func": meta.func,
+            }
+            for name, meta in _REGISTRY.items()
+        }
+
+    def __contains__(self, name: str) -> bool:
+        from app.agents.registry import _REGISTRY
+        return name in _REGISTRY
+
+    def __getitem__(self, name: str) -> dict:
+        return self._data()[name]
+
+    def get(self, name: str, default=None):
+        from app.agents.registry import get_tool
+        meta = get_tool(name)
+        if meta is None:
+            return default
+        return {
+            "name": meta.name,
+            "description": meta.description,
+            "parameters": meta.to_llm_dict()["function"]["parameters"],
+            "func": meta.func,
+        }
+
+    def keys(self):
+        from app.agents.registry import _REGISTRY
+        return _REGISTRY.keys()
+
+    def values(self):
+        return self._data().values()
+
+    def items(self):
+        return self._data().items()
+
+    def __iter__(self):
+        return iter(self.keys())
+
+    def __len__(self):
+        from app.agents.registry import _REGISTRY
+        return len(_REGISTRY)
+
+
+TOOL_FUNCTIONS = _ToolFunctionsProxy()
 
 
 def get_tool_definitions(tool_names: list[str]) -> list[dict]:
-    return [
-        {
-            "type": "function",
-            "function": {
-                "name": t["name"],
-                "description": t["description"],
-                "parameters": t["parameters"],
-            },
-        }
-        for t in TOOL_FUNCTIONS.values() if t["name"] in tool_names
-    ]
+    """v3.8: 改從新 registry 直接讀（含 RiskTier / required_permission metadata）。"""
+    from app.agents.registry import get_tool
+    out: list[dict] = []
+    for name in tool_names:
+        meta = get_tool(name)
+        if meta is None:
+            continue
+        out.append(meta.to_llm_dict())
+    return out
 
 
 async def execute_tool(name: str, args: dict, db=None, user=None) -> str:
-    tool = TOOL_FUNCTIONS.get(name)
-    if not tool:
+    """v3.8: 直接從 registry 取 tool meta + func。"""
+    from app.agents.registry import get_tool
+    meta = get_tool(name)
+    if meta is None or meta.func is None:
         return json.dumps({"error": f"Unknown tool: {name}"}, ensure_ascii=False)
 
-    # v3.3 Slot-filling reverse-ask：
-    # 若 tool 有在新 registry 註冊 slots metadata，先驗 required slots。
-    # 缺欄位時不執行 tool，回 structured `needs_input` 讓 LLM 自動反問使用者。
+    # Slot-filling reverse-ask：缺 required slot 時回 structured needs_input
     missing = _missing_required_slots(name, args)
     if missing:
         return json.dumps({
@@ -133,7 +182,7 @@ async def execute_tool(name: str, args: dict, db=None, user=None) -> str:
         }, ensure_ascii=False)
 
     try:
-        result = await tool["func"](db=db, user=user, **args)
+        result = await meta.func(db=db, user=user, **args)
         if hasattr(result, "__dict__") and not isinstance(result, (dict, list)):
             result = {"success": True, "data": str(result)}
         return json.dumps(result, default=str, ensure_ascii=False)

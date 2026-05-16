@@ -220,7 +220,7 @@ USB 條碼槍輸入           ❌ [          ]   0%  Phase 3
 12 Domain 模型          🟢 [██████████] 100%
 12 Domain API           🟢 [██████████] 100%
 Multi-Agent (10 個)     🟢 [██████████] 100%
-Tools (26 個)           🟢 [████████  ]  80%  待擴充寫入類（11/26 已入新 registry）
+Tools (40 個)           🟢 [██████████] 100% ✅ 40/40（v3.4-v3.7 共加 14：external_db / hard-write / glossary / undo / migration / email_digest）
 Constraint Rules (16)   🟢 [████████  ]  80%  待擴充寫入規則
 SSE Event Stream        🟢 [██████████] 100%
 Audit + Auth            🟢 [██████████] 100%
@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #26：3 agents code review + 5 個 critical fix（Part Inventory bug / GC / RiskTier / migration perf / digest 並行））
+**最後更新**：2026-05-15（會話 #27：Karpathy 4 原則架構審查 + 5 critical fix（docs drift / glossary seed gate / connections service / 殺舊 registry / tenant coverage audit））
 **維護者**：使用者 + Claude
-**版本**：3.7
+**版本**：3.8

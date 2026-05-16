@@ -15,36 +15,49 @@ from app.integrations.connectors import (
     get_connector, list_connectors,
 )
 from app.integrations.connectors.exceptions import ConnectorError
+# v3.8 fix #4：connection store 移到 service layer
+from app.services.connections import (
+    get_connection_info, list_connections as _svc_list_connections,
+    register_connection, unregister_connection,
+)
 
 
-# ─── 連接設定的暫存（PoC 用 in-memory dict；Phase 1.5 改用 DB 表） ───
-#
-# 結構：{
-#   "legacy_dingxin": {"connector": "sqlite", "config": {"path": "/data/dingxin.db"}},
-#   "customer_a_csv": {"connector": "csv_folder", "config": {"folder": "D:/orders"}},
-# }
-#
-# 為什麼 in-memory：PoC 階段先證明 connector + tool 走得通；
-# Phase 1.5 會加 `external_connection` 資料表 + 加密儲存。
-_CONNECTIONS: dict[str, dict] = {}
+# v3.8 後向相容：保留 _CONNECTIONS 名稱給既有測試 import，
+# 但實際讀寫透過 service layer。下次 sprint 移除這個 alias。
+class _ConnectionsAlias:
+    """Read-only mapping proxy 指向 services.connections._CONNECTIONS。
 
-
-def register_connection(name: str, connector: str, config: dict) -> dict:
-    """註冊一個外部 DB 連接（給測試 / 開機 seed 用）。
-
-    Phase 1.5 會包成 hard-write tool（register_external_connection_with_confirm）。
+    保留是為了既有測試（test_connectors.py / test_schema_mapping.py /
+    demo_crud_pipeline.py / demo_deepseek_e2e.py）的 `_CONNECTIONS.clear()`
+    呼叫不破。長期應改成呼叫 `services.connections._clear_for_test()`。
     """
-    _CONNECTIONS[name] = {"connector": connector, "config": dict(config)}
-    return _CONNECTIONS[name]
+    def clear(self):
+        from app.services.connections import _clear_for_test
+        _clear_for_test()
+
+    def __contains__(self, name):
+        from app.services.connections import has_connection
+        return has_connection(name)
+
+    def keys(self):
+        from app.services.connections import list_connection_names
+        return list_connection_names()
+
+    def __iter__(self):
+        return iter(self.keys())
+
+    def __len__(self):
+        from app.services.connections import list_connection_names
+        return len(list_connection_names())
 
 
-def unregister_connection(name: str) -> bool:
-    return _CONNECTIONS.pop(name, None) is not None
+_CONNECTIONS = _ConnectionsAlias()
 
 
 def _connections_snapshot() -> dict[str, dict]:
     """測試用：取得目前所有連接的 snapshot。"""
-    return dict(_CONNECTIONS)
+    from app.services.connections import _CONNECTIONS as _svc
+    return dict(_svc)
 
 
 # ============================================================
@@ -60,16 +73,10 @@ def _connections_snapshot() -> dict[str, dict]:
     required_permission="external_db.connection.list",
 )
 async def _list_connections(db, user):
+    conns = _svc_list_connections()
     return {
-        "total": len(_CONNECTIONS),
-        "connections": [
-            {
-                "name": name,
-                "connector": info["connector"],
-                "config_keys": sorted(info["config"].keys()),
-            }
-            for name, info in _CONNECTIONS.items()
-        ],
+        "total": len(conns),
+        "connections": conns,
         "available_connectors": [
             {"name": m.name, "label": m.label, "kind": m.kind}
             for m in list_connectors()
@@ -93,12 +100,13 @@ async def _list_connections(db, user):
     required_permission="external_db.table.list",
 )
 async def _list_external_tables(db, user, connection: str):
-    if connection not in _CONNECTIONS:
+    info = get_connection_info(connection)
+    if info is None:
+        from app.services.connections import list_connection_names
         return {
             "error": f"連接不存在: {connection!r}",
-            "available": list(_CONNECTIONS),
+            "available": list_connection_names(),
         }
-    info = _CONNECTIONS[connection]
     try:
         conn = get_connector(info["connector"], info["config"])
         tables = await conn.list_tables()
@@ -141,12 +149,13 @@ async def _query_external_db(
     connection: str, table: str,
     filters: dict | None = None, limit: int = 100,
 ):
-    if connection not in _CONNECTIONS:
+    info = get_connection_info(connection)
+    if info is None:
+        from app.services.connections import list_connection_names
         return {
             "error": f"連接不存在: {connection!r}",
-            "available": list(_CONNECTIONS),
+            "available": list_connection_names(),
         }
-    info = _CONNECTIONS[connection]
     try:
         conn = get_connector(info["connector"], info["config"])
         rows = await conn.query(table, filters=filters, limit=limit)

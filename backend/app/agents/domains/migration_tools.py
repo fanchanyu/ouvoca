@@ -32,8 +32,9 @@ from app.integrations.connectors.exceptions import ConnectorError
 # ────────────────────────────────────────────────────────────
 
 def _get_connection_info(name: str) -> Optional[dict]:
-    from app.agents.domains.external_db_tools import _CONNECTIONS
-    return _CONNECTIONS.get(name)
+    """v3.8 fix #4: 走 service layer，不再讀 agent 模組私有 dict。"""
+    from app.services.connections import get_connection_info
+    return get_connection_info(name)
 
 
 # ────────────────────────────────────────────────────────────

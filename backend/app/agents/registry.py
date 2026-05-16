@@ -122,18 +122,8 @@ def register_tool(
             undo_recipe=undo_recipe, func=func,
         )
         _REGISTRY[name] = meta
-
-        # 向後兼容：同步註冊到舊的 engine.TOOL_FUNCTIONS（讓 LLM 仍能找到）
-        try:
-            from app.agents.engine import register_tool as _engine_register
-            _engine_register(
-                name=name,
-                description=description,
-                parameters=meta.to_llm_dict()["function"]["parameters"],
-                func=func,
-            )
-        except Exception:
-            pass  # engine 未載入也不擋
+        # v3.8 fix #3：不再 dual-register 到 engine.TOOL_FUNCTIONS。
+        # engine.TOOL_FUNCTIONS 改為對 _REGISTRY 的 read-only proxy。
         return func
 
     return decorator

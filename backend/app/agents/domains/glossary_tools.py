@@ -13,8 +13,15 @@ from app.agents.glossary import (
 from app.agents.registry import register_tool, RiskTier, Slot
 
 
-# 啟動時自動 seed 一些常見 demo 詞（暫時行為，等 DB 表後移除）
-seed_default_glossary()
+# Demo seed 只在 DEBUG 模式 + 沒設 DISABLE_GLOSSARY_SEED 時跑。
+# Production 應該透過 DB 表（Phase 2 G-201）載入真實 glossary，避免「螺絲→M6」
+# demo 詞污染客戶 tenant 的對映。
+#
+# 對應 v3.7 audit fix #1：see WORKLOG #27。
+import os as _os
+from app.config import settings as _settings
+if _settings.DEBUG and _os.environ.get("DISABLE_GLOSSARY_SEED") != "1":
+    seed_default_glossary()
 
 
 @register_tool(

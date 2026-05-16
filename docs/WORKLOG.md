@@ -38,6 +38,115 @@
 
 ---
 
+## 2026-05-15｜會話 #27｜🔍 Karpathy 架構審查 + 5 Critical Fix（v3.8）
+
+**目標**：使用者「用這個 skill 概念完整檢查 + 完善架構和拓撲」
+觸發：[Karpathy 4 原則 CLAUDE.md](https://github.com/multica-ai/andrej-karpathy-skills) skill。
+
+### 🪞 Karpathy 4 原則嚴格應用
+
+1. **Think Before Coding** → 先做 audit，不直接動 code
+2. **Simplicity First** → 5 個 critical fix 是最小修補集
+3. **Surgical Changes** → 不擅自加 Alembic migration（使用者沒明確要）
+4. **Goal-Driven** → 每 fix 有 verifiable success criteria
+
+### 🔍 Phase 1 Audit：兩個 Agent 並行
+
+**Agent A (Plan/深度)**：發現 10+ 個 layer violations + 8 個 tradeoffs
+**Agent B (Explore/拓撲)**：宣稱「0 violation 全綠」— **與 Agent A 衝突**
+
+判斷：Agent A 給的 file:line 證據可驗證（抽查 `purchase_tools.py:8` 確實 import model）。
+Agent B 是表象掃描不可信。**採 Agent A 為主**。
+
+報告存：`docs/architecture/TOPOLOGY_AUDIT_v3.7.md`（Agent B 寫的，當圖表參考）。
+
+### ✅ Phase 2：5 Critical Fix（user 選「先修 5 critical」）
+
+#### Fix #5 — Docs drift 對齊
+`CLAUDE.md` §4.3 「Tools (26 個) 11/26 已入新 registry」→ 「Tools (40 個) 100% ✅」
+（其它 §4.2 早已正確顯示 32/32 → 38/38 → 40，§4.3 是漏改的舊條）
+
+#### Fix #1 — `seed_default_glossary()` import-time gate
+`backend/app/agents/domains/glossary_tools.py:17`：
+```python
+if _settings.DEBUG and _os.environ.get("DISABLE_GLOSSARY_SEED") != "1":
+    seed_default_glossary()
+```
+- Production (DEBUG=false) 啟動時不再 seed demo 詞
+- 避免「螺絲→M6 / 長江→SUP-001」demo 詞污染客戶 tenant
+- DISABLE_GLOSSARY_SEED env var 給特定 demo 場景禁用
+
+#### Fix #4 — `_CONNECTIONS` 從 agent 層移到 service 層
+
+新檔 `backend/app/services/connections.py`：
+- 公開 API：`register_connection / unregister_connection / get_connection_info / list_connection_names / list_connections / has_connection`
+- 內部 `_CONNECTIONS: dict` + `_clear_for_test()`
+- Docstring 說明長期方向：之後換成 DB-backed `external_connection` 表 + AES 加密
+
+`backend/app/agents/domains/external_db_tools.py`：
+- 3 個 tool 改用 `get_connection_info(name)` 取代 `_CONNECTIONS[name]` 直接讀
+- 保留 `_CONNECTIONS` proxy class 給既有 test 不破
+
+`backend/app/agents/domains/migration_tools.py`：
+- `_get_connection_info()` 改 import 自 `services.connections`（不再讀 agent 模組私有）
+
+#### Fix #3 — 殺舊 `engine.register_tool` + 統一 registry
+
+`backend/app/agents/engine.py`：
+- 移除 `register_tool(name, description, parameters, func)` 函式
+- `TOOL_FUNCTIONS` 改為 `_ToolFunctionsProxy` read-only view 對 `_REGISTRY`
+- `get_tool_definitions()` 改從 `_REGISTRY` + `to_llm_dict()` 直接生成
+- `execute_tool()` 改從 `get_tool(name)` 取 meta.func
+
+`backend/app/agents/registry.py`：
+- 移除 dual-register 到 `engine.TOOL_FUNCTIONS` 的 back-compat hook
+- 唯一真相來源 = `_REGISTRY`
+
+40 個 tool 全部走新 registry，0 重複註冊，0 silent except。
+
+#### Fix #2 — Tenant coverage audit test（保守處理）
+
+加 `backend/tests/smoke/test_tenant_coverage.py`：
+- `EXPECTED_TENANT_MIXIN`：8 個已採用模組
+- `KNOWN_GAPS`：4 個已知 gap + 理由（permission 是有意，warehouse/supplier_plus/ai_governance/organization 待 v3.9）
+- 4 個 test 鎖住現狀：新 model 沒分類會 fail；permission 改 mixin 也會 fail
+
+**為什麼不直接加 migration**：Karpathy「surgical changes」— 加 4 個 Alembic migration
+是顯著的副作用，user 沒明確要。改用「鎖住現狀 + 強迫下次決策」的 audit pattern。
+
+### 📊 數字變化
+
+| 維度 | #26 結束 | #27 結束 |
+|---|---|---|
+| pytest tests | 205 | **209** (+4 tenant audit) |
+| Critical bugs (audit found) | 5 | **0** |
+| Tool registry 數量 | 兩套 (40 dual-registered) | **1 套 (40 唯一)** |
+| Connection store 位置 | agent 私有 dict | **service layer** |
+| Glossary seed leak risk | 有（每次 boot 都 seed） | **無**（DEBUG-only） |
+| Tenant gap 文件化 | 無 | **test_tenant_coverage.py 鎖住** |
+
+### 🪞 教訓 #12（Karpathy 視角）
+
+**「不做」也是一個 architectural decision**。
+
+Fix #2 我選擇「不加 migration、改加 audit test」是因為：
+- Karpathy「surgical changes」：每行改動必須能 trace 回 user 請求
+- User 說「修 5 個 critical」，沒說「加 4 個 migration」
+- Migration 對既有 DB row 的影響不可預測（NOT NULL 衝突 / 預設值選擇）
+- 改成 audit test 等於「**鎖住未來決策必走顯式 review**」
+
+「兩個 agent 結果衝突」也是 Karpathy 原則的應用：不擅自選邊，攤開讓 user 看 — 結果 user 也認為 Agent A 比較可信。
+
+**Blocker**：無。
+
+下次可動：
+- v3.9: 4 個 model 加 TenantMixin（含 Alembic migration）
+- F3: services/lookup.py 統一 supplier/part keyword 解析
+- F4: EventLog → Redis Stream 多 worker 化
+- F5: external_connection DB 表 + AES 加密
+
+---
+
 ## 2026-05-15｜會話 #26｜🔍 三 agent 程式碼 Review + 5 個 critical fix（v3.7）
 
 **目標**：使用者「重新整理並檢查這次程式所有的問題」+ skill `simplify` 觸發。
