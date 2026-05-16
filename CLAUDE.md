@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-17（會話 #39 v3.15 Sprint I：CRM 全頁 + 友善化 — 學 HubSpot Pipeline + Salesforce 360 + Pipedrive Kanban + Odoo EmptyState + Notion OnboardingTour。新建 `pages/Crm.tsx` 3 tab（Lead 漏斗 / 商機 Kanban / 客戶 360 含活動 timeline）+ `components/EmptyState.tsx` 通用 actionable 空狀態 + `components/OnboardingTour.tsx` 首登 4 步驟引導（localStorage 記憶）+ Inventory 套用 EmptyState + Sidebar 加 🤝 CRM 入口 + 6/6 CRM smoke tests pass。教訓 #22：ERP 完整度 = 模型 + API + UI + nav 入口 + 文件 5 層全到才算「有」）
+**最後更新**：2026-05-17（會話 #40 v3.16 Sprint J — **erpilot 原創 UX（不抄人家）**。使用者打臉「我們不是要抄人的東西，要有自己的想法」→ 加 2 個 erpilot 獨家設計：(1) `AskAiFloat.tsx` 右下角 AI 浮球，每頁變現場教練（取代別家的 onboarding tour / help bubble，把 AI 從 chat 頁延伸到所有頁）；(2) `services/crm_auto_log.py` 訂閱 EventBus 6 種事件（so.created/confirmed/shipped/cancelled、lead.converted、opportunity.stage_changed）→ **自動產 CrmEvent 進 customer timeline**（業務不必手動加 activity log，解 Salesforce 一個經典痛點）。4/4 smoke tests pass。教訓 #23：抄別家先學會走，但不抄不會跑。erpilot 必須有自己的 DNA）
 **維護者**：使用者 + Claude
 **版本**：3.13

@@ -16,6 +16,7 @@ import { useTranslation, type Lang } from '../i18n'
 import DesktopNotifications, { type ToastEntry } from './DesktopNotifications'
 import AiStatusBadge from './AiStatusBadge'
 import OnboardingTour from './OnboardingTour'
+import AskAiFloat from './AskAiFloat'
 
 const navConfig = [
   { path: '/',                key: 'dashboard',      icon: '📊', group: 'overview' },
@@ -253,6 +254,9 @@ export default function Layout() {
 
         {/* v3.15 第一次登入引導（自動 localStorage 記住 dismiss） */}
         {token && <OnboardingTour />}
+
+        {/* v3.16 右下角 AI 浮球：每頁的「現場教練」(erpilot 原創 UX) */}
+        {token && location.pathname !== '/chat' && <AskAiFloat />}
 
         {/* v3.3 in-app toast banner（最近 5 則，5 秒後自動消失） */}
         {recentToasts.length > 0 && (

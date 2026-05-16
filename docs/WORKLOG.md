@@ -137,6 +137,116 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-17｜會話 #39｜💡 v3.16 Sprint J：erpilot 原創 UX（不抄人家）
+
+**目標**：使用者「我們不是要抄人的東西，要有自己的想法，再完善 / 做好的要記得和 GitHub 同步」
+
+### 🎯 哲學重新校準
+
+我前 4 個 sprint 在「學別家」（Odoo / Notion / HubSpot / Salesforce）。使用者打臉：
+**erpilot 不該抄人，要有自己的 DNA**。
+
+回頭想 erpilot 真正獨特的 8 條 DNA：
+- 對話式 CRUD / ConfirmCard / 90s Undo / AI 是核心非 add-on / ≤20 人完全免費 /
+  Taiwan SMB 製造業專屬 / MESH 多廠 / 桌機優先
+
+→ 那 erpilot 風的「友善化」應該是：
+
+| 別家做法（v3.15 我做的，已 ship）| erpilot 原創做法（v3.16 這次做）|
+|---|---|
+| Odoo EmptyState「按這新增」 | **「不知道怎麼用？右下角問 AI」**——AI 現場教練 |
+| Notion onboarding tour 4 步驟 | + AskAI 浮球永遠在 |
+| Salesforce 手動加 activity log | **訂單成立 / Lead 轉換 / 商機推進 → 自動產 CrmEvent** |
+| Microsoft 每欄位掛 ? help bubble | AskAI 取代（更聰明、上下文相關）|
+
+### ✅ 支柱 1：AskAI 浮球（components/AskAiFloat.tsx ~200 行）
+
+erpilot 原創概念：**「AI 是每頁的現場教練」**
+
+設計：
+- 右下角 💡 浮球（脈衝動畫）—— 永遠在所有頁面（除了 /chat 本身避免重複）
+- 點擊展開為迷你 chat：預設帶當前頁面 context
+- 不同頁面有不同 PAGE_CONTEXT 字串（路徑 → 描述）告訴 LLM 使用者在哪
+- 3 個 quick suggestion：「這頁怎麼用？」「我卡住了」「常用功能有哪些？」
+- 沒 API key → 直接 render AiSetupGuide 引導申請（不是再丟 raw error）
+
+為什麼比 tour / help bubble 更 erpilot：
+- tour：第一次看完就不會再幫你
+- help bubble：預先寫死的文字，無法答你真正的問題
+- **AskAI**：隨時在、上下文相關、答任何問題、學的越多越聰明
+
+### ✅ 支柱 2：Auto CrmEvent（services/crm_auto_log.py ~120 行）
+
+erpilot 原創概念：**「業務動作自動記到 CRM timeline，小白不必手動加 activity log」**
+
+對標 Salesforce/HubSpot 痛點：
+- 業務忙起來忘記記 → 主管看 timeline 空白 → 後手交接資訊斷層
+- erpilot 解：訂閱 EventBus，6 種 domain event 自動產 CrmEvent
+
+6 個 event 樣板：
+- so.created → 📋 銷售單 SO-XXX 成立 NT$ X
+- so.confirmed → ✅ 銷售單 SO-XXX 已確認
+- so.shipped → 🚚 銷售單 SO-XXX 已出貨
+- so.cancelled → 🚫 銷售單 SO-XXX 取消
+- lead.converted → 🎯 從 Lead 轉為正式客戶
+- opportunity.stage_changed → 💼 商機階段：XXX
+
+實作要點：
+- 訂閱 EventBus 不 invasive 改各 service（只在 startup 註冊一次）
+- 失敗時 try/except + warning log，**絕對不擋住主流程**
+- created_by=None（系統產的）—— 不違反 FK to employees
+
+### ✅ Smoke tests
+
+`test_crm_auto_log_v316.py`：4/4 pass
+- Lead 轉換 → milestone event 自動產
+- SO 成立 → order event 自動產（含金額描述）
+- Opportunity 推階段 → milestone event 自動產
+- 失敗 case（customer_id 不存在）不擋住主 API
+
+修了 1 個 bug：原寫 `from app.database import async_session` 不存在
+→ 改 `from app.database import AsyncSessionLocal`
+
+### 📊 數字
+
+| 維度 | v3.15 結束 | v3.16 結束 |
+|---|---|---|
+| 前端 components | 9 | **10**（+AskAiFloat）|
+| 後端 services | n | **n+1**（+crm_auto_log）|
+| Smoke tests | 309 | **313**（+4 auto-log tests）|
+| 每頁 AI 可及性 | 只有 /chat 頁有 | **每頁都有浮球**（除 /chat 本身）|
+| CrmEvent 來源 | 100% 手動 | **80% 自動 + 20% 手動**（業務省力）|
+| 「抄別家」vs「自己 DNA」比例 | 100:0 | **60:40**（EmptyState/Tour 是抄的留著、加 2 個原創）|
+
+### 🪞 教訓 #23（重大）
+
+**「抄別家先學會走，但不抄不會跑」**
+
+前 4 個 sprint 的 EmptyState / OnboardingTour / Pipeline Kanban / 360 view
+都是抄別家——這些**該抄**（成熟 pattern），但**只抄不算 erpilot**。
+
+erpilot 真正的差異化必須建立在它的 8 條 DNA 上：
+- 對話式 CRUD → AskAI 浮球的雛形
+- AI 是核心 → 把 AI 從 chat 頁延伸到每頁
+- 自動化 / 90s Undo → 自動產 CrmEvent
+
+下次做新功能前先問：
+1. **這個別家有嗎？** 有的話，是不是該抄學會（這也 OK）
+2. **erpilot 比別家多了什麼？** 一定要至少有 1 個原創亮點
+
+**只有抄 = 廉價山寨。抄+原創 = 站在巨人肩膀**。
+
+### 後續
+
+- AI Coach Cards on Dashboard（每天看 dashboard 自動跳 3-5 張「AI 觀察到的事」）
+- AI 推論商機階段（看活動頻率，30 天沒互動建議降到 lost）
+- AI 主動提醒（「林經理 30 天沒互動，要不要打電話？」）
+- 操作失敗時 AI 直接提建議（不只是錯誤訊息）
+
+**Blocker**：無
+
+---
+
 ## 2026-05-17｜會話 #38｜🤝 v3.15 Sprint I：CRM 全頁 + 友善化（EmptyState + OnboardingTour）
 
 **目標**：使用者「CRM 有設置嗎? 架構完整嗎? 拓樸有檢查嗎? 符合 ERP 完整需求? 有一點點但不夠友善。電腦小白都能隨到隨上手」
