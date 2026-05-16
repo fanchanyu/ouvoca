@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-16（會話 #34：戰略軸 — 三軌授權上線，≤20 concurrent users **完全免費**（含閉源 connector），對齊 CLAUDE.md「讓小小企業可以快速上手」承諾。新建 LICENSE-SMALL-BUSINESS.md v1.0（8 章雙語、Elastic+FSL+BSL 啟發但專為 Taiwan SMB 設計）+ LICENSE-COMMERCIAL 三軌制重寫 + FAQ SB1-SB8 區塊 + README 三軌表）
+**最後更新**：2026-05-16（會話 #35：README 完整雙語重寫（🇹🇼/🇺🇸 每 section 並列、TOC、3-column 表格、專案數據）+ Made by Peter 5 個視覺接觸點（README badge+footer、Frontend Layout sidebar、War-room dashboard header）+ i18n footer 加 madeBy key + 順便修 stale v2.0.0 → v3.12）
 **維護者**：使用者 + Claude
 **版本**：3.12

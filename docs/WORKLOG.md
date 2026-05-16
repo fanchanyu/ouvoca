@@ -38,6 +38,105 @@
 
 ---
 
+## 2026-05-16｜會話 #35｜🌐 README 完整雙語 + Made by Peter 5 處署名
+
+**目標**：使用者「github上面要有完整雙語的介紹. 把關鍵幾個地方的圖示中,要新增一個 made by Peter，你覺得如何」
+
+### 🎯 戰略意義
+
+- **完整雙語**：之前 README 是中文為主、英文摻雜，國際訪客（potential ISV / 大廠評估者）讀起來吃力。這次 section by section 雙語並列。
+- **Made by Peter**：把作者個人 brand 上到產品 5 個視覺接觸點，建立「個人代理人」可識別性（避免「fanchanyu/erpilot」是匿名專案的印象）。
+
+### ✅ Made by Peter 5 個位置
+
+| 位置 | 形式 |
+|---|---|
+| README.md badge row | `[![Made by Peter](shields.io/badge/made%20by-Peter%20❤️-ff69b4)]` |
+| README.md footer 區塊 | `Made by [Peter](github.com/fanchanyu) ❤️ in Taiwan` 居中顯示 |
+| Frontend Layout sidebar 底部 | i18n key `footer.madeBy` → `Made by Peter ❤️`，連回 GitHub repo |
+| War-room dashboard header | `⚡ MADE BY PETER` 線條風（配合 80s terminal 美學）|
+| (LICENSE 已有 maintainer 識別) | Section 8 contact block 已標 fanchanyu |
+
+### ✅ README 雙語重寫（318 → 270 行，更密但更完整）
+
+**結構升級**：
+- 副標題雙語 🇹🇼 / 🇺🇸 並列
+- 加 **目錄** TOC（13 個 anchor）
+- 加 **30 秒 pitch** 區塊（雙語並列 + 「為什麼選 erpilot?」5 點對照表）
+- What's Inside 從項目列表升級成 **3 欄表格**（模組 / 中文 / English）
+- Quick Start 中英 inline 並列
+- Domain Map 表格 column 加中文翻譯
+- 對話式 CRUD 範例改 4 列表格（操作中英對照 + ConfirmCard 註明）
+- Architecture 圖加雙語 caption（VMI 友善設計）
+- 三軌授權表格加 🇹🇼/🇺🇸 row 說明
+- 加 **專案數據表**（287 tests / 7 gates / 35 PDFs / 60+ models / 40 tools / public since 2026-05-16）
+- 加 **Footer 居中署名**（Peter + Taiwan 國旗 + 4 個關鍵連結）
+
+新增 badges：
+- License badge 改為 `AGPL-3.0 + SBL + Commercial`（反映三軌制）
+- **Made by Peter** badge（粉色 ❤️）
+- **Built for Taiwan SMB**（紅色）
+
+### ✅ Frontend Layout 改動
+
+```tsx
+// 之前
+<p>{t('footer.version')} · {new Date().getFullYear()}</p>
+
+// 之後
+<div className="space-y-1">
+  <p>{t('footer.version')} · {new Date().getFullYear()}</p>
+  <p className="text-white/30">
+    <a href="https://github.com/fanchanyu/erpilot" ...>
+      {t('footer.madeBy')}
+    </a>
+  </p>
+</div>
+```
+
+i18n 雙語 key 同時更新（zh-TW.ts / en.ts 都加 `madeBy: 'Made by Peter ❤️'`）+ 順便修 stale `version: 'v2.0.0'` → `v3.12`。
+
+### ✅ War-room header
+
+加在 status dot 左邊：
+
+```html
+<a href="github.com/fanchanyu/erpilot" target="_blank"
+   style="color:#00ff9d;font-size:11px;letter-spacing:2px;opacity:0.7;"
+   onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">
+  ⚡ MADE BY PETER
+</a>
+```
+
+配合 war-room 既有的 80s monospace + 螢光綠終端機美學。
+
+### 🪞 教訓 #19
+
+「**個人 brand vs 專案 brand 不衝突，且更有溫度**」。
+
+OSS 專案常常匿名（org name 而已），導致：
+- 訪客不知道誰在維護 → 評估風險高
+- 沒有「故事」 → community 無法 emotionally invest
+- 商業諮詢時客戶問「找誰簽約」不知答案
+
+加 "Made by Peter" 在 5 個視覺點，建立可識別的個人代理人 → 對 SMB 客戶（買 30万/年合約）尤其重要：他們要看到「**真有個人**對這套系統負責」。
+
+對齊 Taiwan 中小企業文化：「跟誰買」往往比「買什麼」更重要。
+
+### 📊 數字變化
+
+| 維度 | Before | After |
+|---|---|---|
+| README 雙語覆蓋 | ~10%（部分 section）| **100%** |
+| Made by Peter 視覺接觸點 | 0 | **5** |
+| README badges | 5 | **7**（+ Made by Peter / Taiwan SMB）|
+| README TOC anchors | 0 | **13** |
+| 國際訪客 onboarding 摩擦 | 高（要逐字翻）| 低（並列即看）|
+
+**Blocker**：無
+
+---
+
 ## 2026-05-16｜會話 #34｜🌱 戰略軸：≤20 concurrent users 完全免費（Small Business License v1.0）
 
 **目標**：使用者「商業策略裡 我想要做 20 以內不用錢」
