@@ -297,12 +297,17 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for production deployment details.
 
 ## License
 
-erpilot 採 **dual-license（雙軌授權）**：
+erpilot 採 **三軌授權（tri-license）**：
 
 | 軌道 | 條款 | 適用 | 費用 |
 |---|---|---|---|
-| 🟢 **開源軌** | [AGPL-3.0](./LICENSE) | 內部自用、社群協作、不在意 source disclosure | **免費** |
-| 🔵 **商業軌** | 個別協商 | 需閉源整合、ISV 包裝轉售、SaaS 不想公開修改 | 個別報價 |
+| 🟢 **開源軌** | [AGPL-3.0](./LICENSE) | 願意揭露 source 的所有人、社群協作 | **免費** |
+| 🌱 **小小企業軌** | [Small Business License](./LICENSE-SMALL-BUSINESS.md) | **≤ 20 concurrent users** 的單一公司，非 ISV / SaaS | **完全免費**（含閉源 connector）|
+| 🔵 **商業軌** | 個別協商 | > 20 concurrent users、ISV / OEM、SaaS provider、大企業 | 個別報價 |
+
+> 🌱 **「20 人以內全免費」**：對齊 erpilot 「**讓小小企業也快速上手**」承諾。
+> Taiwan SMB 1-20 人廠把整套（含鼎新 / 正航 / SAP connector）拿去白用，
+> 等你長到 21 人並離不開 erpilot 再聊商業合約。
 
 需要哪一個？看 [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md) 決策樹。
 詳細 FAQ：[`docs/COMMERCIAL_LICENSING_FAQ_ZH.md`](./docs/COMMERCIAL_LICENSING_FAQ_ZH.md)。

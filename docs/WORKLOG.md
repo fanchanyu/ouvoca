@@ -38,6 +38,97 @@
 
 ---
 
+## 2026-05-16｜會話 #34｜🌱 戰略軸：≤20 concurrent users 完全免費（Small Business License v1.0）
+
+**目標**：使用者「商業策略裡 我想要做 20 以內不用錢」
+→ 從 dual-license 變 **tri-license（三軌制）**：AGPL / Small Business / Commercial。
+
+### 🎯 戰略決定（使用者拍板）
+
+| 問題 | 選擇 | 影響 |
+|---|---|---|
+| 「20 以內」定義？ | **concurrent users**（24h 峰值，15 min idle window）| 最寬鬆。50 人廠常只 15 人同時在線 → 適格 |
+| Connector 收費？ | **全部免費**（含鼎新/正航/SAP/Oracle）| 最激進。完全沒功能 gate |
+
+這是**最寬鬆的 freemium 設計** — 把 Taiwan SMB 的 1-20 人廠市場一網打盡，
+等他們長到 21 人才開始談錢。
+
+### ✅ 新檔案：LICENSE-SMALL-BUSINESS.md v1.0
+
+雙語 8 章 ~250 行：
+- §1 Eligibility（5 個排除條件全部要成立）
+- §2 Grant（明示豁免 AGPL §13 network use disclosure）
+- §3 Restrictions（必須保留 "Powered by erpilot Community" 標示）
+- §4 Upgrade Trigger（30 天 grace period）
+- §5 Audit Right（每年至多 1 次、30 天書面通知）
+- §6 Termination / §7 Governing Law (Taiwan) / §8 Contact
+
+啟發來源：Elastic License v2 第三方限制條款 + Sentry FSL + BSL —
+但 ≤20 concurrent 是 erpilot 為台灣 SMB 專屬設計的差異化。
+
+### ✅ LICENSE-COMMERCIAL.md 升級為三軌制
+
+| 之前（dual-license）| 之後（tri-license）|
+|---|---|
+| 🟢 AGPL + 🔵 Commercial | 🟢 AGPL + 🌱 Small Business + 🔵 Commercial |
+| 決策樹 6 分支 | 決策樹 7 分支（含小小企業分支） |
+| 定價表 4 列 | 定價表 5 列（小小企業 NT$ 0）|
+| 商業包含 4 點（A 免 AGPL / B 加值 / C IP 賠償）| 改為 4 點明確分離（A 規模情境 / B 加值 / C IP 賠償）+ 警語「閉源 connector 對三軌都開放」|
+
+### ✅ README License 章
+
+從 2x2 表變 3x2 表 + 新加「20 人以內全免費」戰略 callout。
+
+### ✅ FAQ 新增 SB1-SB8 專屬區塊（~200 行）
+
+8 個小小企業常見問題：
+- SB1: 5 人新創可以白用嗎？（可以，含 connector）
+- SB2: 「同時在線」怎麼算？（15 min idle window + concurrent peak）
+- SB3: 50 人廠但少數人用？（可以，看 concurrent 不看員工數）
+- SB4: 21 人廠尷尬期？（沒 hard gate + 誠信制 + 可協商）
+- SB5: 分拆成兩家公司鑽漏洞？（自然摩擦 + substance over form 原則）
+- SB6: SI / 顧問可以用嗎？（客戶 license，SI 散布禁止）
+- SB7: 條款會被收回嗎？（不會，版本鎖定）
+- SB8: AGPL vs Small Business 怎麼選？（source disclosure 義務的差異）
+
+### 📊 商業模式變化
+
+| 維度 | Before | After |
+|---|---|---|
+| 授權軌道數 | 2 軌 | **3 軌** |
+| 完全免費條件 | 開源所有改動（AGPL）| **OR** ≤20 concurrent users（Small Business）|
+| 適格客戶群 | 個人 / 願意開源的公司 | + **整個 Taiwan 1-20 人廠市場** |
+| 商業授權門檻 | 任何「不想開源」客戶 | 真有規模 / ISV / SaaS 才付費 |
+| 預期 funnel | 直接收費 | **land** (≤20) → **expand** (>20) |
+
+### 🪞 教訓 #18
+
+「freemium 怎麼設計，戰略價值不對稱」。
+
+20 concurrent users free + 全 connector free = 看似讓利大，實則：
+- ✅ **解鎖整個 SMB 採用 funnel**（1-20 人廠在 Taiwan 是海量）
+- ✅ **大客戶不會被影響**（他們本來就 >20 + ISV/SaaS 情境）
+- ✅ **建立 community 護城河**（小廠用上癮後極難離開）
+- ✅ **對齊 CLAUDE.md 北極星承諾**（「讓小小企業可以快速上手」）
+
+對稱比較：
+- 收費降到 5 人 → 收入小幅增加，但失去 Taiwan SMB market 主導機會
+- concurrent vs employee count → employee 是嚴格但容易誤殺真實 SMB 客戶
+- connector 收費 → 看似差異化，但對 1-20 人廠根本沒上下文（他們還在 Excel 階段）
+
+關鍵 insight：**SMB 在採用前對「閉源 connector」沒概念**，
+我們先讓他們長到 21 人，那時 connector 已經是他們離不開的基礎設施。
+
+### 後續
+
+- 等使用者填 email 占位符（CLA / LICENSE-COMMERCIAL / LICENSE-SMALL-BUSINESS / FAQ）
+- Sprint B（license key 機制）等第一個商業詢價客戶
+- 將來：考慮加 `/api/analytics/concurrent-users-peak` endpoint 讓使用者自己 monitor
+
+**Blocker**：無
+
+---
+
 ## 2026-05-16｜會話 #33｜⚖️ Sprint A：商業授權法務門面（CLA + LICENSE-COMMERCIAL + DCO check）
 
 **目標**：使用者「那申請的授權要如何規劃?」

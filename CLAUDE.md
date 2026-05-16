@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-16（會話 #33：Sprint A 商業授權法務門面 — CLA.md（雙語 + Section 2(b) 雙授權 sublicense 條款）+ CONTRIBUTING.md + LICENSE-COMMERCIAL.md（決策樹 + 定價範圍）+ Commercial License Inquiry Issue Form + CLA Acknowledgement Form + COMMERCIAL_LICENSING_FAQ_ZH.md（15 Q&A）+ `.github/workflows/dco.yml` 自動擋未簽 CLA 的 PR）
+**最後更新**：2026-05-16（會話 #34：戰略軸 — 三軌授權上線，≤20 concurrent users **完全免費**（含閉源 connector），對齊 CLAUDE.md「讓小小企業可以快速上手」承諾。新建 LICENSE-SMALL-BUSINESS.md v1.0（8 章雙語、Elastic+FSL+BSL 啟發但專為 Taiwan SMB 設計）+ LICENSE-COMMERCIAL 三軌制重寫 + FAQ SB1-SB8 區塊 + README 三軌表）
 **維護者**：使用者 + Claude
 **版本**：3.12
