@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #25：真實 DeepSeek E2E 9/9 moments 跑通 + Sales transcript 到位）
+**最後更新**：2026-05-15（會話 #26：3 agents code review + 5 個 critical fix（Part Inventory bug / GC / RiskTier / migration perf / digest 並行））
 **維護者**：使用者 + Claude
-**版本**：3.6
+**版本**：3.7

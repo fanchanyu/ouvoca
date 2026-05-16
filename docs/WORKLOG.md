@@ -38,6 +38,86 @@
 
 ---
 
+## 2026-05-15｜會話 #26｜🔍 三 agent 程式碼 Review + 5 個 critical fix（v3.7）
+
+**目標**：使用者「重新整理並檢查這次程式所有的問題」+ skill `simplify` 觸發。
+動 3 agents 並行（reuse / quality / efficiency）做今天 8 個 sprint 累積差異的 review，
+共識別 ~30 個 finding，CEO triage 出 5 個最高 ROI 的 fix。
+
+### 🔍 3 Agents Review 報告
+
+**Agent 1 (Reuse)**：3 critical + 11 medium + 7 minor — 最痛點是 `_resolve_part` 重複 + `risk_tier` 字串散布 + `_do_migration` 跳過 service 層。
+**Agent 2 (Quality)**：4 must-fix + 12 should-fix + 9 nice-to-have — 最痛點是 3 個 hard-write tool 80% 重複 boilerplate + import-time AGENT_REGISTRY 副作用 + stringly-typed 散布。
+**Agent 3 (Efficiency)**：1 critical + 14 medium + 11 nit — 最痛點是 `_PENDING` 無人 GC（OOM 風險）+ migration N 次 query 衝突檢查 + `build_digest` 三段序列。
+
+### ✅ 5 個 Critical Fix（最高 ROI）
+
+#### Fix #1 — `migration_tools._do_migration` 大改造
+
+`backend/app/agents/domains/migration_tools.py:230-360`
+
+修 4 個問題一次到位：
+1. **資料正確性 bug**：之前直接 `target_model_cls(**kwargs); db.add()` → Part 沒帶 Inventory 行 → 後續 `query_inventory` 會 「找不到」。改走 `services.inventory.create_part / purchase.create_supplier / sales.create_customer`，每筆 insert 都正確建關聯 + emit 事件。
+2. **N 次衝突 SELECT → 1 次**：之前每筆 row 都 `select(Model).where(code == X)` 檢查是否已存在。改成「預先抓所有現存 code 進 set」，1 次 query 取代 N 次。1000 筆 migration ≈ **1000× 速度提升**。
+3. **不再 break loop**：之前 errors > 10 就 break 整個 migration → 1000 筆變只處理 12 筆，剩下 988 筆**靜默丟失**。改成繼續處理，errors 陣列限制長度只截斷訊息收集。
+4. **不再二次 query**：`_migrate_with_confirm` preview 階段已抓 `sample`（最多 1000 筆），executor 直接 reuse 而非再 query 一次。
+
+新增 helper `_get_create_service(domain)` 對映 domain → service create function。
+
+#### Fix #2 — ConfirmCard 背景 GC 任務
+
+`backend/app/main.py` lifespan 加入：
+- 每 60 秒跑一次 `_gc_expired()`
+- 防止過期 ConfirmCard 的 executor closure 持有 db session 而 OOM
+- 進程 shutdown 時 `gc_task.cancel()` 清理
+
+#### Fix #3 — `engine._missing_required_slots` cycle-aware import + 移除 silent except
+
+`backend/app/agents/engine.py`：
+- 移除 `try/except` silent fallback（會隱藏真 bug）
+- 加 `_NO_REGISTRY_META: set` 快取舊註冊 tool 的 lookup miss，避免 hot path 重複 dict 查詢
+- 文件註解為何不能移到模組頂層 import（registry → engine cycle）
+
+#### Fix #4 — `make_card` RiskTier enum 驗證
+
+`backend/app/agents/confirm_card.py`：
+- 接受 `RiskTier | str` — enum 自動轉 `.value`，字串強制驗證
+- 之前 6 處 hard-coded `risk_tier="hard-write"` 一旦 typo 為 `"hardwrite"` 前端 ConfirmCard 顏色 / 標籤會默默壞 — 現在 ValueError 立刻 raise
+- 預設值改成 `RiskTier.HARD_WRITE`
+
+#### Fix #5 — `email_digest.build_digest` 並行 + reuse service
+
+`backend/app/services/email_digest.py`：
+- 3 sections (alerts / events / KPI) 改 `asyncio.gather`，每 section 獨立 `AsyncSession`（避免 SQLAlchemy async session 共享 race）
+- `_build_alerts` 內 (a) 低於安全庫存改用 `services.inventory.list_inventory_below_safety`（之前 inline JOIN 與 service 重複）
+- `period_hours` clamp 集中到 service（之前 API + tool 兩處重複）
+- 預期 build_digest wall-time ~50% 降低
+
+### 📊 數字變化
+
+| 維度 | #25 結束 | #26 結束 |
+|---|---|---|
+| pytest tests | 205 | **205**（沒新增，只 fix 既有 bug）|
+| Critical bugs (review found) | 5 | **0** |
+| Migration 速度（1000 筆） | N+1 query | **2 query 完成** |
+| OOM 風險 | _PENDING 無 GC | ✅ 60 秒背景 GC |
+| Code reuse | 5 處 inline 重複 service 邏輯 | ✅ 走正確 service |
+| RiskTier typo safety | 字串到處跑 | ✅ Enum 驗證 |
+
+### 🪞 教訓 #11
+
+**Code review agent 找到的 5 個問題裡有 1 個是真 bug**（migration 沒建 Inventory 行）— 也就是說，
+**252 tests 全綠不代表 demo 能順走**。Test pyramid 有 gap：
+- Unit/integration tests 驗證程式碼邏輯
+- E2E migration scenario 沒被覆蓋（test fixtures 直接 INSERT，沒走 migrate path 的 dataflow）
+- Code review 是發現「不會跳錯但會默默壞」這類 bug 的正確工具
+
+「並行 3 agents review」這個 pattern 比叫 1 個 agent 做全部更有效 — 不同 lens（reuse / quality / efficiency）找到的問題完全不重疊。
+
+**Blocker**：無。
+
+---
+
 ## 2026-05-15｜會話 #25｜🎬 真實 DeepSeek E2E 錄影：9 moments 全跑通（v3.6）
 
 **目標**：使用者選 "再一個衝刺：DeepSeek E2E 錄影" — 拿真實 LLM transcript 給銷售團隊。

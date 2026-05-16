@@ -21,6 +21,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, UTC
 from typing import Any, Awaitable, Callable, Optional
 
+from app.agents.registry import RiskTier
 from app.core.logging import get_logger
 
 log = get_logger(__name__)
@@ -157,12 +158,26 @@ def make_card(
     title: str,
     summary: list[str],
     slots: dict,
-    risk_tier: str = "hard-write",
+    risk_tier: "RiskTier | str" = RiskTier.HARD_WRITE,
     ttl_seconds: int = DEFAULT_TTL_SECONDS,
     created_by: Optional[str] = None,
     tenant_id: Optional[str] = None,
 ) -> ConfirmCard:
-    """構造一張新 ConfirmCard。"""
+    """構造一張新 ConfirmCard。
+
+    risk_tier 接受 RiskTier enum 或字串（向後相容；字串需是 RiskTier 合法值）。
+    """
+    # Normalize：enum → str；str 必須是合法值
+    if isinstance(risk_tier, RiskTier):
+        risk_value = risk_tier.value
+    else:
+        risk_value = str(risk_tier)
+        # 驗證合法性 — 早抓錯而不是讓前端默默壞掉
+        if risk_value not in {t.value for t in RiskTier}:
+            raise ValueError(
+                f"invalid risk_tier {risk_value!r}; must be one of "
+                f"{[t.value for t in RiskTier]}"
+            )
     now = datetime.now(UTC)
     return ConfirmCard(
         id=str(uuid.uuid4()),
@@ -170,7 +185,7 @@ def make_card(
         title=title,
         summary=summary,
         slots=slots,
-        risk_tier=risk_tier,
+        risk_tier=risk_value,
         created_at=now.isoformat(),
         expires_at=(now + timedelta(seconds=ttl_seconds)).isoformat(),
         ttl_seconds=ttl_seconds,

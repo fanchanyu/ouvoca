@@ -214,9 +214,11 @@ async def _migrate_with_confirm(
     )
 
     async def execute():
+        # 重用 preview 階段已抓的 sample（避免再次 query 同一 table）
         return await _do_migration(
             db, connection, source_table, target_domain,
             preview["mappings"], conflict_strategy, employee_id,
+            rows=sample,
         )
 
     await stash_card(card, execute)
@@ -230,35 +232,52 @@ async def _migrate_with_confirm(
 async def _do_migration(
     db, connection: str, source_table: str, target_domain: str,
     mappings: list[dict], conflict_strategy: str, employee_id: Optional[str],
+    rows: Optional[list[dict]] = None,
 ) -> dict:
-    """執行 migration loop。"""
+    """執行 migration loop。
+
+    優化（review v3.7）：
+      • rows 可從 caller 傳入（避免重複 query 同一 table — 之前 preview 已抓過）
+      • pre-fetch 所有現存 code 一次（O(1) set lookup vs N 次 SELECT）
+      • 走 service 層（create_part 會建 Inventory + emit event；create_supplier/customer 同理）
+      • 不再在 errors > 10 時 break（避免靜默丟棄剩下 989 筆）
+    """
     info = _get_connection_info(connection)
     if info is None:
         return {"error": "連接不存在（execute 階段）"}
 
-    conn = get_connector(info["connector"], info["config"])
-    rows = await conn.query(source_table, limit=1000)
+    if rows is None:
+        conn = get_connector(info["connector"], info["config"])
+        rows = await conn.query(source_table, limit=1000)
 
-    # mapping table: target_field → source_field (skip 0 confidence)
     mapping_dict = {
         m["target_field"]: m["source_field"]
         for m in mappings
         if m["source_field"] and m["confidence"] >= 0.6
     }
 
-    # 動態取目標 model
     target_model_cls = _get_target_model(target_domain)
     if target_model_cls is None:
         return {"error": f"未實作的 target_domain: {target_domain}"}
 
     code_field = "part_no" if target_domain == "part" else "code"
+
+    # 預先抓所有現存 code（1 次 query 取代 N 次）
+    existing_codes: set = set((await db.execute(
+        select(getattr(target_model_cls, code_field))
+    )).scalars().all())
+
+    # 走 service 層的 fast path：customer/supplier/part 都有專屬 create function
+    # （part 必走 service，否則 Inventory 行不會被建）
+    create_service = _get_create_service(target_domain)
+
     inserted = 0
     updated = 0
     skipped = 0
     failed = 0
     errors: list[str] = []
 
-    for row in rows:
+    for idx, row in enumerate(rows, 1):
         try:
             kwargs: dict = {}
             for tgt, src in mapping_dict.items():
@@ -269,34 +288,38 @@ async def _do_migration(
             code_value = kwargs.get(code_field)
             if not code_value:
                 failed += 1
-                errors.append(f"row 缺 {code_field}: {row}")
+                errors.append(f"row #{idx} 缺 {code_field}")
                 continue
 
-            # 衝突檢查
-            existing = (await db.execute(
-                select(target_model_cls).where(getattr(target_model_cls, code_field) == code_value)
-            )).scalar_one_or_none()
-
-            if existing is not None:
+            if code_value in existing_codes:
                 if conflict_strategy == "skip":
                     skipped += 1
                     continue
-                # overwrite
+                # overwrite — 仍走原 ORM update 路徑
+                existing = (await db.execute(
+                    select(target_model_cls).where(getattr(target_model_cls, code_field) == code_value)
+                )).scalar_one()
                 for k, v in kwargs.items():
                     if hasattr(existing, k):
                         setattr(existing, k, v)
                 updated += 1
             else:
-                kwargs["id"] = str(uuid.uuid4())
-                new = target_model_cls(**kwargs)
-                db.add(new)
+                # insert — 走 service 確保 Inventory 行 + 事件
+                if create_service is not None:
+                    await create_service(db, kwargs)
+                else:
+                    kwargs["id"] = str(uuid.uuid4())
+                    db.add(target_model_cls(**kwargs))
+                existing_codes.add(code_value)  # 後續 row 也算 conflict
                 inserted += 1
         except Exception as e:
             failed += 1
-            errors.append(f"{type(e).__name__}: {e}")
-            if len(errors) > 10:
-                errors.append("...（更多錯誤已截斷）")
-                break
+            # 不 break：繼續處理剩下的 row，避免靜默丟資料。
+            # 只截斷 errors 陣列以免回傳 payload 過大。
+            if len(errors) < 20:
+                errors.append(f"row #{idx} {type(e).__name__}: {e}")
+            elif len(errors) == 20:
+                errors.append(f"...（已收集 20 條錯誤訊息，後續錯誤不再記錄）")
 
     await db.commit()
 
@@ -308,13 +331,27 @@ async def _do_migration(
         "updated": updated,
         "skipped": skipped,
         "failed": failed,
-        "errors": errors[:10],
+        "errors": errors,
         "migrated_by": employee_id,
         "message": (
             f"✅ 匯入完成：新增 {inserted} 筆 / "
             f"更新 {updated} 筆 / 略過 {skipped} 筆 / 失敗 {failed} 筆"
         ),
     }
+
+
+def _get_create_service(domain: str):
+    """回對應 domain 的 service create function（保證寫入完整：Part 帶 Inventory、emit event）。"""
+    if domain == "part":
+        from app.services.inventory import create_part
+        return create_part
+    if domain == "supplier":
+        from app.services.purchase import create_supplier
+        return create_supplier
+    if domain == "customer":
+        from app.services.sales import create_customer
+        return create_customer
+    return None
 
 
 def _get_target_model(domain: str):

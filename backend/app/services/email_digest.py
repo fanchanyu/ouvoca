@@ -17,6 +17,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import smtplib
 from dataclasses import dataclass
 from datetime import datetime, timedelta, UTC
@@ -124,49 +125,55 @@ async def build_digest(
     recipient: Optional[str] = None,
     period_hours: int = 24,
 ) -> Digest:
-    """產生 digest。period_hours 控制「最近多久」的統計。"""
+    """產生 digest。period_hours 控制「最近多久」的統計。
+
+    優化（v3.7）：3 個段落的 query 互不相依，並行執行（asyncio.gather）。
+    每段用獨立 AsyncSession 避免 session 共享 race（SQLAlchemy async 不允許 1 session 多 task）。
+    """
+    # period_hours clamp（之前在 API + tool 兩處重複，集中到 service）
+    period_hours = max(1, min(int(period_hours), 168))
     now = datetime.now(UTC).replace(tzinfo=None)
     period_start = now - timedelta(hours=period_hours)
 
-    sections: list[DigestSection] = []
+    # 3 sections 並行：
+    from app.database import AsyncSessionLocal
 
-    # ─── Section 1: 警示 ─────────────────────────────────
-    alerts = await _build_alerts(db, period_start)
-    sections.append(alerts)
+    async def _section(builder):
+        async with AsyncSessionLocal() as session:
+            return await builder(session, period_start) if builder is not _build_kpi_snapshot \
+                else await builder(session)
 
-    # ─── Section 2: 今日事件摘要 ──────────────────────────
-    events = await _build_event_summary(db, period_start)
-    sections.append(events)
+    alerts, events, kpi = await asyncio.gather(
+        _section(_build_alerts),
+        _section(_build_event_summary),
+        _section(_build_kpi_snapshot),
+    )
 
-    # ─── Section 3: KPI ──────────────────────────────────
-    kpi = await _build_kpi_snapshot(db)
-    sections.append(kpi)
-
-    # 一句話結論
     summary = _build_summary_line(alerts, events)
 
     return Digest(
         generated_at=now.isoformat(),
         period_label=f"最近 {period_hours} 小時",
         recipient=recipient,
-        sections=sections,
+        sections=[alerts, events, kpi],
         summary_line=summary,
     )
 
 
 async def _build_alerts(db: AsyncSession, period_start: datetime) -> DigestSection:
-    """警示：低於安全庫存 / 逾期應收 / 未完工逾期工單。"""
+    """警示：低於安全庫存 / 逾期應收 / 未完工逾期工單。
+
+    優化（v3.7）：低於安全走 services.inventory.list_inventory_below_safety
+    （之前 inline SQL 與 service 重複）。
+    """
+    from app.services.inventory import list_inventory_below_safety
+
     items: list[dict] = []
     lines: list[str] = []
+    now_naive = datetime.now(UTC).replace(tzinfo=None)
 
-    # (a) 低於安全庫存
-    low_stock_rows = (await db.execute(
-        select(Inventory, Part)
-        .join(Part, Inventory.part_id == Part.id)
-        .where(Inventory.qty_available < Part.safety_stock)
-        .where(Part.safety_stock > 0)
-        .limit(5)
-    )).all()
+    # (a) 低於安全庫存（reuse service）
+    low_stock_rows = await list_inventory_below_safety(db, limit=5)
     for inv, p in low_stock_rows:
         items.append({
             "type": "low_stock", "severity": "warn",
@@ -182,7 +189,7 @@ async def _build_alerts(db: AsyncSession, period_start: datetime) -> DigestSecti
     # (b) 逾期應收
     overdue_ar = (await db.execute(
         select(AccountsReceivable)
-        .where(AccountsReceivable.due_date < datetime.now(UTC).replace(tzinfo=None))
+        .where(AccountsReceivable.due_date < now_naive)
         .where(AccountsReceivable.status != "paid")
         .limit(5)
     )).scalars().all()
@@ -202,11 +209,11 @@ async def _build_alerts(db: AsyncSession, period_start: datetime) -> DigestSecti
     overdue_wo = (await db.execute(
         select(ProductionOrder)
         .where(ProductionOrder.status.in_(["released", "in_progress"]))
-        .where(ProductionOrder.scheduled_end < datetime.now(UTC).replace(tzinfo=None))
+        .where(ProductionOrder.scheduled_end < now_naive)
         .limit(5)
     )).scalars().all()
     for wo in overdue_wo:
-        delay_days = (datetime.now(UTC).replace(tzinfo=None) - wo.scheduled_end).days if wo.scheduled_end else 0
+        delay_days = (now_naive - wo.scheduled_end).days if wo.scheduled_end else 0
         items.append({
             "type": "overdue_wo", "severity": "warn",
             "wo_no": wo.wo_no, "status": wo.status,

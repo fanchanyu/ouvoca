@@ -142,22 +142,28 @@ async def execute_tool(name: str, args: dict, db=None, user=None) -> str:
         return json.dumps({"error": str(exc)}, ensure_ascii=False)
 
 
+_NO_REGISTRY_META: set[str] = set()
+
+
 def _missing_required_slots(name: str, args: dict) -> list:
     """檢查 args 是否缺少 required slot（從新 registry 取 slots metadata）。
 
     回值：缺少的 Slot 物件 list；若 tool 未在新 registry 註冊則回空 list（向後相容）。
+
+    Note: 不能在模組頂層 import registry — registry 反過來 import engine.register_tool
+    形成 cycle。但快取 None lookup 結果到 _NO_REGISTRY_META 集，避免 hot path 重複 dict miss。
     """
-    try:
-        from app.agents.registry import get_tool
-        meta = get_tool(name)
-        if meta is None:
-            return []  # 舊註冊方式：跳過驗證
-        return [
-            s for s in meta.slots
-            if s.required and (s.name not in args or args.get(s.name) in (None, "", []))
-        ]
-    except Exception:
-        return []  # registry 載入失敗就跳過
+    if name in _NO_REGISTRY_META:
+        return []
+    from app.agents.registry import get_tool
+    meta = get_tool(name)
+    if meta is None:
+        _NO_REGISTRY_META.add(name)
+        return []
+    return [
+        s for s in meta.slots
+        if s.required and (s.name not in args or args.get(s.name) in (None, "", []))
+    ]
 
 
 def _build_reverse_ask(tool_name: str, missing: list) -> str:

@@ -71,7 +71,29 @@ async def lifespan(app: FastAPI):
     install_tenant_auto_injection()
     install_auto_tenant_filter()
 
+    # ConfirmCard pending dict 背景 GC（v3.7）：
+    # 防止過期 card 的 executor closure 持續持有 db session 而 OOM。
+    # 每 60 秒掃一次；無人叫 /pending 時也保證會清。
+    import asyncio as _asyncio
+    from app.agents.confirm_card import _gc_expired
+
+    async def _confirm_card_gc_loop():
+        while True:
+            try:
+                await _gc_expired()
+            except Exception as exc:
+                log.warning("ConfirmCard GC loop error: %s", exc)
+            await _asyncio.sleep(60)
+
+    gc_task = _asyncio.create_task(_confirm_card_gc_loop(), name="confirm-card-gc")
+
     yield
+
+    gc_task.cancel()
+    try:
+        await gc_task
+    except _asyncio.CancelledError:
+        pass
     log.info("Shutting down %s", settings.APP_NAME)
 
 
