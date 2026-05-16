@@ -137,6 +137,115 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-17｜會話 #36｜📚 v3.13.1：README 電腦小白化 + 35 PDF 上 GitHub
+
+**目標**：使用者「GitHub 的快速安裝沒寫清楚，無法讓人一下就上手 / 加油吧 / GitHub 看不到 PDF / 其實都做到這個樣子.PDF 開放也沒有差」
+
+### 🎯 Root cause 診斷
+
+我用「我是阿玲（採購倉管）老闆叫我裝 erpilot」第一人稱視角讀 README，發現：
+- 第一個技術區塊就是「🔐 First-time setup secret-scanning hook」+ `bash scripts/git-hooks/install_hooks.sh` → 阿玲直接嚇到關掉視窗
+- 「Quick Start」雖然叫 quick 但用 `npm install` / `python -m venv` / `cp .env.example` → 全是工程師術語
+- 35 份 PDF 因為 `.gitignore` 排除根本看不到，等於不存在
+
+問題本質：**README 是寫給 contributor 看的，不是寫給 ERP 用戶看的**。
+但 erpilot 的 ICP（理想客戶）是 50-100 人小型製造業，根本不是 contributor。
+
+### ✅ Sprint G：README 重結構
+
+**新加：「我是誰？」3 軌選擇器（最頂端）**
+
+| 我是... | 我要... | 跳到... |
+|---|---|---|
+| 👔 老闆/採購/業務 | 用 erpilot 不寫程式 | 5 分鐘安裝指南 |
+| 📚 採購決策者 | 文件/報價/規格書 | 35 份 PDF |
+| 👨‍💻 工程師/IT | 程式碼/dev setup | 開發者指南（底部）|
+
+**重寫：5 分鐘安裝指南**（取代原本 dev-focused 區塊）
+
+3 step 視覺化 ASCII art：
+```
+Step 1️⃣ 下載 → Step 2️⃣ 裝 Docker → Step 3️⃣ 雙擊 install.bat → admin/admin123
+```
+
+每步都有：
+- 🇹🇼 中文 + 🇺🇸 English 雙語逐句並列
+- 平台分流（Windows / Mac / Linux）詳細指令
+- 下載連結（GitHub Download ZIP 不需要 git）
+- 預期看到的視窗輸出 ASCII art
+- 完成後該做什麼（4 步引導）
+
+**新加：13 題安裝 FAQ**（用 `<details>` 折疊節省 README 高度）
+
+涵蓋電腦小白真實會問的問題：
+1. 我的電腦跑得動嗎？（規格表）
+2. 找不到 Docker → 教你怎麼裝
+3. 卡在「啟動服務」很久 → 解釋首次下載 image
+4. 瀏覽器「Cannot connect」→ 等 1-2 分鐘 + log 排查
+5. Port 5173/8000 被占用 → 重開機 + netstat 找 PID
+6. 防毒擋 install.bat → 為什麼安全 + 怎麼放行
+7. admin/admin123 安全嗎？→ 內網 vs 對外
+8. 匯入舊 Excel / 鼎新 → 3 種方式對照
+9. 我的資料安全嗎？→ 完全本地 + 例外（LLM 對話）
+10. 一定要連網嗎？→ 分階段
+11. 忘了密碼 → 給可執行的 reset 指令
+12. ≤20 人免費怎麼算？→ concurrent 定義 + 3 例子
+13. 怎麼升級新版？→ git pull + docker rebuild
+
+**新加：35 份雙語 PDF 一鍵下載表**（commit PDF 進 git）
+
+`.gitignore` 解鎖 `docs/pdf/*.pdf` → 35 份 PDF（~25MB）入版控
+README 加完整下載表：每份 PDF 中文 + EN 各一個 link 直接點下載
+
+「電腦小白優先讀」順序：00（產品說明書）→ 01（安裝指南）→ 02（快速入門）→ 03（操作手冊）
+
+**移到底部：🛠 開發者指南**
+
+之前散在最上面的 secret-scanning hook / start_dev.bat / Docker dev mode / 跑測試 / run_gates / engineering docs 全集中到一個專屬區段「開發者指南」，明確標註「想看程式碼、改功能、貢獻 PR？這節是你的入口」。
+
+非工程師讀者**完全不會碰到**這些技術術語。
+
+### 📊 數字變化
+
+| 維度 | 之前 | 之後 |
+|---|---|---|
+| README 第一個技術術語出現位置 | Line 54（secret-scanning hook）| Line 600+（移到開發者指南）|
+| 安裝步驟視覺化程度 | 純文字 | ASCII art 3-step 流程圖 |
+| FAQ 題數 | 0 | **13 題**（折疊式）|
+| PDF 在 GitHub 可見性 | ❌ 看不到 | ✅ **35 份直接下載** |
+| README 行數 | ~370 | ~640 |
+| 阿玲第一次打開 README 嚇到關掉的機率 | 高 | 低 |
+| Bilingual coverage | 部分 | 每段都有 🇹🇼 + 🇺🇸 |
+
+### 🔧 順便修了
+
+- v3.13 push fail（`test_tenant_mixin_coverage_is_documented` 沒登記 attachment）→ 加進 EXPECTED_TENANT_MIXIN set
+- amend 上一個 commit 並推
+
+### 🪞 教訓 #20
+
+「**寫 README 時用目標讀者的第一人稱視角讀一次**」。
+
+我之前的 README 自己看覺得 OK（因為我是工程師），但用 ICP（阿玲、王董）視角讀立刻發現：第 54 行就嚇跑使用者。
+
+下次寫任何 user-facing 文件前先問：
+1. **目標讀者打開時看到的第一個技術術語是什麼？**
+2. **如果讀者根本不懂這個術語，他會怎麼做？**（多數答案：關掉）
+
+「**Default to non-developer**」 = 公開專案的 README 預設應該寫給最弱讀者看，
+工程師需要的東西放在明確標註的「開發者指南」區段，
+不要讓使用者被工程師需求的東西嚇跑。
+
+### 後續
+
+- PDF 升 GitHub Release 取代直接 commit（避免 repo binary bloat）— 看 stars 多了再做
+- 加 reset_admin_password.bat / .sh 友善腳本（FAQ Q11 答案的工具）
+- 翻 user FAQ 也要做雙語並列檢查
+
+**Blocker**：無
+
+---
+
 ## 2026-05-17｜會話 #35｜🎯 v3.13 三軌並行：Settings 頁 + 檔案上傳 + USER_MANUAL 重寫
 
 **目標**：使用者「全部并行做」三個 gap：

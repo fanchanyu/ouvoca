@@ -18,11 +18,25 @@
 
 ---
 
+## 🙋 你是誰？/ Who Are You?
+
+🇹🇼 erpilot 有 3 種讀者，**請點下面的連結直接跳到你需要的章節**：
+🇺🇸 erpilot has 3 audiences. **Jump to your section**:
+
+| 我是... / I am... | 我需要... / I need... | 跳到 / Jump to |
+|---|---|---|
+| 👔 **老闆 / 採購 / 業務 / 倉管**<br>Boss / Buyer / Sales / Warehouse | 我要**用** erpilot，不會寫程式<br>I want to **use** erpilot, no coding | 👉 [**5 分鐘安裝指南**](#-5-分鐘安裝指南--5-minute-install-for-non-developers) |
+| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**35 份雙語 PDF**](#-35-份雙語客戶文件--35-bilingual-customer-pdfs) |
+| 👨‍💻 **工程師 / IT / 想貢獻者**<br>Developer / IT / Contributor | 我要看**程式碼 / 開發環境 / PR**<br>I want **code / dev setup / PR** | 👉 [**開發者指南**](#-開發者指南--developer-guide) |
+
+---
+
 ## 📑 目錄 / Table of Contents
 
-- [⚡ 一句話價值主張 / 30-Second Pitch](#-一句話價值主張--30-second-pitch)
-- [🔐 First-time setup](#-first-time-setup--首次設定-secret-scanning-hook)
-- [🚀 30 秒啟動 / Quick Start](#-30-秒啟動--quick-start-30-seconds)
+- [⚡ 30 秒看懂 erpilot / 30-Second Pitch](#-30-秒看懂-erpilot--30-second-pitch)
+- [🚀 5 分鐘安裝指南 / 5-Minute Install](#-5-分鐘安裝指南--5-minute-install-for-non-developers)
+- [❓ 安裝常見問題 / Install FAQ](#-安裝常見問題--install-faq)
+- [📚 35 份雙語客戶文件 / 35 Bilingual PDFs](#-35-份雙語客戶文件--35-bilingual-customer-pdfs)
 - [🎯 內含什麼 / What's Inside](#-內含什麼--whats-inside)
 - [🏗 架構 / Architecture](#-架構--architecture)
 - [🗺 領域對照 / Domain Map](#-領域對照--domain-map)
@@ -31,11 +45,12 @@
 - [🐘 Production 切換 PostgreSQL / Production Switch-over](#-production-切換-postgresql--production-switch-over)
 - [📂 檔案結構 / File Layout](#-檔案結構--file-layout)
 - [⚖️ 三軌授權 / Tri-License Model](#️-三軌授權--tri-license-model)
+- [🛠 開發者指南 / Developer Guide](#-開發者指南--developer-guide)
 - [🤝 貢獻 / Contributing](#-貢獻--contributing)
 
 ---
 
-## ⚡ 一句話價值主張 / 30-Second Pitch
+## ⚡ 30 秒看懂 erpilot / 30-Second Pitch
 
 🇹🇼 **erpilot 是台灣中小製造業的對話式 ERP**：員工坐在電腦前打一句話（「跟長江廠下 100 個 M6 螺絲，交期下週五」），AI 就把它變成完整的採購單，跳出 ConfirmCard 確認卡讓你按確認才執行。**不用學系統、不用教育訓練、2 小時上手**。20 人以內的小公司**完全免費**用整套（含鼎新 / 正航 connector）。
 
@@ -51,78 +66,333 @@
 
 ---
 
-## 🔐 First-time setup — 首次設定 secret-scanning hook
+## 🚀 5 分鐘安裝指南 / 5-Minute Install (for non-developers)
 
-🇹🇼 **這是強制流程**，避免 API key / DB 密碼 / .env 被誤推到 GitHub：
-🇺🇸 **Mandatory step** — prevents accidental commit of API keys / DB passwords / .env files:
+🇹🇼 **不需要 IT 背景、不需要懂程式**。會雙擊滑鼠 + 開瀏覽器就會裝。
+🇺🇸 **No IT skills required.** If you can double-click and open a browser, you can install this.
 
-```bash
-# Mac / Linux / Git Bash
-bash scripts/git-hooks/install_hooks.sh
-
-# Windows
-scripts\git-hooks\install_hooks.bat
+```
+┌────────────────────────────────────────────────────────────────┐
+│                                                                │
+│    Step 1️⃣          Step 2️⃣          Step 3️⃣                  │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐                │
+│  │ 📥 下載   │ →  │ 🐳 裝     │ →  │ ▶️ 雙擊  │ → http://...   │
+│  │ erpilot  │    │  Docker   │    │ install  │   localhost    │
+│  │  zip 檔  │    │ Desktop   │    │   .bat   │   :5173        │
+│  └──────────┘    └──────────┘    └──────────┘                │
+│   2 分鐘 / 2min   5-10 分鐘     2-5 分鐘     登入 admin/admin123 │
+│                  (一次性 once)                                 │
+└────────────────────────────────────────────────────────────────┘
 ```
 
-🇹🇼 之後每次 `git commit` 都會自動掃 `sk-` / `ghp_` / `xoxb-` / hardcoded password 等樣式，偵測到立刻拒絕 commit。
-🇺🇸 Every `git commit` now scans for `sk-` / `ghp_` / `xoxb-` / hardcoded password patterns and refuses to commit if found.
+### Step 1️⃣ · 下載 erpilot / Download erpilot（2 分鐘）
 
-詳見 / See `scripts/git-hooks/pre-commit`.
+🇹🇼 **方法 A（最簡單，不用裝 git）**：
+1. 用瀏覽器打開 https://github.com/fanchanyu/erpilot
+2. 點頁面上方綠色按鈕 **[`< > Code`]** → 選 **[Download ZIP]**
+3. 把 zip 解壓到任何資料夾（建議 `C:\erpilot` 或 `D:\erpilot`）
+
+🇺🇸 **Method A (easiest, no git needed)**: Open https://github.com/fanchanyu/erpilot → click green **[`< > Code`]** button → **[Download ZIP]** → unzip anywhere (e.g. `C:\erpilot`).
+
+🇹🇼 方法 B（會用 git）：`git clone https://github.com/fanchanyu/erpilot`
+🇺🇸 Method B (if you have git): `git clone https://github.com/fanchanyu/erpilot`
+
+### Step 2️⃣ · 安裝 Docker Desktop（一次性，5-10 分鐘）
+
+🇹🇼 **Docker 是什麼？** 就像一個「保護箱」，把 erpilot 包起來不影響你電腦其他軟體。
+🇺🇸 **What's Docker?** A "container" that bundles erpilot so it doesn't mess with your other software.
+
+| 系統 / OS | 下載連結 / Download | 安裝步驟 / Steps |
+|---|---|---|
+| 🪟 **Windows 10/11** | [Download Docker Desktop](https://www.docker.com/products/docker-desktop/) → 選 `Download for Windows` | 雙擊 `.exe` → 一路按 Next → **重開機** → 雙擊桌面 🐳 圖示 → 等出現 `Engine running` |
+| 🍎 **Mac (M1/M2/Intel)** | [Download Docker Desktop](https://www.docker.com/products/docker-desktop/) → 選對應晶片版本 | 雙擊 `.dmg` → 拖 Docker 到 Applications → 啟動 → 按「允許」權限 |
+| 🐧 **Linux** | 命令列 / Terminal | `curl -fsSL https://get.docker.com \| sudo sh && sudo usermod -aG docker $USER` → 登出再登入 |
+
+🇹🇼 ⚠️ Windows 10 家庭版需要先在「Windows 功能」啟用 WSL2，Docker 安裝精靈會提示你。
+🇺🇸 ⚠️ Windows 10 Home requires WSL2 (Docker installer will prompt you).
+
+### Step 3️⃣ · 跑 install 腳本 / Run installer（2-5 分鐘）
+
+| 系統 / OS | 怎麼跑 / How to run |
+|---|---|
+| 🪟 Windows | 在你解壓的資料夾裡 **雙擊 `install.bat`** |
+| 🍎 Mac | 在 Terminal 跑：`cd ~/erpilot && ./install.sh` |
+| 🐧 Linux | 同 Mac |
+
+🇹🇼 你會看到視窗自動跑這 5 步：
+🇺🇸 The script will automatically run these 5 steps:
+
+```
+[Step 1/5] 檢查 Docker / Checking Docker..............OK ✓
+[Step 2/5] 設定環境變數（自動產生 JWT_SECRET）..........OK ✓
+[Step 3/5] 啟動服務（首次需 2-5 分鐘下載 image）.........OK ✓
+[Step 4/5] 等後端就緒.....................................OK ✓ (15s)
+[Step 5/5] 載入示範資料（5 客戶 / 3 供應商 / 10 料件）...OK ✓
+
+           ============================================
+                     安裝完成 / Installation Done
+           ============================================
+
+           請打開瀏覽器訪問 / Open your browser:
+              http://localhost:5173
+
+           登入 / Login:
+              帳號 / Username:  admin
+              密碼 / Password:  admin123
+```
+
+🇹🇼 **完成！** 瀏覽器會自動打開登入畫面。輸入 `admin` / `admin123` 進去。
+🇺🇸 **Done!** Browser will auto-open the login page. Use `admin` / `admin123`.
+
+### 第一次進去要做什麼？/ What to do after first login?
+
+```
+1. ⚙️ 點左側 [設定] 頁
+2. 📦 點「載入示範資料」← 已經自動載入了，但可以再點一次確認
+3. 💬 點左側 [AI 助手]，對它打字：「列出庫存低於安全庫存的零件」
+4. ✨ 看 AI 回你完整答案 → 你已經會用 erpilot 了！
+```
+
+### 後續想做的事
+
+| 我想... / I want to... | 怎麼做 / How |
+|---|---|
+| 啟動 AI 對話功能 / Enable AI chat | 編輯 `backend/.env` 填 `LLM_API_KEY=sk-...`（[DeepSeek 申請](https://platform.deepseek.com)）→ 重跑 install.bat |
+| 上傳我的舊報價單 / 發票 PDF | 登入 → ⚙️ 設定 → 📁 上傳業務文件 → 拖檔案進去 |
+| 清掉示範資料 / Clear demo data | 登入 → ⚙️ 設定 → 📦 示範資料 → 🗑 清除 |
+| 停止 erpilot / Stop | `docker compose down`（在解壓目錄裡）或關掉 Docker Desktop |
+| 完全移除 / Uninstall | `docker compose down -v` → 刪 erpilot 資料夾 |
+| 連現有鼎新 / 正航 DB | 看 [`docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md`](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md) |
+
+📘 **更詳細的「給老闆看的版本」（純圖文、零技術術語）**：
+- 中文 → [`docs/INSTALLATION_ZH.md`](./docs/INSTALLATION_ZH.md)
+- English → [`docs/INSTALLATION_EN.md`](./docs/INSTALLATION_EN.md)
+- 或直接下載 PDF → [`📕 01_安裝指南_中文.pdf`](./docs/pdf/01_安裝指南_中文.pdf)
 
 ---
 
-## 🚀 30 秒啟動 / Quick Start (30 seconds)
+## ❓ 安裝常見問題 / Install FAQ
 
-### 方式 A：開發環境 / Dev Mode (no Docker needed)
+🇹🇼 安裝前先看這 13 題能省 90% 麻煩。
+🇺🇸 Reading these 13 questions before installing saves 90% of headaches.
 
-🇹🇼 Windows 雙擊 `start_dev.bat`，會自動完成：
-🇺🇸 On Windows, double-click `start_dev.bat`. It will automatically:
+<details>
+<summary><strong>Q1. 我的電腦跑得動嗎？/ Will my computer run this?</strong></summary>
 
-```
-[1/5] 檢查 Python 3.12+ / Node 20+         Verify Python 3.12+ / Node 20+
-[2/5] 自動 seed admin/admin123 + sample data Auto-seed admin user + sample data
-[3/5] 釋放占用的 :8000 / :5173 port         Free up ports :8000 / :5173
-[4/5] 等 backend healthcheck 綠燈           Wait for backend healthcheck
-[5/5] 自動打開 http://localhost:5173        Auto-open browser
+| 項目 | 最低 / Min | 建議 / Recommended |
+|---|---|---|
+| 作業系統 | Win 10 / macOS 11 / Ubuntu 20 | Win 11 / macOS 13 |
+| RAM | 4 GB | 8 GB+ |
+| 硬碟空間 | 5 GB | 20 GB+（含 Docker images）|
+| CPU | 任何 x86_64 / ARM64 | 4 核以上 |
+| GPU | ❌ 不需要 | ❌ 不需要（LLM 用雲端 API）|
+| 網路 | 安裝時需要 | 日常使用**不需要**（除非開 AI 對話）|
 
-登入 / Login: admin / admin123
-```
+</details>
 
-🇹🇼 **關閉**：雙擊 `stop_dev.bat`（精準 PID kill 不誤殺其他 Python/Node）。
-🇺🇸 **Stop**: double-click `stop_dev.bat` (precise PID kill — won't affect other processes).
+<details>
+<summary><strong>Q2. install.bat 提示「找不到 Docker」/ "Docker not found"</strong></summary>
 
-### 方式 B：Docker 完整正式模式 / Full Docker Mode
+你還沒裝 Docker Desktop。回 Step 2️⃣ 完成安裝、**重開機**、桌面看到 🐳 圖示再來。
+
+如果裝了 Docker 但還是這個錯：開 Docker Desktop（雙擊桌面 🐳）→ 等左下角出現 `Engine running` 綠燈 → 再跑 install.bat。
+
+</details>
+
+<details>
+<summary><strong>Q3. install.bat 卡在「啟動服務」很久 / Stuck at "Starting services"</strong></summary>
+
+首次下載 Docker images（~2 GB）需要 2-5 分鐘，**請耐心等**。
+網速慢可能要 10-20 分鐘。
+
+確認方法：另開一個 terminal/cmd 跑 `docker ps`，看到 erpilot-backend / erpilot-frontend 在 Up 狀態 = 進度正常。
+
+</details>
+
+<details>
+<summary><strong>Q4. 瀏覽器打開只看到「Cannot connect / 無法連線」</strong></summary>
+
+最常見：等服務完全啟動需要 1-2 分鐘，**等一下再重新整理 (F5)**。
+
+還不行的話：
+1. 確認 install.bat 沒報錯（看到「安裝完成」）
+2. `docker compose ps` 看服務狀態都是 `Up`
+3. `docker compose logs backend` 看後端錯誤訊息
+4. 試試 http://127.0.0.1:5173（換 localhost）
+
+</details>
+
+<details>
+<summary><strong>Q5. 提示「Port 5173 / 8000 被占用」/ "Port in use"</strong></summary>
+
+你的電腦已經有其他程式用了同樣的 port（最常見是 Vite dev server 或別的 web 服務）。
+
+**最簡單**：重開機，再跑 install.bat。
+
+**進階**：
+- Windows: `netstat -ano | findstr :5173` 找到 PID → 用工作管理員關掉
+- Mac/Linux: `lsof -i :5173` 找到 PID → `kill -9 <PID>`
+
+</details>
+
+<details>
+<summary><strong>Q6. Windows Defender / 防毒軟體擋住了 install.bat</strong></summary>
+
+第一次跑批次檔常見現象。erpilot 是開源 (AGPL-3.0)，可以在 GitHub 完整檢視程式碼。
+
+按「**更多資訊 → 仍要執行 (Run anyway)**」就好。
+
+不放心可以先閱讀 `install.bat` 的內容（用記事本打開）— 只做 5 件事：檢查 Docker、設定 .env、跑 docker compose、等就緒、執行 seed。
+
+</details>
+
+<details>
+<summary><strong>Q7. 預設帳號 admin / admin123 安全嗎？要改嗎？</strong></summary>
+
+**內部使用**（公司內網、沒對外開放）：可以不改，方便試用。
+
+**對外發行**（exposed to internet 或多人共用）：**一定要改！**
+
+改密碼方法：
+1. 登入 → 點右上角頭像 → 「我的權限」
+2. 點「修改密碼」（功能待補，下個 sprint）
+3. 暫時方法：`docker compose exec backend python -m scripts.create_admin <newuser> <newpass>`
+
+對外發行時也要把 `backend/.env` 的 `JWT_SECRET` 換成 64 字元亂數（install.bat 已經自動產生過了）。
+
+</details>
+
+<details>
+<summary><strong>Q8. 我可以匯入舊的 Excel / 報價單 / 鼎新 DB 嗎？</strong></summary>
+
+**3 種匯入方式**：
+
+| 方式 | 場景 | 怎麼做 |
+|---|---|---|
+| 📁 直接上傳 | 報價單 / 發票 / 合約 / 規格書 PDF | 登入 → ⚙️ 設定 → 上傳業務文件 → 拖檔案 → 選分類 |
+| 📊 Excel CSV 匯入 | 你的料件清單、客戶清單 | 用 Schema Mapping AI 接 connector（自動對欄位）|
+| 🔗 直連現有 ERP | 鼎新 / 正航 / SAP 主檔 | 設定 connector，AI 自動 mapping 欄位（見 [外部 DB 串接指南](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md)）|
+
+**🌱 小小企業軌（≤20 人）免費含閉源 connector！**
+
+</details>
+
+<details>
+<summary><strong>Q9. 我的資料安全嗎？會不會傳到雲端？</strong></summary>
+
+**完全本地**，除非你自己開啟 AI 對話：
+
+| 項目 | 在哪 | 會傳出去嗎？ |
+|---|---|---|
+| 業務資料（料件、訂單、庫存）| 你的電腦 `backend/erp.db`（SQLite）或你設的 PostgreSQL | ❌ 永不離開你的電腦 |
+| 上傳的檔案（報價單、發票）| 你的電腦 `backend/uploads/` | ❌ 永不離開 |
+| **AI 對話**（如果你開啟） | 只有「**你打的問題文字**」會傳給 LLM 供應商（DeepSeek / OpenAI 等）| ⚠️ **問題文字**會出去，但 DB 資料不會 |
+
+如果連 LLM 都不想連網 → 用本地 Ollama（離線模式，見 docs）。
+
+</details>
+
+<details>
+<summary><strong>Q10. 一定要連網嗎？/ Do I need internet?</strong></summary>
+
+| 階段 | 需要網路嗎？ |
+|---|---|
+| 第一次安裝（下載 Docker images） | ✅ 需要 |
+| 日常使用（CRUD、查報表） | ❌ 不需要 |
+| AI 對話（如果有開啟）| ⚠️ 需要（除非用 Ollama 離線 LLM） |
+| 更新到新版 | ✅ 需要 |
+
+</details>
+
+<details>
+<summary><strong>Q11. 我忘了密碼怎麼辦？/ Forgot password?</strong></summary>
 
 ```bash
-cd opnetest
-cp backend/.env.example backend/.env       # optionally edit LLM_API_KEY
-docker compose up -d --build
-docker compose exec backend python -m scripts.seed
+docker compose exec backend python -c "
+import asyncio
+from app.database import async_session
+from app.models.organization import User
+from app.core.security import hash_password
+from sqlalchemy import select
+
+async def reset():
+    async with async_session() as db:
+        u = (await db.execute(select(User).where(User.username=='admin'))).scalar_one()
+        u.password_hash = hash_password('newpass123')
+        await db.commit()
+        print('✓ admin 密碼已重設為 newpass123')
+
+asyncio.run(reset())
+"
 ```
 
-| 服務 / Service  | URL                              | 說明 / Notes                            |
-|----------------|----------------------------------|----------------------------------------|
-| Desktop UI     | http://localhost:5173            | 登入 / Login: `admin / admin123`        |
-| API docs       | http://localhost:8000/docs       | OpenAPI / Swagger                      |
-| War Room       | http://localhost:8080            | 即時事件儀表板 / Real-time dashboard     |
-| Factory A      | http://localhost:8001/api/factory/health | MESH 節點健康 / Node health      |
-| Factory B      | http://localhost:8002/api/factory/health |                                |
+（一個更友善的 reset_password.bat 待下個 sprint 補）
 
-### 啟用 AI 對話 / Enable AI Chat (optional, 5 min)
+</details>
+
+<details>
+<summary><strong>Q12. 小小企業免費門檻怎麼算？/ How is the ≤20 free tier counted?</strong></summary>
+
+看 **同時在線使用者數**（24 小時內任一時刻的峰值，15 分鐘 idle 算下線）。
+
+舉例：
+- 公司 50 人有 erpilot 帳號，但同時在線最多 18 人 → ✅ 適格（白用）
+- 公司 25 人，同時在線常 22 人 → ❌ 不適格（需商業授權）
+- 公司 100 人但只 5 個業務在用 → ✅ 適格
+
+完整條款：[`LICENSE-SMALL-BUSINESS.md`](./LICENSE-SMALL-BUSINESS.md)
+
+</details>
+
+<details>
+<summary><strong>Q13. 升級到新版怎麼弄？/ How to upgrade?</strong></summary>
 
 ```bash
-# backend/.env
-LLM_API_KEY=<YOUR_KEY_FROM_DEEPSEEK_OR_ANTHROPIC_OR_OPENAI>
-
-# Windows 開發環境若 SSL 證書驗證失敗（DeepSeek 常見）
-# If SSL verification fails on Windows (common with DeepSeek)
-LLM_VERIFY_SSL=false
+cd erpilot
+git pull origin main          # 或重下載 ZIP 覆蓋
+docker compose down
+docker compose up -d --build  # 重 build 新版
+docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有）
 ```
 
-🇹🇼 改完跑 `stop_dev.bat` → `start_dev.bat` 重啟。
-🇺🇸 Restart with `stop_dev.bat` → `start_dev.bat`.
+你的資料（DB + uploads/）會**完整保留**。
 
-詳細安裝指南 / Detailed install guide: [`docs/INSTALLATION_ZH.md`](./docs/INSTALLATION_ZH.md) · [`docs/INSTALLATION_EN.md`](./docs/INSTALLATION_EN.md)
+</details>
+
+⚠️ **還沒解的問題？** 開 [GitHub Issue](https://github.com/fanchanyu/erpilot/issues/new) 我們處理。
+
+---
+
+## 📚 35 份雙語客戶文件 / 35 Bilingual Customer PDFs
+
+🇹🇼 點下面任一個直接下載 PDF（全部繁中 + English）：
+🇺🇸 Click any to download (all bilingual ZH + EN):
+
+| # | 文件 / Document | 🇹🇼 中文 | 🇺🇸 English |
+|---|---|---|---|
+| 00 | 產品說明書 / Product Overview | [📕 中文 PDF](./docs/pdf/00_產品說明書_中文.pdf) | [📘 EN PDF](./docs/pdf/00_Product_Overview_EN.pdf) |
+| 01 | 安裝指南 / Installation Guide | [📕 中文 PDF](./docs/pdf/01_安裝指南_中文.pdf) | [📘 EN PDF](./docs/pdf/01_Installation_Guide_EN.pdf) |
+| 02 | 快速入門 / Quick Start | [📕 雙語 PDF（單檔）](./docs/pdf/02_快速入門_Quick_Start.pdf) | (內含 EN 段落) |
+| 03 | 使用者操作手冊 / User Manual | [📕 中文 PDF](./docs/pdf/03_使用者操作手冊_中文.pdf) | [📘 EN PDF](./docs/pdf/03_User_Manual_EN.pdf) |
+| 05 | 網路部署規劃 / Network Deployment | [📕 中文 PDF](./docs/pdf/05_網路部署規劃_中文.pdf) | [📘 EN PDF](./docs/pdf/05_Network_Deployment_EN.pdf) |
+| 06 | 系統架構流程拓樸 / System Architecture | [📕 中文 PDF](./docs/pdf/06_系統架構流程拓樸_中文.pdf) | [📘 EN PDF](./docs/pdf/06_System_Architecture_Topology_EN.pdf) |
+| 07 | LLM 評比報告 / LLM Benchmark Report | [📕 中文 PDF](./docs/pdf/07_LLM評比報告_中文.pdf) | [📘 EN PDF](./docs/pdf/07_LLM_Benchmark_Report_EN.pdf) |
+| 08 | AI 助手目錄 / AI Agent Catalog | [📕 中文 PDF](./docs/pdf/08_AI助手目錄_中文.pdf) | [📘 EN PDF](./docs/pdf/08_AI_Agent_Catalog_EN.pdf) |
+| 09 | 台灣合規對照表 / Taiwan Compliance | [📕 中文 PDF](./docs/pdf/09_台灣合規對照表_中文.pdf) | [📘 EN PDF](./docs/pdf/09_Taiwan_Compliance_EN.pdf) |
+| 10 | 導入實施手冊 / Implementation Playbook | [📕 中文 PDF](./docs/pdf/10_導入實施手冊_中文.pdf) | [📘 EN PDF](./docs/pdf/10_Implementation_Playbook_EN.pdf) |
+| 11 | 支援運維手冊 / Support Runbook | [📕 中文 PDF](./docs/pdf/11_支援運維手冊_中文.pdf) | [📘 EN PDF](./docs/pdf/11_Support_Runbook_EN.pdf) |
+| 12 | 備份還原 SOP / Backup & Restore | [📕 中文 PDF](./docs/pdf/12_備份還原SOP_中文.pdf) | [📘 EN PDF](./docs/pdf/12_Backup_Restore_SOP_EN.pdf) |
+| 13 | 系統架構藍圖 / Architecture Blueprint | [📕 中文 PDF](./docs/pdf/13_系統架構藍圖_中文.pdf) | [📘 EN PDF](./docs/pdf/13_Architecture_Blueprint_EN.pdf) |
+| 14 | Secrets 輪換 SOP / Secrets Rotation | [📕 中文 PDF](./docs/pdf/14_Secrets輪換SOP_中文.pdf) | [📘 EN PDF](./docs/pdf/14_Secrets_Rotation_SOP_EN.pdf) |
+| 15 | 對話式 ERP 架構 / Conversational ERP | [📕 中文 PDF](./docs/pdf/15_對話式ERP架構_中文.pdf) | [📘 EN PDF](./docs/pdf/15_Conversational_ERP_Architecture_EN.pdf) |
+| 16 | Phase 1 實作 Spec | [📕 中文 PDF](./docs/pdf/16_Phase1_實作Spec_中文.pdf) | [📘 EN PDF](./docs/pdf/16_Phase1_Implementation_Spec_EN.pdf) |
+| 17 | 外部 DB 串接設計 / External DB Integration | [📕 中文 PDF](./docs/pdf/17_外部DB串接設計_中文.pdf) | [📘 EN PDF](./docs/pdf/17_External_DB_Integration_Design_EN.pdf) |
+| 18 | 業務 demo 一頁紙 / Sales Killer Moments | [📕 中文 PDF](./docs/pdf/18_業務demo一頁紙_中文.pdf) | [📘 EN PDF](./docs/pdf/18_Sales_Killer_Moments_EN.pdf) |
+
+🇹🇼 **電腦小白優先讀**：00（產品說明書）→ 01（安裝指南）→ 02（快速入門）→ 03（使用者操作手冊）
+🇺🇸 **Beginners read first**: 00 → 01 → 02 → 03
+
+📦 全部 PDF 在 [`docs/pdf/`](./docs/pdf/) 目錄。要全部下載？clone repo 或 [download ZIP](https://github.com/fanchanyu/erpilot/archive/refs/heads/main.zip)。
 
 ---
 
@@ -338,6 +608,107 @@ opnetest/
 🇺🇸 Not sure which track? See the decision tree in [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md).
 
 詳細 FAQ / Detailed FAQ: [`docs/COMMERCIAL_LICENSING_FAQ_ZH.md`](./docs/COMMERCIAL_LICENSING_FAQ_ZH.md)
+
+---
+
+## 🛠 開發者指南 / Developer Guide
+
+🇹🇼 想看程式碼、改功能、貢獻 PR？這節是你的入口。
+🇺🇸 Want to read code, modify features, or contribute PRs? This section is for you.
+
+### 🔐 首次設定 secret-scanning hook（強制 / Mandatory）
+
+🇹🇼 第一次 clone repo 後**必跑**，避免 API key / .env 被誤推：
+🇺🇸 **Must run after first clone** — prevents accidental commit of API keys / .env files:
+
+```bash
+# Mac / Linux / Git Bash
+bash scripts/git-hooks/install_hooks.sh
+
+# Windows
+scripts\git-hooks\install_hooks.bat
+```
+
+🇹🇼 之後每次 `git commit` 自動掃 `sk-` / `ghp_` / `xoxb-` / hardcoded password 等樣式。
+🇺🇸 Every `git commit` now auto-scans for `sk-` / `ghp_` / `xoxb-` / hardcoded password patterns.
+
+### 🚀 開發環境（不用 Docker，熱重載 / hot reload）
+
+🇹🇼 Windows 雙擊 `start_dev.bat`，會自動完成：
+🇺🇸 On Windows, double-click `start_dev.bat`:
+
+```
+[1/5] 檢查 Python 3.12+ / Node 20+              Verify Python 3.12+ / Node 20+
+[2/5] 自動 seed admin/admin123 + sample data    Auto-seed admin + sample data
+[3/5] 釋放占用的 :8000 / :5173 port            Free up ports :8000 / :5173
+[4/5] 等 backend healthcheck 綠燈              Wait for backend healthcheck
+[5/5] 自動打開 http://localhost:5173           Auto-open browser
+```
+
+🇹🇼 **停止**：雙擊 `stop_dev.bat`（精準 PID kill 不誤殺其他 Python/Node）。
+🇺🇸 **Stop**: double-click `stop_dev.bat` (precise PID kill).
+
+### 🐳 Docker 模式（與 ERP 使用者裝法相同 / Same as user install）
+
+```bash
+cd erpilot
+cp backend/.env.example backend/.env    # optionally set LLM_API_KEY
+docker compose up -d --build
+docker compose exec backend python -m scripts.seed
+```
+
+### 🧪 跑測試 / Run Tests
+
+```bash
+cd backend
+python -m pytest                       # 298 tests (~12s)
+python -m pytest tests/smoke/ -v       # 只跑 smoke
+python -m pytest -k test_update_part   # 跑特定 test
+```
+
+### 🛡 自證閘 / Self-Verification Gates
+
+```bash
+bash scripts/run_gates.sh              # 跑 7 道 gate (~290s)
+```
+
+🇹🇼 7 道全綠才能 commit / push。pre-push hook 自動跑。
+🇺🇸 All 7 gates must pass before commit / push. Auto-run by pre-push hook.
+
+### 🤖 啟用 AI 對話 / Enable AI Chat
+
+```bash
+# backend/.env
+LLM_API_KEY=<YOUR_KEY_FROM_DEEPSEEK_OR_ANTHROPIC_OR_OPENAI>
+
+# Windows 開發環境 SSL 證書問題（DeepSeek 常見）
+# Windows SSL cert issue with DeepSeek
+LLM_VERIFY_SSL=false
+```
+
+🇹🇼 改完跑 `stop_dev.bat` → `start_dev.bat` 重啟。
+🇺🇸 Restart with `stop_dev.bat` → `start_dev.bat`.
+
+### 🔍 主要服務 URL / Main Service URLs
+
+| 服務 / Service  | URL                              | 說明 / Notes                            |
+|----------------|----------------------------------|----------------------------------------|
+| Desktop UI     | http://localhost:5173            | 登入 / Login: `admin / admin123`        |
+| API docs       | http://localhost:8000/docs       | OpenAPI / Swagger                      |
+| War Room       | http://localhost:8080            | 即時事件儀表板 / Real-time dashboard     |
+| Factory A      | http://localhost:8001/api/factory/health | MESH 節點健康 / Node health      |
+| Factory B      | http://localhost:8002/api/factory/health |                                |
+
+### 📖 工程文件 / Engineering Docs
+
+| 文件 / Doc | 用途 / Purpose |
+|---|---|
+| [`CLAUDE.md`](./CLAUDE.md) | 專案北極星、模組進度、設計決策 |
+| [`docs/DEVELOPMENT_SOP.md`](./docs/DEVELOPMENT_SOP.md) | 開發 SOP、新增 domain/tool/constraint 步驟 |
+| [`docs/GAP_ANALYSIS.md`](./docs/GAP_ANALYSIS.md) | Gap 分析（找事做的好地方） |
+| [`docs/WORKLOG.md`](./docs/WORKLOG.md) | 動態工作日誌 |
+| [`docs/CONVERSATIONAL_ERP_DESIGN_ZH.md`](./docs/CONVERSATIONAL_ERP_DESIGN_ZH.md) | 對話式 ERP 6 層架構（必讀）|
+| [`docs/ARCHITECTURE_DECISIONS.md`](./docs/ARCHITECTURE_DECISIONS.md) | ADR 架構決策紀錄 |
 
 ---
 

@@ -140,10 +140,9 @@ out/
 # ─── 🐳 Docker ───────────────────────────────────────────
 .docker/
 
-# ─── 📄 產出（會被 build_pdfs 重新產，不入版控）──────────
-docs/pdf/*.pdf
-!docs/pdf/.gitkeep
-!docs/pdf/README.md
+# ─── 📄 PDF 文件（v3.13 起入版控，讓 GitHub 訪客直接下載）──
+# 35 份雙語客戶手冊是商業價值的一部分，必須在 GitHub 看得到。
+# build_pdfs 重生後手動 commit + push 更新
 
 # 但 SVG 是手繪資產，留住
 !docs/*.svg

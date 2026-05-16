@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-17（會話 #36 v3.13：三軌並行完工。Sprint D = USER_MANUAL_ZH/EN 重寫成 v3.x（867+859 行，拿掉 LINE/mobile/外協殘留）+ Sprint E = Attachment model + POST /api/files/upload 4 endpoints + 11 smoke tests 全 pass + Settings 頁 drag-and-drop UI + Sprint F = Settings 頁接通既有 seed/clear-demo。後端 +4 routes、前端 +1 page、tests 287→298）
+**最後更新**：2026-05-17（會話 #37 v3.13.1：README 完整改寫成電腦小白可讀版本 — 「我是誰？」3 軌選擇器 + 5 分鐘安裝指南（Download ZIP → Docker → 雙擊 install）+ 13 題安裝 FAQ（用 `<details>` 折疊）+ 35 份雙語 PDF 一鍵下載表 + 工程師區段移到底部。`.gitignore` 解鎖 `docs/pdf/*.pdf` 讓 PDF 直接在 GitHub 看得到（35 PDFs ~25MB 入版控）。會話 #36 v3.13 Sprint D+E+F 已完工：USER_MANUAL 重寫+File Upload+Settings 頁）
 **維護者**：使用者 + Claude
 **版本**：3.13
