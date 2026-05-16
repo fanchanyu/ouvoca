@@ -1,30 +1,41 @@
-# LLM-ERP User Manual (English) — v3.0
+# LLM-ERP User Manual (English)
 
-> **Version**: v3.0.0 (Conversational ERP)
-> **Audience**: Owner, Sales, Plant Manager, Purchaser/Warehouse, Inspector, Accountant
-> **Language**: System supports both 繁體中文 and English with on-the-fly switching
+> **Version**: v3.12 Conversational ERP (erpilot Chat)
+> **Audience**: First-time ERP users — Owner, Sales, Plant Manager, Purchaser, Warehouse
+> **Reading time**: ~30 minutes to get productive; refer to §11 Troubleshooting when stuck
+> **Languages**: System supports 🇹🇼 繁體中文 and 🇺🇸 English with instant switching
 
-> ⚡ **v3.0 Strategic Pivot Notice (2026-05-15)**
-> The following features have been removed in v3.0:
-> - **Mobile App chapter**: replaced by desktop Chat full CRUD
-> - **Outsource partner chapter (formerly §5.5)**: outsource persona deprecated
-> - **LINE Bot chapter**: replaced by desktop Toast + Email digest
->
-> If other chapters still mention mobile/LINE/outsource, treat them as deprecated (moved to Phase 7 pending customer feedback).
+---
+
+## A Note for First-Time Readers
+
+If you're not a "computer person" and the word "ERP" makes your head spin — **don't worry, we redesigned it for you**.
+
+This LLM-ERP does not require you to memorize where menus live, what fields are called, or which button comes first.
+**If you can type, you can use it.** Open your browser, type into the chat box:
+
+> "List parts below safety stock"
+> "Order 100 M6 bolts from Chang Jiang Precision, due next Friday"
+> "Change SO-2025-0042's delivery date to 6/10"
+
+The AI assistant understands your intent and queries / creates / updates / cancels on your behalf.
+**Any action that writes data triggers a Confirm Card** that you must click — and if you click wrong, you have **90 seconds to undo**.
 
 ---
 
 ## Table of Contents
 
-1. [System Overview](#1-system-overview)
-2. [Quick Start (5 Minutes)](#2-quick-start)
-3. [Login & Language Switching](#3-login--language)
-4. [Navigation](#4-navigation)
-5. [Role-based Guide](#5-role-based-guide)
-6. [Using the AI Assistant](#6-using-the-ai-assistant)
-7. [FAQ](#7-faq)
-8. [Keyboard Shortcuts](#8-keyboard-shortcuts)
-9. [Troubleshooting](#9-troubleshooting)
+1. [System Overview (5 min)](#1-system-overview)
+2. [First Login (3 min)](#2-first-login)
+3. [Interface Tour (5 min)](#3-interface-tour)
+4. [Talking to the AI: 4 CRUD Operations (10 min) — KEY CHAPTER](#4-talking-to-the-ai-4-crud-operations)
+5. [ConfirmCard (3 min) — KEY](#5-confirmcard)
+6. [Slot-filling: When the AI Asks Back (3 min)](#6-slot-filling-when-the-ai-asks-back)
+7. [90-second Undo (2 min)](#7-90-second-undo)
+8. [Four Personas in Action (10 min)](#8-four-personas-in-action)
+9. [Three Licensing Tracks (2 min)](#9-three-licensing-tracks)
+10. [FAQ (5 min)](#10-faq)
+11. [Troubleshooting (5 min)](#11-troubleshooting)
 
 ---
 
@@ -32,579 +43,817 @@
 
 ### 1.1 What is LLM-ERP?
 
-LLM-ERP is an **AI-Native ERP** designed for **small manufacturers (10-100 employees)**.
+LLM-ERP is a **Conversational ERP** designed for **small manufacturers with 50–100 employees**.
 
-**Core Features**:
-- 🗣️ **Natural Language**: Ask in LINE or speak to your phone to query/operate
-- 📱 **Mobile-First**: Phone, tablet, desktop all optimized
-- 🔗 **Outsource-Friendly**: Outsource partners scan LINE QR — no registration needed
-- 🌐 **MESH Multi-Factory**: HQ + branches sync in real-time, but data stays local
-- 🛡️ **Row-Level Permissions**: Sales sees only their own customers; outsource sees only their own jobs
+"ERP" in plain English: **software that manages inventory, orders, purchasing, production, and reports** for a company.
+Traditional ERPs (SAP, Oracle) cost millions to license and require 1–3 months of staff training.
 
-### 1.2 Who Is It For?
+**LLM-ERP flips that**: you don't learn the interface; you **type what you want to do** and the AI does it.
 
-| Role | How to Use |
+### 1.2 Three Core Promises
+
+| Promise | Plain English |
 |---|---|
-| 👔 **Owner** | LINE: "How's the factory today?" → AI replies |
-| 👨‍💼 **Salesperson** | Mobile in front of customer: check stock, price, delivery |
-| 👨‍🏭 **Plant Manager** | Mobile: WO progress, push notifications |
-| 👩‍💻 **Purchaser/Warehouse** | Desktop: create POs; mobile: scan QR for stocktake |
-| 👴 **Outsource Partner** | LINE: scan QR, report completion, no registration |
+| **🗣️ Natural language operation** | Just type what you want. No menu hunting. |
+| **🛡️ Confirm everything + 90-second undo** | Every write (create/update/delete) shows a confirm card. Click wrong? You have 90 seconds to undo. |
+| **⚡ Real-time, no waiting for month-end** | Owner asks "how's today" — answer in 10 seconds, not a monthly report. |
 
----
+### 1.3 Who's it for?
 
-## 2. Quick Start
+This system is designed for **four roles in a 50–100-person manufacturer**:
 
-### 2.1 Start the System
-
-For IT deployment, see [DEPLOYMENT.md](./DEPLOYMENT.md).
-For trial users, follow these three steps:
-
-```bash
-# Step 1: Start full stack
-docker compose up -d --build
-
-# Step 2: Load demo data
-docker compose exec backend python -m scripts.seed
-
-# Step 3: Open in browser
-# Desktop UI:    http://localhost:5173
-# War Room:      http://localhost:8080
-# API Docs:      http://localhost:8000/docs
-```
-
-### 2.2 Three Ways to Log In
-
-| Method | Credentials | Best for |
+| Persona | Job | Device |
 |---|---|---|
-| **Regular login** | `admin` / `admin123` | Full feature experience |
-| **Demo Mode** | Click "Continue as Demo" | Quick trial, no registration |
-| **Future: LINE Binding** | Add ERP official account | Owner-only |
+| 👔 **Owner (Mr. Wang)** | Monitor company at a glance; check financials anytime | Office desktop, Chrome browser |
+| 👨‍💼 **Sales (Steve)** | Answer stock/price/delivery in front of customers, in seconds | Laptop (Chrome + VPN when traveling) |
+| 👨‍🏭 **Plant Manager (Lin)** | Spot bottlenecks; release WOs; adjust scheduling | Office desktop + factory floor war-room screen |
+| 👩‍💻 **Purchaser/Warehouse (Lina)** | Create POs; receive goods; cycle counting | Desktop + USB barcode scanner |
 
-> 💡 **Demo Mode** auto-disables once you set `JWT_SECRET` in production.
+### 1.4 What can you actually do?
 
-### 2.3 Load Industry-Specific Demo Data
+Four operation classes (industry term: **CRUD**):
 
-```bash
-# Metal machining (CNC bolts/nuts)
-docker compose exec backend python -m scripts.seed_industries metal
-
-# Plastic injection
-docker compose exec backend python -m scripts.seed_industries plastic
-
-# PCB assembly
-docker compose exec backend python -m scripts.seed_industries pcb
-
-# Food processing (bakery)
-docker compose exec backend python -m scripts.seed_industries food
-
-# Textile dyeing
-docker compose exec backend python -m scripts.seed_industries textile
-
-# All five industries combined
-docker compose exec backend python -m scripts.seed_industries all
-```
+| Letter | Meaning | Example phrasing |
+|---|---|---|
+| **C** = Create | Add | "Order 100 M6 bolts from Chang Jiang Precision" |
+| **R** = Read | Query | "List parts below safety stock" |
+| **U** = Update | Change | "Change SO-2025-0042's due date to 6/10" |
+| **D** = Delete | Cancel | "Cancel PO-2025-0107" |
 
 ---
 
-## 3. Login & Language
+## 2. First Login
 
-### 3.1 Login Page
+### 2.1 Open the system
 
-Open `http://localhost:5173`, you'll see a beautiful gradient login screen:
+After IT has deployed the system (if not, see `INSTALLATION_EN.md`), all you do is:
 
-1. **Top-right**: 🇹🇼 繁中 / 🇺🇸 EN toggle
-2. **Center card**: Enter username + password
-3. **Below**: Demo Mode for quick entry
+1. Open **Chrome** (latest version recommended; Edge / Firefox also work)
+2. In the address bar, type: `http://localhost:5173` (or the URL IT gave you)
+3. Press Enter
 
-### 3.2 Language Switching
+You'll see the login screen:
 
-The system auto-detects your browser language. To switch manually:
+```
+┌─────────────────────────────────────────┐
+│                                  🇹🇼 🇺🇸 │
+│                                          │
+│            erpilot Conversational ERP    │
+│                                          │
+│         ┌──────────────────────┐         │
+│         │ Username              │         │
+│         │ ┌──────────────────┐ │         │
+│         │ │ admin             │ │         │
+│         │ └──────────────────┘ │         │
+│         │                       │         │
+│         │ Password              │         │
+│         │ ┌──────────────────┐ │         │
+│         │ │ ••••••••          │ │         │
+│         │ └──────────────────┘ │         │
+│         │                       │         │
+│         │   [ Sign In ]         │         │
+│         │                       │         │
+│         │  ── or ──             │         │
+│         │  [ Enter Demo Mode ]  │         │
+│         └──────────────────────┘         │
+│                                          │
+└─────────────────────────────────────────┘
+```
 
-| Location | Action |
+### 2.2 Enter credentials
+
+| Step | Action |
 |---|---|
-| Login page top-right | Click 🇹🇼 / 🇺🇸 |
-| After login, top-right | Click globe icon → choose language |
+| 1 | Click the **Username** field |
+| 2 | Type your username (default: `admin`) |
+| 3 | Tab to or click the **Password** field |
+| 4 | Type your password (default: `admin123`) |
+| 5 | Click the blue **[ Sign In ]** button (or press Enter) |
 
-**Switching is instant** — no need to log out. Your preference is saved.
+> ⚠️ **Change the default password right after first login!**
+> Top-right avatar → Profile → Change Password
+
+### 2.3 Don't want to memorize credentials? Demo mode
+
+If you're just trying things out:
+- Click **[ Enter Demo Mode ]**
+- All features are unlocked for exploration
+
+> ⚠️ Demo mode is **turned off in production** by IT. Use real credentials when you go live.
+
+### 2.4 Switch language
+
+Top-right of the login screen has two flag buttons:
+
+| Flag | Meaning |
+|---|---|
+| 🇹🇼 | Switch to 繁體中文 |
+| 🇺🇸 | Switch to English |
+
+Same toggle is in the top-right after login. **Switching is instant** — no re-login required.
 
 ---
 
-## 4. Navigation
+## 3. Interface Tour
 
-### 4.1 Main Layout
+### 3.1 What the main screen looks like
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│ Sidebar                │  Header                              │
-│ ┌──────────────┐       │  ┌──────────────────────────────┐   │
-│ │ 🏠 LLM-ERP   │       │  │  🌐 Lang 🔔 Notif 👤 Profile │   │
-│ │              │       │  └──────────────────────────────┘   │
-│ │ Overview     │       │                                       │
-│ │  📊 Dashboard│       │  Main Content                         │
-│ │  💬 AI       │       │                                       │
-│ │  📡 Events   │       │                                       │
-│ │              │       │                                       │
-│ │ Operations   │       │                                       │
-│ │  📦 Inventory│       │                                       │
-│ │  🛒 Purchase │       │                                       │
-│ │  🏭 Production       │                                       │
-│ │  💰 Sales    │       │                                       │
-│ │  🔬 Quality  │       │                                       │
-│ │              │       │                                       │
-│ │ System       │       │                                       │
-│ │  🛡️ Permissions      │                                       │
-│ │  🔑 My Perms │       │                                       │
-│ └──────────────┘       │                                       │
-└──────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│  [Left Sidebar]      │  [Top-right Header]                        │
+│                       │           🇹🇼 / 🇺🇸    👤 admin  [Sign out]│
+│  🏠 Home              │                                              │
+│  📊 Dashboard         │                                              │
+│  ─────────           │    Main content (changes by page)            │
+│  📦 Inventory         │                                              │
+│  🛒 Purchase          │    e.g. clicking Dashboard shows:            │
+│  💰 Sales             │       - AI summary                           │
+│  🏭 Production        │       - 4 key cards                          │
+│  🔬 Quality           │       - Recent work orders                   │
+│  📈 Reports           │       - Low-stock alerts                     │
+│  ⚙️  Settings         │                                              │
+│                       │                                              │
+│  ─────────           │                                              │
+│  💬 AI Assistant      │  ← Click here to chat with AI                │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-**Mobile**: Sidebar collapses into a drawer; tap the hamburger icon to open.
+### 3.2 Eight pages in the left sidebar
 
-### 4.2 Universal UI Elements
+| # | Icon | Name | Purpose |
+|---|---|---|---|
+| 1 | 🏠 | **Home** | First page after login; AI summary |
+| 2 | 📊 | **Dashboard** | 4 key cards (revenue / WO / purchase / stock alerts) + charts |
+| 3 | 📦 | **Inventory** | Parts list, supplier list, stock queries |
+| 4 | 🛒 | **Purchase** | PO creation, lookup, goods receipt |
+| 5 | 💰 | **Sales** | SO, customer list, quotes |
+| 6 | 🏭 | **Production** | Work orders (WO), progress tracking |
+| 7 | 🔬 | **Quality** | Inspection records (**read-only audit log**; cannot create here) |
+| 8 | 📈 | **Reports** | DSO, gross margin, OEE, etc. |
+| 9 | ⚙️ | **Settings** | User management, permissions (incl. "Reset Demo" button — **Phase 2 work**; placeholder for now) |
+
+### 3.3 Three things in the top-right header
 
 | Element | Purpose |
 |---|---|
-| **🔔 Bell** | Real-time alerts (red dot = unread count) |
-| **👤 Avatar** | Profile / My Permissions / Sign out |
-| **🌐 Language** | Toggle ZH/EN |
-| **↻ Refresh** | Reload current page data |
-| **✕ Close** | Close modal / drawer |
+| 🇹🇼 / 🇺🇸 | Instant ZH/EN switch |
+| 👤 admin (your name) | Click for Profile / My Permissions / Change Password |
+| **[ Sign out ]** | End your session; recommended before leaving for the day |
 
-### 4.3 Color Semantics
+### 3.4 Where's 💬 AI Assistant?
 
-| Color | Meaning |
+This is the **most important v3.x feature**. Click **💬 AI Assistant** in the sidebar; a chat panel opens:
+
+```
+┌──────────────────────────────────────────────────────┐
+│  💬 erpilot AI Assistant                         ✕  │
+├──────────────────────────────────────────────────────┤
+│                                                       │
+│  AI: Hi! I'm the erpilot assistant. Try saying:       │
+│      "List today's in-progress work orders"           │
+│      "Order 100 M6 bolts from Chang Jiang Precision"  │
+│      "Change SO-2025-0042 due date to 6/10"           │
+│                                                       │
+│  ─────────────── Conversation history ──────────────  │
+│                                                       │
+├──────────────────────────────────────────────────────┤
+│  ┌──────────────────────────────────────────────┐  │
+│  │ Type your question...                          │  │
+│  └──────────────────────────────────────────────┘  │
+│                                          [ Send ]   │
+└──────────────────────────────────────────────────────┘
+```
+
+**How to use**:
+
+| Step | Action |
 |---|---|
-| 🔵 **Blue** | Primary action · In progress · Normal |
-| 🟢 **Green** | Success · Completed |
-| 🟡 **Yellow** | Warning · Pending · Partial |
-| 🔴 **Red** | Error · Critical · Below safety |
-| ⚪ **Gray** | Neutral · Inactive · Draft |
+| 1 | Click in the "Type your question..." box |
+| 2 | Type, e.g.: "List today's in-progress work orders" |
+| 3 | Press Enter (or click **[ Send ]**) |
+| 4 | Wait 2–10 seconds; the AI replies |
 
 ---
 
-## 5. Role-based Guide
+## 4. Talking to the AI: 4 CRUD Operations
 
-### 5.1 Owner — Run the Factory from LINE
+**This is the most important chapter — read it carefully.**
 
-#### 7:00 AM: Daily Briefing
+Everything an ERP can do boils down to four classes: **Read / Create / Update / Delete**.
+We made all four typeable. Below: one or two examples per class.
 
-Open LINE → ERP Official Account → auto-pushed:
+### 4.1 Read — no Confirm Card, instant answer
 
-```
-Good morning! 📈
+**Simplest case. AI answers directly (no data was changed).**
 
-✅ Yesterday: 12 shipments ($580K)
-⚠️ Today: 2 urgent WOs pending release
-🔴 M6 Bolt stock at 300 (below safety)
+#### Example 1: list parts below safety stock
 
-[View Details] [Handle Urgent]
-```
-
-#### Anytime: Ask a Question
+You type:
 
 ```
-You:  How's the factory today?
-
-Bot:
-Today's highlights:
-✓ 15 WOs in progress, avg progress 68%
-⚠️ 3 WOs pending release (most urgent: SO-20260514-003)
-✓ 12 sales, revenue $580,000
-🔴 M6 Bolt out of stock — suggest order 2000 pcs
+List parts below safety stock
 ```
 
-> 💡 **Tip**: Use natural language — no need for system jargon.
+AI replies (about 3–5 seconds):
+
+```
+Found 3 parts below safety stock:
+
+┌────────────────┬────────┬──────────┬────────┐
+│ Part No        │ OnHand │ Safety   │ Gap    │
+├────────────────┼────────┼──────────┼────────┤
+│ M6-BOLT-20     │  300   │   500    │  -200  │
+│ SUS304-PLATE   │   12   │    50    │   -38  │
+│ GEAR-A-3MM     │    0   │    20    │   -20  │
+└────────────────┴────────┴──────────┴────────┘
+
+Suggest restocking GEAR-A-3MM first (stockout).
+```
+
+#### Example 2: sales snapshot
+
+You type:
+
+```
+What is this month's revenue? Top 3 customers?
+```
+
+AI replies:
+
+```
+This month (2026-05) revenue: NT$ 4,820,000
+
+Top 3 customers:
+1. China Steel Structure   NT$ 1,800,000 (37%)
+2. Delta Electronics       NT$   980,000 (20%)
+3. Hon Hai Precision       NT$   720,000 (15%)
+```
+
+> 💡 Read operations **don't require a Confirm Card** — the AI just answers.
 
 ---
 
-### 5.2 Salesperson — Query in Front of Customer
+### 4.2 Create — triggers ConfirmCard
 
-#### Scenario: Customer asks "How many can you deliver next batch?"
+**Anything that writes data → AI always shows a Confirm Card.**
 
-1. Open mobile app
-2. Tap 💬 AI Assistant
-3. Speak: "PRD-GEAR-A available delivery for next month"
-4. 3 seconds later: "Available 500 units, earliest 6/15"
+#### Example 3: create a purchase order
 
-#### Scenario: "What was the last price I gave them?"
+You type:
 
-1. AI Assistant input: "Customer A historical pricing for PRD-GEAR-A"
-2. Bot: "Last 3 times: 5/12 $4500, 4/20 $4400, 3/15 $4300"
-
-> 💡 **Sales reps cannot see other reps' customers** — this is `own` scope protection.
-
----
-
-### 5.3 Plant Manager — Push Notifications on Phone
-
-#### Setup Push
-
-1. Desktop UI → 🔑 My Permissions
-2. Confirm `plant_manager` role
-3. Subscribe events: `stock.below_safety` / `wo.completed` / `nc.created`
-
-#### When Alert Hits
-
-LINE / App pops up:
 ```
-⚠️ WO Delay Alert
-
-WO-20260514-002 (Bearing Block B)
-Original ETA: 5/20
-Progress: 30% (2 days behind)
-
-[View Details] [Assign Urgent]
+Order 100 M6 bolts from Chang Jiang Precision, due next Friday
 ```
 
-Tap → straight into mobile app WO page.
+AI replies (no order created yet — a card appears):
 
----
+```
+┌────────────────────────────────────────────────────┐
+│  📋 ConfirmCard: please confirm this PO             │
+├────────────────────────────────────────────────────┤
+│  Supplier  │ Chang Jiang Precision (S-0023)         │
+│  Part No   │ M6-BOLT-20 (resolved from "M6 bolt")   │
+│  Quantity  │ 100                                     │
+│  Unit price│ NT$ 0.5 (last contract price)           │
+│  Total     │ NT$ 50                                  │
+│  Due date  │ 2026-05-22 (next Friday)                │
+│  Terms     │ Net 30 (supplier default)               │
+├────────────────────────────────────────────────────┤
+│        [ ✓ Confirm ]   [ ✏ Edit ]   [ ✗ Cancel ]    │
+│             Auto-cancels in 90s ⏱ 88                 │
+└────────────────────────────────────────────────────┘
+```
 
-### 5.4 Purchaser/Warehouse — Mobile QR Scan
+**Your action**:
 
-#### Receiving Goods
-
-1. Goods arrive from supplier
-2. Open mobile app → "Receive"
-3. Scan PO's QR
-4. System auto-fills:
-   ```
-   PO-20260514-001
-   Da-Hua Precision
-   M6-BOLT-20 × 1000
-   ```
-5. Enter actual qty "1000"
-6. Take photo
-7. Confirm → auto:
-   - Inventory +1000
-   - PO marked "Received"
-   - LINE notify Plant Manager "Goods arrived"
-
-#### Stocktake
-
-1. Open mobile app → "Stocktake"
-2. Select bin
-3. Scan bin QR
-4. Enter actual count
-5. Take photo (if variance)
-6. System auto:
-   - Calculates variance
-   - Flags as anomaly if > 5%
-   - Notifies supervisor for review
-
----
-
-### 5.5 Outsource Partner — LINE QR, No Registration
-
-#### Wu's Story
-
-Mr. Wu is a small electroplating outsource shop owner — just him and two apprentices.
-He **doesn't use computers** and doesn't want to register new systems.
-
-#### Completion Reporting Flow
-
-1. Main factory prints "Outsource Dispatch Order" with QR
-2. Mr. Wu finishes the job, opens LINE
-3. Adds the main factory's ERP official account
-4. Selects menu → "Report Outsource"
-5. Bot: "Please scan the dispatch QR"
-6. Mr. Wu scans
-7. Bot shows:
-   ```
-   Order OS-20260514-003
-   Item: M6 Bolt Electroplating
-   Dispatched: 500 pcs
-   Please enter completed qty
-   ```
-8. Wu replies: "500"
-9. Bot: "Please send a completion photo"
-10. Wu uploads
-11. Bot: "✅ Reported. Thank you, Mr. Wu!"
-12. Main factory's Plant Manager instantly gets LINE notification
-
-**No registration, no new software, minimal typing.**
-
----
-
-## 6. Using the AI Assistant
-
-### 6.1 How to Ask
-
-Use **natural language** — no system jargon:
-
-| ✅ Good | ❌ Avoid |
+| Want to | Click |
 |---|---|
-| How much M6 bolt do we have? | execute SELECT FROM parts WHERE... |
-| Any WOs in progress? | List all WO with status=in_progress |
-| Which customer owes us money? | Query AR table |
+| Looks good, order it | **[ ✓ Confirm ]** |
+| Quantity wrong, fix it | **[ ✏ Edit ]** (drops back to chat so you can say "make it 200") |
+| Forget it | **[ ✗ Cancel ]** |
 
-### 6.2 What AI Can Do
+After clicking **[ ✓ Confirm ]**:
 
-| Module | Sample Questions |
+```
+✅ PO-2026-0142 created.
+   Notification sent to Chang Jiang Precision.
+   ETA: 2026-05-22
+
+   💡 Made a mistake? Within 90 seconds, say "undo last action" to revert.
+```
+
+---
+
+### 4.3 Update — also triggers ConfirmCard
+
+**Changing data is just as risky as creating; the AI also shows a Confirm Card.**
+
+#### Example 4: change a sales order's due date
+
+You type:
+
+```
+Change SO-2025-0042 due date to 6/10
+```
+
+AI replies:
+
+```
+┌────────────────────────────────────────────────────┐
+│  📋 ConfirmCard: please confirm this update         │
+├────────────────────────────────────────────────────┤
+│  Sales Order │ SO-2025-0042                         │
+│  Customer    │ China Steel Structure (C-0007)        │
+│  Item        │ GEAR-A-3MM × 500                     │
+│                                                     │
+│  Field       │ Due date                             │
+│  Old value   │ 2026-06-03                           │
+│  New value   │ 2026-06-10 ⚠ +7 days                 │
+├────────────────────────────────────────────────────┤
+│        [ ✓ Confirm ]   [ ✏ Edit ]   [ ✗ Cancel ]    │
+└────────────────────────────────────────────────────┘
+```
+
+Click **[ ✓ Confirm ]**:
+
+```
+✅ SO-2025-0042 due date updated to 2026-06-10.
+   Customer contact auto-notified by email.
+   Undo available for 90 seconds.
+```
+
+---
+
+### 4.4 Delete / Cancel — red warning ConfirmCard
+
+**Delete is the most dangerous; the AI shows a red card with a strong warning.**
+
+#### Example 5: cancel a purchase order
+
+You type:
+
+```
+Cancel PO-2026-0107
+```
+
+AI replies:
+
+```
+┌────────────────────────────────────────────────────┐
+│  ⚠️  ConfirmCard: cancel PO (NOT recoverable)       │
+├────────────────────────────────────────────────────┤
+│  PO         │ PO-2026-0107                          │
+│  Supplier   │ Da-Hua Precision                       │
+│  Total      │ NT$ 28,500                            │
+│  Status     │ Sent, not yet received                │
+│                                                     │
+│  📌 Impact:                                         │
+│    - PO will be marked "Cancelled"                  │
+│    - Supplier will be notified (email)              │
+│    - Incoming inventory reduced by 300              │
+├────────────────────────────────────────────────────┤
+│   [ ✓ Yes, cancel ]    [ ✗ No, keep the PO ]        │
+└────────────────────────────────────────────────────┘
+```
+
+> 💡 Note: **Quality inspection records cannot be deleted via AI** — they are an audit trail and are kept forever.
+
+---
+
+## 5. ConfirmCard
+
+### 5.1 Why ConfirmCard must exist
+
+**Because AI hallucinates** (industry term for "makes things up").
+
+For example:
+- You say "Chang Jiang", AI might pick the wrong "Chang" supplier
+- You say "100 units", AI might hear "1000 units"
+- You say "M6 bolt", but inventory has M6-BOLT, M6-NUT, and M6-WASHER
+
+Without ConfirmCard, AI executes immediately → **you spend 10× too much, or order from the wrong supplier**.
+
+**ConfirmCard design philosophy**:
+> AI parses your sentence and drafts the action;
+> **a human gives the final sign-off** by clicking confirm.
+
+### 5.2 What's on a ConfirmCard
+
+Every card has:
+
+| Section | Content |
 |---|---|
-| 📦 Inventory | "Top 5 lowest stock items?" "How many M6 bolts left?" |
-| 🛒 Purchase | "Recent POs from Da-Hua" "Who did we buy SUS304 from last time?" |
-| 🏭 Production | "Today's WOs in progress" "Progress of WO-001" |
-| 💰 Sales | "Customer A pricing history" "Revenue this month" |
-| 🔬 Quality | "Recent non-conformances" "Pass rate this month" |
-| 💳 Accounting | "Overdue AR list" "Journal entries this month" |
+| **Title** | What action this is (create PO / update SO / cancel WO ...) |
+| **Summary table** | Every field, with the value parsed by AI |
+| **Impact note** | What downstream effects this triggers |
+| **Three buttons** | ✓ Confirm / ✏ Edit / ✗ Cancel |
+| **Countdown** | Auto-cancels after 90 seconds (in case you forget) |
 
-### 6.3 AI Limitations
+### 5.3 Four risk tiers behind the scenes
 
-- **No writes yet (v2.0)** — read-only queries
-- **AI asks for clarification** on ambiguous queries
-- **Honest about unknowns**: "I'm not sure, please check the X page"
+Tools are classified into four risk tiers; cards differ by color:
 
-### 6.4 No LLM API Key?
-
-AI Assistant displays: "[demo mode] Detected intent = xxx, but LLM_API_KEY not set."
-
-**All other 11 pages still work perfectly** — only AI chat is disabled.
-Once IT sets the API Key (DeepSeek / OpenAI / Anthropic), AI auto-resumes.
+| Tier | Color | Example | Card behavior |
+|---|---|---|---|
+| 🟢 **Read** | no card | "List inventory" | Instant answer, no card |
+| 🟡 **Soft-write** | Yellow | "Save search filter" | Light card + easy undo |
+| 🟠 **Hard-write** | Orange | "Create PO" / "Change due date" | **Full ConfirmCard + 90s Undo** |
+| 🔴 **Critical** | Red | "Delete customer" / "Cancel large PO" | **Red card + type-to-confirm** |
 
 ---
 
-## 7. FAQ
+## 6. Slot-filling: When the AI Asks Back
 
-### Q1: Why is a button grayed out?
+### 6.1 What is slot-filling?
 
-→ Your role lacks that permission. Ask IT or owner to grant.
-Check **🔑 My Permissions** for what you have.
+A "slot" is just a field. If you leave fields out, the AI **does not invent values** — it asks back.
 
-### Q2: Why can't I see other salespeople's customers?
+### 6.2 Example: incomplete input
 
-→ **By design**, not a bug. Each salesperson sees only their own customers (own scope) — prevents customer poaching.
+You type:
 
-### Q3: Where do I download the mobile app?
+```
+Send a PO to China Steel
+```
 
-→ v2.0 uses browser (http://localhost:5173) — responsive design works great on mobile.
-Native app is planned for Phase 1.
+AI replies:
 
-### Q4: Can I use both Chinese and English at the same time?
+```
+OK, you want a PO to China Steel. Please tell me:
 
-→ Yes — language is a personal preference. Same system, you see Chinese, your foreign colleague sees English. Data (part names, customer names) is in whatever language you entered.
+1. Which part? (Part No or description)
+2. Quantity?
+3. Due date?
 
-### Q5: Forgot password?
+You can answer in one line, e.g. "M6-BOLT-20, 1000 pcs, next Friday"
+```
 
-→ v2.0 — ask IT to reset (backend updates hashed_password).
-Phase 2 will add self-service reset via email.
+You reply:
 
-### Q6: How do I export data?
+```
+M6 bolt 1000 pcs next Friday
+```
 
-→ Each page has an **Export CSV** button (Phase 2).
-Currently you can use the API: `GET /api/<domain>/<resource>` returns JSON.
+AI replies (still ambiguous):
 
-### Q7: Can multiple factories share one system?
+```
+"M6 bolt" matches 3 parts — please pick one:
 
-→ **Yes** — this is core MESH design:
-- HQ + N Factory Nodes
-- Each factory's data stays local
-- HQ can query aggregates across factories
-- See [DEPLOYMENT.md](./DEPLOYMENT.md) §4
+   ┌─────────────────────────────────────┐
+   │ ⓪ M6-BOLT-20 (hex bolt, most used)  │
+   │ ① M6-NUT (M6 nut)                    │
+   │ ② M6-WASHER (M6 washer)              │
+   └─────────────────────────────────────┘
 
-### Q8: One outsource shop serves multiple main factories?
+Reply with the number (e.g. "0") or the full Part No.
+```
 
-→ Same Wu Electroplating can serve multiple main factories.
-Each main factory's printed QR has independent token — Bot auto-identifies.
+Reply `0` → AI shows the full ConfirmCard.
+
+### 6.3 Why this design?
+
+**No follow-up questions = AI guesses = your company orders wrong**.
+We'd rather ask a couple extra questions than cost you money.
+
+> 💡 **Max 3 follow-ups**: if AI still can't pin it down after 3 questions, it suggests you switch to the **Purchase** sidebar form to fill it manually.
 
 ---
 
-## 8. Keyboard Shortcuts
+## 7. 90-second Undo
 
-| Shortcut | Function |
+### 7.1 How to undo
+
+Within **90 seconds** of any create / update / delete, you can undo.
+
+#### Method 1: type it
+
+In the AI chat box:
+
+```
+Undo last action
+```
+
+or
+
+```
+Cancel the one I just did
+```
+
+AI replies:
+
+```
+✅ Undid PO-2026-0142 creation.
+   PO marked as "Recalled".
+   Chang Jiang Precision was notified of the recall.
+```
+
+#### Method 2: click the inline button
+
+After every write, the AI's response includes a small button:
+
+```
+✅ PO-2026-0142 created.
+
+   [ ↩ Undo (67s left) ]
+```
+
+Just click it.
+
+### 7.2 Undo limitations
+
+| Situation | Can undo? |
 |---|---|
-| `Ctrl + K` (Win) / `⌘ + K` (Mac) | Global search (Phase 2) |
-| `Esc` | Close modal / drawer |
-| `Enter` | Submit form |
-| `/` | Focus AI chat input |
+| Within 90s, PO not yet received | ✅ Yes |
+| Within 90s, PO partially received | ❌ No (downstream side effects) |
+| Past 90s | ❌ No — use the normal "Cancel document" workflow |
+| Someone else confirmed it; you want to undo | ❌ No — only the confirmer can undo |
 
 ---
 
-## 9. Troubleshooting
+## 8. Four Personas in Action
 
-### 9.1 Can't Reach Login
+### 8.1 👔 Mr. Wang (Owner) — desktop morning briefing
+
+**Scenario**: 8:30 AM, walks into the office, wants today's status.
+
+**Steps**:
+
+| # | Action |
+|---|---|
+| 1 | Open Chrome → `http://localhost:5173` |
+| 2 | Login as `boss_wang` |
+| 3 | Lands on 📊 **Dashboard** by default; AI summary appears at the top |
+
+AI summary looks like:
+
+```
+┌────────────────────────────────────────────────────┐
+│ 📈 Morning, Mr. Wang! Today's brief (2026-05-17)    │
+├────────────────────────────────────────────────────┤
+│                                                     │
+│ ✅ Yesterday: 12 shipments, NT$ 580,000 revenue     │
+│ ⚠️  Pending releases today: 3 WOs (urgent SO-0042)  │
+│ 🔴 Stock alert: M6 bolts 300 (< safety 500)         │
+│ 💰 AR DSO: 48 days (+3 vs last month)               │
+│                                                     │
+│ [ View details ] [ Handle urgent ] [ Notify Lina ]  │
+└────────────────────────────────────────────────────┘
+```
+
+**Want more?** Click **💬 AI Assistant** and type:
+
+```
+What's this month's gross margin? Compared to last month?
+```
+
+AI replies:
+
+```
+This month gross margin: 23.4% (NT$ 1,128K / NT$ 4,820K)
+Last month: 21.8%
+Change: +1.6 pp 📈
+
+Main driver: CNC machined parts margin rose from 18% to 22%.
+```
+
+---
+
+### 8.2 👨‍💼 Steve (Sales) — 3-second answer in front of customer
+
+**Scenario**: Steve is at the customer's office. Customer asks: "Do you still have the GEAR-A I bought last time? How soon can you deliver?"
+
+**Steps**:
+
+| # | Action |
+|---|---|
+| 1 | Open laptop Chrome (VPN already connected) |
+| 2 | Login, click **💬 AI Assistant** |
+| 3 | Type |
+
+Input:
+
+```
+GEAR-A-3MM for China Steel Structure — current stock and earliest commitable delivery?
+```
+
+AI replies (3–5 seconds):
+
+```
+China Steel Structure (C-0007) × GEAR-A-3MM:
+
+   On hand:         420
+   In production:   150 (WO-2026-0089, completes 5/22)
+   Reserved:         80
+   ─────────────────────────
+   Available to promise:  490
+   Earliest ship:    if ordered today, ship 5/23
+
+   📌 Last price to China Steel: NT$ 4,500/pc (2026-04-20)
+```
+
+**Customer says "Order 300"**:
+
+```
+Create SO for China Steel Structure: GEAR-A-3MM × 300, use last price, due 5/30
+```
+
+AI shows ConfirmCard, Steve clicks **[ ✓ Confirm ]** → SO created in 30 seconds.
+
+> 💡 Steve **cannot see other reps' customers** — this is RBAC (role-based access control).
+
+---
+
+### 8.3 👨‍🏭 Lin (Plant Manager) — desktop + war-room screen
+
+**Scenario A: desk view**
+
+Lin opens the dashboard, clicks **🏭 Production**, and sees the war-room view:
+
+```
+┌──────────────────────────────────────────────────────┐
+│   🏭 Production War-Room (live)         2026-05-17 09:42│
+├──────────────────────────────────────────────────────┤
+│                                                       │
+│   In-progress WOs: 15      Avg progress: 68%          │
+│                                                       │
+│   ⚠️  Delay alerts:                                   │
+│   ┌────────────────────────────────────────────┐    │
+│   │ WO-2026-0073  Bearing Block B  2 days late 🔴│   │
+│   │ WO-2026-0081  Outer Casing     1 day late 🟡 │   │
+│   └────────────────────────────────────────────┘    │
+│                                                       │
+│   📦 Material risk:                                   │
+│   ┌────────────────────────────────────────────┐    │
+│   │ M6-BOLT-20  300 left, weekly need 800 → -500│   │
+│   └────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────┘
+```
+
+**Scenario B: release a WO via chat**
+
+Lin types:
+
+```
+Release WO-2026-0091 and assign to machine CNC-A
+```
+
+AI shows ConfirmCard, click **[ ✓ ]** → WO drops to the shop floor.
+
+---
+
+### 8.4 👩‍💻 Lina (Purchaser/Warehouse) — desktop + USB barcode scanner
+
+**Scenario A: PO via chat**
+
+Lina gets an email from Lin: "restock M6 bolts". She tells AI:
+
+```
+Order from Chang Jiang Precision: M6-BOLT-20 × 2000, due next Wed, Net 30
+```
+
+AI shows ConfirmCard, Lina confirms, PO created.
+
+**Scenario B: receive goods with USB scanner**
+
+| # | Action |
+|---|---|
+| 1 | Open **🛒 Purchase** → find `PO-2026-0142` |
+| 2 | Click **Receive** — receiving form opens |
+| 3 | Plug USB barcode scanner into the PC |
+| 4 | Point at the supplier's box barcode, **beep** |
+| 5 | System auto-fills Part No and expected quantity |
+| 6 | Type the actual received quantity |
+| 7 | Click **Confirm Inwarding** → stock +N, PO marked "Received" |
+
+> 💡 Advanced USB-scanner workflows (multi-bin, batch/lot tracking) are scheduled for **Phase 2**. The current release supports the basic "beep, get the Part No" workflow only.
+
+---
+
+## 9. Three Licensing Tracks
+
+LLM-ERP ships under three licensing tracks — **picking the right one can save millions**.
+
+| Track | For whom | Cost | Highlight |
+|---|---|---|---|
+| 🟢 **AGPL** | Want to inspect source, OK with sharing your modifications | Free | Fully open-source |
+| 🌱 **Small Business** | 50–100-person factory, ≤ 20 concurrent users | **Completely free** | **Includes closed-source connectors** (Digiwin / Chain Sea integrations) |
+| 🔵 **Commercial** | > 20 concurrent users, ISVs, SaaS providers | Negotiated | Removes AGPL clauses |
+
+### How to apply for Small Business?
+
+It's free, but registration is required. See:
+
+- 📄 **`LICENSE-COMMERCIAL.md`** (in the project root)
+- 📄 **`docs/COMMERCIAL_LICENSING_FAQ_ZH.md`**
+
+Email the licensing contact with your company name, headcount, and expected concurrent users. You'll receive a Small Business grant letter.
+
+---
+
+## 10. FAQ
+
+### Q1: Does the AI handle typos?
+
+→ Mostly yes. "M6 bolt", "m6 buoy", "M6 螺絲" all attempt to resolve.
+When unsure, the AI asks back.
+
+### Q2: What if the AI answers wrong?
+
+→ For Read: re-ask with clearer phrasing.
+For Create/Update/Delete: if the ConfirmCard looks wrong, click **[ ✏ Edit ]** or **[ ✗ Cancel ]** — do not confirm.
+
+### Q3: How long is chat history kept?
+
+→ Default 30 days (IT-configurable).
+To view: top-right 👤 avatar → "My Conversations".
+
+### Q4: Can I switch roles, e.g., a salesperson viewing the plant manager's screen?
+
+→ One account = one role; **you can't self-switch**.
+Ask IT / the owner to add a role under **⚙️ Settings → Users**.
+
+### Q5: Can I export to Excel?
+
+→ Every list page has **📥 Export CSV** in the top-right (CSV opens in Excel).
+Native `.xlsx` export is scheduled for Phase 2.
+
+### Q6: Forgot my password?
+
+→ Ask IT to reset. Self-service email reset is scheduled for Phase 2.
+
+### Q7: Can I use voice input?
+
+→ **Phase 4** (Whisper speech-to-text). Currently text only.
+
+### Q8: Can multiple factories share one system?
+
+→ Yes — it's called **MESH multi-factory**: each site's data stays local, HQ runs aggregate queries. See `NETWORK_DEPLOYMENT_EN.md`.
+
+### Q9: AI not responding?
+
+→ See §11.3 Troubleshooting.
+
+### Q10: What do I need before commercial use?
+
+→ See Chapter 9 plus `LICENSE-COMMERCIAL.md`.
+
+---
+
+## 11. Troubleshooting
+
+### 11.1 Can't reach the login page
 
 | Symptom | Fix |
 |---|---|
-| "Cannot reach backend" | Check backend: `docker compose ps` |
-| 503 / 504 | Restart: `docker compose restart backend` |
-| 401 keeps popping | Clear localStorage: F12 → Application → Clear |
+| Browser says "Cannot reach this site" | Have IT confirm backend is up: `docker compose ps` |
+| 503 / 504 errors | Ask IT to restart: `docker compose restart backend` |
+| 401 keeps popping up | Press F12 → Application → Storage → Clear site data, refresh |
 
-### 9.2 No Data Showing
-
-| Symptom | Fix |
-|---|---|
-| Empty list | Seed first: `docker compose exec backend python -m scripts.seed` |
-| Only see own | This is row-level design (own scope), not a bug |
-| 401 forbidden | Role lacks permission — ask IT |
-
-### 9.3 AI Not Responding
+### 11.2 No data shown
 
 | Symptom | Fix |
 |---|---|
-| "demo mode" message | Set `LLM_API_KEY` in `.env` |
-| "LLM call failed" | Verify API key validity and quota |
-| Long wait | LLM thinking — up to 60s |
+| Empty list | IT hasn't seeded demo data (`docker compose exec backend python -m scripts.seed`) |
+| Only see customers you created | **By design** (RBAC). Not a bug |
+| Button returns 403 | Your role lacks permission — ask IT to grant |
 
-### 9.4 Mobile Display Issues
+### 11.3 AI Assistant unresponsive
 
 | Symptom | Fix |
 |---|---|
-| Font too small | Pinch-zoom or browser font setting |
-| Layout broken | Use Chrome / Safari (latest) |
-| Touch unresponsive | Refresh page |
+| Shows "[demo mode]" | IT hasn't set the LLM API key in `.env` (`LLM_API_KEY`) |
+| Shows "LLM call failed" | Key may be expired / out of quota — ask IT |
+| Long wait (> 30s) | LLM is thinking; allow up to 60s; otherwise check backend logs |
+| AI keeps asking the same thing | After 3 follow-ups it will suggest using the sidebar form instead |
 
----
+### 11.4 ConfirmCard issues
 
-## 10. Advanced: Admin Only
-
-### 10.1 Create New Employee
-
-```
-1. Desktop UI → System → Permissions (admin required)
-2. System → Organization → Employees → Create
-3. Fill: employee #, name, email, department
-4. System → Organization → Users → Create
-5. Username / default password / link employee
-6. Permissions → assign role (e.g. sales_rep)
-```
-
-### 10.2 Temporary Delegation
-
-Example: Owner traveling, Plant Manager delegates for 3 days
-
-```
-Desktop UI → Permissions → boss role → Clone →
-Create boss_temp_2026_05_20 → Assign to Plant Manager →
-Set expires 2026-05-22 23:59 → Save
-```
-
-Auto-revokes after expiry.
-
-### 10.3 Audit Who Changed What
-
-```
-Desktop UI → System → Audit Trail (Phase 1.5)
-Currently: query permission_audit table directly
-```
-
----
-
-## 11. Further Learning
-
-- **Architecture Diagram**: [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md)
-- **Permission Model**: [PERMISSION_MODEL.md](./PERMISSION_MODEL.md)
-- **API Docs**: http://localhost:8000/docs (auto-generated)
-- **Strategy Landscape**: [STRATEGY_LANDSCAPE.md](./STRATEGY_LANDSCAPE.md)
-
----
-
-## 12. Support
-
-| Need | Contact |
+| Symptom | Fix |
 |---|---|
-| Bug report | Internal IT |
-| Feature request | Team meeting or email |
-| Training | Monthly online sessions |
-| Emergency | (per your company SLA) |
+| Card auto-cancelled (countdown hit zero) | Just re-ask the AI |
+| **[ ✏ Edit ]** does nothing | Refresh (F5) and re-ask |
+| **[ ✓ Confirm ]** spins forever | Look for error in the bottom-right; have IT check the backend |
 
----
+### 11.5 Undo failed
 
-## 13. Mobile App Usage (NEW in v2.3)
-
-### 13.1 Install & Launch
-
-Phase 1 ships an Expo mobile app skeleton (5 tabs).
-
-**Prerequisites**: Node.js 18+, phone on the same Wi-Fi as backend.
-
-```bash
-cd frontend-mobile
-npm install
-# Edit app.json: set extra.apiBaseUrl to your computer's LAN IP
-# Example: http://192.168.1.100:8000
-npm start
-```
-
-After QR code appears in terminal:
-- iOS: scan with Camera, opens Expo Go
-- Android: scan with Expo Go app
-
-### 13.2 Five Tabs
-
-| Tab | Function |
+| Symptom | Fix |
 |---|---|
-| 📊 Dashboard | AI summary + 4 stat cards + low-stock list |
-| 📦 Inventory | Searchable parts list |
-| 📷 Scan | Full-screen barcode / QR scanner |
-| 💬 AI Assistant | Chat interface + suggested prompts |
-| 👤 Me | Profile + system info + logout |
+| "Past 90 seconds, cannot undo" | Use the formal "Cancel document" workflow |
+| "Action consumed by downstream flow" | E.g., PO partially received — return the goods first |
+| "You are not the executor" | The person who confirmed must undo |
 
-### 13.3 Full Verification SOP
+### 11.6 Still stuck?
 
-See `frontend-mobile/VERIFY_MOBILE.md` — 5-step procedure + 5-screenshot checklist + sign-off page.
+Contact internal IT and include:
+- Screenshot (Win+Shift+S)
+- The exact phrasing you typed
+- Error message (if any)
+- Timestamp
 
----
-
-## 14. MESH Multi-Factory (NEW in v2.3)
-
-### 14.1 When to Enable
-
-When you have **2+ factories / outsource shops** to interconnect but **don't want data centralized**:
-- Main factory + Plating outsource + Inspection outsource (typical 3-shop)
-- Multiple production sites in a group
-- Customer demands "data stays in our factory"
-
-### 14.2 Start Factory Node
-
-On each factory's server:
-
-```bash
-FACTORY_ID=plating  FACTORY_NAME='Plating Outs' \
-PORT=8002  HQ_URL=http://hq.your-domain.com:8000 \
-python backend/factory_node.py
-```
-
-The factory auto-registers with HQ; HQ can then run aggregated queries.
-
-### 14.3 HQ Cross-Factory Query
-
-```bash
-# List registered factories
-curl http://hq:8000/api/factory/list
-
-# Aggregate M6 bolt inventory across factories
-curl -X POST 'http://hq:8000/api/factory/aggregate?domain=inventory&part_no=M6'
-
-# Response: { total: 4500, per_factory: {main: 3000, plating: 1500}, ... }
-```
-
-### 14.4 Data Sovereignty Guarantee
-
-The `/api/factory/aggregate` response contains **only aggregated numbers**, never raw rows (verified by 5 integration tests):
-- ❌ Never returns created_at / qty_available / items / rows
-- ✅ Only total / per_factory_total / responded_count
+Or email your company's ERP support contact.
 
 ---
 
-## 15. PDF Manual Export (NEW in v2.3)
-
-Convert all customer-facing manuals to polished PDFs (14 documents in ZH + EN):
-
-```bash
-# Windows
-build_pdfs.bat
-
-# Mac/Linux
-./build_pdfs.sh
-```
-
-Output `docs/pdf/*.pdf`, 14 beautiful PDFs (with Mermaid diagrams, A4 layout, page numbers).
-See `scripts/build-pdfs/README.md` for details.
-
----
-
-**Manual version**: v2.3 (2026-05-14)
+**Manual version**: v3.12 (2026-05-17)
 **Chinese version**: [`USER_MANUAL_ZH.md`](./USER_MANUAL_ZH.md)
-**Next update**: After LINE Bot launches
+**Companion docs**: [`CONVERSATIONAL_ERP_DESIGN_EN.md`](./CONVERSATIONAL_ERP_DESIGN_EN.md) (architecture) / `LICENSE-COMMERCIAL.md` (licensing)

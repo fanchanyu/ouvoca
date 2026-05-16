@@ -55,6 +55,7 @@ export const zhTW = {
     quality: '品質',
     permissions: '權限管理',
     myPermissions: '我的權限',
+    settings: '設定',
     group: { overview: '總覽', operations: '營運', system: '系統' },
   },
   // 登入

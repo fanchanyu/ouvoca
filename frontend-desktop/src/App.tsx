@@ -11,6 +11,7 @@ import Quality from './pages/Quality'
 import EventsPage from './pages/Events'
 import Permissions from './pages/Permissions'
 import MyPermissions from './pages/MyPermissions'
+import Settings from './pages/Settings'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/permissions" element={<Permissions />} />
         <Route path="/me/permissions" element={<MyPermissions />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>
   )

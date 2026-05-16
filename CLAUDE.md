@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-16（會話 #35：README 完整雙語重寫（🇹🇼/🇺🇸 每 section 並列、TOC、3-column 表格、專案數據）+ Made by Peter 5 個視覺接觸點（README badge+footer、Frontend Layout sidebar、War-room dashboard header）+ i18n footer 加 madeBy key + 順便修 stale v2.0.0 → v3.12）
+**最後更新**：2026-05-17（會話 #36 v3.13：三軌並行完工。Sprint D = USER_MANUAL_ZH/EN 重寫成 v3.x（867+859 行，拿掉 LINE/mobile/外協殘留）+ Sprint E = Attachment model + POST /api/files/upload 4 endpoints + 11 smoke tests 全 pass + Settings 頁 drag-and-drop UI + Sprint F = Settings 頁接通既有 seed/clear-demo。後端 +4 routes、前端 +1 page、tests 287→298）
 **維護者**：使用者 + Claude
-**版本**：3.12
+**版本**：3.13

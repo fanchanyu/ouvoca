@@ -26,6 +26,7 @@ const navConfig = [
   { path: '/quality',         key: 'quality',        icon: '🔬', group: 'operations' },
   { path: '/permissions',     key: 'permissions',    icon: '🛡️', group: 'system' },
   { path: '/me/permissions',  key: 'myPermissions',  icon: '🔑', group: 'system' },
+  { path: '/settings',        key: 'settings',       icon: '⚙️', group: 'system' },
 ] as const
 
 export default function Layout() {

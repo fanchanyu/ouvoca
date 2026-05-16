@@ -8,6 +8,12 @@
 .env.*
 !.env.example
 !.env.template
+
+# ─── 使用者上傳檔案（Sprint E v3.13）────────────────────────
+# 不可推 — 可能含使用者業務敏感資料（報價單 / 發票 / 合約）
+# 寫 backend/uploads/* 不是 backend/uploads/ 才能讓 !.gitkeep 例外生效
+backend/uploads/*
+!backend/uploads/.gitkeep
 *.pem
 *.key
 *.crt

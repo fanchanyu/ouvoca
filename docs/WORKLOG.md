@@ -137,6 +137,98 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-17｜會話 #35｜🎯 v3.13 三軌並行：Settings 頁 + 檔案上傳 + USER_MANUAL 重寫
+
+**目標**：使用者「全部并行做」三個 gap：
+1. PDF 內容過期（v2 LINE/mobile/外協殘留）
+2. 沒有上傳業務文件功能
+3. 沒一鍵清除預設
+
+→ 啟動 3 個 sprint：Sprint D（rewrite manual）+ Sprint E（file upload）+ Sprint F（demo reset UI）
+→ Sprint D 用 background Agent 並行做，Sprint E+F 自己在 foreground 做。
+
+### ✅ Sprint D：USER_MANUAL 重寫（background Agent）
+
+- `USER_MANUAL_ZH.md`：628 → **867 行**
+- `USER_MANUAL_EN.md`：611 → **859 行**
+
+11 章結構對稱重寫：
+1. 系統簡介（3 大承諾 + 4 persona + CRUD 速覽）
+2. 第一次登入（電腦小白逐步：滑鼠點哪、ASCII 登入畫面）
+3. 介面導覽（左 sidebar + 右 header + Chat 對話框 ASCII）
+4. 對 AI 講話：4 種 CRUD（5 完整實例 + AI 回應 ASCII）
+5. ConfirmCard（為何存在 / 4 風險級 / 完整卡構成）
+6. Slot-filling（多輪對話 + 3 次反問上限）
+7. 90 秒 Undo（2 種方法 + 4 限制）
+8. 4 角色實戰（王董/小陳/林廠長/阿玲——徹底剔除老吳）
+9. 三軌授權
+10. FAQ 10 題 + 11. 疑難排解 6 節
+
+**徹底拿掉 v2 殘留**：LINE / mobile / 行動 / QR / Mobile App / 外協 / 老吳 grep 全 0 命中。
+
+### ✅ Sprint E：File Upload（後端 + 前端 + tests）
+
+**驚喜發現**：後端 `/api/onboarding/seed-demo` + `/api/onboarding/clear-demo` 已存在
+→ Sprint F 縮減為純前端 UI 工作。
+
+**新後端**（從零）：
+- `app/models/attachment.py`：Attachment model + TenantMixin + ATTACHMENT_CATEGORIES frozenset
+- `app/api/files.py`：4 endpoints
+  - `POST /api/files/upload`（multipart, 25MB cap, ext whitelist, 路徑穿越防護）
+  - `GET /api/files?category=`
+  - `GET /api/files/{id}/download`（FileResponse）
+  - `DELETE /api/files/{id}`（清 DB + disk file）
+- 儲存路徑：`backend/uploads/{tenant_id}/{yyyy-mm}/{uuid}_{filename}`
+- `.gitignore` 新加 `backend/uploads/` + `!backend/uploads/.gitkeep`
+
+**Smoke tests**（`test_files_v313.py`）：**11/11 pass**
+- 正常路徑：upload / list / filter / download / delete / full lifecycle
+- 安全邊界：invalid ext / invalid category / 空檔 / 路徑穿越 / 未授權
+
+### ✅ Sprint F：Settings 頁前端（接通 demo + file upload）
+
+新建 `frontend-desktop/src/pages/Settings.tsx`（~280 行）3 區塊：
+1. 📦 **示範資料**：Stat 卡（DEMO/總數）+ 載入 / 清除按鈕（含 confirm + 二次保護）
+2. 📁 **上傳業務文件**：drag-and-drop zone + 分類 / 說明欄位 + 已上傳列表（下載/刪除）
+3. ℹ️ **系統資訊**：版本 / 作者 / 授權 / 商業諮詢連結
+
+路由 + 導航 + i18n 整合：
+- `App.tsx`：加 `/settings` route
+- `Layout.tsx`：sidebar 新增 ⚙️ 設定 在 system group
+- `i18n/locales/{zh-TW,en}.ts`：新增 `nav.settings`
+- `lib/api.ts`：新增 `uploadFile()` multipart helper + `apiUploadAttachment` / `apiListAttachments` / `apiDeleteAttachment` / `downloadAttachmentUrl` / `apiClearDemo`
+
+### 📊 數字變化
+
+| 維度 | v3.12 結束 | v3.13 結束 |
+|---|---|---|
+| 後端 Route 數 | 87 | **91**（+4 files endpoints）|
+| Domain 模型數 | n | **n+1**（Attachment）|
+| 前端頁面數 | 11 | **12**（+Settings）|
+| Smoke tests | 287 | **298**（+11 file tests）|
+| USER_MANUAL_ZH 行數 | 628（v2 殘留）| **867**（v3.x 重寫）|
+| USER_MANUAL_EN 行數 | 611 | **859** |
+| 電腦小白「下載 → 上傳報價單 → 清除 demo」可行 | ❌ | ✅ **三個都通**  |
+
+### 🪞 教訓 #19
+
+「**先 grep 再實作**」——Sprint F 我本來預估 1-2 小時做後端 + 前端，
+結果第一個 grep 就發現 `/api/onboarding/clear-demo` **早就存在**，
+只剩前端 UI 要寫 → 縮成 30 分鐘。
+
+之前 16 個 sprint 應該有更多「以為要做但其實已經做了」的案例。
+**Karpathy「Think Before Coding」原則 = `grep -r` 5 分鐘 = 省 3 小時 dev**。
+
+### 後續
+
+- 跑 `build_pdfs.bat` 重生 35 份 PDF（含新 USER_MANUAL）
+- LLM tool: `parse_uploaded_attachment`（讀 PDF/Excel → Schema Mapping AI → ConfirmCard → 變 SO/PO/Quote）—— 下個 sprint 接通
+- Settings 頁加 reset_seed 之外的功能（multi-tenant 切換、語言預設、Toast 啟用）
+
+**Blocker**：無
+
+---
+
 ## 2026-05-16｜會話 #34｜🌱 戰略軸：≤20 concurrent users 完全免費（Small Business License v1.0）
 
 **目標**：使用者「商業策略裡 我想要做 20 以內不用錢」

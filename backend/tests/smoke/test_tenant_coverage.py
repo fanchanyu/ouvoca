@@ -21,6 +21,7 @@ from app.models import _mixins as mixins_module
 # ─── 預期已加 TenantMixin 的 model 模組 ─────────────────────────
 EXPECTED_TENANT_MIXIN = {
     "accounting",
+    "attachment",   # v3.13 新增（檔案上傳，按租戶隔離存 uploads/{tenant_id}/）
     "crm_sales",
     "inventory",
     "mps_mrp",

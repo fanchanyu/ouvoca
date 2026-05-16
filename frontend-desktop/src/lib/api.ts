@@ -46,7 +46,47 @@ export const api = {
   del:    <T>(path: string) => request<T>('DELETE', path),
 }
 
-export { ApiError }
+/** Upload a file via multipart/form-data. Returns the created Attachment record. */
+async function uploadFile<T>(path: string, file: File, extra?: Record<string, string>): Promise<T> {
+  const token = useAuthStore.getState().token
+  const fd = new FormData()
+  fd.append('file', file)
+  if (extra) for (const [k, v] of Object.entries(extra)) fd.append(k, v)
+  const headers: Record<string, string> = {}
+  if (token) headers['Authorization'] = `Bearer ${token}`
+  const resp = await fetch(BASE + path, { method: 'POST', headers, body: fd })
+  let payload: unknown = null
+  try { payload = await resp.json() } catch { /* ignore */ }
+  if (!resp.ok) {
+    const msg = (payload as { detail?: string })?.detail || resp.statusText
+    if (resp.status === 401) useAuthStore.getState().logout()
+    throw new ApiError(resp.status, msg, payload)
+  }
+  return payload as T
+}
+
+export { ApiError, uploadFile }
+
+// ──────────────────────────────────────────────────────────
+// Attachments / File upload (Sprint E v3.13)
+// ──────────────────────────────────────────────────────────
+export interface Attachment {
+  id: string
+  filename: string
+  content_type: string
+  size_bytes: number
+  category: string         // 'quote' | 'invoice' | 'po' | 'general'
+  description: string | null
+  uploaded_by: string | null
+  uploaded_at: string
+}
+export const apiUploadAttachment = (file: File, category: string = 'general', description?: string) =>
+  uploadFile<Attachment>('/files/upload', file, { category, ...(description ? { description } : {}) })
+export const apiListAttachments  = (category?: string) =>
+  api.get<Attachment[]>(`/files${category ? `?category=${encodeURIComponent(category)}` : ''}`)
+export const apiDeleteAttachment = (id: string) =>
+  api.del<{ deleted: boolean; id: string }>(`/files/${id}`)
+export const downloadAttachmentUrl = (id: string) => `/api/files/${id}/download`
 
 // ---------- domain typed helpers ----------
 
@@ -176,6 +216,16 @@ export const apiSeedDemo = () =>
     skipped: number
     message: string
   }>('/onboarding/seed-demo')
+
+// Sprint F (v3.13)：清除所有 DEMO- 前綴資料
+export const apiClearDemo = () =>
+  api.del<{
+    deleted_customers: number
+    deleted_suppliers: number
+    deleted_parts: number
+    deleted_inventory_rows: number
+    message: string
+  }>('/onboarding/clear-demo')
 
 // ============================================================
 // Reports (v3.10 Track C — 直接拿 URL 給 <a download>)

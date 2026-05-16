@@ -46,5 +46,6 @@ from app.models.permission import (
     RolePermissionLink, UserRoleAssignment, PermissionOverride,
     RowFilter, PermissionAudit,
 )
+from app.models.attachment import Attachment, ATTACHMENT_CATEGORIES
 
 __all__ = ["Base"]

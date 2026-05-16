@@ -1,0 +1,9 @@
+# 使用者上傳檔案存放區（Sprint E v3.13）
+#
+# 路徑結構：
+#   uploads/{tenant_id}/{yyyy-mm}/{uuid}_{filename}
+#
+# 規則：
+#   - .gitignore 已排除此目錄所有檔案
+#   - 含使用者業務資料（報價單 / 發票 / 合約），絕對不可推到 git
+#   - 備份請走獨立加密通道（見 docs/BACKUP_RESTORE_SOP_ZH.md）
