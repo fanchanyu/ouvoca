@@ -137,6 +137,85 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-17｜會話 #40｜📚 v3.16.1：文件補 v3.13-v3.16 缺口 + GitHub 同步
+
+**目標**：使用者「再確認一下使用及操作手冊和 GITHUB 上面的說明是否對小白友善 / 文件務必上傳及同步 github」
+
+### 🔍 Audit 找到的重大缺口
+
+USER_MANUAL_ZH/EN 雖然 Sprint D 重寫了，但**只 cover 到 v3.12**：
+
+| v3.13+ 新功能 | Manual 提了嗎？ |
+|---|---|
+| ⚙️ Settings 頁（v3.13）| ❌ 完全沒提 |
+| 📁 File upload（v3.13）| ❌ |
+| 🤝 CRM 頁 Pipeline/Kanban/360（v3.15）| ❌ |
+| 🤖 AI Key 設定 UI + AskAi/AiSetupGuide（v3.14）| ❌（疑難排解還是寫「請 IT 設 .env」）|
+| 💡 AskAI 浮球（v3.16 原創）| ❌ |
+| 🤖 Auto CrmEvent（v3.16 原創）| ❌ |
+
+也就是：**小白讀完手冊還是不知道 1/3 的新功能怎麼用**。
+
+### ✅ 修正
+
+**USER_MANUAL_ZH.md** + **USER_MANUAL_EN.md** 同步加 3 個新章節：
+- §3.5 ⚙️ 設定頁（A. AI 設定 / B. 示範資料 / C. 上傳檔案 / D. 系統資訊）
+- §3.6 🤝 CRM 頁（Lead 漏斗 / 商機 Kanban / 客戶 360 + 自動 activity）
+- §3.7 💡 AskAI 浮球（erpilot 獨家，每頁的現場 AI 教練）
+
+**改版本標頭** v3.12 → **v3.16**，加 top notice 「v3.13-v3.16 新功能必看」清單。
+
+**改 §3.2 Sidebar 8 大頁面 → 12 大頁面**（分總覽 / 營運 / 系統 3 區）
+
+**改 §11.3 AI 助手不回應**：
+- 之前「請 IT 設 .env」→ 現在「自己進 ⚠️ 設定頁，看 §3.5 + HOW_TO_GET_LLM_API_KEY_ZH.md」
+- 加「右下角 💡 浮球」作為「不知道怎麼用」第一解法
+
+**README.md** 加 4 行 erpilot 獨家功能到 「What's Inside」表：
+- 💡 AskAI 浮球（v3.16 獨家）
+- 🤖 Auto CrmEvent（v3.16 獨家）
+- 🤝 CRM 完整 UI（v3.15）
+- ⚙️ Settings 頁（v3.13）
+
+**重 build 35 份 PDF**（含 USER_MANUAL 新章節 + README 新內容）→ commit。
+
+### 📊 數字
+
+| 維度 | Audit 前 | Audit 後 |
+|---|---|---|
+| USER_MANUAL_ZH 行數 | 867 | **~1000+** |
+| USER_MANUAL 提到的 v3.13+ 功能 | 0/6 | **6/6** |
+| README 提到 erpilot 獨家功能 | 部分 | **完整**（4 行 callout）|
+| 小白讀完是否會用 Settings / CRM / AskAI | ❌ | ✅ |
+| PDF 是否同步 GitHub | 35 PDFs modified 未 commit | **commit + push** |
+
+### 🪞 教訓 #24
+
+**「文件落後 1 個 sprint 就等於沒做這個功能」**
+
+我這 6 個 sprint（D-J）一直在加新功能但**沒有同步更新使用者手冊**。
+從使用者角度：手冊沒提的功能 = 找不到 = 沒做。
+
+下次每個 sprint 收尾應該強制檢查：
+1. ✅ Backend 模型 + endpoint
+2. ✅ Frontend page + nav 入口
+3. ✅ Smoke tests
+4. ✅ **USER_MANUAL 對應章節更新**（這條我之前漏了）
+5. ✅ **README 對應 callout**
+6. ✅ Commit + push 同步 GitHub
+
+不要等到 5-6 個 sprint 後才一次補。
+
+### 後續
+
+- 把 USER_MANUAL 套到 onboarding wizard step 4 變「快速看 manual」連結
+- 開 sprint-checklist.md 強制每個 sprint 完成 6 件事才能 close
+- 整理 docs/ 目錄結構（現在有點亂）
+
+**Blocker**：無
+
+---
+
 ## 2026-05-17｜會話 #39｜💡 v3.16 Sprint J：erpilot 原創 UX（不抄人家）
 
 **目標**：使用者「我們不是要抄人的東西，要有自己的想法，再完善 / 做好的要記得和 GitHub 同步」

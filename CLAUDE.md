@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-17（會話 #40 v3.16 Sprint J — **erpilot 原創 UX（不抄人家）**。使用者打臉「我們不是要抄人的東西，要有自己的想法」→ 加 2 個 erpilot 獨家設計：(1) `AskAiFloat.tsx` 右下角 AI 浮球，每頁變現場教練（取代別家的 onboarding tour / help bubble，把 AI 從 chat 頁延伸到所有頁）；(2) `services/crm_auto_log.py` 訂閱 EventBus 6 種事件（so.created/confirmed/shipped/cancelled、lead.converted、opportunity.stage_changed）→ **自動產 CrmEvent 進 customer timeline**（業務不必手動加 activity log，解 Salesforce 一個經典痛點）。4/4 smoke tests pass。教訓 #23：抄別家先學會走，但不抄不會跑。erpilot 必須有自己的 DNA）
+**最後更新**：2026-05-17（會話 #41 v3.16.1 — 文件 audit + 補 v3.13-v3.16 缺口。USER_MANUAL_ZH/EN 加 §3.5 Settings 頁、§3.6 CRM 頁、§3.7 AskAI 浮球 3 個新章節，版本標頭 v3.12→v3.16，sidebar 8 大頁面→12 大頁面（分總覽/營運/系統 3 區），§11.3 AI 不回應改成「自己進 ⚠️ 設定頁」+ 推 AskAI 浮球。README What's Inside 加 4 行 erpilot 獨家 callout。35 份 PDF 重 build 含 v3.16 新內容後 commit+push 同步 GitHub。教訓 #24：文件落後 1 sprint 就等於沒做這個功能）
 **維護者**：使用者 + Claude
 **版本**：3.13

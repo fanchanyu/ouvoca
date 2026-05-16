@@ -1,9 +1,15 @@
 # LLM-ERP User Manual (English)
 
-> **Version**: v3.12 Conversational ERP (erpilot Chat)
+> **Version**: v3.16 Conversational ERP (erpilot)
 > **Audience**: First-time ERP users — Owner, Sales, Plant Manager, Purchaser, Warehouse
 > **Reading time**: ~30 minutes to get productive; refer to §11 Troubleshooting when stuck
 > **Languages**: System supports 🇹🇼 繁體中文 and 🇺🇸 English with instant switching
+
+> 🆕 **v3.13-v3.16 new features (must read)**
+> - ⚙️ **Settings page**: load demo / clear demo / upload business docs / configure AI API key (§3.5)
+> - 🤝 **CRM page**: Lead pipeline / Opportunity Kanban / Customer 360 with activity timeline (§3.6)
+> - 💡 **AskAI floating button**: always-on "live AI coach" on every page (§3.7)
+> - 🤖 **Auto activity logging**: orders / lead conversions / opportunity stage changes auto-create CRM events
 
 ---
 
@@ -178,19 +184,33 @@ Same toggle is in the top-right after login. **Switching is instant** — no re-
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.2 Eight pages in the left sidebar
+### 3.2 Twelve pages in the left sidebar (v3.16+)
 
+Three groups: **Overview** / **Operations** / **System**
+
+#### 📊 Overview
 | # | Icon | Name | Purpose |
 |---|---|---|---|
-| 1 | 🏠 | **Home** | First page after login; AI summary |
-| 2 | 📊 | **Dashboard** | 4 key cards (revenue / WO / purchase / stock alerts) + charts |
-| 3 | 📦 | **Inventory** | Parts list, supplier list, stock queries |
-| 4 | 🛒 | **Purchase** | PO creation, lookup, goods receipt |
-| 5 | 💰 | **Sales** | SO, customer list, quotes |
+| 1 | 📊 | **Dashboard** | KPI cards (revenue / WO / stock alerts) + charts |
+| 2 | 💬 | **AI Assistant** | Conversational CRUD: query/create/update/delete by talking |
+| 3 | 📡 | **Event Stream** | Real-time system events (new orders / WO complete / stock alerts) |
+
+#### 🏭 Operations
+| # | Icon | Name | Purpose |
+|---|---|---|---|
+| 4 | 📦 | **Inventory** | Parts, suppliers, stock queries |
+| 5 | 🛒 | **Purchase** | PO creation, lookup, goods receipt |
 | 6 | 🏭 | **Production** | Work orders (WO), progress tracking |
-| 7 | 🔬 | **Quality** | Inspection records (**read-only audit log**; cannot create here) |
-| 8 | 📈 | **Reports** | DSO, gross margin, OEE, etc. |
-| 9 | ⚙️ | **Settings** | User management, permissions (incl. "Reset Demo" button — **Phase 2 work**; placeholder for now) |
+| 7 | 💰 | **Sales** | SO, customer list |
+| 8 | 🤝 | **CRM** ✨ | **NEW** Lead pipeline / Opportunity Kanban / Customer 360 (see §3.6) |
+| 9 | 🔬 | **Quality** | Inspection records (**read-only audit**; intentional) |
+
+#### 🛡 System
+| # | Icon | Name | Purpose |
+|---|---|---|---|
+| 10 | 🛡️ | **Permissions** | Roles, permission assignment (admin only) |
+| 11 | 🔑 | **My Permissions** | See your own permissions |
+| 12 | ⚙️ | **Settings** ✨ | **NEW** AI config / load demo / upload files (see §3.5) |
 
 ### 3.3 Three things in the top-right header
 
@@ -232,6 +252,91 @@ This is the **most important v3.x feature**. Click **💬 AI Assistant** in the 
 | 2 | Type, e.g.: "List today's in-progress work orders" |
 | 3 | Press Enter (or click **[ Send ]**) |
 | 4 | Wait 2–10 seconds; the AI replies |
+
+### 3.5 ⚙️ Settings Page ✨ NEW in v3.13
+
+Click **⚙️ Settings** in the sidebar. Four sections (**everything a non-technical user needs is here**):
+
+#### A. 🤖 AI Assistant Configuration
+
+First-time install without an LLM API key? **Paste it here yourself** — no command line needed.
+
+| Step | Action |
+|---|---|
+| 1 | Click the **Provider** dropdown → pick "DeepSeek (recommended)" |
+| 2 | Click the **"No account? Sign up →"** link, follow steps for 5 min to get `sk-...` |
+| 3 | Paste `sk-...` into the **API Key** field |
+| 4 | Click **🧪 Test Connection (no save)** — should show ✅ green |
+| 5 | Click **💾 Save (effective immediately)** — no restart needed |
+
+💡 Full guide: [`HOW_TO_GET_LLM_API_KEY_EN.md`](./HOW_TO_GET_LLM_API_KEY_EN.md)
+
+#### B. 📦 Demo Data
+
+Built-in: 5 customers / 3 suppliers / 10 parts (with `DEMO-` prefix). Clear after trial:
+- **➕ Load demo data** — writes demo data to DB (idempotent)
+- **🗑 Clear demo data** — only removes `DEMO-` prefixed rows; your own data is safe
+
+#### C. 📁 Upload Business Files
+
+Upload customer quotes / invoices / specs / contracts (future AI parsing):
+
+| Step | Action |
+|---|---|
+| 1 | Pick category (quote / invoice / contract / spec / general) |
+| 2 | Write a brief description (optional) |
+| 3 | **Drag file into the dropzone**, or click to browse |
+| 4 | Wait for ✅ upload success |
+
+Supports: PDF / Excel / CSV / Word / images, 25 MB max per file.
+
+#### D. ℹ️ System Info
+
+Version, license track, commercial inquiry link.
+
+### 3.6 🤝 CRM Page ✨ NEW in v3.15
+
+Click **🤝 CRM** in the sidebar. Three tabs:
+
+#### Tab 1: 📋 Lead Pipeline
+
+**What's a Lead?** A potential customer (from trade show / ad / referral) not yet a paying client.
+
+4-column funnel: 🆕 New → 📞 Contacted → ✅ Qualified → ❌ Lost (or 🎯 Converted)
+
+Click **➕ Create Lead** to add. Qualified leads have a **🎯 Convert to Customer** button.
+
+#### Tab 2: 💼 Opportunity Kanban
+
+**What's an Opportunity?** A customer with buying intent currently in active sales pursuit.
+
+5 stages: 🔍 Prospect → 📝 Proposal → 🤝 Negotiation → 🎉 Won → ❌ Lost
+
+Each card has a **Move to next →** button (no drag-and-drop needed).
+The top shows **Weighted Pipeline NT$ X** = sum of (amount × probability%).
+
+#### Tab 3: 👤 Customer 360
+
+**The killer feature.** Pick one customer → see everything related in one view:
+
+- Basic info (code / grade / contact)
+- Stats (orders / opportunities / activities count)
+- Orders list / Opportunities list
+- **Activity timeline** — auto-populated when you place orders, convert leads, advance opportunities.
+  Click **📝 Add Activity** for manual notes (calls / complaints / etc.).
+
+### 3.7 💡 AskAI Floating Button ✨ NEW in v3.16 (erpilot original)
+
+**Purple 💡 button** in the bottom-right corner of every page (except AI Assistant itself).
+
+**Purpose**: Live AI coach for the page you're on. Stuck? Don't dig through docs — click and ask.
+
+Features:
+- Knows **which page you're on** (context-aware answers)
+- 3 quick suggestion buttons: tap to send common questions
+- No LLM key set? Shows a 3-step setup guide (not a cold error)
+
+---
 
 ---
 
@@ -854,6 +959,6 @@ Or email your company's ERP support contact.
 
 ---
 
-**Manual version**: v3.12 (2026-05-17)
+**Manual version**: v3.16 (2026-05-17) — includes Settings page / CRM page / AskAI floating button / Auto CrmEvent
 **Chinese version**: [`USER_MANUAL_ZH.md`](./USER_MANUAL_ZH.md)
 **Companion docs**: [`CONVERSATIONAL_ERP_DESIGN_EN.md`](./CONVERSATIONAL_ERP_DESIGN_EN.md) (architecture) / `LICENSE-COMMERCIAL.md` (licensing)

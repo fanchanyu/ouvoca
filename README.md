@@ -406,6 +406,10 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **FastAPI backend** | 12 個業務領域（庫存/採購/生產/MPS/MRP/品質/銷售/會計/倉儲/CRM/HR/AI 治理）| 12 business domains (Inventory, Purchase, Production, MPS/MRP, Quality, Sales, Accounting, Warehouse, CRM, HR, AI Governance) |
 | **Multi-Agent LLM Engine** | 10 agents、**40 tools**（22 read / 4 soft-write / 14 hard-write），DeepSeek 為預設供應商 | 10 agents, **40 tools** (22 read / 4 soft-write / 14 hard-write), DeepSeek as default LLM provider |
 | **ConfirmCard 確認卡** | hard-write 操作出卡，使用者點「確認」才執行（5 分鐘 TTL + Slot-filling 反問 + 90 秒 Undo）| Hard-write actions issue confirmation cards; user must click "confirm" to execute (5-min TTL + slot-filling reverse-ask + 90s undo) |
+| **💡 AskAI 浮球**（erpilot 獨家 v3.16）| 每頁右下角的「現場 AI 教練」，問「這頁怎麼用」AI 直接答（取代別家的 onboarding tour / help bubble） | "Live AI coach" on every page — ask "how do I use this page?" and AI answers (replaces traditional tours / tooltips) |
+| **🤖 Auto CrmEvent**（erpilot 獨家 v3.16）| 訂單成立 / Lead 轉換 / 商機推進時自動產 CrmEvent 進 Customer timeline（業務不必手動加 activity log）| Orders / lead conversions / opportunity stage changes auto-create CRM events (no manual activity logging) |
+| **🤝 CRM 完整 UI**（v3.15）| Lead 漏斗 / 商機 Kanban / Customer 360 三 tab | Lead pipeline / Opportunity Kanban / Customer 360 (3 tabs) |
+| **⚙️ Settings 頁**（v3.13）| 自助 AI key 設定（測試 + 即時生效）/ 載入清除示範資料 / 檔案上傳 drag-and-drop | Self-service AI key setup (test + live apply) / demo data / file upload drag-and-drop |
 | **Schema Mapping AI** | exact/alias/partial 3 級 confidence，把外部 DB（鼎新/正航/Excel）一鍵接進來 | 3-tier confidence mapping (exact/alias/partial) — one-click external DB integration (鼎新/正航/Excel) |
 | **Event Engine** | EventBus + 16+ ConstraintChecker 規則 + SSE 廣播 | EventBus + 16+ ConstraintChecker rules + SSE broadcasting |
 | **React + Vite + Tailwind** | 桌機前端，完整 CRUD UI（EntityRowActions + EntityFormModal）| Desktop frontend with full CRUD UI (reusable EntityRowActions + EntityFormModal components) |
