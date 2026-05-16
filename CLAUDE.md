@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-16（會話 #30+31：v3.11 EntityRowActions/Modal + Inventory/Purchase/Sales Edit/Delete/Cancel；v3.12 Production WO Cancel 收尾——Quality 是稽核記錄按設計唯讀）
+**最後更新**：2026-05-16（會話 #32：public-ready polish — repo 公開 + AGPL-3.0 LICENSE + README 對齊 v3.x DNA + GitHub description/topics 更新 + 6 層 secrets audit 全綠確認沒 API key 外洩）
 **維護者**：使用者 + Claude
 **版本**：3.12

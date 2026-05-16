@@ -38,6 +38,86 @@
 
 ---
 
+## 2026-05-16｜會話 #32｜📝 Public-ready polish：AGPL-3.0 + v3.x README + GitHub metadata
+
+**目標**：使用者「繼續如何 / 記得要和github同步 / 順便把這個專案打開用public / 檢查API KEY千萬不能上傳」
+— repo 變 public 之後該補的 4 件事一次到位。
+
+### ✅ 6 層 secrets audit（先做這個再 public）
+
+擔心 `LLM_API_KEY=sk-6216b99f...` 被推進 git history。逐層查：
+
+| Layer | 命令 | 結果 |
+|---|---|---|
+| 1. tracked files | `git ls-files \| xargs grep "sk-[a-zA-Z0-9]{20,}"` | 空 |
+| 2. .env files | `grep -rn "sk-..." --include="*.env*"` | 只 `./backend/.env`（.gitignore line 7 已忽略）|
+| 3. history additions | `git log --all --diff-filter=A` × grep | 空 |
+| 4. history content | `git log --all -p -S "sk-6216b99f"` | 空（真實 key 字串從未進 git）|
+| 5. 其他 pattern | ghp_/xoxb-/JWT_SECRET regex | 只命中 .gitignore glob 和 pre-commit hook 本身 |
+| 6. docker-compose | `docker-compose.yml` L104 是註解；`docker-compose.prod.yml` 用 `${POSTGRES_PASSWORD:?...}` placeholder | 安全 |
+
+全綠 → `gh repo edit fanchanyu/erpilot --visibility public`。確認 `isPrivate: false, visibility: PUBLIC`。
+
+### ✅ LICENSE：AGPL-3.0
+
+使用者選 **AGPL-3.0**（防大廠白嫖閉源轉售）。
+拉官方全文 661 行進 `LICENSE`。商業授權窗口（需閉源整合）留給維護者個別洽談。
+
+### ✅ README 重寫對齊 v3.0 軸轉
+
+| 部分 | 之前（v2.x）| 之後（v3.12）|
+|---|---|---|
+| 副標題 | LINE-native ERP 老闆用 LINE 管工廠 | 桌機對話式 ERP，講話就能查/增/改/刪 |
+| Tests badge | 126 | **287** |
+| PDFs badge | 28 | **35** |
+| Gates badge | 8/8 | **7/7** |
+| License badge | internal | **AGPL-3.0**（連到 LICENSE） |
+| Version badge | – | **3.12** |
+| Architecture 圖 | Frontend / War Room / **Mobile (Expo)** | 拿掉 Mobile（v3.0 已砍） |
+| What's inside | 25+ tools | **40 tools** (22R+4SW+14HW) + ConfirmCard + Schema Mapping + RBAC + 7-gate + pre-commit hook |
+| 新章 | – | **Try the Conversational CRUD** — 查/增/改/刪 4 種對話範例 + ConfirmCard + Undo |
+| License 章 | MIT placeholder | AGPL-3.0 + 簡單版說明 + 商業授權窗口 |
+
+### ✅ GitHub repo metadata
+
+```bash
+gh repo edit fanchanyu/erpilot \
+  --description "AI-Native conversational ERP for SMB manufacturers (50-100 employees). Talk to it - no training needed. Multi-agent LLM with ConfirmCard hard-write safety, slot-filling, 90s undo. FastAPI + React + DeepSeek." \
+  --add-topic erp,ai-native,conversational-ai,multi-agent,fastapi,react,manufacturing,smb,taiwan,deepseek,llm-tools
+```
+
+11 個 topics、description 對齊 v3.x DNA、isPrivate=false 確認。
+
+### 📊 數字
+
+| 維度 | 之前 | 之後 |
+|---|---|---|
+| Repo visibility | private | **PUBLIC** |
+| LICENSE 檔 | 無 | **AGPL-3.0**（661 行）|
+| GitHub topics | null | **11** |
+| GitHub description | LINE-native, mobile-first | 桌機對話式 + ConfirmCard + DeepSeek |
+| README badges | 4 過期 | 5 正確（+ version 3.12）|
+| README Mobile 提及 | 1 處（架構圖）| 0 |
+
+### 🪞 教訓 #16
+
+「**public 不只是切 visibility flag**」 — 還需要：
+- LICENSE（沒 LICENSE = All Rights Reserved = community 不敢碰）
+- README 對齊現況（v2 的 LINE-native 字樣留著會 confuse 訪客）
+- description + topics（GitHub 搜尋找得到）
+- secrets audit（一次失誤就要刪 repo 重來）
+
+4 件事一次做完 = 真正 public-ready。
+
+**後續**：
+- 等 GitHub 自動偵測 LICENSE 後 `licenseInfo` 會從 null 更新為 AGPL-3.0
+- 寫 CONTRIBUTING.md（community 開始 issue/PR 後再加）
+- 寫 SECURITY.md（揭露管道）
+
+**Blocker**：無
+
+---
+
 ## 2026-05-16｜會話 #31｜🎯 v3.12 收尾：Production WO Cancel + Quality 維持唯讀
 
 **目標**：使用者「快完成了」 — 收尾剩下兩頁。
