@@ -148,11 +148,15 @@ from app.api import (
     auth, inventory, purchase, production, chat,
     sales, quality, mps_mrp, accounting, warehouse, crm, events,
     permission, mesh, analytics, tax_tw, confirm_card, email_digest,
+    agents_exec, reports, onboarding,
 )
 
 app.include_router(chat.router)
 app.include_router(confirm_card.router)
 app.include_router(email_digest.router)
+app.include_router(agents_exec.router)
+app.include_router(reports.router)
+app.include_router(onboarding.router)
 app.include_router(auth.router)
 app.include_router(auth.org_router)
 app.include_router(inventory.router)

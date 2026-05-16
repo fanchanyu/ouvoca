@@ -205,3 +205,52 @@ async def create_dispatch_log(db: AsyncSession, data: dict, user: Optional[dict]
         data={"wo_id": log.production_order_id, "op_id": log.operation_id, "qty": log.dispatched_qty},
     ))
     return log
+
+
+# ============================================================
+# v3.10 — Update / Delete
+# ============================================================
+
+PRODUCT_UPDATABLE_FIELDS = {
+    "name", "selling_price", "standard_cost", "is_active",
+}
+
+
+async def update_product(db: AsyncSession, product_id: str, data: dict, user: Optional[dict] = None) -> Product:
+    p = (await db.execute(select(Product).where(Product.id == product_id))).scalar_one_or_none()
+    if not p:
+        raise NotFoundError("產品不存在", product_id=product_id)
+    changes = {}
+    for k, v in data.items():
+        if k not in PRODUCT_UPDATABLE_FIELDS:
+            continue
+        if getattr(p, k) != v:
+            changes[k] = {"from": getattr(p, k), "to": v}
+            setattr(p, k, v)
+    if not changes:
+        return p
+    await db.commit()
+    await db.refresh(p)
+    await EventBus.emit(DomainEvent(
+        name="product.updated", domain="production",
+        entity_type="Product", entity_id=p.id,
+        data={"product_no": p.product_no, "changes": changes},
+    ))
+    return p
+
+
+async def cancel_production_order(db: AsyncSession, wo_id: str, user: dict, reason: str = "") -> ProductionOrder:
+    wo = (await db.execute(select(ProductionOrder).where(ProductionOrder.id == wo_id))).scalar_one_or_none()
+    if not wo:
+        raise NotFoundError("工單不存在", wo_id=wo_id)
+    if wo.status in ("completed", "cancelled"):
+        raise BusinessRuleError(f"狀態 {wo.status!r} 不可取消", wo_id=wo_id)
+    old = wo.status
+    wo.status = "cancelled"
+    await db.commit()
+    await EventBus.emit(DomainEvent(
+        name="wo.cancelled", domain="production",
+        entity_type="ProductionOrder", entity_id=wo.id,
+        data={"wo_no": wo.wo_no, "previous_status": old, "reason": reason},
+    ))
+    return wo

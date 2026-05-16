@@ -108,3 +108,59 @@ async def receive_po(
         db, po_id, [r.model_dump() for r in payload.receipts], user.raw_user,
     )
     return PurchaseOrderResponse.model_validate(po)
+
+
+# ─── v3.10 PATCH/DELETE/Cancel ────────────────────────────
+
+from pydantic import BaseModel as _BM
+
+
+class SupplierUpdate(_BM):
+    name: Optional[str] = None
+    tier: Optional[str] = None
+    contact_person: Optional[str] = None
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    address: Optional[str] = None
+    payment_terms: Optional[str] = None
+    lead_time_days: Optional[int] = None
+    is_approved: Optional[bool] = None
+    is_active: Optional[bool] = None
+
+
+class CancelRequest(_BM):
+    reason: str = ""
+
+
+@router.patch("/suppliers/{supplier_id}", response_model=SupplierResponse)
+async def update_supplier_endpoint(
+    supplier_id: str,
+    data: SupplierUpdate,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.supplier.update")),
+):
+    patch = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
+    s = await svc.update_supplier(db, supplier_id, patch, user=user.raw_user)
+    return SupplierResponse.model_validate(s)
+
+
+@router.delete("/suppliers/{supplier_id}")
+async def delete_supplier_endpoint(
+    supplier_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.supplier.update")),
+):
+    return await svc.delete_supplier(db, supplier_id, user=user.raw_user)
+
+
+@router.post("/orders/{po_id}/cancel", response_model=PurchaseOrderResponse)
+async def cancel_po_endpoint(
+    po_id: str,
+    data: Optional[CancelRequest] = None,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.po.update")),
+):
+    po = await svc.cancel_purchase_order(
+        db, po_id, user=user.raw_user, reason=(data.reason if data else ""),
+    )
+    return PurchaseOrderResponse.model_validate(po)

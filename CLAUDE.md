@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #28：Day A 限縮版——8 個新 hard-write tools，LLM 全 CRUD 補完，14/14 hard-write 接 4 domain agents，20/20 tests）
+**最後更新**：2026-05-15（會話 #29：root cause fix——「可以新增但不能修改和刪除」是因為後端根本沒 update/delete endpoints。補 9 endpoints + 3 路徑 reports + onboarding wizard + agents/exec，247/247 tests）
 **維護者**：使用者 + Claude
-**版本**：3.9
+**版本**：3.10

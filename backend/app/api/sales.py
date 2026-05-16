@@ -105,3 +105,58 @@ async def ship_so(
 ):
     so = await svc.ship_sales_order(db, so_id, user.raw_user)
     return SalesOrderResponse.model_validate(so)
+
+
+# ─── v3.10 PATCH/DELETE/Cancel ────────────────────────────
+
+from pydantic import BaseModel as _BMs
+
+
+class CustomerUpdate(_BMs):
+    name: Optional[str] = None
+    grade: Optional[str] = None
+    contact_person: Optional[str] = None
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    address: Optional[str] = None
+    payment_terms: Optional[str] = None
+    credit_limit: Optional[float] = None
+    is_active: Optional[bool] = None
+
+
+class SOCancelRequest(_BMs):
+    reason: str = ""
+
+
+@router.patch("/customers/{customer_id}", response_model=CustomerResponse)
+async def update_customer_endpoint(
+    customer_id: str,
+    data: CustomerUpdate,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("sales.customer.update")),
+):
+    patch = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
+    c = await svc.update_customer(db, customer_id, patch, user=user.raw_user)
+    return CustomerResponse.model_validate(c)
+
+
+@router.delete("/customers/{customer_id}")
+async def delete_customer_endpoint(
+    customer_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("sales.customer.update")),
+):
+    return await svc.delete_customer(db, customer_id, user=user.raw_user)
+
+
+@router.post("/orders/{so_id}/cancel", response_model=SalesOrderResponse)
+async def cancel_so_endpoint(
+    so_id: str,
+    data: Optional[SOCancelRequest] = None,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("sales.order.update")),
+):
+    so = await svc.cancel_sales_order(
+        db, so_id, user=user.raw_user, reason=(data.reason if data else ""),
+    )
+    return SalesOrderResponse.model_validate(so)

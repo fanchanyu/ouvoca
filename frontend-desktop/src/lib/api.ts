@@ -139,6 +139,92 @@ export const apiGetCard = (cardId: string) =>
 export const apiPendingCards = () =>
   api.get<{ total: number; cards: ConfirmCardData[] }>('/agents/pending')
 
+// ============================================================
+// Agent exec (v3.10 Track B — UI 直接呼 hard-write tool)
+// ============================================================
+
+export const apiExecTool = <TArgs extends Record<string, unknown>>(
+  toolName: string,
+  args: TArgs,
+) => api.post<ConfirmCardPayload | { error: string } | Record<string, unknown>>(
+  `/agents/exec/${toolName}`,
+  args,
+)
+
+// ============================================================
+// Onboarding (v3.10 Track D)
+// ============================================================
+
+export interface OnboardingStatus {
+  has_demo_data: boolean
+  demo_customers: number
+  demo_suppliers: number
+  demo_parts: number
+  total_customers: number
+  total_suppliers: number
+  total_parts: number
+}
+
+export const apiOnboardingStatus = () =>
+  api.get<OnboardingStatus>('/onboarding/status')
+
+export const apiSeedDemo = () =>
+  api.post<{
+    inserted_customers: number
+    inserted_suppliers: number
+    inserted_parts: number
+    skipped: number
+    message: string
+  }>('/onboarding/seed-demo')
+
+// ============================================================
+// Reports (v3.10 Track C — 直接拿 URL 給 <a download>)
+// ============================================================
+
+export const reportUrls = {
+  tax401Html: (year: number, periodNo: number, companyName = '') =>
+    `/api/reports/tax-401.html?year=${year}&period_no=${periodNo}&company_name=${encodeURIComponent(companyName)}`,
+  arAgingXlsx: (overdueOnly = false) =>
+    `/api/reports/ar-aging.xlsx?overdue_only=${overdueOnly}`,
+  inventoryMonthlyXlsx: (periodLabel = '', onlyLow = false) =>
+    `/api/reports/inventory-monthly.xlsx?period_label=${encodeURIComponent(periodLabel)}&only_low=${onlyLow}`,
+}
+
+// ============================================================
+// CRUD update/delete (v3.10 — fix「可以新增但不能修改和刪除」root cause)
+// ============================================================
+
+// Part
+export const apiUpdatePart = (partId: string, data: Partial<Part>) =>
+  api.patch<Part>(`/inventory/parts/${partId}`, data)
+export const apiDeletePart = (partId: string) =>
+  api.del<{ deleted: boolean; part_id: string; part_no: string }>(`/inventory/parts/${partId}`)
+
+// Supplier
+export const apiUpdateSupplier = (id: string, data: Partial<Supplier>) =>
+  api.patch<Supplier>(`/purchase/suppliers/${id}`, data)
+export const apiDeleteSupplier = (id: string) =>
+  api.del<{ deleted: boolean; supplier_id: string; code: string }>(`/purchase/suppliers/${id}`)
+
+// Customer
+export interface Customer {
+  id: string; code: string; name: string; grade: string
+  credit_limit: number; is_active: boolean
+  contact_person?: string | null; contact_phone?: string | null
+}
+export const apiUpdateCustomer = (id: string, data: Partial<Customer>) =>
+  api.patch<Customer>(`/sales/customers/${id}`, data)
+export const apiDeleteCustomer = (id: string) =>
+  api.del<{ deleted: boolean; customer_id: string; code: string }>(`/sales/customers/${id}`)
+
+// Cancel orders
+export const apiCancelPO = (id: string, reason = '') =>
+  api.post<PurchaseOrder>(`/purchase/orders/${id}/cancel`, { reason })
+export const apiCancelSO = (id: string, reason = '') =>
+  api.post<SalesOrder>(`/sales/orders/${id}/cancel`, { reason })
+export const apiCancelWO = (id: string, reason = '') =>
+  api.post<ProductionOrder>(`/production/work-orders/${id}/cancel`, { reason })
+
 export const apiListParts = () => api.get<Part[]>('/inventory/parts')
 export const apiCreatePart = (data: Partial<Part>) => api.post<Part>('/inventory/parts', data)
 export const apiBelowSafety = () => api.get<Array<{ part_no: string; name: string; qty_available: number; safety_stock: number; shortage: number }>>('/inventory/below-safety')

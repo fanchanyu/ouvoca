@@ -163,3 +163,76 @@ async def receive_purchase_order(db: AsyncSession, po_id: str,
         data={"po_no": po.po_no, "status": po.status},
     ))
     return po
+
+
+# ============================================================
+# v3.10 — Update / Delete
+# ============================================================
+
+SUPPLIER_UPDATABLE_FIELDS = {
+    "name", "tier", "contact_person", "contact_email", "contact_phone",
+    "address", "payment_terms", "lead_time_days", "is_approved", "is_active",
+}
+
+
+async def update_supplier(db: AsyncSession, supplier_id: str, data: dict, user: Optional[dict] = None) -> Supplier:
+    s = (await db.execute(select(Supplier).where(Supplier.id == supplier_id))).scalar_one_or_none()
+    if not s:
+        raise NotFoundError("供應商不存在", supplier_id=supplier_id)
+    changes = {}
+    for k, v in data.items():
+        if k not in SUPPLIER_UPDATABLE_FIELDS:
+            continue
+        if getattr(s, k) != v:
+            changes[k] = {"from": getattr(s, k), "to": v}
+            setattr(s, k, v)
+    if not changes:
+        return s
+    await db.commit()
+    await db.refresh(s)
+    await EventBus.emit(DomainEvent(
+        name="supplier.updated", domain="purchase",
+        entity_type="Supplier", entity_id=s.id,
+        data={"code": s.code, "changes": changes},
+    ))
+    return s
+
+
+async def delete_supplier(db: AsyncSession, supplier_id: str, user: Optional[dict] = None) -> dict:
+    s = (await db.execute(select(Supplier).where(Supplier.id == supplier_id))).scalar_one_or_none()
+    if not s:
+        raise NotFoundError("供應商不存在", supplier_id=supplier_id)
+    has_po = (await db.execute(
+        select(PurchaseOrder).where(PurchaseOrder.supplier_id == supplier_id).limit(1)
+    )).scalar_one_or_none()
+    if has_po is not None:
+        raise BusinessRuleError("此供應商已有採購單，不可刪除（改用 is_active=False 停用）", supplier_id=supplier_id)
+    code = s.code
+    await db.delete(s)
+    await db.commit()
+    await EventBus.emit(DomainEvent(
+        name="supplier.deleted", domain="purchase",
+        entity_type="Supplier", entity_id=supplier_id,
+        data={"code": code},
+    ))
+    return {"deleted": True, "supplier_id": supplier_id, "code": code}
+
+
+async def cancel_purchase_order(db: AsyncSession, po_id: str, user: dict, reason: str = "") -> PurchaseOrder:
+    po = await get_purchase_order(db, po_id)
+    if not po:
+        raise NotFoundError("採購單不存在", po_id=po_id)
+    if po.status in ("received", "cancelled"):
+        raise BusinessRuleError(f"狀態 {po.status!r} 不可取消", po_id=po_id)
+    old = po.status
+    po.status = "cancelled"
+    if reason:
+        po.remark = (po.remark or "") + f"\n[Cancel] {reason}"
+    await db.commit()
+    await db.refresh(po, attribute_names=["supplier"])
+    await EventBus.emit(DomainEvent(
+        name="po.cancelled", domain="purchase",
+        entity_type="PurchaseOrder", entity_id=po.id,
+        data={"po_no": po.po_no, "previous_status": old, "reason": reason},
+    ))
+    return po

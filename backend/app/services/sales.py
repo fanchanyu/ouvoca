@@ -160,3 +160,76 @@ async def list_sales_orders(db: AsyncSession, status: Optional[str] = None,
         q = q.where(SalesOrder.status == status)
     q = q.offset(skip).limit(limit).order_by(SalesOrder.created_at.desc())
     return list((await db.execute(q)).unique().scalars().all())
+
+
+# ============================================================
+# v3.10 — Update / Delete
+# ============================================================
+
+CUSTOMER_UPDATABLE_FIELDS = {
+    "name", "grade", "contact_person", "contact_email", "contact_phone",
+    "address", "payment_terms", "credit_limit", "is_active",
+}
+
+
+async def update_customer(db: AsyncSession, customer_id: str, data: dict, user: Optional[dict] = None) -> Customer:
+    c = (await db.execute(select(Customer).where(Customer.id == customer_id))).scalar_one_or_none()
+    if not c:
+        raise NotFoundError("客戶不存在", customer_id=customer_id)
+    changes = {}
+    for k, v in data.items():
+        if k not in CUSTOMER_UPDATABLE_FIELDS:
+            continue
+        if getattr(c, k) != v:
+            changes[k] = {"from": getattr(c, k), "to": v}
+            setattr(c, k, v)
+    if not changes:
+        return c
+    await db.commit()
+    await db.refresh(c)
+    await EventBus.emit(DomainEvent(
+        name="customer.updated", domain="sales",
+        entity_type="Customer", entity_id=c.id,
+        data={"code": c.code, "changes": changes},
+    ))
+    return c
+
+
+async def delete_customer(db: AsyncSession, customer_id: str, user: Optional[dict] = None) -> dict:
+    c = (await db.execute(select(Customer).where(Customer.id == customer_id))).scalar_one_or_none()
+    if not c:
+        raise NotFoundError("客戶不存在", customer_id=customer_id)
+    has_so = (await db.execute(
+        select(SalesOrder).where(SalesOrder.customer_id == customer_id).limit(1)
+    )).scalar_one_or_none()
+    if has_so is not None:
+        raise BusinessRuleError("此客戶已有銷售訂單，不可刪除（改用 is_active=False 停用）", customer_id=customer_id)
+    code = c.code
+    await db.delete(c)
+    await db.commit()
+    await EventBus.emit(DomainEvent(
+        name="customer.deleted", domain="sales",
+        entity_type="Customer", entity_id=customer_id,
+        data={"code": code},
+    ))
+    return {"deleted": True, "customer_id": customer_id, "code": code}
+
+
+async def cancel_sales_order(db: AsyncSession, so_id: str, user: dict, reason: str = "") -> SalesOrder:
+    so = await get_sales_order(db, so_id)
+    if not so:
+        raise NotFoundError("銷售訂單不存在", so_id=so_id)
+    if so.status in ("shipped", "delivered", "closed", "cancelled"):
+        raise BusinessRuleError(f"狀態 {so.status!r} 不可取消", so_id=so_id)
+    old = so.status
+    so.status = "cancelled"
+    if reason:
+        so.remark = (so.remark or "") + f"\n[Cancel] {reason}"
+    await db.commit()
+    await db.refresh(so, attribute_names=["customer"])
+    await EventBus.emit(DomainEvent(
+        name="so.cancelled", domain="sales",
+        entity_type="SalesOrder", entity_id=so.id,
+        data={"so_no": so.so_no, "previous_status": old, "reason": reason},
+    ))
+    return so

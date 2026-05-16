@@ -172,3 +172,81 @@ async def create_transfer(db: AsyncSession, data: dict, user: Optional[dict] = N
         data={"transfer_no": transfer.transfer_no, "part_id": transfer.part_id, "qty": transfer.qty},
     ))
     return transfer
+
+
+# ============================================================
+# v3.10 — Update / Delete (修補 root cause：UI 沒 Edit/Delete 是因為 service 沒有)
+# ============================================================
+
+# Fields that can be safely updated via PATCH (white-list, 不允許改 part_no/id)
+PART_UPDATABLE_FIELDS = {
+    "name", "description", "category", "unit", "specification", "drawing_no",
+    "min_stock", "max_stock", "safety_stock", "lead_time_days",
+    "unit_cost", "is_active", "is_critical",
+}
+
+
+async def update_part(db: AsyncSession, part_id: str, data: dict, user: Optional[dict] = None) -> Part:
+    """更新 Part — 白名單欄位，emit part.updated event。"""
+    p = (await db.execute(select(Part).where(Part.id == part_id))).scalar_one_or_none()
+    if not p:
+        raise NotFoundError("零件不存在", part_id=part_id)
+    changes = {}
+    for k, v in data.items():
+        if k not in PART_UPDATABLE_FIELDS:
+            continue
+        if getattr(p, k) != v:
+            changes[k] = {"from": getattr(p, k), "to": v}
+            setattr(p, k, v)
+    if not changes:
+        return p
+    await db.commit()
+    await db.refresh(p)
+    await EventBus.emit(DomainEvent(
+        name="part.updated", domain="inventory",
+        entity_type="Part", entity_id=p.id,
+        data={"part_no": p.part_no, "changes": changes},
+    ))
+    return p
+
+
+async def delete_part(db: AsyncSession, part_id: str, user: Optional[dict] = None) -> dict:
+    """刪除 Part — FK guard：有交易紀錄 / 庫存 > 0 / BOM 引用 不准刪。"""
+    p = (await db.execute(select(Part).where(Part.id == part_id))).scalar_one_or_none()
+    if not p:
+        raise NotFoundError("零件不存在", part_id=part_id)
+
+    txn_count = (await db.execute(
+        select(InventoryTransaction).where(InventoryTransaction.part_id == part_id).limit(1)
+    )).scalar_one_or_none()
+    if txn_count is not None:
+        raise BusinessRuleError(
+            "此料件已有交易紀錄，不可刪除（改用 is_active=False 停用）",
+            part_id=part_id,
+        )
+    inv = (await db.execute(select(Inventory).where(Inventory.part_id == part_id))).scalar_one_or_none()
+    if inv and (inv.qty_on_hand > 0 or inv.qty_allocated > 0):
+        raise BusinessRuleError(
+            "庫存未歸零，不可刪除",
+            part_id=part_id, qty_on_hand=inv.qty_on_hand,
+        )
+
+    # BOM 引用檢查
+    from app.models.product import BOMItem
+    bom_ref = (await db.execute(
+        select(BOMItem).where(BOMItem.part_id == part_id).limit(1)
+    )).scalar_one_or_none()
+    if bom_ref is not None:
+        raise BusinessRuleError("此料件被 BOM 引用，不可刪除", part_id=part_id)
+
+    part_no = p.part_no
+    if inv:
+        await db.delete(inv)
+    await db.delete(p)
+    await db.commit()
+    await EventBus.emit(DomainEvent(
+        name="part.deleted", domain="inventory",
+        entity_type="Part", entity_id=part_id,
+        data={"part_no": part_no},
+    ))
+    return {"deleted": True, "part_id": part_id, "part_no": part_no}

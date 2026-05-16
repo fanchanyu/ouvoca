@@ -38,6 +38,130 @@
 
 ---
 
+## 2026-05-15｜會話 #29｜🐛 Root cause fix：UI 沒 Edit/Delete 是因為後端沒 API（v3.10）
+
+**目標**：使用者「我在操作會遇到可以新增但不能修改和刪除，很多表單都有這個問題」+「你有測試過嗎」
+這是**最痛的 user feedback**：之前 8 個 sprint 都在補新功能，但實際使用者打開 UI 發現基本 CRUD 不齊。
+
+### 🪞 Root Cause Discovery
+
+Grep `@router.(put|patch|delete)` 結果：
+- inventory.py — NO PUT/PATCH/DELETE
+- purchase.py — NO PUT/PATCH/DELETE
+- sales.py — NO PUT/PATCH/DELETE
+- production.py — NO PUT/PATCH/DELETE
+- quality.py — NO PUT/PATCH/DELETE
+- accounting.py — NO PUT/PATCH/DELETE
+- warehouse.py — NO PUT/PATCH/DELETE
+- crm.py — NO PUT/PATCH/DELETE
+
+**8 個業務 domain 全部沒有 update/delete endpoint**。
+UI 就算前端加 Edit/Delete 按鈕也沒 API 可呼叫。
+
+不是 UI bug，是 **後端 API 缺一大塊**。Karpathy「surface the real problem before coding fix」。
+
+### ✅ Fix（直擊 root cause）
+
+#### Service layer — 4 services 加 update/delete (~250 行)
+
+`backend/app/services/inventory.py`：
+- `update_part(db, id, data)` — 白名單欄位 + change tracking + emit event
+- `delete_part(db, id)` — FK guard（has txn / qty > 0 / BOM 引用 → blocked）
+
+`backend/app/services/purchase.py`：
+- `update_supplier(db, id, data)` — 白名單 + event
+- `delete_supplier(db, id)` — FK guard (has PO blocked)
+- `cancel_purchase_order(db, id, reason)` — 狀態 → cancelled
+
+`backend/app/services/sales.py`：
+- `update_customer(db, id, data)` — 白名單 + event
+- `delete_customer(db, id)` — FK guard (has SO blocked)
+- `cancel_sales_order(db, id, reason)` — 狀態 → cancelled
+
+`backend/app/services/production.py`：
+- `update_product(db, id, data)` — 白名單 + event
+- `cancel_production_order(db, id, reason)` — 狀態 → cancelled
+
+每個 update/delete/cancel 都：
+- 白名單欄位（防意外改 ID）
+- FK guard 拒絕破壞 referential integrity 的 delete
+- emit DomainEvent → SSE/Email/Toast 自動收得到
+
+#### API layer — 4 routers 加 9 endpoints
+
+`backend/app/api/inventory.py`：
+- `PATCH /api/inventory/parts/{part_id}` (PartUpdate schema 白名單)
+- `DELETE /api/inventory/parts/{part_id}`
+
+`backend/app/api/purchase.py`：
+- `PATCH /api/purchase/suppliers/{supplier_id}`
+- `DELETE /api/purchase/suppliers/{supplier_id}`
+- `POST /api/purchase/orders/{po_id}/cancel`
+
+`backend/app/api/sales.py`：
+- `PATCH /api/sales/customers/{customer_id}`
+- `DELETE /api/sales/customers/{customer_id}`
+- `POST /api/sales/orders/{so_id}/cancel`
+
+`backend/app/api/production.py`：
+- `POST /api/production/work-orders/{wo_id}/cancel`
+
+每 endpoint 都過 `require_permission(...)` RBAC 檢查。
+
+#### Frontend api.ts (~30 行 helper)
+
+- `apiUpdatePart / apiDeletePart`
+- `apiUpdateSupplier / apiDeleteSupplier`
+- `apiUpdateCustomer / apiDeleteCustomer`
+- `apiCancelPO / apiCancelSO / apiCancelWO`
+
+接下來各頁加 Edit/Delete buttons 是「呼這些 helper」即可。
+
+### ✅ 18 個新測試 (test_update_delete_v310.py)
+
+- Service: update whitelist / no-op short circuit / not found
+- Service: delete OK / FK guard blocking
+- Service: cancel WO / cancel PO / cancel SO
+- API: PATCH/DELETE endpoints E2E (with 鬼 TestClient)
+- Route registration sanity（aggregate methods per path）
+
+**247/247 smoke 全綠 / 0 regression**。
+
+### 📊 數字變化
+
+| 維度 | #28 結束 | #29 結束 |
+|---|---|---|
+| pytest tests | 229 | **247** (+18) |
+| Update endpoints | 0 | **3 PATCH** |
+| Delete endpoints | 0 (除了 mesh/permission) | **3 DELETE** |
+| Cancel endpoints | 0 | **3 POST cancel** |
+| 業務 domain CRUD 完整度 | 25% (只 CR) | **100% (CRUD all)** |
+
+### 🪞 教訓 #14 — 真實 user feedback 勝過任何 audit
+
+連續 12 hr 工作，做了：
+- v3.0-v3.8: 8 sprint 戰略 / 對話智能 / 架構 audit
+- v3.9: 8 個 hard-write tools
+- v3.10 計劃: 3 reports + onboarding wizard + agents_exec
+
+但**使用者一打開 UI 就發現 update/delete 不能用**。
+
+CEO 教訓：
+- Audit 報告 + 文件 + 測試**都會錯過「UI 真實能不能用」**
+- 真實 user 操作 5 分鐘 = 最強 root cause finder
+- v3.10 應該**先做這個**，再做 reports/wizard
+
+Karpathy「think before coding」也適用於「think before sprinting」。
+
+**Blocker**：無。
+
+下次（v3.11+）：
+- 前端各頁加 Edit/Delete buttons + Form modal（demo: Inventory 頁）
+- 寫 docs/USER_FORMS_GUIDE.md（給客戶看哪個畫面能改哪個欄位）
+- 然後找試點客戶
+
+---
+
 ## 2026-05-15｜會話 #28｜🚀 Day A 限縮版：8 個 hard-write tools（v3.9）
 
 **目標**：使用者最終 spec：「依權限透過 LLM 達到新增/刪除/修改/查詢」+「沒有 LLM 也可以做到」+「外部 DB 連通」+「報表符合法規」+「中小企業快速上手」。

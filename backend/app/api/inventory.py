@@ -141,3 +141,46 @@ async def create_transfer(
 ):
     t = await svc.create_transfer(db, data.model_dump(), user=user.raw_user)
     return InventoryTransferResponse.model_validate(t)
+
+
+# ─── v3.10 PATCH/DELETE ───────────────────────────────────
+
+from pydantic import BaseModel
+
+
+class PartUpdate(BaseModel):
+    """白名單欄位 — 不可改 part_no/id。"""
+    name: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    unit: Optional[str] = None
+    specification: Optional[str] = None
+    drawing_no: Optional[str] = None
+    min_stock: Optional[float] = None
+    max_stock: Optional[float] = None
+    safety_stock: Optional[float] = None
+    lead_time_days: Optional[int] = None
+    unit_cost: Optional[float] = None
+    is_active: Optional[bool] = None
+    is_critical: Optional[bool] = None
+
+
+@router.patch("/parts/{part_id}", response_model=PartResponse)
+async def update_part_endpoint(
+    part_id: str,
+    data: PartUpdate,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("inventory.part.update")),
+):
+    patch = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
+    part = await svc.update_part(db, part_id, patch, user=user.raw_user)
+    return PartResponse.model_validate(part)
+
+
+@router.delete("/parts/{part_id}")
+async def delete_part_endpoint(
+    part_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("inventory.part.update")),
+):
+    return await svc.delete_part(db, part_id, user=user.raw_user)

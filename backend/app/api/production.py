@@ -142,3 +142,25 @@ async def create_dispatch_log_endpoint(
 ):
     log = await svc.create_dispatch_log(db, data.model_dump(), user=user.raw_user)
     return {"id": log.id, "status": log.status}
+
+
+# ─── v3.10 Cancel WO ────────────────────────────────────
+
+from pydantic import BaseModel as _BMp
+
+
+class WOCancelRequest(_BMp):
+    reason: str = ""
+
+
+@router.post("/work-orders/{wo_id}/cancel", response_model=ProductionOrderResponse)
+async def cancel_wo_endpoint(
+    wo_id: str,
+    data: Optional[WOCancelRequest] = None,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("production.work_order.update")),
+):
+    wo = await svc.cancel_production_order(
+        db, wo_id, user=user.raw_user, reason=(data.reason if data else ""),
+    )
+    return ProductionOrderResponse.model_validate(wo)
