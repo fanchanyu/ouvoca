@@ -15,6 +15,7 @@ import { useToast } from './ui'
 import { useTranslation, type Lang } from '../i18n'
 import DesktopNotifications, { type ToastEntry } from './DesktopNotifications'
 import AiStatusBadge from './AiStatusBadge'
+import OnboardingTour from './OnboardingTour'
 
 const navConfig = [
   { path: '/',                key: 'dashboard',      icon: '📊', group: 'overview' },
@@ -24,6 +25,7 @@ const navConfig = [
   { path: '/purchase',        key: 'purchase',       icon: '🛒', group: 'operations' },
   { path: '/production',      key: 'production',     icon: '🏭', group: 'operations' },
   { path: '/sales',           key: 'sales',          icon: '💰', group: 'operations' },
+  { path: '/crm',             key: 'crm',            icon: '🤝', group: 'operations' },
   { path: '/quality',         key: 'quality',        icon: '🔬', group: 'operations' },
   { path: '/permissions',     key: 'permissions',    icon: '🛡️', group: 'system' },
   { path: '/me/permissions',  key: 'myPermissions',  icon: '🔑', group: 'system' },
@@ -248,6 +250,9 @@ export default function Layout() {
 
         {/* v3.3 桌機通知（背景 SSE + Browser Notification） */}
         {token && <DesktopNotifications onToast={handleToast} />}
+
+        {/* v3.15 第一次登入引導（自動 localStorage 記住 dismiss） */}
+        {token && <OnboardingTour />}
 
         {/* v3.3 in-app toast banner（最近 5 則，5 秒後自動消失） */}
         {recentToasts.length > 0 && (

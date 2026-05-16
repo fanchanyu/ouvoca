@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { apiListParts, apiCreatePart, type Part } from '../lib/api'
+import EmptyState from '../components/EmptyState'
 
 export default function Inventory() {
   const [parts, setParts] = useState<Part[]>([])
@@ -86,7 +87,16 @@ export default function Inventory() {
             {loading ? (
               <tr><td colSpan={7} className="p-4 text-center text-gray-400">載入中…</td></tr>
             ) : parts.length === 0 ? (
-              <tr><td colSpan={7} className="p-4 text-center text-gray-400">尚無資料，請先新增零件</td></tr>
+              <tr><td colSpan={7}>
+                <EmptyState
+                  icon="📦"
+                  title="你還沒有任何料件"
+                  subtitle="先載入示範資料試試手感，或直接新增第一個料件"
+                  primaryAction={{ label: '➕ 新增第一個料件', onClick: () => setShowForm(true) }}
+                  secondaryAction={{ label: '⚙️ 載入示範資料', to: '/settings' }}
+                  compact
+                />
+              </td></tr>
             ) : (
               parts.map(p => (
                 <tr key={p.id} className="border-t hover:bg-gray-50">

@@ -52,6 +52,7 @@ export const zhTW = {
     purchase: '採購',
     production: '生產',
     sales: '銷售',
+    crm: 'CRM',
     quality: '品質',
     permissions: '權限管理',
     myPermissions: '我的權限',

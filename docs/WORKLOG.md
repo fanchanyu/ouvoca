@@ -137,6 +137,101 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-17｜會話 #38｜🤝 v3.15 Sprint I：CRM 全頁 + 友善化（EmptyState + OnboardingTour）
+
+**目標**：使用者「CRM 有設置嗎? 架構完整嗎? 拓樸有檢查嗎? 符合 ERP 完整需求? 有一點點但不夠友善。電腦小白都能隨到隨上手」
+
+### 🔍 我先誠實診斷現狀
+
+| 你問 | 我答 | 證據 |
+|---|---|---|
+| CRM 設置嗎 | 後端有，前端**完全沒有** | api/crm.py 有 8 endpoints、pages/ 沒 Crm.tsx |
+| 架構完整？ | 資料模型有，業務流程缺 | 缺 pipeline 漏斗、Customer 360、活動 timeline、跟進提醒 |
+| 拓樸 OK？ | backend route OK，nav 看不到 CRM 入口 | Layout.tsx navConfig 8 頁無 /crm |
+| 符合完整 ERP？ | 以 Salesforce 標準算缺 50% | 沒 pipeline / 360 view / activity timeline / 跟進 |
+| 電腦小白友善？ | 部分友善 | Settings 頁好，列表頁仍是冰冷空表 |
+
+### 🎯 ERP 競品 UX 借鏡（這次學什麼）
+
+| 來源 | 學的 pattern |
+|---|---|
+| HubSpot | Lead Pipeline 漏斗欄式視圖 |
+| Salesforce | Customer 360 全貌（一個客戶看到所有相關資料）|
+| Pipedrive | Opportunity Kanban 5 階段 |
+| Odoo | EmptyState actionable card（不是冷冰冰「無資料」）|
+| Notion / Linear | First-time onboarding tour（4 步驟引導 + localStorage 記住）|
+
+### ✅ Sprint I 成果
+
+**新建 `pages/Crm.tsx`（~360 行）3 tab：**
+1. 📋 Lead 漏斗：4 欄（新進/已接觸/已驗證/失敗）+ 新增 Lead + qualified 可轉成正式客戶
+2. 💼 商機 Kanban：5 欄（探索/提案/議價/成交/失敗）+ 階段推進按鈕 + 加權總值統計
+3. 👤 客戶 360：左側客戶清單 → 右側看訂單/商機/活動 timeline，可加新活動記錄
+
+**新建 `components/EmptyState.tsx`（~70 行）reusable：**
+- 學 Odoo：空表格不要冰冷寫「無資料」，給 actionable primary+secondary action
+- 套到 Inventory.tsx empty state（其他頁下個 sprint 套）
+
+**新建 `components/OnboardingTour.tsx`（~180 行）first-time wizard：**
+- 4 步驟引導：歡迎 → 載入示範資料 → 啟用 AI → 4 個快速試試
+- localStorage 記住 dismiss 狀態（永遠不再彈）
+- Layout.tsx 全頁渲染（modal style）
+
+**新加 CRM API helpers（lib/api.ts ~50 行）：**
+- apiListLeads / apiCreateLead / apiConvertLead
+- apiListOpps / apiCreateOpp / apiUpdateOppStage
+- apiListCrmEvents / apiCreateCrmEvent
+
+**整合：**
+- App.tsx 加 /crm route
+- Layout.tsx navConfig 加 🤝 CRM 在 operations group
+- Layout.tsx mount `<OnboardingTour />`
+- i18n zh-TW + en 加 nav.crm
+
+**Smoke test：test_crm_v315.py：6/6 pass**
+
+### 📊 數字變化
+
+| 維度 | v3.14 結束 | v3.15 結束 |
+|---|---|---|
+| 前端 pages | 12 | **13**（+Crm.tsx） |
+| 前端 components | 7 | **9**（+EmptyState, +OnboardingTour）|
+| Frontend routes | 11 | **12**（+/crm）|
+| Sidebar nav 入口 | 11 | **12**（+🤝 CRM）|
+| Smoke tests | 303 | **309**（+6 CRM tests）|
+| CRM UI 完整度 vs Salesforce | **0%** | **~40%**（pipeline + kanban + 360 三大核心 + activity log）|
+| Empty state 友善度 | 冰冷 | actionable（先做 Inventory，其他下個 sprint）|
+| First-time UX | 直接掉到 dashboard | **4 步驟引導卡** |
+
+### 🪞 教訓 #22
+
+「**ERP 完整度有 3 層：模型 / API / UI。任何一層缺都不算完整**」
+
+之前的我以為「backend 有 CRM endpoint = CRM 有了」。
+真實情況：UI 沒入口 = **使用者不知道有這功能** = 0% 採用率。
+
+下次提到「我們有 X 功能」之前，先確認：
+1. ✅ Backend 模型 + endpoint 在嗎？
+2. ✅ Frontend 有對應頁面嗎？
+3. ✅ Sidebar / nav 有入口嗎？
+4. ✅ Empty state 有引導嗎？
+5. ✅ 文件有教怎麼用嗎？
+
+5 個都打勾才能說「有」。
+
+### 後續
+
+- EmptyState 套到剩下 4 頁（Sales/Purchase/Production/Quality）— 純樣板複製
+- HelpTooltip 加到複雜欄位（Microsoft Dynamics 風）— 下個 sprint
+- Cmd+K 命令面板（Linear/Notion 風）— 下個 sprint
+- CRM Lead 轉換漏斗 KPI（多少 Lead → 成交，週/月）— 下個 sprint
+- CRM 加跟進提醒（task / reminder due date）— 下個 sprint
+- 加 drag-and-drop 拖動 Kanban 卡片（react-dnd）— 加分項
+
+**Blocker**：無
+
+---
+
 ## 2026-05-17｜會話 #37｜🤖 v3.14 Sprint H：AI Key UX 完整化（無 key 也能用 + 友善引導）
 
 **目標**：使用者「重點要說明使用者要如何申請及安裝 APIKEY 的完整過程 / 如果小白裝了軟體但沒有申請 APIKEY，至少也要能用，只是在 LLM 命令列使用時要提醒小白去申請 / 多看其他 ERP 如何讓使用者友善」

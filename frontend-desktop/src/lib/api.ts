@@ -125,6 +125,54 @@ export const apiLlmTest      = (body: LlmTestRequest) => api.post<LlmTestRespons
 export const apiLlmConfigure = (body: LlmConfigureRequest) =>
   api.post<{ saved: boolean; requires_restart: boolean; message: string }>('/llm/configure', body)
 
+// ──────────────────────────────────────────────────────────
+// CRM (Sprint I v3.15) — Lead / Opportunity / Activity
+// ──────────────────────────────────────────────────────────
+export interface Lead {
+  id: string
+  company_name: string
+  contact_person: string | null
+  status: string                  // 'new' | 'contacted' | 'qualified' | 'lost' | 'converted'
+  converted_to_customer_id: string | null
+  created_at: string
+}
+export interface Opportunity {
+  id: string
+  customer_id: string
+  name: string
+  stage: string                   // 'prospect' | 'proposal' | 'negotiation' | 'won' | 'lost'
+  amount: number
+  probability: number
+  status: string                  // 'open' | 'closed'
+}
+export interface CrmEvent {
+  id: string
+  customer_id: string
+  event_type: string              // 'call' | 'email' | 'meeting' | 'note' | 'task'
+  subject: string
+  description: string | null
+  created_at: string
+}
+
+export const apiListLeads     = (status?: string) =>
+  api.get<Lead[]>(`/crm/leads${status ? `?status=${status}` : ''}`)
+export const apiCreateLead    = (data: { company_name: string; contact_person?: string; contact_email?: string; contact_phone?: string; source?: string }) =>
+  api.post<Lead>('/crm/leads', data)
+export const apiConvertLead   = (lead_id: string, customer: { code: string; name: string }) =>
+  api.post<Customer>(`/crm/leads/${lead_id}/convert`, { customer })
+
+export const apiListOpps      = (stage?: string) =>
+  api.get<Opportunity[]>(`/crm/opportunities${stage ? `?stage=${stage}` : ''}`)
+export const apiCreateOpp     = (data: { customer_id: string; name: string; stage?: string; amount?: number; probability?: number; expected_close_date?: string }) =>
+  api.post<Opportunity>('/crm/opportunities', data)
+export const apiUpdateOppStage = (opp_id: string, stage: string) =>
+  api.post<Opportunity>(`/crm/opportunities/${opp_id}/stage`, { stage })
+
+export const apiListCrmEvents = (customer_id?: string, limit = 50) =>
+  api.get<CrmEvent[]>(`/crm/events?${customer_id ? `customer_id=${customer_id}&` : ''}limit=${limit}`)
+export const apiCreateCrmEvent = (data: { customer_id: string; event_type: string; subject: string; description?: string }) =>
+  api.post<CrmEvent>('/crm/events', data)
+
 // ---------- domain typed helpers ----------
 
 export interface Part {

@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-17（會話 #38 v3.14 Sprint H：AI Key UX 完整化 — 學 NetSuite + Odoo 風格。後端新增 `/api/llm/{status,test,configure}` 3 endpoints（即時生效 settings + 寫 .env 持久化）；Chat 沒 key 時回結構化 `setup_required` flag 而非 raw error；前端新增 `AiStatusBadge`（header 常駐 ⚠️/✅ 燈號）+ `AiSetupGuide`（Chat 內 3-step actionable 引導卡）+ Settings 頁「🤖 AI 助手設定」section（provider 選擇 + key 測試 + 即時儲存）；新文件 `HOW_TO_GET_LLM_API_KEY_ZH/EN.md` 雙語 ~260 行（4 provider 比較 + 申請步驟 + Windows SSL troubleshoot + 費用試算）；5/5 smoke tests pass。教訓 #21：對小白要在他撞牆的當下「就地」提供出路，不是「請看 FAQ」）
+**最後更新**：2026-05-17（會話 #39 v3.15 Sprint I：CRM 全頁 + 友善化 — 學 HubSpot Pipeline + Salesforce 360 + Pipedrive Kanban + Odoo EmptyState + Notion OnboardingTour。新建 `pages/Crm.tsx` 3 tab（Lead 漏斗 / 商機 Kanban / 客戶 360 含活動 timeline）+ `components/EmptyState.tsx` 通用 actionable 空狀態 + `components/OnboardingTour.tsx` 首登 4 步驟引導（localStorage 記憶）+ Inventory 套用 EmptyState + Sidebar 加 🤝 CRM 入口 + 6/6 CRM smoke tests pass。教訓 #22：ERP 完整度 = 模型 + API + UI + nav 入口 + 文件 5 層全到才算「有」）
 **維護者**：使用者 + Claude
 **版本**：3.13
