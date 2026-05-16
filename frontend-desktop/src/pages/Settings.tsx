@@ -15,6 +15,7 @@ import {
   apiOnboardingStatus, apiSeedDemo, apiClearDemo, type OnboardingStatus,
   apiUploadAttachment, apiListAttachments, apiDeleteAttachment,
   downloadAttachmentUrl, type Attachment,
+  apiLlmStatus, apiLlmTest, apiLlmConfigure, type LlmStatus,
 } from '../lib/api'
 
 const CATEGORIES: { value: string; label: string }[] = [
@@ -36,10 +37,210 @@ export default function Settings() {
         </p>
       </div>
 
+      <AiSettingsSection />
       <DemoDataSection />
       <FileUploadSection />
       <SystemInfoSection />
     </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+// 0. AI 助手設定（Sprint H v3.14）
+// ────────────────────────────────────────────────────────────
+
+const PROVIDERS: { value: 'deepseek' | 'openai' | 'anthropic' | 'ollama'; label: string; desc: string; signup: string }[] = [
+  { value: 'deepseek',  label: '🇨🇳 DeepSeek（推薦）', desc: '最便宜、有免費額度；中英文能力強', signup: 'https://platform.deepseek.com/sign_up' },
+  { value: 'openai',    label: '🇺🇸 OpenAI (GPT-4o)',  desc: '老牌、最穩、最貴',                signup: 'https://platform.openai.com/signup' },
+  { value: 'anthropic', label: '🇺🇸 Anthropic Claude', desc: '推理 / 寫文章 / Code 能力強',     signup: 'https://console.anthropic.com/' },
+  { value: 'ollama',    label: '🏠 Ollama（離線）',    desc: '本機跑、零成本、需自備 GPU',       signup: 'https://ollama.com/download' },
+]
+
+function AiSettingsSection() {
+  const [status, setStatus] = useState<LlmStatus | null>(null)
+  const [provider, setProvider] = useState<'deepseek' | 'openai' | 'anthropic' | 'ollama'>('deepseek')
+  const [apiKey, setApiKey] = useState('')
+  const [verifySsl, setVerifySsl] = useState(true)
+  const [showKey, setShowKey] = useState(false)
+  const [busy, setBusy] = useState<'test' | 'save' | null>(null)
+  const [msg, setMsg] = useState<string | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string; ms?: number } | null>(null)
+
+  async function load() {
+    try {
+      const s = await apiLlmStatus()
+      setStatus(s)
+      setProvider(s.provider)
+      setVerifySsl(s.verify_ssl)
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : '載入失敗')
+    }
+  }
+  useEffect(() => { load() }, [])
+
+  async function doTest() {
+    if (!apiKey.trim() && provider !== 'ollama') {
+      setErr('請先貼入 API Key')
+      return
+    }
+    setBusy('test'); setErr(null); setMsg(null); setTestResult(null)
+    try {
+      const r = await apiLlmTest({ provider, api_key: apiKey || 'ollama-no-key-needed', verify_ssl: verifySsl })
+      setTestResult({ success: r.success, message: r.message, ms: r.response_ms })
+      if (!r.success && r.detail) setErr(r.detail)
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : '測試失敗')
+    } finally { setBusy(null) }
+  }
+
+  async function doSave() {
+    if (!apiKey.trim() && provider !== 'ollama') {
+      setErr('請先貼入 API Key')
+      return
+    }
+    setBusy('save'); setErr(null); setMsg(null)
+    try {
+      const r = await apiLlmConfigure({ provider, api_key: apiKey || 'ollama-no-key', verify_ssl: verifySsl })
+      setMsg(r.message)
+      setApiKey('')  // 清掉 input 避免被別人看到
+      await load()
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : '儲存失敗')
+    } finally { setBusy(null) }
+  }
+
+  const currentProvider = PROVIDERS.find(p => p.value === provider)
+
+  return (
+    <section className="bg-white rounded-xl shadow p-6">
+      <div className="flex items-start justify-between mb-1">
+        <h2 className="text-lg font-semibold">🤖 AI 助手設定</h2>
+        {status && (
+          status.configured ? (
+            <span className="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-medium">
+              ✓ 已啟用（{status.provider}）
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 font-medium">
+              ⚠️ 未設定
+            </span>
+          )
+        )}
+      </div>
+      <p className="text-sm text-gray-500 mb-4">
+        申請 LLM API Key 啟用對話式 CRUD（查 / 增 / 改 / 刪 用講的）。
+        <strong className="ml-1">不設也能用所有非 AI 功能</strong>，但會少了 erpilot 最大的賣點。
+      </p>
+
+      {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mb-3 text-sm">{err}</div>}
+      {msg && <div className="bg-green-50 text-green-700 px-3 py-2 rounded mb-3 text-sm">{msg}</div>}
+
+      {status && (
+        <div className="grid md:grid-cols-3 gap-3 mb-4 text-xs">
+          <Stat label="當前 Provider" value={status.provider} />
+          <Stat label="當前 Model" value={status.model || '—'} />
+          <Stat label="上次測試"
+            value={
+              status.last_test_success === true ? '✅ 成功'
+              : status.last_test_success === false ? `❌ ${status.last_test_error || '失敗'}`
+              : '—'
+            }
+          />
+        </div>
+      )}
+
+      <div className="space-y-3 mb-4">
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">選 Provider</label>
+          <select
+            value={provider} onChange={(e) => setProvider(e.target.value as typeof provider)}
+            className="w-full border rounded px-2 py-1.5 text-sm"
+          >
+            {PROVIDERS.map(p => (
+              <option key={p.value} value={p.value}>{p.label} — {p.desc}</option>
+            ))}
+          </select>
+          {currentProvider && (
+            <p className="text-xs text-gray-500 mt-1">
+              還沒帳號？
+              <a href={currentProvider.signup} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline ml-1">
+                去申請 →
+              </a>
+              {' '}（5 分鐘）
+            </p>
+          )}
+        </div>
+
+        {provider !== 'ollama' && (
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">API Key</label>
+            <div className="flex gap-2">
+              <input
+                type={showKey ? 'text' : 'password'}
+                value={apiKey} onChange={(e) => setApiKey(e.target.value)}
+                placeholder="sk-..."
+                className="flex-1 border rounded px-2 py-1.5 text-sm font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => setShowKey(v => !v)}
+                className="px-2 py-1 text-xs border rounded hover:bg-gray-50"
+              >
+                {showKey ? '🙈 隱藏' : '👁 顯示'}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              貼入後 key 會即時生效（不需重啟）。寫入 <code className="bg-gray-100 px-1 rounded">backend/.env</code>。
+            </p>
+          </div>
+        )}
+
+        <div>
+          <label className="flex items-center gap-2 text-xs text-gray-700">
+            <input type="checkbox" checked={verifySsl} onChange={(e) => setVerifySsl(e.target.checked)} />
+            驗證 SSL 證書
+            <span className="text-gray-500">
+              （Windows 連 DeepSeek 失敗時可關掉。Mac/Linux/production 請維持開啟）
+            </span>
+          </label>
+        </div>
+      </div>
+
+      {testResult && (
+        <div className={`px-3 py-2 rounded mb-3 text-sm ${testResult.success ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-700'}`}>
+          {testResult.message}
+          {testResult.ms != null && <span className="ml-2 text-xs opacity-75">({testResult.ms} ms)</span>}
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button
+          onClick={doTest} disabled={busy !== null}
+          className="px-4 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 disabled:opacity-50 text-sm"
+        >
+          {busy === 'test' ? '測試中…' : '🧪 測試連線（不儲存）'}
+        </button>
+        <button
+          onClick={doSave} disabled={busy !== null}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm"
+        >
+          {busy === 'save' ? '儲存中…' : '💾 儲存（即時生效）'}
+        </button>
+      </div>
+
+      <div className="mt-4 text-xs text-gray-600 bg-blue-50 rounded p-3">
+        📖 不知道怎麼申請？看完整教學：
+        <a
+          href="https://github.com/fanchanyu/erpilot/blob/main/docs/HOW_TO_GET_LLM_API_KEY_ZH.md"
+          target="_blank" rel="noopener noreferrer"
+          className="text-blue-600 underline ml-1"
+        >
+          docs/HOW_TO_GET_LLM_API_KEY_ZH.md
+        </a>
+        {' '}（含 3 個 provider 比較 + 圖文步驟）
+      </div>
+    </section>
   )
 }
 

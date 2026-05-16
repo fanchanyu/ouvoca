@@ -137,6 +137,113 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-17｜會話 #37｜🤖 v3.14 Sprint H：AI Key UX 完整化（無 key 也能用 + 友善引導）
+
+**目標**：使用者「重點要說明使用者要如何申請及安裝 APIKEY 的完整過程 / 如果小白裝了軟體但沒有申請 APIKEY，至少也要能用，只是在 LLM 命令列使用時要提醒小白去申請 / 多看其他 ERP 如何讓使用者友善」
+
+### 🎯 ERP 競品 UX 比較參考
+
+| ERP | 我們學的好做法 |
+|---|---|
+| Odoo | empty state 不空白要 actionable card |
+| NetSuite | API 健康狀態 dashboard widget 永遠可見 |
+| Salesforce/Linear | Cmd+K 命令面板（這次先不做）|
+| Microsoft Dynamics | 每欄位有 ? help bubble |
+| SAP | 紅黃綠燈系統狀態 |
+| 鼎新 | footer 永遠顯示連線/權限/版本 |
+
+→ 這次採用 NetSuite + Odoo 兩家精華：**header 常駐 AI status 燈** + **Chat 無 key 時 actionable 引導卡**
+
+### ✅ 後端
+
+**新檔案 `app/api/llm_status.py`**（3 endpoints, ~220 行）：
+- `GET /api/llm/status`：公開查當前 provider / configured / model / 上次 test 結果
+- `POST /api/llm/test`：admin 用候選 key 試打 API（不 persist），4 個 provider 分別處理
+- `POST /api/llm/configure`：寫 backend/.env + **即時更新 settings 記憶體**（不需重啟）
+
+**改 `chat.py`**：沒 API key 時回 **結構化** `setup_required=true` flag（不再回 raw error string）
+**改 `schemas/chat.py`**：ChatResponse 加 `setup_required` + `setup_reason`
+**改 `app/main.py`**：include llm_status.router
+
+### ✅ 前端
+
+**`components/AiStatusBadge.tsx`**（~80 行）— **常駐 header**
+- 🟢 已啟用：`AI · deepseek` 綠燈，hover 顯示 model
+- 🟡 未設定：`⚠️ AI 未設定` 黃燈，點擊跳 /settings
+- 每 60 秒 poll 一次（不會打爆 server）
+
+**`components/AiSetupGuide.tsx`**（~100 行）— Chat 無 key 時 actionable card
+- 3 步驟視覺化：① 去 DeepSeek 申請 ② 貼到 Settings 頁 ③ 回來重打
+- 直接給 deeplink「🌐 去 DeepSeek 註冊 →」+「⚙️ 去設定頁 →」
+- 「不想申請？」段落提醒非 AI 功能還是可以用（庫存/採購/銷售/生產）
+
+**Settings.tsx**：在最頂端新增「🤖 AI 助手設定」section（~180 行）
+- Provider 選擇器（4 家對照 + 推薦 + 描述 + 申請連結）
+- API Key 輸入（password 模式 + 👁 顯示切換）
+- 「🧪 測試連線（不儲存）」+ 「💾 儲存（即時生效）」雙按鈕
+- 上次測試結果顯示（含 response_ms）
+- SSL 驗證勾選（Windows + DeepSeek 常見問題）
+
+**Chat.tsx**：偵測 setup_required → render `<AiSetupGuide>`
+**Layout.tsx**：header 加 `<AiStatusBadge />` 在 language switcher 之前
+
+### ✅ 文件
+
+**新檔案 `docs/HOW_TO_GET_LLM_API_KEY_ZH.md`**（~260 行）+ 同步 EN：
+- 為什麼需要 API Key + 沒 key 也能用什麼
+- 4 家 provider 比較表（價格 / 免費額度 / 中文能力 / 推薦對象）
+- DeepSeek 申請 3 步驟（註冊 / 拿 key / 充值）
+- 餵 erpilot 3 種方法（Settings UI / .env file / env var）
+- Windows + DeepSeek SSL 證書錯誤 troubleshoot
+- 安全提醒（key = 密碼，怎麼處理對話資料的去向）
+- 費用試算（小工廠月費 NT$3-400）
+- 9 個常見問題 + 解法
+
+### ✅ 測試
+
+`test_llm_status_v314.py`：**5/5 pass**
+- status 永遠回（公開）
+- chat 沒 key 回 setup_required=true 結構化 flag
+- configure 寫 .env + 即時生效 settings
+- 未授權 configure 被拒
+- status 反映 settings 變更
+
+### 📊 數字
+
+| 維度 | v3.13 結束 | v3.14 結束 |
+|---|---|---|
+| Backend routes | 91 | **94**（+3 LLM endpoints）|
+| 前端 components | 5 | **7**（+AiStatusBadge, +AiSetupGuide）|
+| Smoke tests | 298 | **303**（+5 LLM tests）|
+| 沒 key 時 Chat 表現 | 露出 raw error 字串 | **render 友善 3-step 引導卡** |
+| AI 啟用狀態可見性 | 隱藏在 backend log | **header 常駐燈號** |
+| API Key 設定 UI | 無（要編 .env）| **Settings 頁完整 UI（測試 + 儲存）**|
+| 申請教學文件 | 無 | **HOW_TO_GET_LLM_API_KEY_ZH.md/EN（~260 行雙語）**|
+
+### 🪞 教訓 #21
+
+「**對小白要做兩件事：(a) 不要讓他撞牆 (b) 撞牆時告訴他下一步**」
+
+之前的 erpilot：沒 key 進 Chat → API 回 plaintext 「請在 .env 設定 LLM_API_KEY 後重啟」
+→ 小白看到「.env 是什麼？」+「重啟什麼？」→ 兩個聽不懂的詞 → 放棄
+
+v3.14 後：沒 key 進 Chat → **3-step actionable card**（去申請 / 貼進 Settings / 回來重打）+ 直接給 deeplink + 提示「不想申請也能用其他功能」
+→ 小白能 follow 步驟，**沒被卡住**
+
+**重點：不只是要解決問題，要在使用者撞牆的當下「就地」提供出路**。
+而不是「請看 FAQ」「請看 docs」「請聯繫支援」。
+
+### 後續
+
+- Cmd+K 命令面板（Salesforce/Linear 風）— 下個 sprint
+- Empty state cards 套到 Inventory/Sales/Purchase 列表（Odoo 風）— 下個 sprint
+- Help bubble (?) 加到複雜欄位 — 下個 sprint
+- 完整 dashboard widget（系統狀態紅黃綠燈 SAP 風）— 後續
+
+**Blocker**：無
+
+---
+
 ## 2026-05-17｜會話 #36｜📚 v3.13.1：README 電腦小白化 + 35 PDF 上 GitHub
 
 **目標**：使用者「GitHub 的快速安裝沒寫清楚，無法讓人一下就上手 / 加油吧 / GitHub 看不到 PDF / 其實都做到這個樣子.PDF 開放也沒有差」

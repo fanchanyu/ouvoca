@@ -14,6 +14,9 @@ class ChatResponse(BaseModel):
     agent: str
     session_id: str
     tool_calls: Optional[list] = None
+    # v3.14：當 LLM_API_KEY 未設時，前端依此 flag render AI 申請引導卡
+    setup_required: Optional[bool] = None
+    setup_reason: Optional[str] = None  # 'no_api_key' / 'invalid_key' / 'quota_exceeded'
 
 
 class ConversationLogResponse(BaseModel):

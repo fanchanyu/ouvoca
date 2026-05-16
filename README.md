@@ -157,7 +157,7 @@
 
 | 我想... / I want to... | 怎麼做 / How |
 |---|---|
-| 啟動 AI 對話功能 / Enable AI chat | 編輯 `backend/.env` 填 `LLM_API_KEY=sk-...`（[DeepSeek 申請](https://platform.deepseek.com)）→ 重跑 install.bat |
+| 啟動 AI 對話功能 / Enable AI chat | 登入 → ⚙️ 設定 → 🤖 AI 助手設定 → 貼 API Key + 測試 + 儲存（**即時生效不需重啟**）。詳見 [`HOW_TO_GET_LLM_API_KEY_ZH.md`](./docs/HOW_TO_GET_LLM_API_KEY_ZH.md)（含 3 個 provider 比較 + 5 分鐘申請步驟） |
 | 上傳我的舊報價單 / 發票 PDF | 登入 → ⚙️ 設定 → 📁 上傳業務文件 → 拖檔案進去 |
 | 清掉示範資料 / Clear demo data | 登入 → ⚙️ 設定 → 📦 示範資料 → 🗑 清除 |
 | 停止 erpilot / Stop | `docker compose down`（在解壓目錄裡）或關掉 Docker Desktop |
@@ -388,6 +388,9 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | 16 | Phase 1 實作 Spec | [📕 中文 PDF](./docs/pdf/16_Phase1_實作Spec_中文.pdf) | [📘 EN PDF](./docs/pdf/16_Phase1_Implementation_Spec_EN.pdf) |
 | 17 | 外部 DB 串接設計 / External DB Integration | [📕 中文 PDF](./docs/pdf/17_外部DB串接設計_中文.pdf) | [📘 EN PDF](./docs/pdf/17_External_DB_Integration_Design_EN.pdf) |
 | 18 | 業務 demo 一頁紙 / Sales Killer Moments | [📕 中文 PDF](./docs/pdf/18_業務demo一頁紙_中文.pdf) | [📘 EN PDF](./docs/pdf/18_Sales_Killer_Moments_EN.pdf) |
+
+📌 **特別文件**：
+- [**`HOW_TO_GET_LLM_API_KEY_ZH.md`**](./docs/HOW_TO_GET_LLM_API_KEY_ZH.md) · [EN](./docs/HOW_TO_GET_LLM_API_KEY_EN.md) — 5-10 分鐘申請 API Key 完整教學（DeepSeek/OpenAI/Anthropic/Ollama 比較）
 
 🇹🇼 **電腦小白優先讀**：00（產品說明書）→ 01（安裝指南）→ 02（快速入門）→ 03（使用者操作手冊）
 🇺🇸 **Beginners read first**: 00 → 01 → 02 → 03

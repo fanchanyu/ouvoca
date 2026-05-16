@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm'
 import { apiChat } from '../lib/api'
 import type { ConfirmCardData, ConfirmCardResult } from '../lib/api'
 import ConfirmCard from '../components/ConfirmCard'
+import AiSetupGuide from '../components/AiSetupGuide'
 
 interface Msg {
   role: 'user' | 'assistant' | 'system'
@@ -15,6 +16,8 @@ interface Msg {
   card?: ConfirmCardData
   /** 是否已處理（確認 / 取消 / 過期） — 決定是否還可互動 */
   cardSettled?: 'confirmed' | 'cancelled' | 'expired'
+  /** v3.14：當 backend 回 setup_required=true 時 render 申請引導卡 */
+  setupGuide?: { reason: 'no_api_key' | 'invalid_key' | 'quota_exceeded'; intent?: string }
 }
 
 /**
@@ -92,6 +95,10 @@ export default function Chat() {
         agent: data.agent,
         timestamp: Date.now(),
         card,
+        // v3.14：把 backend 結構化 setup_required flag 帶到前端 render
+        setupGuide: data.setup_required
+          ? { reason: data.setup_reason || 'no_api_key', intent: data.agent }
+          : undefined,
       }])
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : '連線錯誤'
@@ -230,6 +237,13 @@ export default function Chat() {
                 <div className="whitespace-pre-wrap break-words">{msg.content}</div>
               )}
             </div>
+
+            {/* v3.14: AI 設定引導卡（no_api_key / invalid_key / quota_exceeded） */}
+            {msg.setupGuide && (
+              <div className="w-full max-w-[85%]">
+                <AiSetupGuide reason={msg.setupGuide.reason} detectedIntent={msg.setupGuide.intent} />
+              </div>
+            )}
 
             {/* v3.1: ConfirmCard 內嵌（在訊息泡泡下方） */}
             {msg.card && !msg.cardSettled && (

@@ -14,6 +14,7 @@ import { useAuthStore } from '../store/auth'
 import { useToast } from './ui'
 import { useTranslation, type Lang } from '../i18n'
 import DesktopNotifications, { type ToastEntry } from './DesktopNotifications'
+import AiStatusBadge from './AiStatusBadge'
 
 const navConfig = [
   { path: '/',                key: 'dashboard',      icon: '📊', group: 'overview' },
@@ -165,6 +166,9 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-1 ml-auto">
+            {/* v3.14：AI 狀態指示燈（永遠可見）*/}
+            <AiStatusBadge />
+
             {/* Language switcher */}
             <div className="relative" ref={langMenuRef}>
               <button

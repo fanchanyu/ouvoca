@@ -88,6 +88,43 @@ export const apiDeleteAttachment = (id: string) =>
   api.del<{ deleted: boolean; id: string }>(`/files/${id}`)
 export const downloadAttachmentUrl = (id: string) => `/api/files/${id}/download`
 
+// ──────────────────────────────────────────────────────────
+// LLM Status / Configuration (Sprint H v3.14)
+// ──────────────────────────────────────────────────────────
+export interface LlmStatus {
+  configured: boolean
+  provider: 'deepseek' | 'openai' | 'anthropic' | 'ollama'
+  model: string
+  base_url: string
+  verify_ssl: boolean
+  last_test_success: boolean | null
+  last_test_error: string | null
+  setup_url: string
+}
+export interface LlmTestRequest {
+  provider: 'deepseek' | 'openai' | 'anthropic' | 'ollama'
+  api_key: string
+  base_url?: string
+  verify_ssl?: boolean
+}
+export interface LlmTestResponse {
+  success: boolean
+  message: string
+  detail?: string
+  response_ms?: number
+}
+export interface LlmConfigureRequest {
+  provider: 'deepseek' | 'openai' | 'anthropic' | 'ollama'
+  api_key: string
+  base_url?: string
+  model?: string
+  verify_ssl?: boolean
+}
+export const apiLlmStatus    = () => api.get<LlmStatus>('/llm/status')
+export const apiLlmTest      = (body: LlmTestRequest) => api.post<LlmTestResponse>('/llm/test', body)
+export const apiLlmConfigure = (body: LlmConfigureRequest) =>
+  api.post<{ saved: boolean; requires_restart: boolean; message: string }>('/llm/configure', body)
+
 // ---------- domain typed helpers ----------
 
 export interface Part {
@@ -126,6 +163,9 @@ export interface HealthResponse {
 export interface ChatResponse {
   reply: string; agent: string; session_id: string
   tool_calls?: Array<{ tool: string; args: unknown; result: string }>
+  // v3.14：當 LLM_API_KEY 未設或失效時，前端依此 flag render 申請引導卡
+  setup_required?: boolean
+  setup_reason?: 'no_api_key' | 'invalid_key' | 'quota_exceeded'
 }
 
 export const apiHealth = () => api.get<HealthResponse>('/health')

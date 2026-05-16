@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-17（會話 #37 v3.13.1：README 完整改寫成電腦小白可讀版本 — 「我是誰？」3 軌選擇器 + 5 分鐘安裝指南（Download ZIP → Docker → 雙擊 install）+ 13 題安裝 FAQ（用 `<details>` 折疊）+ 35 份雙語 PDF 一鍵下載表 + 工程師區段移到底部。`.gitignore` 解鎖 `docs/pdf/*.pdf` 讓 PDF 直接在 GitHub 看得到（35 PDFs ~25MB 入版控）。會話 #36 v3.13 Sprint D+E+F 已完工：USER_MANUAL 重寫+File Upload+Settings 頁）
+**最後更新**：2026-05-17（會話 #38 v3.14 Sprint H：AI Key UX 完整化 — 學 NetSuite + Odoo 風格。後端新增 `/api/llm/{status,test,configure}` 3 endpoints（即時生效 settings + 寫 .env 持久化）；Chat 沒 key 時回結構化 `setup_required` flag 而非 raw error；前端新增 `AiStatusBadge`（header 常駐 ⚠️/✅ 燈號）+ `AiSetupGuide`（Chat 內 3-step actionable 引導卡）+ Settings 頁「🤖 AI 助手設定」section（provider 選擇 + key 測試 + 即時儲存）；新文件 `HOW_TO_GET_LLM_API_KEY_ZH/EN.md` 雙語 ~260 行（4 provider 比較 + 申請步驟 + Windows SSL troubleshoot + 費用試算）；5/5 smoke tests pass。教訓 #21：對小白要在他撞牆的當下「就地」提供出路，不是「請看 FAQ」）
 **維護者**：使用者 + Claude
 **版本**：3.13
