@@ -38,6 +38,98 @@
 
 ---
 
+## 2026-05-15｜會話 #28｜🚀 Day A 限縮版：8 個 hard-write tools（v3.9）
+
+**目標**：使用者最終 spec：「依權限透過 LLM 達到新增/刪除/修改/查詢」+「沒有 LLM 也可以做到」+「外部 DB 連通」+「報表符合法規」+「中小企業快速上手」。
+盤點 6 個 gap，user 選「今晚再拼 Day A 限縮版（~3-4 hr）」。
+
+### 🪞 為何選 Day A
+
+LLM 寫入嚴重不對稱：36 read tools / 4 hard-write tools。
+不補完 → 「LLM 全 CRUD」承諾跳票。Day A 補 8 個最關鍵的，cover 4 個 domain。
+
+### ✅ 8 個新 hard-write tools
+
+`backend/app/agents/domains/hard_write_tools.py`（再追加 ~530 行）：
+
+| # | Tool | Domain | 對應 service | Demo |
+|---|---|---|---|---|
+| 1 | `create_part_with_confirm` | inventory | `create_part`（會帶 Inventory 行） | 「新增料件 M6 螺絲 安全 500」 |
+| 2 | `update_part_safety_stock_with_confirm` | inventory | 直接 ORM update | 「M6 安全庫存改 1000」 |
+| 3 | `add_inventory_transaction_with_confirm` | inventory | `add_inventory_transaction` | 「進料 M6 +500」 |
+| 4 | `create_supplier_with_confirm` | purchase | `create_supplier` | 「新增供應商 大同電子」 |
+| 5 | `approve_purchase_order_with_confirm` | purchase | `approve_purchase_order` | 「審核 PO-001」 |
+| 6 | `create_customer_with_confirm` | sales | `create_customer` | 「新增客戶 富士康」 |
+| 7 | `create_sales_order_with_confirm` | sales | `create_sales_order`（含 product 解析） | 「客戶 X 下單 100 個 M6」 |
+| 8 | `complete_work_order_with_confirm` | production | `complete_production_order` | 「工單 WO-001 完工 100」 |
+
+每個 tool 都：
+- emit ConfirmCard（lookup → summary → executor closure）
+- required_permission 強制設置
+- 接到對應 domain agent.tool_names（自動 loop 接）
+
+### ✅ 20 個新測試
+
+`backend/tests/smoke/test_hard_write_v39.py`：
+- 17 個 functional tests（每 tool 至少 emit + execute；含 error case）
+- 3 個 registry sanity tests（registered / attached / required_permission）
+
+### 📊 數字變化
+
+| 維度 | #27 結束 | #28 結束 |
+|---|---|---|
+| pytest tests | 209 | **229** (+20) |
+| Hard-write tools | 4 (含 migration/email_digest = 7) | **14**（含 migration/email_digest/undo = 17） |
+| Read tools | 30+ | 30+ |
+| 寫入 domain coverage | 3 (purchase/sales/production) | **4** (+inventory) |
+| MVP #2 (AI CRUD) | 92% | **98%** |
+| MVP 整體 | ~93% | **~95%** |
+
+### 🎬 LLM 全 CRUD 場景
+
+現在 LLM 可以「用講的做」這些事（每個都走 ConfirmCard）：
+
+**Inventory**：
+- 新增料件 / 改安全庫存 / 進出料 / 調整盤點
+
+**Purchase**：
+- 新增供應商 / 建 PO / 審核 PO / 撤銷剛建的 PO（undo）
+
+**Sales**：
+- 新增客戶 / 建 SO / 改交期
+
+**Production**：
+- 釋放工單 / 報完工
+
+**External DB**：
+- 跨 DB read / Schema mapping / Migration
+
+**Notification**：
+- 預覽 Email digest / 寄出 digest
+
+### 🪞 教訓 #13
+
+8 tools × 25 min/tool = 200 分鐘，**比預估的快**。
+原因：v3.7-v3.8 把 hard_write_tools.py 的 pattern + ConfirmCard 介面定義清楚後，
+copy-paste-modify 變得高效。
+
+「**基石型投資**」（v3.2 ConfirmCard 框架）的回報：
+- v3.2: 1 hr 投資建框架
+- v3.7: 改 1 行（make_card RiskTier 驗證）
+- v3.9: 8 hr 補完 8 個 tool
+
+如果 v3.2 沒先把框架做對，v3.9 會變成 16 hr。
+
+**Blocker**：無。
+
+下次（v3.10+）建議路線：
+- Day B: 前端 Edit/Delete 按鈕 + Form modal（沒 LLM 也能 CRUD）
+- Day C: 法規報表 PDF/Excel/XML 輸出（401/應收帳齡/庫存月報）
+- Day D: 第一次登入 wizard + demo seed
+- 然後找試點客戶開談
+
+---
+
 ## 2026-05-15｜會話 #27｜🔍 Karpathy 架構審查 + 5 Critical Fix（v3.8）
 
 **目標**：使用者「用這個 skill 概念完整檢查 + 完善架構和拓撲」

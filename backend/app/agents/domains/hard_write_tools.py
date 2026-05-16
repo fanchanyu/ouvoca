@@ -384,3 +384,667 @@ async def _resolve_part(db, raw: dict):
 # 而是各自接到對應的 domain agent（PurchaseAgent / ProductionAgent / SalesAgent），
 # 因為 intent classifier 走關鍵字（「下單」→ purchase），不會路由到 hard_write。
 # 詳見 purchase_tools.py / production_tools.py / sales_tools.py 各自的 register_agent。
+
+
+# ============================================================
+# v3.9 — Day A 8 個 hard-write tools（LLM 全 CRUD 補完）
+# ============================================================
+# 同樣 pattern：lookup → build summary → make_card → executor closure
+# 接到 inventory / purchase / sales / production agent 的 tool_names
+
+from app.models.inventory import Inventory, Part as _Part
+from app.models.purchase import PurchaseOrder  # for approve_po
+# 注意：Supplier / SalesOrder / ProductionOrder 已在檔案上方 import
+
+
+# ------------------------------------------------------------
+# Inventory: create_part / update_safety / add_transaction
+# ------------------------------------------------------------
+
+@register_tool(
+    name="create_part_with_confirm",
+    domain="inventory",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "新增料件主檔（同時自動建空 Inventory 行）。"
+        "範例：「新增料件 M6 螺絲，料號 M6-BOLT-20，類別 component，安全庫存 500」"
+    ),
+    slots=[
+        Slot("part_no", "string", required=True, description="料號（如 M6-BOLT-20），全公司唯一"),
+        Slot("name", "string", required=True, description="料件名稱"),
+        Slot("category", "string", required=False,
+             description="raw_material / semi_finished / component / consumable / packaging"),
+        Slot("unit", "string", required=False, description="單位，預設 pcs"),
+        Slot("safety_stock", "number", required=False, description="安全庫存"),
+        Slot("unit_cost", "number", required=False, description="標準成本"),
+    ],
+    required_permission="inventory.part.create",
+)
+async def _create_part_with_confirm(
+    db, user,
+    part_no: str, name: str,
+    category: str = "component", unit: str = "pcs",
+    safety_stock: float = 0, unit_cost: float = 0,
+):
+    # 檢查 part_no 是否已存在
+    from sqlalchemy import select as _select
+    existing = (await db.execute(_select(_Part).where(_Part.part_no == part_no))).scalar_one_or_none()
+    if existing is not None:
+        return {"error": f"料號 {part_no!r} 已存在", "existing_id": existing.id}
+
+    summary = [
+        f"料號：{part_no}",
+        f"名稱：{name}",
+        f"類別：{category}",
+        f"單位：{unit}",
+    ]
+    if safety_stock:
+        summary.append(f"安全庫存：{safety_stock:g}")
+    if unit_cost:
+        summary.append(f"標準成本：${unit_cost:g}")
+
+    card = make_card(
+        tool_name="create_part_with_confirm",
+        title="確認新增料件",
+        summary=summary,
+        slots={
+            "part_no": part_no, "name": name, "category": category,
+            "unit": unit, "safety_stock": safety_stock, "unit_cost": unit_cost,
+        },
+        created_by=(user or {}).get("employee_id"),
+    )
+
+    async def execute():
+        from app.services.inventory import create_part
+        p = await create_part(db, {
+            "part_no": part_no, "name": name, "category": category,
+            "unit": unit, "safety_stock": safety_stock, "unit_cost": unit_cost,
+        })
+        return {
+            "part_no": p.part_no, "id": p.id, "name": p.name,
+            "message": f"✅ 料件 {p.part_no}（{p.name}）已建立，並自動建立空庫存行",
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
+@register_tool(
+    name="update_part_safety_stock_with_confirm",
+    domain="inventory",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "修改料件的安全庫存設定。"
+        "範例：「把 M6-BOLT-20 的安全庫存改成 1000」"
+    ),
+    slots=[
+        Slot("part_no", "string", required=True, description="料號"),
+        Slot("new_safety_stock", "number", required=True, description="新安全庫存值"),
+        Slot("reason", "string", required=False, description="變更原因"),
+    ],
+    required_permission="inventory.part.update",
+)
+async def _update_safety_stock_with_confirm(
+    db, user, part_no: str, new_safety_stock: float, reason: str = "",
+):
+    from sqlalchemy import select as _select
+    p = (await db.execute(_select(_Part).where(_Part.part_no == part_no))).scalar_one_or_none()
+    if p is None:
+        return {"error": f"找不到料號 {part_no!r}"}
+    if new_safety_stock < 0:
+        return {"error": f"安全庫存不能負數: {new_safety_stock}"}
+
+    summary = [
+        f"料號：{p.part_no}（{p.name}）",
+        f"目前安全庫存：{p.safety_stock:g}",
+        f"新安全庫存：{new_safety_stock:g}",
+    ]
+    if reason:
+        summary.append(f"變更原因：{reason}")
+
+    card = make_card(
+        tool_name="update_part_safety_stock_with_confirm",
+        title=f"確認修改 {p.part_no} 安全庫存",
+        summary=summary,
+        slots={
+            "part_id": p.id, "part_no": p.part_no,
+            "old_safety_stock": p.safety_stock,
+            "new_safety_stock": new_safety_stock,
+            "reason": reason,
+        },
+        created_by=(user or {}).get("employee_id"),
+    )
+
+    async def execute():
+        from sqlalchemy import select as _select
+        p_fresh = (await db.execute(_select(_Part).where(_Part.id == p.id))).scalar_one()
+        old = p_fresh.safety_stock
+        p_fresh.safety_stock = float(new_safety_stock)
+        await db.commit()
+        return {
+            "part_no": p_fresh.part_no,
+            "old_safety_stock": old,
+            "new_safety_stock": new_safety_stock,
+            "message": f"✅ {p_fresh.part_no} 安全庫存 {old:g} → {new_safety_stock:g}",
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
+@register_tool(
+    name="add_inventory_transaction_with_confirm",
+    domain="inventory",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "新增庫存交易（進料 / 出料 / 調整）。"
+        "範例：「進料 M6-BOLT-20 +500」「M6 出料 100」「盤點調整 M6 +5」"
+    ),
+    slots=[
+        Slot("part_no", "string", required=True, description="料號"),
+        Slot("transaction_type", "string", required=True,
+             description="inbound（進料）/ outbound（出料）/ adjustment_in / adjustment_out"),
+        Slot("qty", "number", required=True, description="數量（正數）"),
+        Slot("remark", "string", required=False, description="備註"),
+    ],
+    required_permission="inventory.transaction.create",
+)
+async def _add_inventory_txn_with_confirm(
+    db, user, part_no: str, transaction_type: str, qty: float, remark: str = "",
+):
+    from sqlalchemy import select as _select
+    from app.services.inventory import ALL_VALID_TXN_TYPES, VALID_OUTBOUND
+    p = (await db.execute(_select(_Part).where(_Part.part_no == part_no))).scalar_one_or_none()
+    if p is None:
+        return {"error": f"找不到料號 {part_no!r}"}
+    if transaction_type not in ALL_VALID_TXN_TYPES:
+        return {
+            "error": f"無效的交易類型 {transaction_type!r}",
+            "valid": sorted(ALL_VALID_TXN_TYPES),
+        }
+    if qty <= 0:
+        return {"error": f"數量必須大於 0: {qty}"}
+
+    inv = (await db.execute(
+        _select(Inventory).where(Inventory.part_id == p.id)
+    )).scalar_one_or_none()
+    current = inv.qty_available if inv else 0
+
+    direction = "出庫" if transaction_type in VALID_OUTBOUND else "入庫"
+    summary = [
+        f"料號：{p.part_no}（{p.name}）",
+        f"類型：{transaction_type}（{direction}）",
+        f"數量：{qty:g} {p.unit}",
+        f"目前可用：{current:g}",
+    ]
+    if transaction_type in VALID_OUTBOUND and current < qty:
+        summary.append(f"⚠️ 注意：可用庫存 {current:g} < 出庫 {qty:g}，將會被擋")
+
+    if remark:
+        summary.append(f"備註：{remark}")
+
+    card = make_card(
+        tool_name="add_inventory_transaction_with_confirm",
+        title=f"確認 {p.part_no} {direction} {qty:g}",
+        summary=summary,
+        slots={
+            "part_id": p.id, "part_no": p.part_no,
+            "transaction_type": transaction_type, "qty": qty, "remark": remark,
+        },
+        created_by=(user or {}).get("employee_id"),
+    )
+
+    async def execute():
+        from app.services.inventory import add_inventory_transaction
+        txn = await add_inventory_transaction(db, {
+            "part_id": p.id, "transaction_type": transaction_type,
+            "qty": float(qty), "remark": remark,
+        }, user=user)
+        return {
+            "txn_id": txn.id, "part_no": p.part_no,
+            "transaction_type": transaction_type, "qty": qty,
+            "message": f"✅ {p.part_no} {direction} {qty:g} {p.unit} 已記錄",
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
+# ------------------------------------------------------------
+# Purchase: create_supplier / approve_po
+# ------------------------------------------------------------
+
+@register_tool(
+    name="create_supplier_with_confirm",
+    domain="purchase",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "新增供應商主檔。"
+        "範例：「新增供應商 大同電子 編號 SUP-005 等級 T2」"
+    ),
+    slots=[
+        Slot("code", "string", required=True, description="供應商編號（如 SUP-005）"),
+        Slot("name", "string", required=True, description="供應商名稱"),
+        Slot("tier", "string", required=False, description="等級 T1/T2/T3，預設 T3"),
+        Slot("contact_person", "string", required=False, description="聯絡人"),
+        Slot("contact_phone", "string", required=False, description="電話"),
+        Slot("payment_terms", "string", required=False, description="付款條件（如 月結 60 天）"),
+    ],
+    required_permission="purchase.supplier.create",
+)
+async def _create_supplier_with_confirm(
+    db, user, code: str, name: str,
+    tier: str = "T3", contact_person: str = "",
+    contact_phone: str = "", payment_terms: str = "",
+):
+    from sqlalchemy import select as _select
+    existing = (await db.execute(
+        _select(Supplier).where(Supplier.code == code)
+    )).scalar_one_or_none()
+    if existing is not None:
+        return {"error": f"供應商編號 {code!r} 已存在", "existing_id": existing.id}
+
+    summary = [
+        f"編號：{code}",
+        f"名稱：{name}",
+        f"等級：{tier}",
+    ]
+    if contact_person:
+        summary.append(f"聯絡人：{contact_person}")
+    if contact_phone:
+        summary.append(f"電話：{contact_phone}")
+    if payment_terms:
+        summary.append(f"付款條件：{payment_terms}")
+
+    card = make_card(
+        tool_name="create_supplier_with_confirm",
+        title="確認新增供應商",
+        summary=summary,
+        slots={
+            "code": code, "name": name, "tier": tier,
+            "contact_person": contact_person,
+            "contact_phone": contact_phone, "payment_terms": payment_terms,
+        },
+        created_by=(user or {}).get("employee_id"),
+    )
+
+    async def execute():
+        from app.services.purchase import create_supplier
+        s = await create_supplier(db, {
+            "code": code, "name": name, "tier": tier,
+            "contact_person": contact_person or None,
+            "contact_phone": contact_phone or None,
+            "payment_terms": payment_terms or None,
+        })
+        return {
+            "supplier_id": s.id, "code": s.code, "name": s.name,
+            "message": f"✅ 供應商 {s.code}（{s.name}）已建立",
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
+@register_tool(
+    name="approve_purchase_order_with_confirm",
+    domain="purchase",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "審核採購單（draft / pending → approved）。"
+        "範例：「審核採購單 PO-20260514-001」"
+    ),
+    slots=[
+        Slot("po_no", "string", required=True, description="採購單號"),
+    ],
+    required_permission="purchase.po.approve",
+)
+async def _approve_po_with_confirm(db, user, po_no: str):
+    from sqlalchemy import select as _select
+    po = (await db.execute(
+        _select(PurchaseOrder).where(PurchaseOrder.po_no == po_no)
+    )).scalar_one_or_none()
+    if po is None:
+        return {"error": f"找不到採購單 {po_no!r}"}
+    if po.status not in ("draft", "pending"):
+        return {
+            "error": f"狀態 {po.status!r} 不可審核（只接受 draft/pending）",
+            "po_no": po_no,
+        }
+
+    summary = [
+        f"採購單號：{po.po_no}",
+        f"供應商 ID：{po.supplier_id}",
+        f"金額：${po.total_amount:,.0f}",
+        f"狀態變更：{po.status} → approved",
+    ]
+
+    card = make_card(
+        tool_name="approve_purchase_order_with_confirm",
+        title=f"確認審核採購單 {po.po_no}",
+        summary=summary,
+        slots={"po_id": po.id, "po_no": po.po_no, "old_status": po.status},
+        created_by=(user or {}).get("employee_id"),
+    )
+
+    async def execute():
+        from app.services.purchase import approve_purchase_order
+        approved = await approve_purchase_order(db, po.id, user=user or {})
+        return {
+            "po_no": approved.po_no, "id": approved.id,
+            "status": approved.status, "approved_by": approved.approved_by,
+            "message": f"✅ 採購單 {approved.po_no} 已審核",
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
+# ------------------------------------------------------------
+# Sales: create_customer / create_sales_order
+# ------------------------------------------------------------
+
+@register_tool(
+    name="create_customer_with_confirm",
+    domain="sales",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "新增客戶主檔。"
+        "範例：「新增客戶 富士康 編號 CUST-A005 等級 A」"
+    ),
+    slots=[
+        Slot("code", "string", required=True, description="客戶編號（如 CUST-A005）"),
+        Slot("name", "string", required=True, description="客戶名稱"),
+        Slot("grade", "string", required=False, description="等級 A/B/C/D，預設 C"),
+        Slot("contact_person", "string", required=False, description="聯絡人"),
+        Slot("contact_phone", "string", required=False, description="電話"),
+        Slot("payment_terms", "string", required=False, description="付款條件"),
+        Slot("credit_limit", "number", required=False, description="信用額度"),
+    ],
+    required_permission="sales.customer.create",
+)
+async def _create_customer_with_confirm(
+    db, user, code: str, name: str,
+    grade: str = "C", contact_person: str = "",
+    contact_phone: str = "", payment_terms: str = "",
+    credit_limit: float = 0,
+):
+    from sqlalchemy import select as _select
+    from app.models.crm_sales import Customer
+    existing = (await db.execute(
+        _select(Customer).where(Customer.code == code)
+    )).scalar_one_or_none()
+    if existing is not None:
+        return {"error": f"客戶編號 {code!r} 已存在", "existing_id": existing.id}
+
+    summary = [
+        f"編號：{code}",
+        f"名稱：{name}",
+        f"等級：{grade}",
+    ]
+    if contact_person:
+        summary.append(f"聯絡人：{contact_person}")
+    if credit_limit:
+        summary.append(f"信用額度：${credit_limit:,.0f}")
+
+    card = make_card(
+        tool_name="create_customer_with_confirm",
+        title="確認新增客戶",
+        summary=summary,
+        slots={
+            "code": code, "name": name, "grade": grade,
+            "contact_person": contact_person, "contact_phone": contact_phone,
+            "payment_terms": payment_terms, "credit_limit": credit_limit,
+        },
+        created_by=(user or {}).get("employee_id"),
+    )
+
+    async def execute():
+        from app.services.sales import create_customer
+        c = await create_customer(db, {
+            "code": code, "name": name, "grade": grade,
+            "contact_person": contact_person or None,
+            "contact_phone": contact_phone or None,
+            "payment_terms": payment_terms or None,
+            "credit_limit": credit_limit or 0,
+        })
+        return {
+            "customer_id": c.id, "code": c.code, "name": c.name,
+            "message": f"✅ 客戶 {c.code}（{c.name}）已建立",
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
+@register_tool(
+    name="create_sales_order_with_confirm",
+    domain="sales",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "建立銷售訂單。"
+        "範例：「客戶 CUST-A001 下單 100 個 M6 螺絲，單價 5，要求交期 5/30」"
+    ),
+    slots=[
+        Slot("customer_keyword", "string", required=True,
+             description="客戶編號或名稱（如 CUST-A001 或「富士康」）"),
+        Slot("items", "array", required=True,
+             description='品項清單：[{"product_no": "PRD-A", "ordered_qty": 100, "unit_price": 5}]'),
+        Slot("requested_delivery_date", "string", required=True,
+             description="客戶要求交期 YYYY-MM-DD"),
+        Slot("remark", "string", required=False, description="備註"),
+    ],
+    required_permission="sales.order.create",
+)
+async def _create_so_with_confirm(
+    db, user, customer_keyword: str, items: list,
+    requested_delivery_date: str, remark: str = "",
+):
+    from sqlalchemy import select as _select
+    from app.models.crm_sales import Customer
+    from app.models.product import Product
+
+    # Lookup customer
+    cust = (await db.execute(
+        _select(Customer).where(Customer.code == customer_keyword)
+    )).scalar_one_or_none()
+    if cust is None:
+        cust = (await db.execute(
+            _select(Customer).where(Customer.name.like(f"%{customer_keyword}%")).limit(1)
+        )).scalar_one_or_none()
+    if cust is None:
+        return {"error": f"找不到客戶 {customer_keyword!r}"}
+
+    if not items:
+        return {"error": "items 不能為空"}
+
+    # Resolve products
+    total = 0.0
+    item_lines: list[str] = []
+    resolved: list[dict] = []
+    for raw in items:
+        prod = None
+        if pid := raw.get("product_id"):
+            prod = (await db.execute(
+                _select(Product).where(Product.id == pid)
+            )).scalar_one_or_none()
+        elif pno := raw.get("product_no"):
+            prod = (await db.execute(
+                _select(Product).where(Product.product_no == pno)
+            )).scalar_one_or_none()
+        if prod is None:
+            return {
+                "error": f"找不到產品: {raw.get('product_no') or raw.get('product_id') or '?'}"
+            }
+        qty = float(raw.get("ordered_qty", 0))
+        price = float(raw.get("unit_price") or prod.selling_price or 0)
+        if qty <= 0 or price <= 0:
+            return {
+                "error": f"無效 qty={qty} / price={price}",
+                "product_no": prod.product_no,
+            }
+        line_total = qty * price
+        total += line_total
+        item_lines.append(
+            f"  • {prod.product_no} {prod.name} × {qty:g} @ ${price:g} = ${line_total:,.0f}"
+        )
+        resolved.append({
+            "product_id": prod.id, "ordered_qty": qty, "unit_price": price,
+        })
+
+    summary = [
+        f"客戶：{cust.name}（{cust.code}，等級 {cust.grade}）",
+        f"品項數：{len(items)} 項",
+        *item_lines,
+        f"總金額：${total:,.0f}",
+        f"要求交期：{requested_delivery_date}",
+    ]
+    if remark:
+        summary.append(f"備註：{remark}")
+
+    card = make_card(
+        tool_name="create_sales_order_with_confirm",
+        title="確認建立銷售訂單",
+        summary=summary,
+        slots={
+            "customer_id": cust.id, "customer_name": cust.name,
+            "items": resolved, "requested_delivery_date": requested_delivery_date,
+            "remark": remark, "total_amount": total,
+        },
+        created_by=(user or {}).get("employee_id"),
+    )
+
+    async def execute():
+        from app.services.sales import create_sales_order
+        from datetime import date
+        try:
+            edd = date.fromisoformat(requested_delivery_date)
+        except Exception:
+            edd = None
+        so = await create_sales_order(db, {
+            "customer_id": cust.id,
+            "requested_delivery_date": edd,
+            "remark": remark,
+            "items": resolved,
+        }, user=user)
+        return {
+            "so_no": so.so_no, "id": so.id,
+            "total_amount": float(so.total_amount or 0),
+            "message": f"✅ 銷售訂單 {so.so_no} 已建立，總金額 ${so.total_amount:,.0f}",
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
+# ------------------------------------------------------------
+# Production: complete_work_order
+# ------------------------------------------------------------
+
+@register_tool(
+    name="complete_work_order_with_confirm",
+    domain="production",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "工單報完工：累加完工數量，達訂單量自動轉 completed + 自動入庫。"
+        "範例：「工單 WO-20260514-001 完工 100」"
+    ),
+    slots=[
+        Slot("wo_no", "string", required=True, description="工單號"),
+        Slot("completed_qty", "number", required=True, description="本次完工數"),
+    ],
+    required_permission="production.work_order.complete",
+)
+async def _complete_wo_with_confirm(db, user, wo_no: str, completed_qty: float):
+    from sqlalchemy import select as _select
+    wo = (await db.execute(
+        _select(ProductionOrder).where(ProductionOrder.wo_no == wo_no)
+    )).scalar_one_or_none()
+    if wo is None:
+        return {"error": f"找不到工單 {wo_no!r}"}
+    if wo.status not in ("released", "in_progress"):
+        return {
+            "error": f"狀態 {wo.status!r} 不可報完工（需 released/in_progress）",
+            "wo_no": wo_no,
+        }
+    if completed_qty <= 0:
+        return {"error": f"完工量必須 > 0: {completed_qty}"}
+
+    new_total = (wo.completed_qty or 0) + completed_qty
+    will_close = new_total >= wo.ordered_qty
+
+    summary = [
+        f"工單：{wo.wo_no}",
+        f"產品 ID：{wo.product_id}",
+        f"訂單量：{wo.ordered_qty:g}",
+        f"已完工：{wo.completed_qty:g} → {new_total:g}",
+        f"本次完工：{completed_qty:g}",
+    ]
+    if will_close:
+        summary.append("✅ 累計達訂單量 → 自動結案 + 成品入庫")
+    else:
+        summary.append(f"進度：{(new_total / wo.ordered_qty * 100):.1f}%")
+
+    card = make_card(
+        tool_name="complete_work_order_with_confirm",
+        title=f"確認 {wo.wo_no} 報完工 {completed_qty:g}",
+        summary=summary,
+        slots={
+            "wo_id": wo.id, "wo_no": wo.wo_no,
+            "completed_qty": completed_qty,
+            "current_total": wo.completed_qty,
+            "will_close": will_close,
+        },
+        created_by=(user or {}).get("employee_id"),
+    )
+
+    async def execute():
+        from app.services.production import complete_production_order
+        wo_done = await complete_production_order(
+            db, wo.id, float(completed_qty), user=user
+        )
+        return {
+            "wo_no": wo_done.wo_no,
+            "id": wo_done.id,
+            "completed_qty_total": wo_done.completed_qty,
+            "status": wo_done.status,
+            "message": (
+                f"✅ {wo_done.wo_no} 累計完工 {wo_done.completed_qty:g}"
+                + ("，已結案 + 入庫" if wo_done.status == "completed" else "")
+            ),
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
+# ------------------------------------------------------------
+# 接到 4 個 domain agent 的 tool_names
+# ------------------------------------------------------------
+
+from app.agents.engine import AGENT_REGISTRY as _AGENT_REGISTRY
+
+_DOMAIN_TOOL_MAP = {
+    "inventory": [
+        "create_part_with_confirm",
+        "update_part_safety_stock_with_confirm",
+        "add_inventory_transaction_with_confirm",
+    ],
+    "purchase": [
+        "create_supplier_with_confirm",
+        "approve_purchase_order_with_confirm",
+    ],
+    "sales": [
+        "create_customer_with_confirm",
+        "create_sales_order_with_confirm",
+    ],
+    "production": [
+        "complete_work_order_with_confirm",
+    ],
+}
+
+for _domain, _tools in _DOMAIN_TOOL_MAP.items():
+    if _domain in _AGENT_REGISTRY:
+        _tn = _AGENT_REGISTRY[_domain]["tool_names"]
+        for _t in _tools:
+            if _t not in _tn:
+                _tn.append(_t)

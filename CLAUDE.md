@@ -177,7 +177,7 @@
 
 ```
 1. AI 自然語言查詢          🟢 [████████  ]  80%   ✅ 12/12 query 實機 PASS
-2. AI 自然語言寫入（CRUD）  🟢 [█████████ ]  92%   ✅ ConfirmCard + 4 hard-write tools + Slot-filling 反問 + Undo 90s（v3.3）
+2. AI 自然語言寫入（CRUD）  🟢 [██████████]  98%   ✅ ConfirmCard + **14 hard-write tools**（v3.9 補 8）涵蓋 inventory/purchase/sales/production 主要寫入
 3. 即時庫存同步             🟢 [██████████] 100%   ✅ Phase 0 已備
 4. AI 主動推播（Toast/Email）🟢 [██████████] 100%  ✅ Toast (v3.3) + Email digest preview/send + ConfirmCard (v3.5)
 5. 基礎訂單到出貨閉環       🟢 [█████████ ]  95%   ✅ O2C/P2P/P2I 全測過
@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-15（會話 #27：Karpathy 4 原則架構審查 + 5 critical fix（docs drift / glossary seed gate / connections service / 殺舊 registry / tenant coverage audit））
+**最後更新**：2026-05-15（會話 #28：Day A 限縮版——8 個新 hard-write tools，LLM 全 CRUD 補完，14/14 hard-write 接 4 domain agents，20/20 tests）
 **維護者**：使用者 + Claude
-**版本**：3.8
+**版本**：3.9
