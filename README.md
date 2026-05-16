@@ -1,12 +1,16 @@
-# erpilot — AI-Native ERP for SMB Manufacturers
+# erpilot — Conversational AI-Native ERP for SMB Manufacturers
 
-> **The LINE-native ERP that lets your boss run the factory by chat.**
-> 給小型製造業的 LINE 原生 ERP — 老闆用 LINE 就能管整個工廠。
+> **The desktop conversational ERP for 50–100 person factories — talk to it, no training required.**
+> 給 50-100 人小型製造業的桌機對話式 ERP — 講話就能查/增/改/刪，AI 取代教育訓練。
 
-[![Tests](https://img.shields.io/badge/tests-126%20passing-brightgreen)]()
-[![Gates](https://img.shields.io/badge/self--verify-8%2F8%20green-brightgreen)]()
-[![Docs](https://img.shields.io/badge/PDFs-28%20bilingual-blue)]()
-[![License](https://img.shields.io/badge/license-internal-lightgrey)]()
+[![Tests](https://img.shields.io/badge/tests-287%20passing-brightgreen)]()
+[![Gates](https://img.shields.io/badge/self--verify-7%2F7%20green-brightgreen)]()
+[![Docs](https://img.shields.io/badge/PDFs-35%20bilingual-blue)]()
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](./LICENSE)
+[![Version](https://img.shields.io/badge/version-3.12-blueviolet)]()
+
+> ⚡ **v3.0 戰略軸轉（2026-05-15）**：砍 LINE Bot / Mobile App / 外協協同三線，全力做桌機對話式 ERP。
+> 細節見 [`CLAUDE.md` §10](./CLAUDE.md)。
 
 ---
 
@@ -74,13 +78,17 @@ open http://localhost:5173
 
 ## What's inside
 - **FastAPI backend** with 12 business domains (Inventory, Purchase, Production, MPS/MRP, Quality, Sales, Accounting, Warehouse, CRM, HR, AI Governance)
-- **Multi-Agent LLM Engine** that classifies user intent and routes to a domain agent (10 agents, 25+ tools)
+- **Multi-Agent LLM Engine** — 10 agents, **40 tools**（22 read / 4 soft-write / 14 hard-write），DeepSeek 為預設供應商
+- **ConfirmCard 確認卡** — hard-write 操作出卡，使用者點「確認」才執行（5 分鐘 TTL + Slot-filling 反問 + 90 秒 Undo）
+- **Schema Mapping AI** — exact/alias/partial 3 級 confidence，把外部 DB（鼎新/正航/Excel）一鍵接進來
 - **Event Engine** with EventBus, 16+ ConstraintChecker rules, and SSE broadcasting
-- **React + Vite + Tailwind** desktop frontend with JWT auth + 8 pages
+- **React + Vite + Tailwind** desktop frontend — 完整 CRUD UI（EntityRowActions + EntityFormModal）
 - **War-room HTML dashboard** that live-streams events via SSE
 - **MESH factory nodes** (VMI-friendly: raw data never leaves the factory)
-- **Docker Compose** orchestration with health-checks
-- **Alembic** migrations + seed script
+- **5-layer RBAC** + 多租戶隔離（TenantMixin + with_loader_criteria 自動過濾）
+- **7-gate Self-Verification** suite (~290s, all green)
+- **Pre-commit secret-scan hook** — sk-/ghp_/xoxb-/JWT_SECRET 模式自動攔截
+- **Docker Compose** orchestration with health-checks + **Alembic** async migrations + seed script
 
 ---
 
@@ -135,12 +143,13 @@ Just open `war-room/index.html` in a browser — it will connect to `http://loca
 ## Architecture
 
 ```
-┌─────────────┐  ┌─────────────┐  ┌────────────┐
-│  Frontend   │  │  War Room   │  │  Mobile    │
-│  (Vite/React)│ │  (HTML+SSE) │  │  (Expo)    │
-└──────┬──────┘  └──────┬──────┘  └─────┬──────┘
-       │                 │                │
-       └─────────────────┴────────────────┘
+┌──────────────────┐  ┌─────────────┐
+│  Desktop UI      │  │  War Room   │
+│  (Vite/React +   │  │  (HTML+SSE) │
+│   Chat + Confirm)│  │             │
+└──────┬───────────┘  └──────┬──────┘
+       │                     │
+       └─────────────────────┘
                          │ HTTPS + Bearer JWT
               ┌──────────▼───────────┐
               │   FastAPI Backend     │
@@ -272,6 +281,23 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for production deployment details.
 
 ---
 
+## Try the Conversational CRUD (v3.x 旗艦功能)
+
+對 AI 助手講：
+- **查**：「列出庫存低於安全庫存的零件」
+- **增**：「跟長江廠下 100 個 M6 螺絲，交期下週五」→ **ConfirmCard** 出卡，點確認才下單
+- **改**：「把 SO-2025-0042 的交期改到 6/10」→ ConfirmCard 出卡
+- **刪/取消**：「取消 PO-2025-0099」→ ConfirmCard 出卡 + 90 秒內可 Undo
+
+缺欄位時 AI 會**反問**（slot-filling），不會憑空編造。詳見：
+- [`docs/CONVERSATIONAL_ERP_DESIGN_ZH.md`](./docs/CONVERSATIONAL_ERP_DESIGN_ZH.md) — 6 層架構 + 7 設計原則
+- [`docs/demos/deepseek_e2e_latest.md`](./docs/demos/deepseek_e2e_latest.md) — 真實 DeepSeek 跑 9/9 killer moments 全通（50 秒、21 tool calls）
+
+---
+
 ## License
 
-MIT — built as a reference architecture for AI-native ERP.
+**AGPL-3.0** — see [LICENSE](./LICENSE).
+
+簡單版說明：你可以自由使用、修改、商業部署本專案，但若你提供修改後的版本（包含 SaaS 託管），**你的修改必須以 AGPL 同等條款開源**。
+適合社群協作 + 防大廠白嫖閉源轉售。商業授權（需閉源整合 / 嵌入專有產品）請洽專案維護者。
