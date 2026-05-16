@@ -38,6 +38,31 @@
 
 ---
 
+## 2026-05-16｜會話 #31｜🎯 v3.12 收尾：Production WO Cancel + Quality 維持唯讀
+
+**目標**：使用者「快完成了」 — 收尾剩下兩頁。
+
+### ✅ Production.tsx
+- 加 `apiCancelWO` import + `cancel(wo)` handler（prompt 輸入原因）
+- 動作欄：原「釋放」按鈕之外，加「🚫 取消」（非 completed/cancelled 狀態可取消）
+
+### 🪞 Quality.tsx — 刻意維持唯讀
+
+品質記錄（檢驗單 / NC）是稽核底線資料：
+- **不應該 Edit / Delete**（ISO/GMP/FDA 合規要求）
+- 改動只能透過建立矯正措施單（CAPA）或下一張檢驗單覆蓋
+- 「不做也是 architectural decision」（教訓 #12 應用）
+
+### 📊 數字
+
+| 維度 | v3.11 結束 | v3.12 結束 |
+|---|---|---|
+| 有 Cancel button 的頁面 | 2 (PO/SO) | **3** (+WO) |
+| UI 全 CRUD 覆蓋業務 domain | inventory/purchase/sales | + **production** |
+| User 痛點「新增但不能改/刪」 | 主流程通 | **全通**（除稽核類） |
+
+---
+
 ## 2026-05-16｜會話 #30｜🎨 v3.11 前端 Day B：3 頁 Edit/Delete/Cancel 接通
 
 **目標**：使用者「今天有一個小時」+ v3.10 已補完後端 update/delete API。

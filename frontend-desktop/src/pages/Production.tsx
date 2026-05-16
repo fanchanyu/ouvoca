@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { apiListWOs, apiReleaseWO, type ProductionOrder } from '../lib/api'
+import { apiListWOs, apiReleaseWO, apiCancelWO, type ProductionOrder } from '../lib/api'
 
 export default function Production() {
   const [wos, setWos] = useState<ProductionOrder[]>([])
@@ -17,6 +17,14 @@ export default function Production() {
     setError(null)
     try { await apiReleaseWO(id); load() }
     catch (e: unknown) { setError(e instanceof Error ? e.message : '釋放失敗') }
+  }
+
+  async function cancel(wo: ProductionOrder) {
+    const reason = prompt(`取消工單 ${wo.wo_no}\n\n請輸入取消原因：`)
+    if (reason === null) return
+    setError(null)
+    try { await apiCancelWO(wo.id, reason); load() }
+    catch (e: unknown) { setError(e instanceof Error ? e.message : '取消失敗') }
   }
 
   const inProgress = wos.filter(w => w.status === 'released' || w.status === 'in_progress').length
@@ -67,9 +75,14 @@ export default function Production() {
                     <td className="p-3 text-right text-red-600">{w.rejected_qty}</td>
                     <td className="p-3 text-right">{pct}%</td>
                     <td className="p-3 text-center">
-                      {w.status === 'draft' && (
-                        <button onClick={() => release(w.id)} className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">釋放</button>
-                      )}
+                      <div className="flex gap-1 justify-center">
+                        {w.status === 'draft' && (
+                          <button onClick={() => release(w.id)} className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">釋放</button>
+                        )}
+                        {!['completed', 'cancelled'].includes(w.status) && (
+                          <button onClick={() => cancel(w)} className="px-2 py-1 text-xs text-red-700 hover:bg-red-50 rounded" title="取消工單">🚫 取消</button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )
