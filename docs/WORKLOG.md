@@ -38,6 +38,48 @@
 
 ---
 
+## 2026-05-16｜會話 #30｜🎨 v3.11 前端 Day B：3 頁 Edit/Delete/Cancel 接通
+
+**目標**：使用者「今天有一個小時」+ v3.10 已補完後端 update/delete API。
+1 hour Day B = 把昨天的後端 endpoints 接到 UI，讓使用者真的能點 Edit/Delete 按鈕。
+
+### ✅ 共用 components
+
+`frontend-desktop/src/components/EntityRowActions.tsx`（80 行）— 表格 row 右側按鈕：
+- ✏️ 編輯 + 🗑 刪除 + busy 狀態 + error inline
+- `confirm()` 二次確認避免誤刪
+
+`frontend-desktop/src/components/EntityFormModal.tsx`（150 行）— 編輯彈窗：
+- 動態 FieldDef list 驅動（text / number / select / checkbox）
+- 只送有變動的欄位（避免 no-op update event）
+
+### ✅ 3 頁面接通
+
+| 頁面 | Edit | Delete | Cancel |
+|---|---|---|---|
+| Inventory.tsx | ✅ Part | ✅ Part (FK guard) | – |
+| Purchase.tsx | ✅ Supplier (tab 切換) | ✅ Supplier | ✅ PO 取消（prompt 理由）|
+| Sales.tsx | ✅ Customer | ✅ Customer | ✅ SO 取消 |
+
+### 📊 數字變化
+
+| 維度 | #29 結束 | #30 結束 |
+|---|---|---|
+| 前端共用 UI 組件 | 2 | **4**（+EntityRowActions + EntityFormModal）|
+| UI 頁面有 Edit/Delete | 0 | **3** |
+| UI 頁面有 Cancel | 0 | **2**（PO/SO） |
+| User 痛點「可以新增但不能修改和刪除」 | 🔴 | 🟢 主流程都通 |
+
+### 🪞 教訓 #15
+
+1 小時專注做 1 件事比 3 條並行更有效。
+v3.10 我並行做 reports + wizard + agents_exec — user 打開 UI 立刻發現「Edit/Delete 還是沒按鈕」。
+v3.11 only do Day B：1 共用組件 + 3 頁套用 = real 用戶看得到的改變。
+
+剩下其它頁面（Production WO / Quality NC 等）是純複製樣板，每頁 ~5 min，下次 sprint 補。
+
+---
+
 ## 2026-05-15｜會話 #29｜🐛 Root cause fix：UI 沒 Edit/Delete 是因為後端沒 API（v3.10）
 
 **目標**：使用者「我在操作會遇到可以新增但不能修改和刪除，很多表單都有這個問題」+「你有測試過嗎」
