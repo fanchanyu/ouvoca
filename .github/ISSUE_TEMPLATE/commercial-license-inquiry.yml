@@ -1,0 +1,172 @@
+name: 商業授權諮詢 / Commercial License Inquiry
+description: 申請 erpilot 商業授權（免於 AGPL-3.0 義務 + 加值服務）
+title: "[Commercial License] "
+labels: ["legal/commercial-license"]
+assignees:
+  - fanchanyu
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感謝你對 erpilot 商業授權感興趣。請填以下資訊，維護者會在 **5 個工作天內**聯絡你。
+
+        **不知道自己需不需要商業授權？** 先看 [LICENSE-COMMERCIAL.md 的決策樹](https://github.com/fanchanyu/erpilot/blob/main/LICENSE-COMMERCIAL.md#-我需要商業授權嗎決策樹)。
+
+        > ⚠️ 這個 issue **是 public 的**。不想 public 揭露公司資訊？請改寄 email 至 *(email 待填)*。
+
+  - type: input
+    id: company-name
+    attributes:
+      label: 公司 / 組織名稱
+      description: 個人申請填本名或 GitHub handle 即可
+      placeholder: 例：長江精密股份有限公司
+    validations:
+      required: true
+
+  - type: dropdown
+    id: country
+    attributes:
+      label: 所在國家 / 地區
+      options:
+        - 台灣
+        - 中國大陸
+        - 香港
+        - 新加坡
+        - 馬來西亞
+        - 日本
+        - 韓國
+        - 美國
+        - 歐洲
+        - 其他（請在情境描述補充）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scenario
+    attributes:
+      label: 使用情境（最接近的）
+      description: 不確定？看 LICENSE-COMMERCIAL.md 決策樹
+      options:
+        - 內部自用 ERP（單一公司、不對外發行）
+        - 內部自用 ERP（多廠 / 集團、跨子公司）
+        - 包裝給多客戶的 SaaS / hosted service
+        - 嵌入自家產品閉源轉售（ISV / OEM）
+        - 公司政策不准用 GPL/AGPL 系列
+        - SI / 系統整合商，幫客戶做專案
+        - 其他（請在下面補充）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: company-size
+    attributes:
+      label: 公司規模（員工數）
+      options:
+        - "< 50 人（小型）"
+        - "50 - 100 人（erpilot 主力客群）"
+        - "100 - 500 人（中型）"
+        - "500 - 1000 人（大型）"
+        - "> 1000 人（企業 / 集團）"
+    validations:
+      required: true
+
+  - type: input
+    id: end-user-count
+    attributes:
+      label: 預計實際使用者人數
+      description: 包含 ERP 系統的查詢、輸入、決策使用者（不是公司總人頭數）
+      placeholder: 例：50 人 / 200 人 / 待估
+    validations:
+      required: true
+
+  - type: dropdown
+    id: industry
+    attributes:
+      label: 產業類別
+      options:
+        - 精密機械 / 五金 / CNC
+        - 電子製造 / PCB / 半導體後段
+        - 食品 / 飲料 / 包裝
+        - 化工 / 塑膠 / 橡膠
+        - 紡織 / 成衣 / 鞋業
+        - 醫療器材 / 生技
+        - 系統整合商 / 軟體 vendor
+        - 顧問 / 諮詢公司
+        - 其他（請在情境補充）
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: 使用情境補充說明
+      description: 越具體越好。例如「想把 erpilot 包成『某某產業 ERP』賣給 N 個客戶」、「想串現有的鼎新 Workflow ERP」
+      placeholder: |
+        我們是 XX 廠，目前用 Excel 管庫存 + 鼎新 Workflow 開發票，想用 erpilot 做生產 + 倉儲一體化，
+        員工 60 人實際 30 人會用。希望保留我們自寫的鼎新串接邏輯不公開。
+    validations:
+      required: true
+
+  - type: dropdown
+    id: timeline
+    attributes:
+      label: 期望上線時程
+      options:
+        - 1 個月內（急）
+        - 1 - 3 個月（標準）
+        - 3 - 6 個月（評估中）
+        - 6 個月以上（長期規劃）
+        - 還沒定（看報價）
+
+  - type: dropdown
+    id: budget
+    attributes:
+      label: 年度預算範圍（選填，幫加速報價）
+      options:
+        - 還沒定
+        - "< NT$30 万"
+        - "NT$30 - 50 万"
+        - "NT$50 - 100 万"
+        - "NT$100 - 300 万"
+        - "> NT$300 万"
+
+  - type: checkboxes
+    id: services
+    attributes:
+      label: 想加購的服務（可複選）
+      options:
+        - label: 閉源 connector（鼎新 / 正航 / SAP / Oracle 等）
+        - label: 技術支援 SLA（4 / 8 / 24 小時應答可選）
+        - label: 導入顧問（2 週上線 + 員工訓練 + 客製 schema mapping）
+        - label: 私有部署協助（on-premise / 客戶 VPC / 多廠 MESH）
+        - label: 早期 access（新功能比社群早拿到）
+        - label: 智慧財產侵權賠償條款（IP indemnification）
+
+  - type: input
+    id: contact-name
+    attributes:
+      label: 聯絡人姓名
+    validations:
+      required: true
+
+  - type: input
+    id: contact-email
+    attributes:
+      label: 聯絡 email
+      description: 維護者會用這個 email 私下聯絡你做正式報價
+    validations:
+      required: true
+
+  - type: input
+    id: contact-phone
+    attributes:
+      label: 聯絡電話（選填）
+      placeholder: 含國碼，例：+886 2 1234 5678
+
+  - type: checkboxes
+    id: agree
+    attributes:
+      label: 確認
+      options:
+        - label: 我已閱讀 [LICENSE-COMMERCIAL.md](https://github.com/fanchanyu/erpilot/blob/main/LICENSE-COMMERCIAL.md) 並了解定價結構
+          required: true
+        - label: 我了解這個 issue 是 public 的；機密資訊我會等維護者私下聯絡後再揭露
+          required: true

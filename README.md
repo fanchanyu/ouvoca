@@ -297,7 +297,16 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for production deployment details.
 
 ## License
 
-**AGPL-3.0** — see [LICENSE](./LICENSE).
+erpilot 採 **dual-license（雙軌授權）**：
 
-簡單版說明：你可以自由使用、修改、商業部署本專案，但若你提供修改後的版本（包含 SaaS 託管），**你的修改必須以 AGPL 同等條款開源**。
-適合社群協作 + 防大廠白嫖閉源轉售。商業授權（需閉源整合 / 嵌入專有產品）請洽專案維護者。
+| 軌道 | 條款 | 適用 | 費用 |
+|---|---|---|---|
+| 🟢 **開源軌** | [AGPL-3.0](./LICENSE) | 內部自用、社群協作、不在意 source disclosure | **免費** |
+| 🔵 **商業軌** | 個別協商 | 需閉源整合、ISV 包裝轉售、SaaS 不想公開修改 | 個別報價 |
+
+需要哪一個？看 [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md) 決策樹。
+詳細 FAQ：[`docs/COMMERCIAL_LICENSING_FAQ_ZH.md`](./docs/COMMERCIAL_LICENSING_FAQ_ZH.md)。
+
+## Contributing
+
+歡迎 PR！第一次貢獻請先看 [`CONTRIBUTING.md`](./CONTRIBUTING.md) + 簽 [`CLA.md`](./CLA.md)（DCO-style，`git commit -s` 即可）。

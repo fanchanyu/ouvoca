@@ -1,0 +1,111 @@
+name: DCO / CLA Signed-off-by Check
+
+# 確認每個 PR commit 都帶 Signed-off-by trailer（CLA 簽署機制）
+# 詳見 CLA.md + CONTRIBUTING.md
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  dco-check:
+    runs-on: ubuntu-latest
+    name: 檢查 Signed-off-by trailer
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Verify Signed-off-by on all PR commits
+        id: dco
+        run: |
+          set -e
+
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+
+          echo "::group::PR commit range"
+          git log --oneline "$BASE..$HEAD"
+          echo "::endgroup::"
+
+          MISSING=()
+          while IFS= read -r commit; do
+            [ -z "$commit" ] && continue
+            author_email=$(git show -s --format='%ae' "$commit")
+            author_name=$(git show -s --format='%an' "$commit")
+            expected="Signed-off-by: ${author_name} <${author_email}>"
+
+            if ! git show -s --format='%B' "$commit" | grep -q "^Signed-off-by: "; then
+              MISSING+=("$commit ($author_name): NO Signed-off-by trailer")
+              continue
+            fi
+
+            # 確認 Signed-off-by 的 email 和 author email 一致
+            if ! git show -s --format='%B' "$commit" | grep -qF "<${author_email}>"; then
+              MISSING+=("$commit ($author_name): Signed-off-by email ≠ author email <${author_email}>")
+            fi
+          done < <(git rev-list "$BASE..$HEAD")
+
+          if [ "${#MISSING[@]}" -gt 0 ]; then
+            echo "::error::Some commits are missing or have mismatched Signed-off-by trailer:"
+            for line in "${MISSING[@]}"; do
+              echo "::error::  - $line"
+            done
+            echo ""
+            echo "📝 修正方式："
+            echo "  1. 確認 git config user.name / user.email 設好"
+            echo "  2. 對每個 commit 用 \`git commit --amend -s\` 補簽（或 rebase 重簽）"
+            echo "  3. force-push 更新 PR：\`git push --force-with-lease\`"
+            echo ""
+            echo "完整 CLA 條款：https://github.com/${{ github.repository }}/blob/main/CLA.md"
+            echo "貢獻指南：https://github.com/${{ github.repository }}/blob/main/CONTRIBUTING.md#2-cla--第一次貢獻必看"
+            exit 1
+          fi
+
+          echo "✅ 所有 commit 都帶 Signed-off-by trailer + email 對齊"
+
+      - name: 留 PR 留言（失敗時）
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = [
+              '## ❌ DCO / CLA 簽署檢查未通過',
+              '',
+              '本 PR 有 commit 缺少 `Signed-off-by:` trailer，或 trailer email 和 author email 不一致。',
+              '',
+              '### 為什麼？',
+              'erpilot 用 **DCO-style CLA**：每個 commit 必須帶 `Signed-off-by:` 等同你同意 [CLA.md](../blob/main/CLA.md) 條款。',
+              '這讓專案能維持 **AGPL-3.0 + 商業授權雙軌制** ([LICENSE-COMMERCIAL.md](../blob/main/LICENSE-COMMERCIAL.md))。',
+              '',
+              '### 怎麼修？',
+              '```bash',
+              '# 設好 git config（如果還沒設）',
+              'git config user.name "Your Name"',
+              'git config user.email "you@example.com"',
+              '',
+              '# 對所有 PR commit 補簽（在 PR branch 上）',
+              'git rebase --signoff main',
+              '',
+              '# 或最近一個 commit',
+              'git commit --amend -s --no-edit',
+              '',
+              '# force-push 更新 PR',
+              'git push --force-with-lease',
+              '```',
+              '',
+              '第一次貢獻？也請開 [CLA Acknowledgement issue](../issues/new?template=cla-acknowledgement.yml)。',
+            ].join('\n');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });

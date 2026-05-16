@@ -38,6 +38,109 @@
 
 ---
 
+## 2026-05-16｜會話 #33｜⚖️ Sprint A：商業授權法務門面（CLA + LICENSE-COMMERCIAL + DCO check）
+
+**目標**：使用者「那申請的授權要如何規劃?」
+回應：dual-license 模式架構解釋 + 推薦先做 Sprint A 補 CLA 防法務破口。
+使用者選 Sprint A。
+
+### 🎯 為什麼這個 sprint 緊急
+
+沒 CLA → 任何外部 PR 進主線後，那段 code 的著作權還是 contributor 的、
+按 AGPL-3.0 條款貢獻。維護者**沒有權利**把它以商業條款再授權給客戶
+（sublicense，AGPL 沒給）。
+
+只要 1 個外部 contribution 進主線，整條商業授權軌就破口——非常難看。
+
+### ✅ 新建 7 個檔案
+
+#### 1. `CLA.md`（雙語，~250 行）
+
+Apache ICLA v2.0 改編 + 雙授權條款（Section 2(b)）：
+
+> You grant to the Maintainer ... license to **relicense and sublicense**
+> Your Contribution under any other terms — including **proprietary,
+> closed-source, and commercial** licenses — for the purpose of
+> distributing the project under a dual-license or multi-license model.
+
+這條就是讓商業授權軌成立的關鍵。沒有它整個 dual-license 模式作廢。
+
+#### 2. `CONTRIBUTING.md`（~150 行）
+
+3 步驟貢獻流程 + CLA 簽署方法（`git commit -s`）+ 程式碼風格 + 公司員工注意事項。
+連結到 CLAUDE.md、DEVELOPMENT_SOP.md、GAP_ANALYSIS.md。
+
+#### 3. `LICENSE-COMMERCIAL.md`（~200 行）
+
+商業授權門面文件，包含：
+- Dual-license 軌道對照表
+- 「我需要商業授權嗎？」決策樹（ASCII art）
+- 商業授權包含什麼（A 免於 AGPL 義務 / B 加值服務 / C 智財保護）
+- 定價結構範圍指引（50-100 人廠 30-50 万/年 / ISV 5-10 万/租戶/年 / 大企業 site license / Perpetual）
+- 申請流程 + 為什麼選 AGPL（不是逼客戶付錢，是防大廠白嫖）
+
+#### 4. `.github/ISSUE_TEMPLATE/commercial-license-inquiry.yml`
+
+GitHub Issue Form：公司資訊 / 使用情境 / 規模 / 預算 / 想加購服務（複選）/
+聯絡資訊 + 必勾「已讀 LICENSE-COMMERCIAL.md」+「了解 issue 是 public」。
+
+5 工作天 SLA、自動 assign 給維護者、自動 label `legal/commercial-license`。
+
+#### 5. `.github/ISSUE_TEMPLATE/cla-acknowledgement.yml`
+
+第一次貢獻者用的 CLA 確認 issue：身分（個人/員工/學生）+ 4 個必勾確認框
+（讀過 CLA / 同意 dual-license relicense / 是原創 / 會用 -s 簽 commit）。
+
+#### 6. `docs/COMMERCIAL_LICENSING_FAQ_ZH.md`（~300 行）
+
+15 個 Q&A 分 3 區：
+- 🟢 一般使用問題（Q1-5）：「自己用要付嗎」「公司內部要付嗎」「改 source 要公開嗎」「SI 要付嗎」「SaaS 要付嗎」
+- 🔵 商業授權細節（Q6-10）：「怎麼買」「license key 是什麼」「不續會怎樣」「perpetual」「自己法務模板」
+- ⚖️ AGPL-3.0 細節（Q11-15）：「Network use is distribution」「Compatible License」「LICENSE 檔放進產品」「plugin 要不要 AGPL」「fork 改授權」
+
+每題都有「實務上」段落避免單純講法理。
+
+#### 7. `.github/workflows/dco.yml`
+
+CI 自動擋未簽 CLA 的 PR：
+- 對 PR commit range 跑 `git rev-list`
+- 每個 commit 檢查 `^Signed-off-by: ` trailer + email 對齊 author email
+- 失敗自動留 PR comment 教 contributor 怎麼補簽
+- 成功 print「✅ 所有 commit 都帶 Signed-off-by + email 對齊」
+
+### ✅ README 商業面更新
+
+License 章重寫：原本只說 AGPL-3.0 → 改成 dual-license 對照表 + 連 LICENSE-COMMERCIAL 決策樹 + FAQ。
+加 Contributing 章導 CONTRIBUTING.md。
+
+### 📊 法務防護度提升
+
+| 維度 | Sprint A 前 | Sprint A 後 |
+|---|---|---|
+| 商業 sublicense 權 | 🔴 無（破口）| 🟢 CLA Section 2(b) |
+| 第一次貢獻者引導 | 🔴 無 | 🟢 CONTRIBUTING + cla-ack issue |
+| 商業客戶申請管道 | 🔴 無 | 🟢 LICENSE-COMMERCIAL + 申請 issue |
+| 客戶常見問題 | 🔴 無 | 🟢 15 Q&A FAQ |
+| CLA 簽署 enforcement | 🔴 無 | 🟢 GitHub Action 擋未簽 PR |
+| AGPL/商業界線說明 | 🔴 無 | 🟢 決策樹 + 15 FAQ |
+
+### 🪞 教訓 #17
+
+「**dual-license 沒 CLA = 樓蓋一半**」。
+切 public + 加 AGPL LICENSE 只是門面，真正讓商業軌成立的是 CLA Section 2(b) 那一條 sublicense 權。
+做這個只花 ~1.5 小時，但延後做 = 第一個外部 PR 進來就要回頭跟人協商「能不能補簽」，很尷尬。
+「**法務不是 optional plug-in**」。
+
+### 後續
+
+- Sprint B（license key 機制）：等有第一個商業詢價客戶再做
+- Sprint C（定價 + 商業 demo）：等 README 累積一些 GitHub star 再做
+- 待維護者填 LICENSE-COMMERCIAL.md / CLA.md / FAQ 裡的 email 占位符（`*(email 待填)*`）
+
+**Blocker**：無
+
+---
+
 ## 2026-05-16｜會話 #32｜📝 Public-ready polish：AGPL-3.0 + v3.x README + GitHub metadata
 
 **目標**：使用者「繼續如何 / 記得要和github同步 / 順便把這個專案打開用public / 檢查API KEY千萬不能上傳」

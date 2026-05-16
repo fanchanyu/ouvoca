@@ -1,0 +1,64 @@
+name: CLA 確認 / CLA Acknowledgement
+description: 第一次貢獻者：開一個 issue 確認你同意 CLA
+title: "[CLA] I agree — <Your Name / GitHub handle>"
+labels: ["legal/cla"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        歡迎成為 erpilot contributor 🙏
+
+        第一次貢獻前請花 30 秒填這份確認，讓我們留紀錄。
+
+        **完整條款**：[`CLA.md`](https://github.com/fanchanyu/erpilot/blob/main/CLA.md)
+
+        > ⚠️ 後續每個 commit 還是要加 `git commit -s`（Signed-off-by trailer）。
+
+  - type: input
+    id: name
+    attributes:
+      label: 你的名字（real name 或 GitHub handle）
+      placeholder: 例：fanchanyu 或 范〇〇
+    validations:
+      required: true
+
+  - type: input
+    id: email
+    attributes:
+      label: 用來簽 commit 的 email
+      description: 必須是你掌控的 email；和 git config user.email 相同
+      placeholder: 例：you@example.com
+    validations:
+      required: true
+
+  - type: dropdown
+    id: capacity
+    attributes:
+      label: 你以什麼身分貢獻？
+      options:
+        - 個人（用自己時間 + 設備寫的）
+        - 公司員工（已取得雇主同意 / 雇主對此貢獻無智財權主張）
+        - 公司員工（雇主需要另簽 Corporate CLA，請聯繫維護者）
+        - 學生（學校無智財權主張此 contribution）
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: agreements
+    attributes:
+      label: 我確認以下事項
+      options:
+        - label: 我已讀完 [CLA.md](https://github.com/fanchanyu/erpilot/blob/main/CLA.md) 全部條款
+          required: true
+        - label: 我同意把我提交的 contribution 授權給維護者，可用 AGPL-3.0 **及**其他條款（含商業授權）再授權
+          required: true
+        - label: 我保證每項 contribution 都是我的原創、或我有權依本 CLA 提交
+          required: true
+        - label: 我會在每個 commit 加 `Signed-off-by:` trailer（用 `git commit -s`）
+          required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補充事項（選填）
+      description: 例如：「我有在用雇主提供的設備，但已取得書面同意」、「我會聯繫法務部簽 Corporate CLA」
