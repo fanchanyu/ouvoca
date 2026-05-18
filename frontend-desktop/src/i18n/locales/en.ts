@@ -16,7 +16,7 @@ export const en = {
   nav: {
     dashboard: 'Dashboard', aiAssistant: 'AI Assistant', eventStream: 'Event Stream',
     inventory: 'Inventory', purchase: 'Purchase', production: 'Production',
-    sales: 'Sales', crm: 'CRM', quality: 'Quality',
+    sales: 'Sales', crm: 'CRM', accounting: 'Accounting', einvoice: 'E-Invoice', quality: 'Quality', reports: 'Reports',
     permissions: 'Permissions', myPermissions: 'My Permissions', settings: 'Settings',
     group: { overview: 'Overview', operations: 'Operations', system: 'System' },
   },

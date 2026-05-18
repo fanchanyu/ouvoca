@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   apiListWOs, apiReleaseWO, apiCancelWO,
   apiListProducts, apiCreateProduct, apiCreateWO,
+  apiCompleteWO,
   type ProductionOrder, type Product,
 } from '../lib/api'
 
@@ -22,6 +23,22 @@ export default function Production() {
     setError(null)
     try { await apiReleaseWO(id); load() }
     catch (e: unknown) { setError(e instanceof Error ? e.message : '釋放失敗') }
+  }
+
+  // v3.19：完工（含填完工量 + 不良量）
+  async function complete(wo: ProductionOrder) {
+    const completedStr = prompt(`完工 ${wo.wo_no}\n\n完工數量？（訂單 ${wo.ordered_qty}，已完工 ${wo.completed_qty}）`,
+      String(wo.ordered_qty - wo.completed_qty))
+    if (!completedStr) return
+    const completed = Number(completedStr)
+    if (!Number.isFinite(completed) || completed <= 0) { alert('完工量必須 > 0'); return }
+    const rejStr = prompt(`不良數量？（可選，預設 0）`, '0')
+    const rejected = Number(rejStr || '0')
+    setError(null)
+    try {
+      await apiCompleteWO(wo.id, { completed_qty: completed, rejected_qty: rejected })
+      load()
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : '完工失敗') }
   }
 
   async function cancel(wo: ProductionOrder) {
@@ -85,10 +102,13 @@ export default function Production() {
                     <td className="p-3 text-center">
                       <div className="flex gap-1 justify-center">
                         {w.status === 'draft' && (
-                          <button onClick={() => release(w.id)} className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">釋放</button>
+                          <button onClick={() => release(w.id)} className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700" title="釋放工單到產線">▶ 釋放</button>
+                        )}
+                        {['released', 'in_progress'].includes(w.status) && (
+                          <button onClick={() => complete(w)} className="px-2 py-1 bg-emerald-600 text-white rounded text-xs hover:bg-emerald-700" title="完工 (填完工量+不良量)">✓ 完工</button>
                         )}
                         {!['completed', 'cancelled'].includes(w.status) && (
-                          <button onClick={() => cancel(w)} className="px-2 py-1 text-xs text-red-700 hover:bg-red-50 rounded" title="取消工單">🚫 取消</button>
+                          <button onClick={() => cancel(w)} className="px-2 py-1 text-xs text-red-700 hover:bg-red-50 rounded" title="取消工單">🚫</button>
                         )}
                       </div>
                     </td>

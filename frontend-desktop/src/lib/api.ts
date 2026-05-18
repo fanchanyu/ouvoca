@@ -213,6 +213,151 @@ export const apiCreateProduct = (data: { product_no: string; name: string }) =>
 export const apiCreateWO = (data: { product_id: string; ordered_qty: number; priority?: number; due_date?: string; so_id?: string }) =>
   api.post<ProductionOrder>('/production/work-orders', data)
 
+// ──────────────────────────────────────────────────────────
+// 進貨 / 出貨 / 票據 / 會計 (Sprint L v3.18)
+// ──────────────────────────────────────────────────────────
+
+// 取得 PO 含 line items（後端應該回 items 陣列）
+export interface POItem {
+  id: string; po_id: string; line_no: number
+  part_id: string; ordered_qty: number; received_qty: number
+  unit_price: number; line_total: number
+}
+export interface PurchaseOrderDetail extends PurchaseOrder {
+  items?: POItem[]
+}
+export const apiGetPO = (po_id: string) => api.get<PurchaseOrderDetail>(`/purchase/orders/${po_id}`)
+
+// 進貨 (Goods Receipt)
+export const apiReceivePO = (po_id: string, receipts: Array<{ item_id: string; received_qty: number }>) =>
+  api.post<PurchaseOrder>(`/purchase/orders/${po_id}/receive`, { receipts })
+
+// 出貨 (Shipping)
+export const apiShipSO = (so_id: string) =>
+  api.post<SalesOrder>(`/sales/orders/${so_id}/ship`)
+
+export const apiConfirmSO = (so_id: string) =>
+  api.post<SalesOrder>(`/sales/orders/${so_id}/confirm`)
+
+// PO approve（草稿 → 已核准）
+export const apiApprovePO = (po_id: string) =>
+  api.post<PurchaseOrder>(`/purchase/orders/${po_id}/approve`)
+
+// ─── 會計 ────────────────────────────────────────────
+export interface Account {
+  id: string; code: string; name: string; account_type: string
+  is_debit_normal: boolean; is_active: boolean
+}
+export interface JournalLine {
+  id: string; account_id: string; line_no: number
+  debit: number; credit: number; description?: string | null
+}
+export interface JournalEntry {
+  id: string; entry_no: string; entry_date: string
+  period?: string | null; status: string
+  description?: string | null
+  lines?: JournalLine[]
+}
+export interface JournalLineInput {
+  account_id: string; debit: number; credit: number; description?: string
+}
+
+export const apiListAccounts = () => api.get<Account[]>('/accounting/accounts')
+export const apiCreateAccount = (data: { code: string; name: string; account_type: string; is_debit_normal?: boolean }) =>
+  api.post<Account>('/accounting/accounts', data)
+
+export const apiListJournals = (limit = 100) =>
+  api.get<JournalEntry[]>(`/accounting/journals?limit=${limit}`)
+export const apiCreateJournal = (data: { description: string; lines: JournalLineInput[]; entry_date?: string; period?: string; source_type?: string }) =>
+  api.post<JournalEntry>('/accounting/journals', data)
+export const apiPostJournal = (entry_id: string) =>
+  api.post<JournalEntry>(`/accounting/journals/${entry_id}/post`)
+
+// ─── 應收帳款 (AR) ───────────────────────────────────
+export interface AccountsReceivable {
+  id: string; customer_id: string
+  invoice_no: string; invoice_date: string; due_date: string
+  amount: number; paid_amount: number
+  status: string  // 'open' | 'partial' | 'paid' | 'overdue'
+  aging_days: number
+}
+export const apiListAR = () => api.get<AccountsReceivable[]>('/accounting/receivables')
+export const apiCreateAR = (data: { customer_id: string; invoice_no: string; invoice_date: string; due_date: string; amount: number }) =>
+  api.post<AccountsReceivable>('/accounting/receivables', data)
+
+// ─── 電子發票 e-invoice（台灣合規）─────────────────────
+// 對齊 backend app/api/tax_tw.py EInvoiceCreateRequest schema
+export interface EInvoiceLineItem {
+  description: string
+  qty: number
+  unit_price: number
+}
+export interface EInvoiceIssueRequest {
+  invoice_no: string         // 例 AA-12345678
+  seller_tax_id: string      // 我方統編
+  seller_name: string        // 我方公司名
+  buyer_tax_id?: string
+  buyer_name?: string
+  items: EInvoiceLineItem[]
+}
+export interface EInvoice {
+  invoice_no: string
+  invoice_date?: string; invoice_time?: string
+  seller_tax_id: string; seller_name: string
+  buyer_tax_id?: string; buyer_name?: string
+  sales_amount: number; tax: number; total: number
+  status: string
+}
+// Backend 回 {success, tracking_no, errors, mig_payload}
+export const apiIssueEInvoice = (data: EInvoiceIssueRequest) =>
+  api.post<{ success: boolean; tracking_no?: string; errors?: string[]; mig_payload?: Record<string, unknown> }>('/tax/tw/einvoice/issue', data)
+// Cancel 用 query param ?reason=...
+export const apiCancelEInvoice = (invoice_no: string, reason: string) =>
+  api.post<{ success: boolean; errors?: string[] }>(`/tax/tw/einvoice/cancel/${invoice_no}?reason=${encodeURIComponent(reason)}`)
+// Query 回 {success, invoice: {...MIG dict}}
+export const apiGetEInvoice = (invoice_no: string) =>
+  api.get<{ success: boolean; invoice?: Record<string, unknown>; errors?: string[] }>(`/tax/tw/einvoice/${invoice_no}`)
+export const apiValidateTaxId = (tax_id: string) =>
+  api.get<{ tax_id: string; valid: boolean }>(`/tax/tw/validate-tax-id/${tax_id}`)
+
+// ─── WO release / complete（Production 補齊操作鏈）─────
+export const apiReleaseWOById = (wo_id: string) =>
+  api.post<ProductionOrder>(`/production/work-orders/${wo_id}/release`)
+export const apiCompleteWO = (wo_id: string, data: { completed_qty: number; rejected_qty?: number }) =>
+  api.post<ProductionOrder>(`/production/work-orders/${wo_id}/complete`, data)
+
+// ─── 庫存交易（inbound/outbound 記錄）───────────────────
+export interface InventoryTransaction {
+  id: string; part_id: string; transaction_type: string
+  qty: number; reference_type?: string | null; reference_id?: string | null
+  created_at: string
+}
+export const apiListInventoryTxns = (part_id?: string, limit = 100) =>
+  api.get<InventoryTransaction[]>(`/inventory/transactions?${part_id ? `part_id=${part_id}&` : ''}limit=${limit}`)
+
+// ─── 報表 URL 直接下載 ──────────────────────────────────
+export const reportUrlAR = (overdueOnly = false) =>
+  `/api/reports/ar-aging.xlsx?overdue_only=${overdueOnly}`
+export const reportUrlInventoryMonthly = (yyyymm: string) =>
+  `/api/reports/inventory-monthly.xlsx?period=${yyyymm}`
+export const reportUrlTax401 = (year: number, periodNo: number, companyName = '') =>
+  `/api/reports/tax-401.html?year=${year}&period_no=${periodNo}&company_name=${encodeURIComponent(companyName)}`
+
+// ─── Analytics KPI（給報表 dashboard 用）────────────────
+// Backend returns: { metric, value, generated_at, breakdown, interpretation, status }
+export interface KpiResult {
+  metric: string
+  value: number
+  generated_at: string
+  breakdown?: Record<string, unknown>
+  interpretation?: string
+  status?: string
+}
+export const apiAnalyticsDSO = () => api.get<KpiResult>('/analytics/dso')
+export const apiAnalyticsInventoryTurn = () => api.get<KpiResult>('/analytics/inventory-turn')
+export const apiAnalyticsGrossMargin = () => api.get<KpiResult>('/analytics/gross-margin')
+export const apiAnalyticsSummary = () => api.get<Record<string, unknown>>('/analytics/summary')
+
 // ---------- domain typed helpers ----------
 
 export interface Part {

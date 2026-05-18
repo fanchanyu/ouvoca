@@ -13,6 +13,9 @@ import Permissions from './pages/Permissions'
 import MyPermissions from './pages/MyPermissions'
 import Settings from './pages/Settings'
 import Crm from './pages/Crm'
+import Accounting from './pages/Accounting'
+import Reports from './pages/Reports'
+import EInvoicePage from './pages/EInvoice'
 
 export default function App() {
   return (
@@ -31,6 +34,9 @@ export default function App() {
         <Route path="/me/permissions" element={<MyPermissions />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/crm" element={<Crm />} />
+        <Route path="/accounting" element={<Accounting />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/einvoice" element={<EInvoicePage />} />
       </Route>
     </Routes>
   )

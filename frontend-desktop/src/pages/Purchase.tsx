@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   apiListPOs, apiListSuppliers, apiUpdateSupplier, apiDeleteSupplier,
   apiCancelPO, apiCreateSupplier, apiCreatePO,
+  apiApprovePO, apiReceivePO, apiGetPO,
   apiListParts, type Part,
   type PurchaseOrder, type Supplier,
 } from '../lib/api'
@@ -49,6 +50,30 @@ export default function Purchase() {
     if (reason === null) return
     await apiCancelPO(po.id, reason)
     await load()
+  }
+
+  // v3.18：核准草稿單
+  const approvePO = async (po: PurchaseOrder) => {
+    if (!confirm(`核准採購單 ${po.po_no}？`)) return
+    try { await apiApprovePO(po.id); await load() }
+    catch (e: unknown) { alert(e instanceof Error ? e.message : '核准失敗') }
+  }
+
+  // v3.18：進貨（一次全收）
+  const receivePOFull = async (po: PurchaseOrder) => {
+    if (!confirm(`進貨：${po.po_no} 全部訂購量都收到？\n\n部分收貨請用 AI 對話。`)) return
+    try {
+      const detail = await apiGetPO(po.id)
+      const items = detail.items || []
+      if (items.length === 0) { alert('此採購單沒有項目'); return }
+      const receipts = items
+        .filter(it => (it.ordered_qty - (it.received_qty || 0)) > 0)
+        .map(it => ({ item_id: it.id, received_qty: it.ordered_qty - (it.received_qty || 0) }))
+      if (receipts.length === 0) { alert('所有項目已收齊'); return }
+      await apiReceivePO(po.id, receipts)
+      await load()
+      alert(`✅ 進貨完成：${receipts.length} 項`)
+    } catch (e: unknown) { alert(e instanceof Error ? e.message : '進貨失敗') }
   }
 
   return (
@@ -116,13 +141,23 @@ export default function Purchase() {
                     <td className="p-3 text-right">{po.total_amount.toLocaleString()}</td>
                     <td className="p-3">{new Date(po.order_date).toLocaleDateString('zh-TW')}</td>
                     <td className="p-3 text-right">
-                      {!['received', 'cancelled'].includes(po.status) && (
-                        <button
-                          onClick={() => cancelPO(po)}
-                          className="px-2 py-1 text-xs text-red-700 hover:bg-red-50 rounded"
-                          title="取消採購單"
-                        >🚫 取消</button>
-                      )}
+                      <div className="flex gap-1 justify-end">
+                        {po.status === 'draft' && (
+                          <button onClick={() => approvePO(po)}
+                            className="px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded"
+                            title="核准採購單">✓ 核准</button>
+                        )}
+                        {['approved', 'sent', 'partial_received'].includes(po.status) && (
+                          <button onClick={() => receivePOFull(po)}
+                            className="px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-50 rounded"
+                            title="全部收貨">🚚 進貨</button>
+                        )}
+                        {!['received', 'cancelled'].includes(po.status) && (
+                          <button onClick={() => cancelPO(po)}
+                            className="px-2 py-1 text-xs text-red-700 hover:bg-red-50 rounded"
+                            title="取消採購單">🚫</button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

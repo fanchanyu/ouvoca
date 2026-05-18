@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   apiListSOs, apiListCustomers, apiUpdateCustomer, apiDeleteCustomer,
   apiCancelSO, apiCreateCustomer, apiCreateSO,
+  apiConfirmSO, apiShipSO,
   apiListProducts, type Product,
   type SalesOrder, type Customer,
 } from '../lib/api'
@@ -56,6 +57,23 @@ export default function Sales() {
     await load()
   }
 
+  // v3.18：確認單（草稿 → confirmed）
+  const confirmSO = async (so: SalesOrder) => {
+    if (!confirm(`確認銷售訂單 ${so.so_no}？\n\n之後可出貨。`)) return
+    try { await apiConfirmSO(so.id); await load() }
+    catch (e: unknown) { alert(e instanceof Error ? e.message : '確認失敗') }
+  }
+
+  // v3.18：出貨（自動扣庫存 + 開 AR）
+  const shipSO = async (so: SalesOrder) => {
+    if (!confirm(`出貨 ${so.so_no}？\n\n動作：① 扣庫存 ② 改狀態為 shipped ③ 自動產 CrmEvent`)) return
+    try {
+      await apiShipSO(so.id)
+      await load()
+      alert(`🚚 ${so.so_no} 已出貨`)
+    } catch (e: unknown) { alert(e instanceof Error ? e.message : '出貨失敗') }
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">銷售管理</h1>
@@ -106,13 +124,23 @@ export default function Sales() {
                   <td className="p-3"><span className="text-xs text-gray-500">{so.payment_status}</span></td>
                   <td className="p-3 text-xs">{new Date(so.order_date).toLocaleDateString('zh-TW')}</td>
                   <td className="p-3 text-right">
-                    {!['shipped', 'delivered', 'closed', 'cancelled'].includes(so.status) && (
-                      <button
-                        onClick={() => cancelSO(so)}
-                        className="px-2 py-1 text-xs text-red-700 hover:bg-red-50 rounded"
-                        title="取消銷售訂單"
-                      >🚫 取消</button>
-                    )}
+                    <div className="flex gap-1 justify-end">
+                      {so.status === 'draft' && (
+                        <button onClick={() => confirmSO(so)}
+                          className="px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded"
+                          title="確認銷售單">✓ 確認</button>
+                      )}
+                      {['confirmed', 'production', 'ready_to_ship'].includes(so.status) && (
+                        <button onClick={() => shipSO(so)}
+                          className="px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-50 rounded"
+                          title="出貨">📦 出貨</button>
+                      )}
+                      {!['shipped', 'delivered', 'closed', 'cancelled'].includes(so.status) && (
+                        <button onClick={() => cancelSO(so)}
+                          className="px-2 py-1 text-xs text-red-700 hover:bg-red-50 rounded"
+                          title="取消銷售訂單">🚫</button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))

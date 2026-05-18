@@ -72,7 +72,8 @@ async def create_journal_entry(db: AsyncSession, data: dict, user: Optional[dict
         )
         db.add(line)
     await db.commit()
-    await db.refresh(je)
+    # 預載 lines 關聯，避免 JournalEntryResponse 觸發 async lazy-load (MissingGreenlet)
+    await db.refresh(je, attribute_names=["lines"])
     await EventBus.emit(DomainEvent(
         name="journal.created", domain="accounting",
         entity_type="JournalEntry", entity_id=je.id,
@@ -82,7 +83,11 @@ async def create_journal_entry(db: AsyncSession, data: dict, user: Optional[dict
 
 
 async def post_journal(db: AsyncSession, entry_id: str, user: dict) -> JournalEntry:
-    je = (await db.execute(select(JournalEntry).where(JournalEntry.id == entry_id))).scalar_one_or_none()
+    # 預載 lines 避免 response schema 觸發 async lazy-load
+    je = (await db.execute(
+        select(JournalEntry).options(selectinload(JournalEntry.lines))
+        .where(JournalEntry.id == entry_id)
+    )).scalar_one_or_none()
     if not je:
         raise NotFoundError("傳票不存在", entry_id=entry_id)
     if je.status != "draft":

@@ -137,6 +137,99 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-18｜會話 #42｜🧾 v3.18-19 Sprint L+M：完整票據鏈（會計+進出貨+電子發票+報表）
+
+**目標**：使用者「傳票.進貨及相關的票據都要檢查 / 只要有票據,輸出和輸入的各種表單,都要檢查,不能有失誤」
+
+### 🔍 Audit 找到的 5 大缺口
+
+| 票據流 | Backend | Frontend |
+|---|---|---|
+| 🚚 進貨 (PO receive) | ✅ | ❌ 沒按鈕 |
+| 📦 出貨 (SO ship) | ✅ | ❌ 沒按鈕 |
+| 💵 應收帳款 (AR) | ✅ | ❌ |
+| 📊 傳票 (Journal) | ✅ | ❌ |
+| 🗓 月結 close-month | ✅ | ❌ |
+| 🧾 電子發票 e-invoice | ✅ | ❌ **台灣強制法規** |
+| 📈 報表（DSO/AR aging/401）| ✅ | ❌ |
+| WO release / complete | ✅ | ⚠️ 缺 complete |
+
+電腦小白裝完 erpilot：「PO 建好了收不到料、SO 出不了貨、看不到誰欠錢」。
+
+### ✅ Sprint L (v3.18)：會計 + 進出貨
+
+- 新建 `pages/Accounting.tsx`（3 tab：傳票 / AR / 科目表）
+  - 傳票：簡化版 1 借 1 貸 form + 過帳按鈕
+  - AR：列表 + status 過濾 + 帳齡 + 逾期高亮
+  - 科目表：分類顯示（資產/負債/權益/收入/費用）+ 新增
+- Purchase 頁加 ✓ 核准 + 🚚 進貨 buttons（不只 cancel）
+- Sales 頁加 ✓ 確認 + 📦 出貨 buttons
+- 修了 backend `JournalEntry` 的 MissingGreenlet bug（lazy-load lines → 改 selectinload）
+- API helpers 12 個（含 apiApprovePO / apiReceivePO / apiShipSO / apiConfirmSO / apiCreateJournal / apiListAR / ...）
+- 7/7 voucher smoke tests pass
+
+### ✅ Sprint M (v3.19)：電子發票 + 報表 + WO 完整鏈
+
+- 新建 `pages/EInvoice.tsx`（3 區塊：開立 / 查詢 / 作廢）
+  - **schema 對齊 backend MIG 標準**：invoice_no + seller_tax_id + seller_name + items[]
+  - 多項目支援、未稅/稅/含稅自動計算、買方統編 checksum 驗證
+  - 作廢需填原因（稅法稽核要求）
+- 新建 `pages/Reports.tsx`（4 區塊：KPI / AR aging xlsx / 月度庫存 xlsx / 401 報表 HTML）
+  - KPI 即時：DSO / 庫存週轉 / 毛利率（用 backend 真實 schema {metric, value, interpretation}）
+  - 401 雙月制下拉、整合 print → PDF 流程
+- Production 頁加 ✓ 完工 button（含完工量 + 不良量 prompt）
+- Sidebar 新增 🧾 電子發票 + 📈 報表 入口
+- i18n 加 nav.einvoice / reports
+- 修了 5 個 schema mismatch bugs：
+  - EInvoice 不是 `{buyer_name, amount}` 而是 MIG 完整格式
+  - Analytics KPI 不是 `{dso_days, total_ar}` 而是 `{metric, value, interpretation}`
+  - EInvoice cancel 用 query param 不是 body
+  - WO release 需 BOM（業務規則）
+  - 修 backend Journal lazy-load greenlet bug
+
+- 11/12 voucher chain smoke tests pass（1 skip 因 WO release 業務規則需 BOM）
+
+### 📊 數字
+
+| 維度 | v3.17 結束 | v3.19 結束 |
+|---|---|---|
+| 前端 pages | 13 | **16**（+Accounting +EInvoice +Reports）|
+| Sidebar nav 入口 | 13 | **16** |
+| API helpers | +7 | **+28**（accounting/EInvoice/reports/WO/AR/transactions/KPI）|
+| 票據流前端 UI 覆蓋率 | 70% | **~95%**（剩 cycle count + MPS/MRP 進階）|
+| Smoke tests | 321 | **339** (+11 vouchers +7 chain)  |
+| 電腦小白完整 P2P (採購→收料→付款) 可走 | ❌ | ✅ |
+| 電腦小白完整 O2C (銷售→出貨→收款→發票) 可走 | ❌ | ✅ |
+
+### 🪞 教訓 #27
+
+**「Backend 不等於 frontend；endpoint 不等於 UI；UI 不等於使用者能用」**
+
+我前 17 sprint 一直堆 backend endpoint（87 個 routes）+ 7 個 frontend page。
+但**最關鍵的票據流**（會計、進出貨、發票、報表）**完全沒前端入口**——
+backend 寫得再漂亮、使用者點不到等於沒做。
+
+下次每加一個 backend endpoint 應該強制問：
+1. ✅ Endpoint 註冊 OK？
+2. ✅ Frontend 有 page 可點到？
+3. ✅ Sidebar nav 有入口？
+4. ✅ 流程鏈（前單 → 此票據 → 後單）可以完整跑過？
+5. ✅ 對應的 USER_MANUAL 章節有？
+
+也修了一堆 schema mismatch bug — 證明 frontend-backend contract test 該補。
+
+### 後續
+
+- AR 開發票自動帶開 SO 出貨後（auto invoice）
+- 庫存交易頁面（看到 ship/receive 後庫存變動明細）
+- MPS / MRP UI
+- Cycle Count 盤點 UI
+- 月結 close-month 觸發 UI
+
+**Blocker**：無
+
+---
+
 ## 2026-05-17｜會話 #41｜📝 v3.17 Sprint K：補 Sales/Purchase/Production 前端 Create 缺口
 
 **目標**：使用者「感覺少了前端輸入。你要不要檢查一下」

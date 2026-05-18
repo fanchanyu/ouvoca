@@ -1,0 +1,285 @@
+/**
+ * EInvoice — 電子發票頁（Sprint M v3.19，schema 對齊版）
+ *
+ * 對齊 backend app/api/tax_tw.py EInvoiceCreateRequest:
+ *   invoice_no / seller_tax_id / seller_name / buyer_* / items[]
+ */
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import {
+  apiIssueEInvoice, apiCancelEInvoice, apiGetEInvoice, apiValidateTaxId,
+  type EInvoiceLineItem,
+} from '../lib/api'
+
+const BLANK_ITEM = (): EInvoiceLineItem => ({ description: '', qty: 1, unit_price: 0 })
+
+export default function EInvoicePage() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">🧾 電子發票</h1>
+        <p className="text-sm text-gray-500 mt-1">
+          台灣財政部 e-invoice 開立 / 查詢 / 作廢
+        </p>
+      </div>
+
+      <IssueSection />
+      <LookupSection />
+      <CancelSection />
+    </div>
+  )
+}
+
+function IssueSection() {
+  // Default 自家公司資訊（之後可從 settings 帶入）
+  const [seller, setSeller] = useState({ tax_id: '12345678', name: '示範公司股份有限公司' })
+  const [buyer, setBuyer] = useState({ tax_id: '', name: '' })
+  const [invoiceNo, setInvoiceNo] = useState(() => `AA-${Date.now().toString().slice(-8)}`)
+  const [items, setItems] = useState<EInvoiceLineItem[]>([BLANK_ITEM()])
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const [issued, setIssued] = useState<{ invoice_no: string; tracking_no?: string } | null>(null)
+  const [taxIdValid, setTaxIdValid] = useState<{ valid: boolean; message?: string } | null>(null)
+
+  const total = items.reduce((s, it) => s + (it.qty * it.unit_price), 0)
+  const taxIncluded = Math.round(total)            // 含稅總額
+  const salesAmount = Math.round(taxIncluded / 1.05) // 未稅
+  const tax = taxIncluded - salesAmount
+
+  async function validateTaxId() {
+    if (!buyer.tax_id || buyer.tax_id.length !== 8) {
+      setTaxIdValid({ valid: false, message: '統一編號必須是 8 位數字' }); return
+    }
+    try {
+      const r = await apiValidateTaxId(buyer.tax_id)
+      setTaxIdValid({ valid: r.valid, message: r.valid ? '統編格式有效' : 'checksum 不對' })
+    } catch (e: unknown) {
+      setTaxIdValid({ valid: false, message: e instanceof Error ? e.message : '查詢失敗' })
+    }
+  }
+
+  function addItem() { setItems([...items, BLANK_ITEM()]) }
+  function removeItem(i: number) { setItems(items.filter((_, idx) => idx !== i)) }
+  function updateItem(i: number, patch: Partial<EInvoiceLineItem>) {
+    setItems(items.map((it, idx) => idx === i ? { ...it, ...patch } : it))
+  }
+
+  async function issue() {
+    if (!seller.tax_id || !seller.name) { setErr('我方統編 + 公司名必填'); return }
+    if (!invoiceNo) { setErr('發票號必填'); return }
+    const validItems = items.filter(it => it.description && it.qty > 0 && it.unit_price > 0)
+    if (validItems.length === 0) { setErr('至少一個項目（含品名/數量/單價）'); return }
+
+    setBusy(true); setErr(null); setIssued(null)
+    try {
+      const result = await apiIssueEInvoice({
+        invoice_no: invoiceNo,
+        seller_tax_id: seller.tax_id, seller_name: seller.name,
+        buyer_tax_id: buyer.tax_id || undefined,
+        buyer_name: buyer.name || undefined,
+        items: validItems,
+      })
+      if (!result.success) {
+        setErr(`開立失敗：${result.errors?.join(', ') || '未知錯誤'}`)
+        setBusy(false); return
+      }
+      setIssued({ invoice_no: invoiceNo, tracking_no: result.tracking_no })
+      // 重置：留 seller，更新發票號，清項目
+      setInvoiceNo(`AA-${Date.now().toString().slice(-8)}`)
+      setBuyer({ tax_id: '', name: '' })
+      setItems([BLANK_ITEM()])
+      setTaxIdValid(null)
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '開立失敗') }
+    finally { setBusy(false) }
+  }
+
+  return (
+    <section className="bg-white rounded-xl shadow p-6">
+      <h2 className="text-lg font-semibold mb-4">📝 開立電子發票</h2>
+
+      {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mb-3 text-sm">{err}</div>}
+      {issued && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded p-3 mb-3 text-sm">
+          <div className="font-semibold text-emerald-900">✅ 發票 {issued.invoice_no} 已開立</div>
+          {issued.tracking_no && <div className="text-xs mt-1">tracking_no: <span className="font-mono">{issued.tracking_no}</span></div>}
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {/* 我方 */}
+        <fieldset className="border rounded p-3">
+          <legend className="text-xs font-medium px-1 text-gray-600">🏢 我方（開立方）</legend>
+          <div className="grid md:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">統一編號*</label>
+              <input className="w-full border rounded px-2 py-1.5 text-sm font-mono" maxLength={8}
+                value={seller.tax_id} onChange={(e) => setSeller({ ...seller, tax_id: e.target.value })} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs text-gray-600 mb-1">公司名稱*</label>
+              <input className="w-full border rounded px-2 py-1.5 text-sm"
+                value={seller.name} onChange={(e) => setSeller({ ...seller, name: e.target.value })} />
+            </div>
+          </div>
+        </fieldset>
+
+        {/* 買方 */}
+        <fieldset className="border rounded p-3">
+          <legend className="text-xs font-medium px-1 text-gray-600">👤 買方</legend>
+          <div className="grid md:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">買方統編（公司必填，個人留空）</label>
+              <div className="flex gap-2">
+                <input className="flex-1 border rounded px-2 py-1.5 text-sm font-mono" maxLength={8}
+                  value={buyer.tax_id}
+                  onChange={(e) => { setBuyer({ ...buyer, tax_id: e.target.value }); setTaxIdValid(null) }} />
+                <button onClick={validateTaxId} disabled={!buyer.tax_id}
+                  className="px-2 py-1 border border-blue-500 text-blue-600 rounded text-xs hover:bg-blue-50 disabled:opacity-50">
+                  查
+                </button>
+              </div>
+              {taxIdValid && (
+                <p className={`text-xs mt-1 ${taxIdValid.valid ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {taxIdValid.valid ? '✓ 統編格式有效' : `❌ ${taxIdValid.message || '無效'}`}
+                </p>
+              )}
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs text-gray-600 mb-1">買方名稱</label>
+              <input className="w-full border rounded px-2 py-1.5 text-sm"
+                placeholder="個人寫姓名 / 公司寫公司名"
+                value={buyer.name} onChange={(e) => setBuyer({ ...buyer, name: e.target.value })} />
+            </div>
+          </div>
+        </fieldset>
+
+        {/* 發票號 + 項目 */}
+        <fieldset className="border rounded p-3">
+          <legend className="text-xs font-medium px-1 text-gray-600">📄 發票內容</legend>
+          <div className="mb-3">
+            <label className="block text-xs text-gray-600 mb-1">發票號*</label>
+            <input className="w-full md:w-1/3 border rounded px-2 py-1.5 text-sm font-mono"
+              value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} />
+            <span className="text-xs text-gray-500 ml-2">已自動產一個，可改</span>
+          </div>
+
+          <label className="block text-xs text-gray-600 mb-1">項目（最少 1 行）*</label>
+          {items.map((it, i) => (
+            <div key={i} className="grid grid-cols-12 gap-2 mb-2">
+              <input className="col-span-6 border rounded px-2 py-1.5 text-sm" placeholder="品名 / 描述"
+                value={it.description} onChange={(e) => updateItem(i, { description: e.target.value })} />
+              <input type="number" className="col-span-2 border rounded px-2 py-1.5 text-sm" placeholder="數量" min="0.01" step="0.01"
+                value={it.qty || ''} onChange={(e) => updateItem(i, { qty: Number(e.target.value) })} />
+              <input type="number" className="col-span-3 border rounded px-2 py-1.5 text-sm" placeholder="單價 (含稅)" min="0.01" step="0.01"
+                value={it.unit_price || ''} onChange={(e) => updateItem(i, { unit_price: Number(e.target.value) })} />
+              <button onClick={() => removeItem(i)} disabled={items.length === 1}
+                className="col-span-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-30">✕</button>
+            </div>
+          ))}
+          <button onClick={addItem} className="text-xs text-blue-600 hover:underline">+ 加項目</button>
+        </fieldset>
+
+        {/* 金額預覽 */}
+        <div className="bg-gray-50 rounded p-3 grid grid-cols-3 gap-2 text-sm">
+          <div>未稅 NT$ <strong>{salesAmount.toLocaleString()}</strong></div>
+          <div>稅 (5%) NT$ <strong>{tax.toLocaleString()}</strong></div>
+          <div>含稅合計 NT$ <strong className="text-blue-700">{taxIncluded.toLocaleString()}</strong></div>
+        </div>
+
+        <button onClick={issue} disabled={busy}
+          className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50">
+          {busy ? '開立中…' : '🧾 開立發票'}
+        </button>
+
+        <p className="text-xs text-gray-500">
+          💡 大量批次開請走 <Link to="/chat" className="text-blue-600 underline">AI 助手</Link>。
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function LookupSection() {
+  const [no, setNo] = useState('')
+  const [inv, setInv] = useState<Record<string, unknown> | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+
+  async function lookup() {
+    if (!no.trim()) return
+    setErr(null); setInv(null)
+    try {
+      const r = await apiGetEInvoice(no.trim())
+      if (r.success && r.invoice) setInv(r.invoice)
+      else setErr(r.errors?.join(', ') || '查無發票')
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '查無發票') }
+  }
+
+  return (
+    <section className="bg-white rounded-xl shadow p-6">
+      <h2 className="text-lg font-semibold mb-4">🔍 查詢發票</h2>
+      <div className="flex gap-2">
+        <input className="flex-1 border rounded px-2 py-1.5 text-sm font-mono"
+          placeholder="輸入發票號（例：AA-12345678）"
+          value={no} onChange={(e) => setNo(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && lookup()} />
+        <button onClick={lookup}
+          className="px-4 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">查詢</button>
+      </div>
+      {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mt-3 text-sm">{err}</div>}
+      {inv && (
+        <div className="bg-gray-50 rounded p-4 mt-3 text-sm">
+          <div className="text-xs text-gray-500 mb-2">MIG 標準格式（財政部規範）:</div>
+          <pre className="text-xs overflow-x-auto bg-white rounded p-2 border">{JSON.stringify(inv, null, 2)}</pre>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function CancelSection() {
+  const [no, setNo] = useState('')
+  const [reason, setReason] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState<string | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+
+  async function cancel() {
+    if (!no.trim() || !reason.trim()) { setErr('發票號 + 作廢原因必填'); return }
+    if (!confirm(`⚠️ 確定作廢發票 ${no}？\n\n不可復原。原因會留稽核。`)) return
+    setBusy(true); setErr(null); setMsg(null)
+    try {
+      const r = await apiCancelEInvoice(no.trim(), reason.trim())
+      if (!r.success) { setErr(`作廢失敗：${r.errors?.join(', ') || ''}`); setBusy(false); return }
+      setMsg(`✅ ${no} 已作廢`)
+      setNo(''); setReason('')
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '作廢失敗') }
+    finally { setBusy(false) }
+  }
+
+  return (
+    <section className="bg-white rounded-xl shadow p-6 border-l-4 border-red-300">
+      <h2 className="text-lg font-semibold mb-1 text-red-700">🚫 作廢發票</h2>
+      <p className="text-sm text-gray-500 mb-4">⚠️ 不可復原。原因依稅法留稽核紀錄。</p>
+
+      {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mb-3 text-sm">{err}</div>}
+      {msg && <div className="bg-green-50 text-green-700 px-3 py-2 rounded mb-3 text-sm">{msg}</div>}
+
+      <div className="grid md:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">發票號*</label>
+          <input className="w-full border rounded px-2 py-1.5 text-sm font-mono"
+            value={no} onChange={(e) => setNo(e.target.value)} />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">作廢原因*</label>
+          <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="例：金額有誤 / 客戶退單"
+            value={reason} onChange={(e) => setReason(e.target.value)} />
+        </div>
+      </div>
+      <button onClick={cancel} disabled={busy}
+        className="mt-3 px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50">
+        {busy ? '作廢中…' : '🚫 確定作廢'}
+      </button>
+    </section>
+  )
+}

@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-17（會話 #42 v3.17 Sprint K — 補 Sales/Purchase/Production 前端 Create 缺口。使用者「感覺少了前端輸入」一語打中 — 之前 16 sprint 過度押注 AI 對話建單，假設小白都會用 AI，但沒 LLM API Key 的小白完全卡死無法建單。Sprint K 加 QuickCreateBar 到 3 頁：每頁「新增主實體 / 快速建單 (1項目) / 用 AI 建多項目」3 條路。新 API helpers 7 個 + 8/8 smoke tests pass + 修了 PO unit_price 不是 unit_cost 的 bug。教訓 #26：對話式 ERP 不能只有對話，必須對話 AND 滑鼠雙軌）
+**最後更新**：2026-05-18（會話 #43 v3.18-19 Sprint L+M — 完整票據鏈。使用者「傳票.進貨及相關的票據都要檢查 / 不能有失誤」打中重大 gap。新建 3 個 frontend pages：📒 Accounting（傳票/AR/科目表 3 tab）、🧾 EInvoice（開立/查詢/作廢，schema 對齊 MIG 標準）、📈 Reports（KPI/AR aging/月度庫存/401 報表）。Purchase 加 ✓核准+🚚進貨 buttons、Sales 加 ✓確認+📦出貨 buttons、Production 加 ✓完工 button。修了 backend JournalEntry MissingGreenlet bug + 5 個 schema mismatch bug。+28 API helpers，+18 smoke tests pass。教訓 #27：endpoint 不等於 UI，UI 不等於使用者能用——每加 backend 都要問「使用者點得到嗎」）
 **維護者**：使用者 + Claude
 **版本**：3.13
