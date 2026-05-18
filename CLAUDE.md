@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-18（會話 #44 v3.20-21 Sprint N+O — 對標鼎新/正航/SAP B1。Sprint N: 統編驗證**多國化** (TW/CN/US/JP/EU + GENERIC fallback + register_validator plug-in 任何國家) + EInvoice 加買方統編國別下拉，28/28 smoke tests pass。Sprint O: 新增 **CommandPalette** Cmd+K 全系統搜尋（8 種 entity + 10 快速命令）+ **PrintableDocument** 單據列印（PO/SO 印 PDF 給供應商/客戶，標準台頭+簽章區）。教訓 #28：hardcode 國別=自我設限；教訓 #29：erpilot 要兼具 AI 對話的酷+傳統 ERP 的穩，補上 Cmd+K/列印/流程鏈才能贏鼎新）
+**最後更新**：2026-05-18（會話 #45 v3.22 Sprint P — 平行作業 6 件。1 agent 跑多階審批工作流（ApprovalRule + Request + Step + 7 endpoints + Approvals 頁 3 tab + 9/9 tests），foreground 跑 ProcessChain 流程鏈視覺化（P2P/O2C/WO 3 種推導）+ 出貨單列印 + 發票列印 + 單據備註（PO/SO/WO PATCH + NotesEditor modal）。教訓 #30：平行作業要明確 file boundary — append-only + 避開共用檔即可零衝突。52/52 tests pass + TS clean）
 **維護者**：使用者 + Claude
 **版本**：3.13

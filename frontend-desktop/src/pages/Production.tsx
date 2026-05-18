@@ -6,11 +6,15 @@ import {
   apiCompleteWO,
   type ProductionOrder, type Product,
 } from '../lib/api'
+import ProcessChain, { deriveWOSteps } from '../components/ProcessChain'
+import NotesEditor from '../components/NotesEditor'
 
 export default function Production() {
   const [wos, setWos] = useState<ProductionOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [chainWO, setChainWO] = useState<ProductionOrder | null>(null)
+  const [notesWO, setNotesWO] = useState<ProductionOrder | null>(null)
 
   async function load() {
     setLoading(true)
@@ -101,6 +105,12 @@ export default function Production() {
                     <td className="p-3 text-right">{pct}%</td>
                     <td className="p-3 text-center">
                       <div className="flex gap-1 justify-center">
+                        <button onClick={() => setChainWO(w)}
+                          className="px-2 py-1 text-xs text-purple-700 hover:bg-purple-50 rounded"
+                          title="看流程鏈狀態">📊</button>
+                        <button onClick={() => setNotesWO(w)}
+                          className="px-2 py-1 text-xs text-amber-700 hover:bg-amber-50 rounded"
+                          title="編輯備註">📝</button>
                         {w.status === 'draft' && (
                           <button onClick={() => release(w.id)} className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700" title="釋放工單到產線">▶ 釋放</button>
                         )}
@@ -119,6 +129,35 @@ export default function Production() {
           </tbody>
         </table>
       </div>
+
+      {/* v3.22: 備註編輯 */}
+      {notesWO && (
+        <NotesEditor entityType="wo" entityId={notesWO.id} entityLabel={notesWO.wo_no}
+          initialRemark={(notesWO as ProductionOrder & { remark?: string }).remark || null}
+          onClose={() => setNotesWO(null)} onSaved={load} />
+      )}
+
+      {/* v3.22: 工單流程鏈 */}
+      {chainWO && (
+        <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto"
+          onClick={() => setChainWO(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-3 border-b">
+              <h2 className="font-semibold">📊 生產流程鏈 — {chainWO.wo_no}</h2>
+              <button onClick={() => setChainWO(null)} className="px-2 py-1 text-gray-500 hover:bg-gray-100 rounded text-sm">✕</button>
+            </div>
+            <div className="p-6">
+              <ProcessChain
+                title="WO 生產流程"
+                steps={deriveWOSteps(chainWO.status, chainWO.completed_qty, chainWO.ordered_qty)}
+              />
+              <div className="mt-4 text-xs text-gray-500">
+                💡 點 WO 列表的「▶ 釋放 → ✓ 完工」按鈕推進流程；完工後自動進庫存。
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

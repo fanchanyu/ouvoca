@@ -32,6 +32,7 @@ const navConfig = [
   { path: '/einvoice',        key: 'einvoice',       icon: '🧾', group: 'operations' },
   { path: '/quality',         key: 'quality',        icon: '🔬', group: 'operations' },
   { path: '/reports',         key: 'reports',        icon: '📈', group: 'operations' },
+  { path: '/approvals',       key: 'approvals',      icon: '✅', group: 'operations' },
   { path: '/permissions',     key: 'permissions',    icon: '🛡️', group: 'system' },
   { path: '/me/permissions',  key: 'myPermissions',  icon: '🔑', group: 'system' },
   { path: '/settings',        key: 'settings',       icon: '⚙️', group: 'system' },

@@ -11,6 +11,7 @@ import {
   apiListTaxIdCountries,
   type EInvoiceLineItem,
 } from '../lib/api'
+import PrintableDocument, { DocHeader, DocFooter } from '../components/PrintableDocument'
 
 const BLANK_ITEM = (): EInvoiceLineItem => ({ description: '', qty: 1, unit_price: 0 })
 
@@ -40,6 +41,12 @@ function IssueSection() {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [issued, setIssued] = useState<{ invoice_no: string; tracking_no?: string } | null>(null)
+  const [printSnapshot, setPrintSnapshot] = useState<{
+    invoice_no: string; seller_name: string; seller_tax_id: string
+    buyer_name: string; buyer_tax_id: string
+    sales_amount: number; tax: number; total: number
+    items: EInvoiceLineItem[]
+  } | null>(null)
   const [taxIdValid, setTaxIdValid] = useState<{ valid: boolean; message?: string } | null>(null)
   const [countries, setCountries] = useState<Array<{ code: string; name: string }>>([
     { code: 'TW', name: '🇹🇼 台灣' }, { code: 'GENERIC', name: '🌐 不驗證' },
@@ -93,6 +100,14 @@ function IssueSection() {
         setBusy(false); return
       }
       setIssued({ invoice_no: invoiceNo, tracking_no: result.tracking_no })
+      // v3.22: 留 snapshot 用於列印（後端不存 issued 細節，前端自留）
+      setPrintSnapshot({
+        invoice_no: invoiceNo,
+        seller_name: seller.name, seller_tax_id: seller.tax_id,
+        buyer_name: buyer.name, buyer_tax_id: buyer.tax_id,
+        sales_amount: salesAmount, tax, total: taxIncluded,
+        items: items.filter(it => it.description && it.qty > 0),
+      })
       // 重置：留 seller，更新發票號，清項目
       setInvoiceNo(`AA-${Date.now().toString().slice(-8)}`)
       setBuyer({ tax_id: '', name: '', country: buyer.country })
@@ -109,9 +124,79 @@ function IssueSection() {
       {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mb-3 text-sm">{err}</div>}
       {issued && (
         <div className="bg-emerald-50 border border-emerald-200 rounded p-3 mb-3 text-sm">
-          <div className="font-semibold text-emerald-900">✅ 發票 {issued.invoice_no} 已開立</div>
-          {issued.tracking_no && <div className="text-xs mt-1">tracking_no: <span className="font-mono">{issued.tracking_no}</span></div>}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-semibold text-emerald-900">✅ 發票 {issued.invoice_no} 已開立</div>
+              {issued.tracking_no && <div className="text-xs mt-1">tracking_no: <span className="font-mono">{issued.tracking_no}</span></div>}
+            </div>
+            {printSnapshot && (
+              <button
+                onClick={() => {
+                  // 重新打開列印視窗
+                  setPrintSnapshot({ ...printSnapshot })  // re-trigger
+                }}
+                className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700"
+              >🖨 列印發票</button>
+            )}
+          </div>
         </div>
+      )}
+
+      {/* 列印發票（剛開立 / 重印） */}
+      {printSnapshot && issued && (
+        <PrintableDocument
+          title={`電子發票 ${printSnapshot.invoice_no}`}
+          onClose={() => setPrintSnapshot(null)}
+        >
+          <DocHeader docType="統一發票 e-Invoice" docNo={printSnapshot.invoice_no}
+            date={new Date().toLocaleDateString('zh-TW')}
+            companyName={printSnapshot.seller_name || '示範公司股份有限公司'} />
+          <table className="w-full text-sm mb-4">
+            <tbody>
+              <tr><td className="text-gray-600 py-1 w-32">賣方統編</td><td className="font-mono">{printSnapshot.seller_tax_id}</td></tr>
+              <tr><td className="text-gray-600 py-1">買方</td><td>{printSnapshot.buyer_name || '個人 / 無'}</td></tr>
+              {printSnapshot.buyer_tax_id && (
+                <tr><td className="text-gray-600 py-1">買方統編</td><td className="font-mono">{printSnapshot.buyer_tax_id}</td></tr>
+              )}
+            </tbody>
+          </table>
+
+          <table className="w-full text-sm mb-4 border-t border-gray-300">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left p-2">品名</th>
+                <th className="text-right p-2 w-20">數量</th>
+                <th className="text-right p-2 w-24">單價</th>
+                <th className="text-right p-2 w-24">小計</th>
+              </tr>
+            </thead>
+            <tbody>
+              {printSnapshot.items.map((it, i) => (
+                <tr key={i} className="border-b border-gray-100">
+                  <td className="p-2">{it.description}</td>
+                  <td className="p-2 text-right">{it.qty}</td>
+                  <td className="p-2 text-right">{it.unit_price.toLocaleString()}</td>
+                  <td className="p-2 text-right">{(it.qty * it.unit_price).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-gray-400">
+                <td colSpan={3} className="p-2 text-right text-gray-600">未稅 / Sales Amount</td>
+                <td className="p-2 text-right font-mono">{printSnapshot.sales_amount.toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td colSpan={3} className="p-2 text-right text-gray-600">稅 5% / Tax</td>
+                <td className="p-2 text-right font-mono">{printSnapshot.tax.toLocaleString()}</td>
+              </tr>
+              <tr className="border-t">
+                <td colSpan={3} className="p-2 text-right font-bold">總計 / Total</td>
+                <td className="p-2 text-right font-bold text-lg">NT$ {printSnapshot.total.toLocaleString()}</td>
+              </tr>
+            </tfoot>
+          </table>
+          <DocFooter note="本發票經財政部 MIG 規範開立。如有問題請洽國稅局或開立公司。" />
+        </PrintableDocument>
       )}
 
       <div className="space-y-4">

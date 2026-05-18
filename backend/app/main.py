@@ -75,6 +75,10 @@ async def lifespan(app: FastAPI):
     from app.services.crm_auto_log import install_auto_crm_logging
     install_auto_crm_logging()
 
+    # v3.22：多階審批工作流 — 訂閱 po/so/payment.created 自動 evaluate 規則
+    from app.services.approval import install_approval_hooks
+    install_approval_hooks()
+
     # ConfirmCard pending dict 背景 GC（v3.7）：
     # 防止過期 card 的 executor closure 持續持有 db session 而 OOM。
     # 每 60 秒掃一次；無人叫 /pending 時也保證會清。
@@ -153,6 +157,7 @@ from app.api import (
     sales, quality, mps_mrp, accounting, warehouse, crm, events,
     permission, mesh, analytics, tax_tw, confirm_card, email_digest,
     agents_exec, reports, onboarding, files, llm_status,
+    approval,
 )
 
 app.include_router(chat.router)
@@ -179,6 +184,7 @@ app.include_router(permission.router)
 app.include_router(mesh.router)
 app.include_router(analytics.router)
 app.include_router(tax_tw.router)
+app.include_router(approval.router)
 
 
 @app.get("/")

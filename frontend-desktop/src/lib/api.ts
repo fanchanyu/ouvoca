@@ -696,3 +696,87 @@ export const apiUserEffective = (userId: string) =>
 
 export const apiMyEffective = () =>
   api.get<EffectivePermissions>('/permission/me/effective')
+
+// ──────────────────────────────────────────────────────────
+// Approval Workflow (v3.22 — 多階審批工作流)
+// ──────────────────────────────────────────────────────────
+export interface ApprovalRule {
+  id: string
+  name: string
+  trigger_type: 'po' | 'so' | 'payment'
+  condition_field: 'amount' | 'discount_pct'
+  condition_op: 'gt' | 'gte' | 'lt' | 'lte' | 'eq'
+  condition_value: number
+  approver_role: string
+  stages: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface ApprovalStep {
+  id: string
+  stage: number
+  approver_id: string | null
+  approver_username: string | null
+  action: 'approved' | 'rejected'
+  comment: string | null
+  decided_at: string
+}
+
+export interface ApprovalRequest {
+  id: string
+  rule_id: string
+  trigger_type: 'po' | 'so' | 'payment'
+  trigger_id: string
+  trigger_summary: string
+  requested_by: string | null
+  approver_role: string
+  current_stage: number
+  total_stages: number
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled'
+  created_at: string
+  updated_at: string
+  steps: ApprovalStep[]
+}
+
+export const apiListRules = (params?: { trigger_type?: string; active_only?: boolean }) => {
+  const q = new URLSearchParams()
+  if (params?.trigger_type) q.set('trigger_type', params.trigger_type)
+  if (params?.active_only) q.set('active_only', 'true')
+  const qs = q.toString()
+  return api.get<ApprovalRule[]>(`/approvals/rules${qs ? `?${qs}` : ''}`)
+}
+
+export const apiCreateRule = (data: {
+  name: string
+  trigger_type: 'po' | 'so' | 'payment'
+  condition_field: 'amount' | 'discount_pct'
+  condition_op?: 'gt' | 'gte' | 'lt' | 'lte' | 'eq'
+  condition_value: number
+  approver_role: string
+  stages?: number
+  is_active?: boolean
+}) => api.post<ApprovalRule>('/approvals/rules', data)
+
+export const apiDeleteRule = (rule_id: string) =>
+  api.del<{ deleted: boolean; rule_id: string }>(`/approvals/rules/${rule_id}`)
+
+export const apiListPendingApprovals = (approver_role?: string) => {
+  const qs = approver_role ? `?approver_role=${encodeURIComponent(approver_role)}` : ''
+  return api.get<ApprovalRequest[]>(`/approvals/pending${qs}`)
+}
+
+export const apiListApprovalHistory = (params?: { status?: string; trigger_type?: string; limit?: number }) => {
+  const q = new URLSearchParams()
+  if (params?.status) q.set('status', params.status)
+  if (params?.trigger_type) q.set('trigger_type', params.trigger_type)
+  if (params?.limit) q.set('limit', String(params.limit))
+  const qs = q.toString()
+  return api.get<ApprovalRequest[]>(`/approvals/history${qs ? `?${qs}` : ''}`)
+}
+
+export const apiApprove = (request_id: string, comment?: string) =>
+  api.post<ApprovalRequest>(`/approvals/${request_id}/approve`, { comment: comment ?? '' })
+
+export const apiReject = (request_id: string, comment: string) =>
+  api.post<ApprovalRequest>(`/approvals/${request_id}/reject`, { comment })

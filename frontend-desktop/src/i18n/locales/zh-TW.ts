@@ -57,6 +57,7 @@ export const zhTW = {
     einvoice: '電子發票',
     quality: '品質',
     reports: '報表',
+    approvals: '審批',
     permissions: '權限管理',
     myPermissions: '我的權限',
     settings: '設定',

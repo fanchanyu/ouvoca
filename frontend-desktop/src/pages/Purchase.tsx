@@ -10,6 +10,8 @@ import {
 import EntityRowActions from '../components/EntityRowActions'
 import EntityFormModal, { type FieldDef } from '../components/EntityFormModal'
 import PrintableDocument, { DocHeader, DocFooter } from '../components/PrintableDocument'
+import ProcessChain, { deriveP2PSteps } from '../components/ProcessChain'
+import NotesEditor from '../components/NotesEditor'
 
 const SUPPLIER_FIELDS: FieldDef[] = [
   { name: 'name', label: '名稱', type: 'text', required: true },
@@ -36,6 +38,8 @@ export default function Purchase() {
   const [tab, setTab] = useState<'orders' | 'suppliers'>('orders')
   const [editingSup, setEditingSup] = useState<Supplier | null>(null)
   const [printPO, setPrintPO] = useState<PurchaseOrder | null>(null)
+  const [chainPO, setChainPO] = useState<PurchaseOrder | null>(null)
+  const [notesPO, setNotesPO] = useState<PurchaseOrder | null>(null)
 
   async function load() {
     setLoading(true)
@@ -144,6 +148,12 @@ export default function Purchase() {
                     <td className="p-3">{new Date(po.order_date).toLocaleDateString('zh-TW')}</td>
                     <td className="p-3 text-right">
                       <div className="flex gap-1 justify-end">
+                        <button onClick={() => setChainPO(po)}
+                          className="px-2 py-1 text-xs text-purple-700 hover:bg-purple-50 rounded"
+                          title="看流程鏈狀態">📊</button>
+                        <button onClick={() => setNotesPO(po)}
+                          className="px-2 py-1 text-xs text-amber-700 hover:bg-amber-50 rounded"
+                          title="編輯備註">📝</button>
                         <button onClick={() => setPrintPO(po)}
                           className="px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 rounded"
                           title="列印 PDF（給供應商）">🖨</button>
@@ -226,6 +236,35 @@ export default function Purchase() {
           onClose={() => setEditingSup(null)}
           onSuccess={() => { setEditingSup(null); load() }}
         />
+      )}
+
+      {/* v3.22: 備註編輯 */}
+      {notesPO && (
+        <NotesEditor entityType="po" entityId={notesPO.id} entityLabel={notesPO.po_no}
+          initialRemark={(notesPO as PurchaseOrder & { remark?: string }).remark || null}
+          onClose={() => setNotesPO(null)} onSaved={load} />
+      )}
+
+      {/* v3.22: 流程鏈視覺化 */}
+      {chainPO && (
+        <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto"
+          onClick={() => setChainPO(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-3 border-b">
+              <h2 className="font-semibold">📊 採購流程鏈 — {chainPO.po_no}</h2>
+              <button onClick={() => setChainPO(null)} className="px-2 py-1 text-gray-500 hover:bg-gray-100 rounded text-sm">✕</button>
+            </div>
+            <div className="p-6">
+              <ProcessChain
+                title="P2P (Procure to Pay)"
+                steps={deriveP2PSteps(chainPO.status, new Date(chainPO.order_date).toLocaleDateString('zh-TW'))}
+              />
+              <div className="mt-4 text-xs text-gray-500">
+                💡 點 PO 列表的「🚚 進貨」按鈕推進進貨步驟。
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* v3.21: 列印 PO PDF */}

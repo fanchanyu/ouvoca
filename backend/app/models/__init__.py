@@ -47,5 +47,8 @@ from app.models.permission import (
     RowFilter, PermissionAudit,
 )
 from app.models.attachment import Attachment, ATTACHMENT_CATEGORIES
+from app.models.approval_workflow import (
+    ApprovalRule, ApprovalRequestV2, ApprovalStepV2,
+)
 
 __all__ = ["Base"]

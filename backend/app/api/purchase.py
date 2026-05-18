@@ -164,3 +164,27 @@ async def cancel_po_endpoint(
         db, po_id, user=user.raw_user, reason=(data.reason if data else ""),
     )
     return PurchaseOrderResponse.model_validate(po)
+
+
+# v3.22: 單據備註
+class POPatchRequest(_BM):
+    remark: Optional[str] = None
+
+
+@router.patch("/orders/{po_id}", response_model=PurchaseOrderResponse)
+async def patch_po_endpoint(
+    po_id: str,
+    data: POPatchRequest,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.po.update")),
+):
+    """PATCH PO（目前只支援 remark / notes）。"""
+    po = (await db.execute(select(PurchaseOrder).where(PurchaseOrder.id == po_id))).scalar_one_or_none()
+    if not po:
+        from fastapi import HTTPException
+        raise HTTPException(404, "採購單不存在")
+    if data.remark is not None:
+        po.remark = data.remark
+    await db.commit()
+    await db.refresh(po, attribute_names=["supplier"])
+    return PurchaseOrderResponse.model_validate(po)

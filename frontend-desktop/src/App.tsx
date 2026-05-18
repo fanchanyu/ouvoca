@@ -16,6 +16,7 @@ import Crm from './pages/Crm'
 import Accounting from './pages/Accounting'
 import Reports from './pages/Reports'
 import EInvoicePage from './pages/EInvoice'
+import Approvals from './pages/Approvals'
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/einvoice" element={<EInvoicePage />} />
+        <Route path="/approvals" element={<Approvals />} />
       </Route>
     </Routes>
   )

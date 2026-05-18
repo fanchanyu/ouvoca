@@ -160,3 +160,27 @@ async def cancel_so_endpoint(
         db, so_id, user=user.raw_user, reason=(data.reason if data else ""),
     )
     return SalesOrderResponse.model_validate(so)
+
+
+# v3.22: 單據備註
+class SOPatchRequest(_BMs):
+    remark: Optional[str] = None
+
+
+@router.patch("/orders/{so_id}", response_model=SalesOrderResponse)
+async def patch_so_endpoint(
+    so_id: str,
+    data: SOPatchRequest,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("sales.order.update")),
+):
+    """PATCH SO（目前只支援 remark / notes）。"""
+    so = (await db.execute(select(SalesOrder).where(SalesOrder.id == so_id))).scalar_one_or_none()
+    if not so:
+        from fastapi import HTTPException
+        raise HTTPException(404, "銷售訂單不存在")
+    if data.remark is not None:
+        so.remark = data.remark
+    await db.commit()
+    await db.refresh(so, attribute_names=["customer"])
+    return SalesOrderResponse.model_validate(so)

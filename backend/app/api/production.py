@@ -164,3 +164,29 @@ async def cancel_wo_endpoint(
         db, wo_id, user=user.raw_user, reason=(data.reason if data else ""),
     )
     return ProductionOrderResponse.model_validate(wo)
+
+
+# v3.22: 單據備註
+class WOPatchRequest(BaseModel):
+    remark: Optional[str] = None
+
+
+@router.patch("/work-orders/{wo_id}", response_model=ProductionOrderResponse)
+async def patch_wo_endpoint(
+    wo_id: str,
+    data: WOPatchRequest,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("production.work_order.update")),
+):
+    """PATCH WO（目前只支援 remark / notes）。"""
+    from sqlalchemy import select
+    from app.models.production import ProductionOrder
+    from fastapi import HTTPException
+    wo = (await db.execute(select(ProductionOrder).where(ProductionOrder.id == wo_id))).scalar_one_or_none()
+    if not wo:
+        raise HTTPException(404, "工單不存在")
+    if data.remark is not None:
+        wo.remark = data.remark
+    await db.commit()
+    await db.refresh(wo)
+    return ProductionOrderResponse.model_validate(wo)

@@ -137,6 +137,110 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-18｜會話 #44｜🚀 v3.22 Sprint P：多階審批 + 流程鏈 + 出貨單 + 備註（平行作業）
+
+**目標**：使用者「同步平行處理」剩下的 6 件待做。
+
+### 🎯 平行作業策略
+
+- **1 個 Agent 背景跑**：多階審批工作流（最複雜 / 獨立度高）
+- **我在 foreground 並行做**：流程鏈視覺化 + 出貨單列印 + 發票列印 + 單據備註
+
+### ✅ 多階審批（Agent 完成）
+
+**新建 5 個檔案**：
+- `app/models/approval_workflow.py` (101 行) — ApprovalRule + ApprovalRequestV2 + ApprovalStepV2（新表避開 organization.py 既有衝突）
+- `app/schemas/approval.py` (95 行) — Pydantic v2 with field_validator
+- `app/services/approval.py` (296 行) — rule CRUD + evaluate + lifecycle + EventBus listeners
+- `app/api/approval.py` (109 行) — 7 endpoints
+- `tests/smoke/test_approval_v322.py` (217 行, **9 tests pass**)
+- `pages/Approvals.tsx` (456 行) — 3 tab (待我審 / 歷史 / 規則設定)
+
+**設計亮點**：
+- EventBus listener pattern — PO/SO service 一行未改，只訂閱 po.created/so.created
+- listener 失敗只 log warning，**絕對不擋主流程**
+- 拒絕 comment 雙重把關（schema + service）
+
+**已知 limitation**：payment.created 事件 codebase 沒在 emit、list_pending_for_user 簡化版用 approver_role 字串、規則 update 沒做
+
+### ✅ 流程鏈視覺化（我做）
+
+**新建 `components/ProcessChain.tsx`**（200 行）：
+- 通用步驟組件，水平 5 圓圈 + 連接線
+- 5 種 status：done (綠) / current (藍脈衝) / pending (灰) / skipped (黃) / cancelled (紅)
+- 3 個 helper 函式：`deriveP2PSteps` / `deriveO2CSteps` / `deriveWOSteps` — 從 PO/SO/WO status 自動產 5 步驟
+
+**整合到 3 頁**：Purchase / Sales / Production 每個 row 加 📊 按鈕 → modal 顯示 ProcessChain。
+
+### ✅ 出貨單列印（我做）
+
+- Sales 頁每個**已出貨** SO 加 📋 按鈕，印「出貨單 Delivery Note」（跟貨給司機 / 客戶簽收）
+- DN-{so_no} 格式、含對應訂單號 + 收貨客戶 + 出貨日 + 簽收區
+- 文字明確「請於 3 日內回傳簽收，逾期視同收貨無誤」
+
+### ✅ 發票列印（我做）
+
+EInvoice 頁開立成功後加 🖨 按鈕，可印完整 MIG 格式：
+- 標準台頭（賣方統編+公司名）
+- 買方資訊（買方統編+名稱，個人省略）
+- 多項目明細表（品名/數量/單價/小計）
+- 未稅 + 稅 + 含稅合計
+- 標準簽章區
+
+### ✅ 單據備註（我做）
+
+**Backend**：
+- 確認 PO/SO/WO model 都已有 `remark` Column（Text）
+- 新加 PATCH endpoint：`/api/purchase/orders/{po_id}`、`/api/sales/orders/{so_id}`、`/api/production/work-orders/{wo_id}`
+- 簡化版只支援 remark 欄位
+
+**Frontend**：
+- 新建 `components/NotesEditor.tsx`（70 行）— modal 編輯，直接用 `api.patch()` 不加新 helper（避免和 agent 改 lib/api.ts 衝突）
+- 3 頁 row 加 📝 按鈕
+
+### 📊 數字
+
+| 維度 | v3.21 結束 | v3.22 結束 |
+|---|---|---|
+| Backend models | n | **+3**（ApprovalRule/V2/Step）|
+| Backend services | n | **+1**（approval + 6 listener 訂閱）|
+| Backend endpoints | 94 | **+10**（7 approval + 3 PATCH notes）|
+| Frontend pages | 16 | **17**（+Approvals）|
+| Frontend components | 12 | **14**（+ProcessChain +NotesEditor）|
+| Smoke tests | 367 | **376** (+9 approval) |
+| Row 操作按鈕（每個 PO/SO/WO）| 3-4 | **7-8** (印PDF / 鏈 / 備註 / 出貨單 / 確認 / 進貨 / 取消) |
+
+### 🪞 教訓 #30
+
+**「平行作業要明確 file boundary」**
+
+我把 agent 鎖在「新建檔案 + 列表 append-only 修改」，自己也避開 lib/api.ts。雖然有幾次 system reminder 提示「agent modified X」，但**從未有 merge conflict**。
+
+關鍵設計：
+- Agent 只 append、不 insert / replace 既有 line
+- 我用 NotesEditor 直接 `api.patch()` 不加 helper（avoid lib/api.ts 衝突）
+- 共用檔（i18n / App.tsx / Layout.tsx）只加新 key / route / nav item — append 安全
+
+下次平行作業前先列「衝突檔案矩陣」：
+| 檔案 | Agent | Me |
+|---|---|---|
+| lib/api.ts | Append helpers | Avoid |
+| App.tsx | Append route | Avoid |
+| Layout.tsx | Append nav | Avoid |
+| pages/Sales.tsx | NEVER | Edit |
+| pages/Purchase.tsx | NEVER | Edit |
+| pages/Production.tsx | NEVER | Edit |
+
+### 後續
+
+- 多階審批：規則 update UI + 接 user role assignment（嚴格 RBAC）
+- payment.created EventBus emit（accounting service）
+- Dashboard 加「待我審 N 張」widget
+
+**Blocker**：無
+
+---
+
 ## 2026-05-18｜會話 #43｜🌍 v3.20-21 Sprint N+O：多國統編 + Cmd+K + 單據列印
 
 **目標**：使用者「再次檢查整套系統，站在系統小白的觀點 / 看看鼎新/正航/SAP 完善一下 /

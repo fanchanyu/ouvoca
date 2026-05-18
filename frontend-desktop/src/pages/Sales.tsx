@@ -10,6 +10,8 @@ import {
 import EntityRowActions from '../components/EntityRowActions'
 import EntityFormModal, { type FieldDef } from '../components/EntityFormModal'
 import PrintableDocument, { DocHeader, DocFooter } from '../components/PrintableDocument'
+import ProcessChain, { deriveO2CSteps } from '../components/ProcessChain'
+import NotesEditor from '../components/NotesEditor'
 
 const CUSTOMER_FIELDS: FieldDef[] = [
   { name: 'name', label: '名稱', type: 'text', required: true },
@@ -35,6 +37,9 @@ export default function Sales() {
   const [loading, setLoading] = useState(true)
   const [editingCust, setEditingCust] = useState<Customer | null>(null)
   const [printSO, setPrintSO] = useState<SalesOrder | null>(null)
+  const [shipNoteSO, setShipNoteSO] = useState<SalesOrder | null>(null)
+  const [chainSO, setChainSO] = useState<SalesOrder | null>(null)
+  const [notesSO, setNotesSO] = useState<SalesOrder | null>(null)
 
   async function load() {
     setLoading(true)
@@ -127,9 +132,20 @@ export default function Sales() {
                   <td className="p-3 text-xs">{new Date(so.order_date).toLocaleDateString('zh-TW')}</td>
                   <td className="p-3 text-right">
                     <div className="flex gap-1 justify-end">
+                      <button onClick={() => setChainSO(so)}
+                        className="px-2 py-1 text-xs text-purple-700 hover:bg-purple-50 rounded"
+                        title="看流程鏈狀態">📊</button>
+                      <button onClick={() => setNotesSO(so)}
+                        className="px-2 py-1 text-xs text-amber-700 hover:bg-amber-50 rounded"
+                        title="編輯備註">📝</button>
                       <button onClick={() => setPrintSO(so)}
                         className="px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 rounded"
-                        title="列印 PDF（給客戶）">🖨</button>
+                        title="列印銷售單 PDF">🖨</button>
+                      {['shipped', 'delivered', 'closed'].includes(so.status) && (
+                        <button onClick={() => setShipNoteSO(so)}
+                          className="px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-50 rounded"
+                          title="列印出貨單（跟貨走）">📋</button>
+                      )}
                       {so.status === 'draft' && (
                         <button onClick={() => confirmSO(so)}
                           className="px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded"
@@ -212,6 +228,59 @@ export default function Sales() {
           onClose={() => setEditingCust(null)}
           onSuccess={() => { setEditingCust(null); load() }}
         />
+      )}
+
+      {/* v3.22: 備註編輯 */}
+      {notesSO && (
+        <NotesEditor entityType="so" entityId={notesSO.id} entityLabel={notesSO.so_no}
+          initialRemark={(notesSO as SalesOrder & { remark?: string }).remark || null}
+          onClose={() => setNotesSO(null)} onSaved={load} />
+      )}
+
+      {/* v3.22: 流程鏈視覺化 */}
+      {chainSO && (
+        <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto"
+          onClick={() => setChainSO(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-3 border-b">
+              <h2 className="font-semibold">📊 銷售流程鏈 — {chainSO.so_no}</h2>
+              <button onClick={() => setChainSO(null)} className="px-2 py-1 text-gray-500 hover:bg-gray-100 rounded text-sm">✕</button>
+            </div>
+            <div className="p-6">
+              <ProcessChain
+                title="O2C (Order to Cash)"
+                steps={deriveO2CSteps(chainSO.status, new Date(chainSO.order_date).toLocaleDateString('zh-TW'))}
+              />
+              <div className="mt-4 text-xs text-gray-500">
+                💡 點 SO 列表的「✓ 確認 → 📦 出貨」按鈕推進流程；出貨後可印「📋 出貨單」跟貨。
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* v3.22: 出貨單列印（跟貨走，給司機 / 客戶簽收）*/}
+      {shipNoteSO && (
+        <PrintableDocument title={`出貨單 — ${shipNoteSO.so_no}`} onClose={() => setShipNoteSO(null)}>
+          <DocHeader docType="出貨單 Delivery Note" docNo={`DN-${shipNoteSO.so_no}`}
+            date={new Date().toLocaleDateString('zh-TW')} />
+          <div className="mb-4 text-sm">
+            <p>本批次貨物為下列銷售訂單之出貨，請收貨方核對品項數量後簽收。</p>
+          </div>
+          <table className="w-full text-sm mb-4">
+            <tbody>
+              <tr><td className="text-gray-600 py-1 w-32">對應訂單</td><td className="font-mono">{shipNoteSO.so_no}</td></tr>
+              <tr><td className="text-gray-600 py-1">收貨客戶</td><td>{shipNoteSO.customer?.name || shipNoteSO.customer_id}</td></tr>
+              <tr><td className="text-gray-600 py-1">出貨日期</td><td>{new Date().toLocaleDateString('zh-TW')}</td></tr>
+              <tr><td className="text-gray-600 py-1">訂單金額</td><td>NT$ {shipNoteSO.total_amount.toLocaleString()}（僅供核對，正式金額以發票為準）</td></tr>
+              <tr><td className="text-gray-600 py-1">訂單狀態</td><td>{shipNoteSO.status}</td></tr>
+            </tbody>
+          </table>
+          <div className="text-xs text-gray-500 italic mb-4">
+            ※ 詳細品項清單請對照原銷售單 {shipNoteSO.so_no}。
+          </div>
+          <DocFooter note="請於收貨後 3 日內回傳已簽收之出貨單，逾期視同收貨無誤。" />
+        </PrintableDocument>
       )}
 
       {/* v3.21: 列印 SO PDF */}
