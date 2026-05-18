@@ -137,6 +137,105 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-18｜會話 #43｜🌍 v3.20-21 Sprint N+O：多國統編 + Cmd+K + 單據列印
+
+**目標**：使用者「再次檢查整套系統，站在系統小白的觀點 / 看看鼎新/正航/SAP 完善一下 /
+嚴格驗證統編但客戶不只台灣，可客製化」
+
+### 🔍 對標 3 家領導 ERP 找出的差距（小白視角）
+
+| 功能 | 鼎新 | 正航 | SAP B1 | erpilot 之前 | 修正 |
+|---|---|---|---|---|---|
+| 多國統編驗證 | ❌（只 TW）| ❌ | ✅ | TW only hardcoded | **v3.20 多國 + plug-in** |
+| 全系統 Cmd+K 搜尋 | ❌ | ❌ | ✅ | ❌ | **v3.21 加** |
+| 單據列印 PDF（PO/SO）| ✅ 招牌 | ✅ | ✅ Crystal | ❌ | **v3.21 加** |
+
+### ✅ Sprint N (v3.20)：多國統編驗證 + Plugin 機制
+
+**新建 `app/integrations/tax_id_validators.py`**（~140 行）：
+- ValidationResult dataclass（valid / country / message / formatted）
+- 6 個內建 validator: TW (台灣 checksum) / CN (18 碼 GB 32100) / US (EIN 9 碼) /
+  JP (法人番號 13 碼) / EU VAT (DE/FR/IT/...) / GENERIC (不驗證 fallback)
+- registry pattern：`register_validator("KE", fn)` 客戶可 plug-in 任何國家
+- `list_supported()` 給 frontend dropdown 用
+
+**API 升級**：
+- `GET /tax/tw/validate-tax-id/{tax_id}?country=TW` 支援多國（預設 TW 向後相容）
+- 新 `GET /tax/tw/validate-tax-id-countries` 公開列表
+- AuthMiddleware PUBLIC_PREFIXES 修一個小 bug
+
+**EInvoice 前端升級**：買方統編加「國別下拉」+ placeholder 動態提示格式
+
+**Smoke tests**：28/28 pass — 涵蓋
+- TW：Acer/Asustek 已知有效 + checksum 邊界（全 0/同數字/字母/長度）
+- CN/US/JP/EU 格式驗證
+- 通用 fallback + `register_validator` 客製化
+
+### ✅ Sprint O (v3.21)：CommandPalette (Cmd+K) + Printable Documents
+
+**新建 `components/CommandPalette.tsx`**（~180 行）：對標 SAP B1 search / Linear / Notion / Raycast
+- `Cmd+K` / `Ctrl+K` 全域開啟（Layout 註冊 keydown handler）
+- 模糊搜尋 8 種 entity：customer / supplier / part / product / SO / PO / WO / lead
+- 加 10 個快速命令（去 CRM / 設定 / 報表 / AI / ...）
+- 分組顯示（每類最多 5 筆）+ 鍵盤 ↑↓ Enter 導航 + ESC 關閉
+- Header 加 `🔍 Ctrl K 搜尋` 提示按鈕
+
+**新建 `components/PrintableDocument.tsx`**（~120 行）：對標鼎新標準台灣出單格式
+- modal 容器 + `🖨 列印 / 存 PDF` 按鈕
+- `@media print` CSS：列印時只剩單據區、自動 A4 大小
+- `DocHeader` + `DocFooter` 通用樣板（標準台頭、單據號、簽章區）
+- Purchase 頁 + Sales 頁 row 加 🖨 按鈕，可印 PO/SO PDF 給供應商/客戶
+
+### 📊 數字
+
+| 維度 | v3.19 結束 | v3.21 結束 |
+|---|---|---|
+| 統編支援國 | 1 (TW) | **6** + plug-in 任何國家 |
+| 全系統搜尋 | ❌ | ✅ **Cmd+K** |
+| 單據可列印 PDF | ❌ | ✅ **PO / SO**（出貨單 / 發票下個 sprint）|
+| Frontend components | 10 | **12**（+CommandPalette +PrintableDocument）|
+| Smoke tests | 339 | **367**（+28 multi-country）|
+| 對標完整 ERP UX 覆蓋率 | ~70% | **~85%** |
+
+### 🪞 教訓 #28
+
+**「Hardcode 國別 = 自我設限為單一市場」**
+
+我原本台灣統編 validator hardcode 在 `einvoice_tw.py` 裡，
+名字就鎖死台灣——直接告訴自己「erpilot 只能做台灣」。
+
+使用者一句「客戶不見得只有台灣」打中：
+- 海外台商 / 跨境貿易 / 設廠中國 / 賣到 US/JP 都很常見
+- 商業擴張不該被技術 hardcode 卡住
+
+下次寫任何「地區性業務規則」都要先問：
+1. 這條規則只適用一個國家嗎？
+2. 別的國家可能不同嗎？
+3. 該不該用 plugin/registry 開放擴充？
+
+### 🪞 教訓 #29
+
+**「ERP 小白要的不是 AI 對話，是 Cmd+K + 列印 + 流程鏈」**
+
+我前 18 sprint 過度押注 AI 對話作為差異化。但鼎新/正航/SAP 在台灣已經做了 30 年，
+**他們最寶貴的不是 AI**，是：
+- **Cmd+K 全系統搜尋**（大資料量找東西的痛點）
+- **單據列印 PDF**（製造業還是要紙本給上下游）
+- **流程鏈狀態**（採購→收料→應付→付款 一目了然）
+
+erpilot 要兼具「AI 對話的酷」+「傳統 ERP 的穩」才能贏。Sprint N+O 補上 2/3 缺。
+
+### 後續
+
+- 出貨單 / 發票 列印格式（v3.22）
+- 流程鏈視覺化（採購 → 進貨 → 應付 → 付款）
+- 多階審批工作流（鼎新 / SAP 招牌）
+- 個人化 Dashboard widget（角色不同看不同）
+
+**Blocker**：無
+
+---
+
 ## 2026-05-18｜會話 #42｜🧾 v3.18-19 Sprint L+M：完整票據鏈（會計+進出貨+電子發票+報表）
 
 **目標**：使用者「傳票.進貨及相關的票據都要檢查 / 只要有票據,輸出和輸入的各種表單,都要檢查,不能有失誤」

@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-18（會話 #43 v3.18-19 Sprint L+M — 完整票據鏈。使用者「傳票.進貨及相關的票據都要檢查 / 不能有失誤」打中重大 gap。新建 3 個 frontend pages：📒 Accounting（傳票/AR/科目表 3 tab）、🧾 EInvoice（開立/查詢/作廢，schema 對齊 MIG 標準）、📈 Reports（KPI/AR aging/月度庫存/401 報表）。Purchase 加 ✓核准+🚚進貨 buttons、Sales 加 ✓確認+📦出貨 buttons、Production 加 ✓完工 button。修了 backend JournalEntry MissingGreenlet bug + 5 個 schema mismatch bug。+28 API helpers，+18 smoke tests pass。教訓 #27：endpoint 不等於 UI，UI 不等於使用者能用——每加 backend 都要問「使用者點得到嗎」）
+**最後更新**：2026-05-18（會話 #44 v3.20-21 Sprint N+O — 對標鼎新/正航/SAP B1。Sprint N: 統編驗證**多國化** (TW/CN/US/JP/EU + GENERIC fallback + register_validator plug-in 任何國家) + EInvoice 加買方統編國別下拉，28/28 smoke tests pass。Sprint O: 新增 **CommandPalette** Cmd+K 全系統搜尋（8 種 entity + 10 快速命令）+ **PrintableDocument** 單據列印（PO/SO 印 PDF 給供應商/客戶，標準台頭+簽章區）。教訓 #28：hardcode 國別=自我設限；教訓 #29：erpilot 要兼具 AI 對話的酷+傳統 ERP 的穩，補上 Cmd+K/列印/流程鏈才能贏鼎新）
 **維護者**：使用者 + Claude
 **版本**：3.13

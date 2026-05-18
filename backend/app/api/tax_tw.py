@@ -275,6 +275,25 @@ async def query_einvoice(
 
 
 @router.get("/validate-tax-id/{tax_id}")
-async def check_tax_id(tax_id: str):
-    """公開：驗證統一編號（不需 auth）。"""
-    return {"tax_id": tax_id, "valid": validate_tax_id(tax_id)}
+async def check_tax_id(tax_id: str, country: str = "TW"):
+    """公開：驗證統編 / 商號註冊號（不需 auth）。
+
+    v3.20：支援多國，預設 TW。傳 ?country=CN/US/JP/EU/GENERIC 使用該國規則。
+    """
+    from app.integrations.tax_id_validators import validate, list_supported
+    result = validate(tax_id, country)
+    return {
+        "tax_id": tax_id,
+        "country": result.country,
+        "valid": result.valid,
+        "message": result.message,
+        "formatted": result.formatted,
+        "supported_countries": list_supported() if not result.valid else None,
+    }
+
+
+@router.get("/validate-tax-id-countries")
+async def list_validator_countries():
+    """公開：列出當前支援的國家統編驗證。"""
+    from app.integrations.tax_id_validators import list_supported
+    return {"countries": list_supported()}

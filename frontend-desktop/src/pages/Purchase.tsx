@@ -9,6 +9,7 @@ import {
 } from '../lib/api'
 import EntityRowActions from '../components/EntityRowActions'
 import EntityFormModal, { type FieldDef } from '../components/EntityFormModal'
+import PrintableDocument, { DocHeader, DocFooter } from '../components/PrintableDocument'
 
 const SUPPLIER_FIELDS: FieldDef[] = [
   { name: 'name', label: '名稱', type: 'text', required: true },
@@ -34,6 +35,7 @@ export default function Purchase() {
   const [filterStatus, setFilterStatus] = useState<string>('')
   const [tab, setTab] = useState<'orders' | 'suppliers'>('orders')
   const [editingSup, setEditingSup] = useState<Supplier | null>(null)
+  const [printPO, setPrintPO] = useState<PurchaseOrder | null>(null)
 
   async function load() {
     setLoading(true)
@@ -142,6 +144,9 @@ export default function Purchase() {
                     <td className="p-3">{new Date(po.order_date).toLocaleDateString('zh-TW')}</td>
                     <td className="p-3 text-right">
                       <div className="flex gap-1 justify-end">
+                        <button onClick={() => setPrintPO(po)}
+                          className="px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 rounded"
+                          title="列印 PDF（給供應商）">🖨</button>
                         {po.status === 'draft' && (
                           <button onClick={() => approvePO(po)}
                             className="px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded"
@@ -221,6 +226,26 @@ export default function Purchase() {
           onClose={() => setEditingSup(null)}
           onSuccess={() => { setEditingSup(null); load() }}
         />
+      )}
+
+      {/* v3.21: 列印 PO PDF */}
+      {printPO && (
+        <PrintableDocument title={`採購單 ${printPO.po_no}`} onClose={() => setPrintPO(null)}>
+          <DocHeader docType="採購單 Purchase Order" docNo={printPO.po_no}
+            date={new Date(printPO.order_date).toLocaleDateString('zh-TW')} />
+          <table className="w-full text-sm mb-4">
+            <tbody>
+              <tr><td className="text-gray-600 py-1 w-32">供應商</td><td>{printPO.supplier?.name || printPO.supplier_id}</td></tr>
+              <tr><td className="text-gray-600 py-1">狀態</td><td><StatusBadge status={printPO.status} /></td></tr>
+              <tr><td className="text-gray-600 py-1">金額（含稅）</td><td className="font-bold text-lg">NT$ {printPO.total_amount.toLocaleString()}</td></tr>
+              <tr><td className="text-gray-600 py-1">下單日期</td><td>{new Date(printPO.order_date).toLocaleDateString('zh-TW')}</td></tr>
+            </tbody>
+          </table>
+          <div className="text-xs text-gray-500 italic mb-4">
+            ※ 完整品項明細請至 erpilot 系統查詢，或開啟對話請 AI 列出。
+          </div>
+          <DocFooter note="請確認規格、數量、價格後簽回。" />
+        </PrintableDocument>
       )}
     </div>
   )

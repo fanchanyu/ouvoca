@@ -32,7 +32,7 @@ PUBLIC_PATHS = {
 PUBLIC_PREFIXES = (
     "/api/events/",
     "/api/factory/",
-    "/api/tax/tw/validate-tax-id/",  # 純驗證算法，無 DB / 無敏感資料
+    "/api/tax/tw/validate-tax-id",  # 純驗證算法，無 DB / 無敏感資料（含 /-countries 子路徑）
 )
 
 

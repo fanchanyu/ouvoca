@@ -9,6 +9,7 @@ import {
 } from '../lib/api'
 import EntityRowActions from '../components/EntityRowActions'
 import EntityFormModal, { type FieldDef } from '../components/EntityFormModal'
+import PrintableDocument, { DocHeader, DocFooter } from '../components/PrintableDocument'
 
 const CUSTOMER_FIELDS: FieldDef[] = [
   { name: 'name', label: '名稱', type: 'text', required: true },
@@ -33,6 +34,7 @@ export default function Sales() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [editingCust, setEditingCust] = useState<Customer | null>(null)
+  const [printSO, setPrintSO] = useState<SalesOrder | null>(null)
 
   async function load() {
     setLoading(true)
@@ -125,6 +127,9 @@ export default function Sales() {
                   <td className="p-3 text-xs">{new Date(so.order_date).toLocaleDateString('zh-TW')}</td>
                   <td className="p-3 text-right">
                     <div className="flex gap-1 justify-end">
+                      <button onClick={() => setPrintSO(so)}
+                        className="px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 rounded"
+                        title="列印 PDF（給客戶）">🖨</button>
                       {so.status === 'draft' && (
                         <button onClick={() => confirmSO(so)}
                           className="px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded"
@@ -207,6 +212,28 @@ export default function Sales() {
           onClose={() => setEditingCust(null)}
           onSuccess={() => { setEditingCust(null); load() }}
         />
+      )}
+
+      {/* v3.21: 列印 SO PDF */}
+      {printSO && (
+        <PrintableDocument title={`銷售單 ${printSO.so_no}`} onClose={() => setPrintSO(null)}>
+          <DocHeader docType="銷售單 Sales Order" docNo={printSO.so_no}
+            date={new Date(printSO.order_date).toLocaleDateString('zh-TW')} />
+          <table className="w-full text-sm mb-4">
+            <tbody>
+              <tr><td className="text-gray-600 py-1 w-32">客戶</td><td>{printSO.customer?.name || printSO.customer_id}</td></tr>
+              <tr><td className="text-gray-600 py-1">狀態</td>
+                <td><span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">{printSO.status}</span></td></tr>
+              <tr><td className="text-gray-600 py-1">付款狀態</td><td>{printSO.payment_status}</td></tr>
+              <tr><td className="text-gray-600 py-1">金額（含稅）</td><td className="font-bold text-lg text-blue-700">NT$ {printSO.total_amount.toLocaleString()}</td></tr>
+              <tr><td className="text-gray-600 py-1">下單日期</td><td>{new Date(printSO.order_date).toLocaleDateString('zh-TW')}</td></tr>
+            </tbody>
+          </table>
+          <div className="text-xs text-gray-500 italic mb-4">
+            ※ 完整品項明細請至 erpilot 系統查詢，或請 AI 列出。
+          </div>
+          <DocFooter note="請確認規格、數量、價格、交期後簽回。" />
+        </PrintableDocument>
       )}
     </div>
   )

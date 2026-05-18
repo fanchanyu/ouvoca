@@ -4,10 +4,11 @@
  * 對齊 backend app/api/tax_tw.py EInvoiceCreateRequest:
  *   invoice_no / seller_tax_id / seller_name / buyer_* / items[]
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   apiIssueEInvoice, apiCancelEInvoice, apiGetEInvoice, apiValidateTaxId,
+  apiListTaxIdCountries,
   type EInvoiceLineItem,
 } from '../lib/api'
 
@@ -32,14 +33,22 @@ export default function EInvoicePage() {
 
 function IssueSection() {
   // Default 自家公司資訊（之後可從 settings 帶入）
-  const [seller, setSeller] = useState({ tax_id: '12345678', name: '示範公司股份有限公司' })
-  const [buyer, setBuyer] = useState({ tax_id: '', name: '' })
+  const [seller, setSeller] = useState({ tax_id: '04595257', name: '示範公司股份有限公司' })  // 04595257 = 已知有效統編
+  const [buyer, setBuyer] = useState({ tax_id: '', name: '', country: 'TW' })  // v3.20: 加 country
   const [invoiceNo, setInvoiceNo] = useState(() => `AA-${Date.now().toString().slice(-8)}`)
   const [items, setItems] = useState<EInvoiceLineItem[]>([BLANK_ITEM()])
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [issued, setIssued] = useState<{ invoice_no: string; tracking_no?: string } | null>(null)
   const [taxIdValid, setTaxIdValid] = useState<{ valid: boolean; message?: string } | null>(null)
+  const [countries, setCountries] = useState<Array<{ code: string; name: string }>>([
+    { code: 'TW', name: '🇹🇼 台灣' }, { code: 'GENERIC', name: '🌐 不驗證' },
+  ])
+
+  useEffect(() => {
+    // 載入支援的國家清單
+    apiListTaxIdCountries().then(r => setCountries(r.countries)).catch(() => {/* 用 fallback */})
+  }, [])
 
   const total = items.reduce((s, it) => s + (it.qty * it.unit_price), 0)
   const taxIncluded = Math.round(total)            // 含稅總額
@@ -47,12 +56,12 @@ function IssueSection() {
   const tax = taxIncluded - salesAmount
 
   async function validateTaxId() {
-    if (!buyer.tax_id || buyer.tax_id.length !== 8) {
-      setTaxIdValid({ valid: false, message: '統一編號必須是 8 位數字' }); return
+    if (!buyer.tax_id.trim()) {
+      setTaxIdValid({ valid: false, message: '請輸入統編' }); return
     }
     try {
-      const r = await apiValidateTaxId(buyer.tax_id)
-      setTaxIdValid({ valid: r.valid, message: r.valid ? '統編格式有效' : 'checksum 不對' })
+      const r = await apiValidateTaxId(buyer.tax_id, buyer.country)
+      setTaxIdValid({ valid: r.valid, message: r.message })
     } catch (e: unknown) {
       setTaxIdValid({ valid: false, message: e instanceof Error ? e.message : '查詢失敗' })
     }
@@ -86,7 +95,7 @@ function IssueSection() {
       setIssued({ invoice_no: invoiceNo, tracking_no: result.tracking_no })
       // 重置：留 seller，更新發票號，清項目
       setInvoiceNo(`AA-${Date.now().toString().slice(-8)}`)
-      setBuyer({ tax_id: '', name: '' })
+      setBuyer({ tax_id: '', name: '', country: buyer.country })
       setItems([BLANK_ITEM()])
       setTaxIdValid(null)
     } catch (e: unknown) { setErr(e instanceof Error ? e.message : '開立失敗') }
@@ -123,28 +132,37 @@ function IssueSection() {
           </div>
         </fieldset>
 
-        {/* 買方 */}
+        {/* 買方 — v3.20 支援多國統編 */}
         <fieldset className="border rounded p-3">
           <legend className="text-xs font-medium px-1 text-gray-600">👤 買方</legend>
-          <div className="grid md:grid-cols-3 gap-3">
+          <div className="grid md:grid-cols-4 gap-3">
             <div>
+              <label className="block text-xs text-gray-600 mb-1">統編國別</label>
+              <select className="w-full border rounded px-2 py-1.5 text-sm"
+                value={buyer.country}
+                onChange={(e) => { setBuyer({ ...buyer, country: e.target.value }); setTaxIdValid(null) }}>
+                {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+              </select>
+            </div>
+            <div className="md:col-span-2">
               <label className="block text-xs text-gray-600 mb-1">買方統編（公司必填，個人留空）</label>
               <div className="flex gap-2">
-                <input className="flex-1 border rounded px-2 py-1.5 text-sm font-mono" maxLength={8}
+                <input className="flex-1 border rounded px-2 py-1.5 text-sm font-mono"
+                  placeholder={buyer.country === 'TW' ? '8 位數字' : buyer.country === 'US' ? 'XX-XXXXXXX' : '依國別格式'}
                   value={buyer.tax_id}
                   onChange={(e) => { setBuyer({ ...buyer, tax_id: e.target.value }); setTaxIdValid(null) }} />
                 <button onClick={validateTaxId} disabled={!buyer.tax_id}
                   className="px-2 py-1 border border-blue-500 text-blue-600 rounded text-xs hover:bg-blue-50 disabled:opacity-50">
-                  查
+                  驗
                 </button>
               </div>
               {taxIdValid && (
                 <p className={`text-xs mt-1 ${taxIdValid.valid ? 'text-emerald-600' : 'text-red-600'}`}>
-                  {taxIdValid.valid ? '✓ 統編格式有效' : `❌ ${taxIdValid.message || '無效'}`}
+                  {taxIdValid.valid ? `✓ ${taxIdValid.message || '有效'}` : `❌ ${taxIdValid.message || '無效'}`}
                 </p>
               )}
             </div>
-            <div className="md:col-span-2">
+            <div>
               <label className="block text-xs text-gray-600 mb-1">買方名稱</label>
               <input className="w-full border rounded px-2 py-1.5 text-sm"
                 placeholder="個人寫姓名 / 公司寫公司名"

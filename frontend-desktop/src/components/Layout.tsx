@@ -17,6 +17,7 @@ import DesktopNotifications, { type ToastEntry } from './DesktopNotifications'
 import AiStatusBadge from './AiStatusBadge'
 import OnboardingTour from './OnboardingTour'
 import AskAiFloat from './AskAiFloat'
+import CommandPalette from './CommandPalette'
 
 const navConfig = [
   { path: '/',                key: 'dashboard',      icon: '📊', group: 'overview' },
@@ -171,6 +172,14 @@ export default function Layout() {
             </p>
           </div>
 
+          {/* v3.21: Cmd+K 提示按鈕（也可點開搜尋）*/}
+          <div className="hidden md:flex items-center ml-4">
+            <div className="text-xs text-ink-400 flex items-center gap-1 px-2 py-1 bg-ink-50 rounded border border-ink-100"
+              title="按 Ctrl+K / Cmd+K 開啟全系統搜尋">
+              🔍 <kbd className="font-mono bg-white px-1 rounded border">Ctrl K</kbd> 搜尋
+            </div>
+          </div>
+
           <div className="flex items-center gap-1 ml-auto">
             {/* v3.14：AI 狀態指示燈（永遠可見）*/}
             <AiStatusBadge />
@@ -260,6 +269,9 @@ export default function Layout() {
 
         {/* v3.16 右下角 AI 浮球：每頁的「現場教練」(erpilot 原創 UX) */}
         {token && location.pathname !== '/chat' && <AskAiFloat />}
+
+        {/* v3.21 Cmd+K 全系統搜尋（任何頁面按 Ctrl+K / Cmd+K 開啟） */}
+        {token && <CommandPalette />}
 
         {/* v3.3 in-app toast banner（最近 5 則，5 秒後自動消失） */}
         {recentToasts.length > 0 && (

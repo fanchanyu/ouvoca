@@ -317,8 +317,20 @@ export const apiCancelEInvoice = (invoice_no: string, reason: string) =>
 // Query 回 {success, invoice: {...MIG dict}}
 export const apiGetEInvoice = (invoice_no: string) =>
   api.get<{ success: boolean; invoice?: Record<string, unknown>; errors?: string[] }>(`/tax/tw/einvoice/${invoice_no}`)
-export const apiValidateTaxId = (tax_id: string) =>
-  api.get<{ tax_id: string; valid: boolean }>(`/tax/tw/validate-tax-id/${tax_id}`)
+// v3.20: 多國統編驗證
+export interface TaxIdValidationResult {
+  tax_id: string
+  country: string             // 'TW' / 'CN' / 'US' / 'JP' / 'EU-DE' / 'GENERIC' / ...
+  valid: boolean
+  message: string
+  formatted: string
+  supported_countries?: Array<{ code: string; name: string }>
+}
+export const apiValidateTaxId = (tax_id: string, country = 'TW') =>
+  api.get<TaxIdValidationResult>(`/tax/tw/validate-tax-id/${encodeURIComponent(tax_id)}?country=${country}`)
+
+export const apiListTaxIdCountries = () =>
+  api.get<{ countries: Array<{ code: string; name: string }> }>('/tax/tw/validate-tax-id-countries')
 
 // ─── WO release / complete（Production 補齊操作鏈）─────
 export const apiReleaseWOById = (wo_id: string) =>
