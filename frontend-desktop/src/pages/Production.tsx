@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
-import { apiListWOs, apiReleaseWO, apiCancelWO, type ProductionOrder } from '../lib/api'
+import { Link } from 'react-router-dom'
+import {
+  apiListWOs, apiReleaseWO, apiCancelWO,
+  apiListProducts, apiCreateProduct, apiCreateWO,
+  type ProductionOrder, type Product,
+} from '../lib/api'
 
 export default function Production() {
   const [wos, setWos] = useState<ProductionOrder[]>([])
@@ -44,6 +49,9 @@ export default function Production() {
         <Stat title="已完成工單" value={completed} color="green" />
         <Stat title="待釋放工單" value={draft} color="yellow" />
       </div>
+
+      {/* v3.17: Quick create bar (Sprint K) */}
+      <ProductionQuickCreateBar onAfterCreate={load} />
 
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <table className="w-full text-sm">
@@ -114,4 +122,113 @@ function StatusBadge({ status }: { status: string }) {
     cancelled: 'bg-red-100 text-red-800',
   }
   return <span className={`px-2 py-1 rounded-full text-xs ${m[status] || 'bg-gray-100'}`}>{status}</span>
+}
+
+// ────────────────────────────────────────────────────────────
+// Quick create bar — 新增產品 + 快速建工單（Sprint K v3.17）
+// ────────────────────────────────────────────────────────────
+function ProductionQuickCreateBar({ onAfterCreate }: {
+  onAfterCreate: () => void | Promise<void>
+}) {
+  const [mode, setMode] = useState<'closed' | 'product' | 'wo'>('closed')
+  const [products, setProducts] = useState<Product[]>([])
+  const [err, setErr] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [prod, setProd] = useState({ product_no: '', name: '' })
+  const [wo, setWo] = useState({ product_id: '', ordered_qty: 1, priority: 50 })
+
+  async function loadProducts() {
+    try { setProducts(await apiListProducts()) }
+    catch { setProducts([]) }
+  }
+
+  useEffect(() => {
+    if ((mode === 'wo' || mode === 'product') && products.length === 0) {
+      void loadProducts()
+    }
+  }, [mode])
+
+  async function createProduct() {
+    if (!prod.product_no.trim() || !prod.name.trim()) { setErr('編號 + 名稱必填'); return }
+    setBusy(true); setErr(null)
+    try {
+      await apiCreateProduct(prod)
+      setProd({ product_no: '', name: '' })
+      setMode('closed')
+      await loadProducts()
+      await onAfterCreate()
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '新增失敗') }
+    finally { setBusy(false) }
+  }
+
+  async function createWO() {
+    if (!wo.product_id || wo.ordered_qty <= 0) { setErr('產品 + 數量必填'); return }
+    setBusy(true); setErr(null)
+    try {
+      await apiCreateWO(wo)
+      setWo({ product_id: '', ordered_qty: 1, priority: 50 })
+      setMode('closed')
+      await onAfterCreate()
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '建單失敗') }
+    finally { setBusy(false) }
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow p-4 mb-6">
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-sm font-medium text-gray-700 mr-2">新增：</span>
+        <button onClick={() => setMode(mode === 'product' ? 'closed' : 'product')}
+          className={`px-3 py-1.5 rounded text-sm ${mode === 'product' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}>
+          ➕ 新增產品
+        </button>
+        <button onClick={() => setMode(mode === 'wo' ? 'closed' : 'wo')}
+          className={`px-3 py-1.5 rounded text-sm ${mode === 'wo' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
+          🏭 新增工單
+        </button>
+        <Link to="/chat" className="px-3 py-1.5 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded text-sm">
+          💬 用 AI 釋放工單
+        </Link>
+      </div>
+
+      {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mt-3 text-sm">{err}</div>}
+
+      {mode === 'product' && (
+        <div className="grid md:grid-cols-3 gap-2 mt-3 pt-3 border-t">
+          <input className="border rounded px-2 py-1.5 text-sm" placeholder="編號* 例 PROD-001"
+            value={prod.product_no} onChange={(e) => setProd({ ...prod, product_no: e.target.value })} />
+          <input className="border rounded px-2 py-1.5 text-sm" placeholder="產品名稱*"
+            value={prod.name} onChange={(e) => setProd({ ...prod, name: e.target.value })} />
+          <button onClick={createProduct} disabled={busy}
+            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50">
+            {busy ? '儲存中…' : '✓ 儲存'}
+          </button>
+        </div>
+      )}
+
+      {mode === 'wo' && (
+        <div className="mt-3 pt-3 border-t">
+          <div className="grid md:grid-cols-4 gap-2">
+            <select className="border rounded px-2 py-1.5 text-sm" value={wo.product_id}
+              onChange={(e) => setWo({ ...wo, product_id: e.target.value })}>
+              <option value="">選產品*</option>
+              {products.map(p => <option key={p.id} value={p.id}>{p.product_no} {p.name}</option>)}
+            </select>
+            <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="數量*" min="1"
+              value={wo.ordered_qty} onChange={(e) => setWo({ ...wo, ordered_qty: Number(e.target.value) })} />
+            <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="優先級 1-100" min="1" max="100"
+              value={wo.priority} onChange={(e) => setWo({ ...wo, priority: Number(e.target.value) })} />
+            <button onClick={createWO} disabled={busy}
+              className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700 disabled:opacity-50">
+              {busy ? '建單中…' : '✓ 建單'}
+            </button>
+          </div>
+          {products.length === 0 && (
+            <p className="text-xs text-gray-500 mt-2">
+              💡 還沒有產品？先按上面的「➕ 新增產品」建一個。
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }

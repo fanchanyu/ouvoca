@@ -173,6 +173,46 @@ export const apiListCrmEvents = (customer_id?: string, limit = 50) =>
 export const apiCreateCrmEvent = (data: { customer_id: string; event_type: string; subject: string; description?: string }) =>
   api.post<CrmEvent>('/crm/events', data)
 
+// ──────────────────────────────────────────────────────────
+// Create helpers for primary entities (Sprint K v3.17)
+// 補上 Sales/Purchase/Production 主實體建單能力（小白不必靠 AI 也能建）
+// ──────────────────────────────────────────────────────────
+export interface Product {
+  id: string; product_no: string; name: string; bom_version?: string
+  is_active: boolean
+}
+
+// Sales
+export const apiCreateCustomer = (data: { code: string; name: string; grade?: string; contact_person?: string; contact_phone?: string; payment_terms?: string; credit_limit?: number }) =>
+  api.post<Customer>('/sales/customers', data)
+
+export interface SalesOrderItemInput {
+  product_id: string
+  ordered_qty: number
+  unit_price: number
+}
+export const apiCreateSO = (data: { customer_id: string; items: SalesOrderItemInput[]; due_date?: string; notes?: string }) =>
+  api.post<SalesOrder>('/sales/orders', data)
+
+// Purchase
+export const apiCreateSupplier = (data: { code: string; name: string; tier?: string; lead_time_days?: number; is_approved?: boolean }) =>
+  api.post<Supplier>('/purchase/suppliers', data)
+
+export interface PurchaseOrderItemInput {
+  part_id: string
+  ordered_qty: number
+  unit_price: number   // backend uses unit_price (not unit_cost) for PO line items
+}
+export const apiCreatePO = (data: { supplier_id: string; items: PurchaseOrderItemInput[]; expected_date?: string }) =>
+  api.post<PurchaseOrder>('/purchase/orders', data)
+
+// Production
+export const apiListProducts = () => api.get<Product[]>('/production/products')
+export const apiCreateProduct = (data: { product_no: string; name: string }) =>
+  api.post<Product>('/production/products', data)
+export const apiCreateWO = (data: { product_id: string; ordered_qty: number; priority?: number; due_date?: string; so_id?: string }) =>
+  api.post<ProductionOrder>('/production/work-orders', data)
+
 // ---------- domain typed helpers ----------
 
 export interface Part {

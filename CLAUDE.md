@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-17（會話 #41 v3.16.1 — 文件 audit + 補 v3.13-v3.16 缺口。USER_MANUAL_ZH/EN 加 §3.5 Settings 頁、§3.6 CRM 頁、§3.7 AskAI 浮球 3 個新章節，版本標頭 v3.12→v3.16，sidebar 8 大頁面→12 大頁面（分總覽/營運/系統 3 區），§11.3 AI 不回應改成「自己進 ⚠️ 設定頁」+ 推 AskAI 浮球。README What's Inside 加 4 行 erpilot 獨家 callout。35 份 PDF 重 build 含 v3.16 新內容後 commit+push 同步 GitHub。教訓 #24：文件落後 1 sprint 就等於沒做這個功能）
+**最後更新**：2026-05-17（會話 #42 v3.17 Sprint K — 補 Sales/Purchase/Production 前端 Create 缺口。使用者「感覺少了前端輸入」一語打中 — 之前 16 sprint 過度押注 AI 對話建單，假設小白都會用 AI，但沒 LLM API Key 的小白完全卡死無法建單。Sprint K 加 QuickCreateBar 到 3 頁：每頁「新增主實體 / 快速建單 (1項目) / 用 AI 建多項目」3 條路。新 API helpers 7 個 + 8/8 smoke tests pass + 修了 PO unit_price 不是 unit_cost 的 bug。教訓 #26：對話式 ERP 不能只有對話，必須對話 AND 滑鼠雙軌）
 **維護者**：使用者 + Claude
 **版本**：3.13

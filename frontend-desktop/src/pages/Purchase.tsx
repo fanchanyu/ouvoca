@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   apiListPOs, apiListSuppliers, apiUpdateSupplier, apiDeleteSupplier,
-  apiCancelPO,
+  apiCancelPO, apiCreateSupplier, apiCreatePO,
+  apiListParts, type Part,
   type PurchaseOrder, type Supplier,
 } from '../lib/api'
 import EntityRowActions from '../components/EntityRowActions'
@@ -77,6 +79,9 @@ export default function Purchase() {
           )}
         </div>
       </div>
+
+      {/* v3.17: Quick create bar (Sprint K) */}
+      <PurchaseQuickCreateBar suppliers={suppliers} onAfterCreate={load} />
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         <Stat title="供應商總數" value={suppliers.length} />
@@ -205,4 +210,126 @@ function StatusBadge({ status }: { status: string }) {
     cancelled: 'bg-red-100 text-red-800',
   }
   return <span className={`px-2 py-1 rounded-full text-xs ${m[status] || 'bg-gray-100'}`}>{status}</span>
+}
+
+// ────────────────────────────────────────────────────────────
+// Quick create bar — 新增供應商 + 快速建採購單（Sprint K v3.17）
+// ────────────────────────────────────────────────────────────
+function PurchaseQuickCreateBar({ suppliers, onAfterCreate }: {
+  suppliers: Supplier[]
+  onAfterCreate: () => void | Promise<void>
+}) {
+  const [mode, setMode] = useState<'closed' | 'supplier' | 'po'>('closed')
+  const [err, setErr] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [parts, setParts] = useState<Part[]>([])
+  const [sup, setSup] = useState({ code: '', name: '', tier: 'T2', lead_time_days: 7 })
+  const [po, setPo] = useState({ supplier_id: '', part_id: '', ordered_qty: 1, unit_price: 0 })
+
+  useEffect(() => {
+    if (mode === 'po' && parts.length === 0) {
+      void apiListParts().then(setParts).catch(() => setParts([]))
+    }
+  }, [mode])
+
+  async function createSupplier() {
+    if (!sup.code.trim() || !sup.name.trim()) { setErr('代碼 + 名稱必填'); return }
+    setBusy(true); setErr(null)
+    try {
+      await apiCreateSupplier({ ...sup, is_approved: true })
+      setSup({ code: '', name: '', tier: 'T2', lead_time_days: 7 })
+      setMode('closed')
+      await onAfterCreate()
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '新增失敗') }
+    finally { setBusy(false) }
+  }
+
+  async function createPO() {
+    if (!po.supplier_id || !po.part_id || po.ordered_qty <= 0) {
+      setErr('供應商 + 料件 + 數量必填'); return
+    }
+    setBusy(true); setErr(null)
+    try {
+      await apiCreatePO({
+        supplier_id: po.supplier_id,
+        items: [{ part_id: po.part_id, ordered_qty: po.ordered_qty, unit_price: po.unit_price }],
+      })
+      setPo({ supplier_id: '', part_id: '', ordered_qty: 1, unit_price: 0 })
+      setMode('closed')
+      await onAfterCreate()
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '建單失敗') }
+    finally { setBusy(false) }
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow p-4 mb-6">
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-sm font-medium text-gray-700 mr-2">新增：</span>
+        <button onClick={() => setMode(mode === 'supplier' ? 'closed' : 'supplier')}
+          className={`px-3 py-1.5 rounded text-sm ${mode === 'supplier' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}>
+          ➕ 新增供應商
+        </button>
+        <button onClick={() => setMode(mode === 'po' ? 'closed' : 'po')}
+          className={`px-3 py-1.5 rounded text-sm ${mode === 'po' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
+          🛒 快速建採購單（1 項目）
+        </button>
+        <Link to="/chat" className="px-3 py-1.5 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded text-sm">
+          💬 用 AI 建多項目採購單
+        </Link>
+      </div>
+
+      {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mt-3 text-sm">{err}</div>}
+
+      {mode === 'supplier' && (
+        <div className="grid md:grid-cols-5 gap-2 mt-3 pt-3 border-t">
+          <input className="border rounded px-2 py-1.5 text-sm" placeholder="代碼* 例 SUP-001"
+            value={sup.code} onChange={(e) => setSup({ ...sup, code: e.target.value })} />
+          <input className="border rounded px-2 py-1.5 text-sm" placeholder="名稱*"
+            value={sup.name} onChange={(e) => setSup({ ...sup, name: e.target.value })} />
+          <select className="border rounded px-2 py-1.5 text-sm" value={sup.tier}
+            onChange={(e) => setSup({ ...sup, tier: e.target.value })}>
+            <option value="T1">T1 (策略)</option>
+            <option value="T2">T2 (主力)</option>
+            <option value="T3">T3 (一般)</option>
+          </select>
+          <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="交期天數" min="1"
+            value={sup.lead_time_days} onChange={(e) => setSup({ ...sup, lead_time_days: Number(e.target.value) })} />
+          <button onClick={createSupplier} disabled={busy}
+            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50">
+            {busy ? '儲存中…' : '✓ 儲存'}
+          </button>
+        </div>
+      )}
+
+      {mode === 'po' && (
+        <div className="mt-3 pt-3 border-t">
+          <div className="grid md:grid-cols-5 gap-2">
+            <select className="border rounded px-2 py-1.5 text-sm" value={po.supplier_id}
+              onChange={(e) => setPo({ ...po, supplier_id: e.target.value })}>
+              <option value="">選供應商*</option>
+              {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+            <select className="border rounded px-2 py-1.5 text-sm" value={po.part_id}
+              onChange={(e) => setPo({ ...po, part_id: e.target.value })}>
+              <option value="">選料件*</option>
+              {parts.map(p => <option key={p.id} value={p.id}>{p.part_no} {p.name}</option>)}
+            </select>
+            <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="數量*" min="1"
+              value={po.ordered_qty} onChange={(e) => setPo({ ...po, ordered_qty: Number(e.target.value) })} />
+            <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="單價"
+              value={po.unit_price || ''} onChange={(e) => setPo({ ...po, unit_price: Number(e.target.value) })} />
+            <button onClick={createPO} disabled={busy}
+              className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700 disabled:opacity-50">
+              {busy ? '建單中…' : '✓ 建單'}
+            </button>
+          </div>
+          {parts.length === 0 && (
+            <p className="text-xs text-gray-500 mt-2">
+              💡 還沒有料件？先去 <Link to="/inventory" className="text-blue-600 underline">庫存頁</Link> 新增。
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }

@@ -137,6 +137,103 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-17｜會話 #41｜📝 v3.17 Sprint K：補 Sales/Purchase/Production 前端 Create 缺口
+
+**目標**：使用者「感覺少了前端輸入。你要不要檢查一下」
+
+### 🔍 Audit 確認的重大缺口
+
+| 頁面 | 列表 | Edit 既有 | **Create 主實體 UI** |
+|---|---|---|---|
+| Inventory | ✅ | ✅ | ✅ 行內 form（之前就有）|
+| Sales | ✅ | ✅ Customer | ❌ **沒有 Customer 新增按鈕 / 沒 SO 建單 UI** |
+| Purchase | ✅ | ✅ Supplier | ❌ **沒 Supplier 新增按鈕 / 沒 PO 建單 UI** |
+| Production | ✅ | — | ❌ **完全沒 WO 建單按鈕** |
+| CRM | ✅ | — | ✅ Lead / Opp（Sprint I 加的）|
+
+**問題**：電腦小白裝完 erpilot，打開 Sales/Purchase/Production **點不到「新增」**。
+之前的隱含假設：用 AI 對話建單。**但沒 LLM API Key 的小白就完全卡死**。
+
+### ✅ Sprint K 補上 3 頁的 QuickCreateBar
+
+每頁加一個 bar：「新增 X 主體 / 快速建單（1 項目）/ 用 AI 建多項目單」
+
+**Sales.tsx + QuickCreateBar**：
+- ➕ 新增客戶（代碼/名稱/分級/聯絡人）
+- 📝 快速建銷售單（customer + product + qty + unit_price，1 行）
+- 💬 用 AI 建多項目訂單 → 跳 /chat
+
+**Purchase.tsx + PurchaseQuickCreateBar**：
+- ➕ 新增供應商（代碼/名稱/T級/交期天數）
+- 🛒 快速建採購單（supplier + part + qty + unit_price，1 行）
+- 💬 用 AI 建多項目採購單 → 跳 /chat
+
+**Production.tsx + ProductionQuickCreateBar**：
+- ➕ 新增產品（編號/名稱）
+- 🏭 新增工單（product + qty + priority）
+- 💬 用 AI 釋放工單 → 跳 /chat
+
+### ✅ 新 API helpers（lib/api.ts）
+
+- apiCreateCustomer / apiCreateSO
+- apiCreateSupplier / apiCreatePO
+- apiListProducts / apiCreateProduct / apiCreateWO
+- Product interface
+
+### 🐛 修了 1 個 bug
+
+PO 後端用 `unit_price` 不是 `unit_cost`（schema/model 確認）。
+原本前端寫 unit_cost → backend 接收後 total_amount=0
+→ 改成 `unit_price` + smoke test 揪出（這就是 smoke test 的價值）
+
+### ✅ Smoke tests
+
+`test_quick_create_v317.py`：**8/8 pass**
+- 創建 Customer（最少欄位）/ 完整欄位
+- 創建 Supplier
+- 創建 Product
+- 創建 SO（1 行 line item）
+- 創建 PO（1 行 line item） ← 抓到 unit_price 命名 bug
+- 創建 WO
+- 未授權 401
+
+### 📊 數字
+
+| 維度 | v3.16 結束 | v3.17 結束 |
+|---|---|---|
+| 前端可直接 Create 主實體的頁面 | 1 (Inventory) | **4** (+Sales +Purchase +Production) |
+| 沒 AI Key 的小白可不可以完整用 ERP | ❌（卡在沒建單按鈕） | ✅ **能** |
+| 新建 API helpers | n | **n+7** |
+| Smoke tests | 313 | **321** |
+
+### 🪞 教訓 #26
+
+**「對話式 ERP 不能只有對話 — 必須有對話 AND 滑鼠雙軌**」
+
+我前 16 個 sprint 過度押注「AI 對話式 CRUD」，**假設使用者都會用 AI 對話建單**。
+真實情境：
+- 第一次裝完沒 LLM API Key 的小白
+- 公司禁用對外 AI 服務的客戶
+- 想快速建一筆單懶得打對話的老手
+
+→ 都需要**傳統的「點按鈕新增」入口**。
+
+每個主實體必須兩條路：
+1. 🖱️ **滑鼠表單**（小白 / 沒 AI / 想快）
+2. 💬 **AI 對話**（複雜情境 / 多項目 / 自然語言）
+
+之前只做 (2) 是設計失誤。Sprint K 補齊 (1)。
+
+### 後續
+
+- SO/PO/WO 多項目 form（不只 1 行）— 但可以先靠 AI 對話
+- 圖形化 Kanban drag-drop（Pipedrive 風）— 加分項
+- Quick search Cmd+K（Linear 風）— 還沒做
+
+**Blocker**：無
+
+---
+
 ## 2026-05-17｜會話 #40｜📚 v3.16.1：文件補 v3.13-v3.16 缺口 + GitHub 同步
 
 **目標**：使用者「再確認一下使用及操作手冊和 GITHUB 上面的說明是否對小白友善 / 文件務必上傳及同步 github」

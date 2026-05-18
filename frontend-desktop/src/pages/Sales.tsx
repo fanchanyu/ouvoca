@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   apiListSOs, apiListCustomers, apiUpdateCustomer, apiDeleteCustomer,
-  apiCancelSO,
+  apiCancelSO, apiCreateCustomer, apiCreateSO,
+  apiListProducts, type Product,
   type SalesOrder, type Customer,
 } from '../lib/api'
 import EntityRowActions from '../components/EntityRowActions'
@@ -63,8 +65,14 @@ export default function Sales() {
         <Stat title="累計營收 (TWD)" value={totalRevenue.toLocaleString()} />
       </div>
 
+      {/* v3.17: Quick create bar (Sprint K — 補小白沒 AI 也能建單的能力) */}
+      <QuickCreateBar onAfterCreate={load} customers={customers} />
+
       <div className="bg-white rounded-xl shadow overflow-hidden mb-6">
-        <div className="px-4 py-3 bg-gray-50 font-semibold">銷售訂單</div>
+        <div className="px-4 py-3 bg-gray-50 font-semibold flex items-center justify-between">
+          <span>銷售訂單</span>
+          <Link to="/chat" className="text-xs text-blue-600 hover:underline">💬 用 AI 建多項目訂單 →</Link>
+        </div>
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-t">
             <tr>
@@ -181,6 +189,129 @@ function Stat({ title, value }: { title: string; value: number | string }) {
     <div className="bg-white rounded-xl shadow p-4">
       <div className="text-sm text-gray-500">{title}</div>
       <div className="text-2xl font-bold mt-1">{value}</div>
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+// QuickCreateBar — 新增客戶 + 快速建單（Sprint K v3.17）
+// 補上 Sales 頁先前缺的「新增」入口（之前只能靠 AI 對話）
+// ────────────────────────────────────────────────────────────
+function QuickCreateBar({ onAfterCreate, customers }: {
+  onAfterCreate: () => void | Promise<void>
+  customers: Customer[]
+}) {
+  const [mode, setMode] = useState<'closed' | 'customer' | 'so'>('closed')
+  const [err, setErr] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [products, setProducts] = useState<Product[]>([])
+  const [cust, setCust] = useState({ code: '', name: '', grade: 'B', contact_person: '', contact_phone: '' })
+  const [so, setSo] = useState({ customer_id: '', product_id: '', ordered_qty: 1, unit_price: 0 })
+
+  useEffect(() => {
+    if (mode === 'so' && products.length === 0) {
+      void apiListProducts().then(setProducts).catch(() => setProducts([]))
+    }
+  }, [mode])
+
+  async function createCustomer() {
+    if (!cust.code.trim() || !cust.name.trim()) { setErr('代碼 + 名稱必填'); return }
+    setBusy(true); setErr(null)
+    try {
+      await apiCreateCustomer(cust)
+      setCust({ code: '', name: '', grade: 'B', contact_person: '', contact_phone: '' })
+      setMode('closed')
+      await onAfterCreate()
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '新增失敗') }
+    finally { setBusy(false) }
+  }
+
+  async function createSO() {
+    if (!so.customer_id || !so.product_id || so.ordered_qty <= 0) {
+      setErr('客戶 + 產品 + 數量必填'); return
+    }
+    setBusy(true); setErr(null)
+    try {
+      await apiCreateSO({
+        customer_id: so.customer_id,
+        items: [{ product_id: so.product_id, ordered_qty: so.ordered_qty, unit_price: so.unit_price }],
+      })
+      setSo({ customer_id: '', product_id: '', ordered_qty: 1, unit_price: 0 })
+      setMode('closed')
+      await onAfterCreate()
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '建單失敗') }
+    finally { setBusy(false) }
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow p-4 mb-6">
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-sm font-medium text-gray-700 mr-2">新增：</span>
+        <button onClick={() => setMode(mode === 'customer' ? 'closed' : 'customer')}
+          className={`px-3 py-1.5 rounded text-sm transition-colors ${mode === 'customer' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}>
+          ➕ 新增客戶
+        </button>
+        <button onClick={() => setMode(mode === 'so' ? 'closed' : 'so')}
+          className={`px-3 py-1.5 rounded text-sm transition-colors ${mode === 'so' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
+          📝 快速建單（1 項目）
+        </button>
+        <Link to="/chat" className="px-3 py-1.5 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded text-sm">
+          💬 用 AI 建單（多項目）
+        </Link>
+      </div>
+
+      {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mt-3 text-sm">{err}</div>}
+
+      {mode === 'customer' && (
+        <div className="grid md:grid-cols-5 gap-2 mt-3 pt-3 border-t">
+          <input className="border rounded px-2 py-1.5 text-sm" placeholder="代碼* 例 CUST-001"
+            value={cust.code} onChange={(e) => setCust({ ...cust, code: e.target.value })} />
+          <input className="border rounded px-2 py-1.5 text-sm" placeholder="名稱*"
+            value={cust.name} onChange={(e) => setCust({ ...cust, name: e.target.value })} />
+          <select className="border rounded px-2 py-1.5 text-sm" value={cust.grade}
+            onChange={(e) => setCust({ ...cust, grade: e.target.value })}>
+            <option value="A">A (VIP)</option><option value="B">B (主力)</option>
+            <option value="C">C (一般)</option><option value="D">D (低頻)</option>
+          </select>
+          <input className="border rounded px-2 py-1.5 text-sm" placeholder="聯絡人"
+            value={cust.contact_person} onChange={(e) => setCust({ ...cust, contact_person: e.target.value })} />
+          <button onClick={createCustomer} disabled={busy}
+            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50">
+            {busy ? '儲存中…' : '✓ 儲存'}
+          </button>
+        </div>
+      )}
+
+      {mode === 'so' && (
+        <div className="mt-3 pt-3 border-t">
+          <div className="grid md:grid-cols-5 gap-2">
+            <select className="border rounded px-2 py-1.5 text-sm" value={so.customer_id}
+              onChange={(e) => setSo({ ...so, customer_id: e.target.value })}>
+              <option value="">選客戶*</option>
+              {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+            <select className="border rounded px-2 py-1.5 text-sm" value={so.product_id}
+              onChange={(e) => setSo({ ...so, product_id: e.target.value })}>
+              <option value="">選產品*</option>
+              {products.map(p => <option key={p.id} value={p.id}>{p.product_no} {p.name}</option>)}
+            </select>
+            <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="數量*" min="1"
+              value={so.ordered_qty} onChange={(e) => setSo({ ...so, ordered_qty: Number(e.target.value) })} />
+            <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="單價"
+              value={so.unit_price || ''} onChange={(e) => setSo({ ...so, unit_price: Number(e.target.value) })} />
+            <button onClick={createSO} disabled={busy}
+              className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700 disabled:opacity-50">
+              {busy ? '建單中…' : '✓ 建單'}
+            </button>
+          </div>
+          {products.length === 0 && (
+            <p className="text-xs text-gray-500 mt-2">
+              💡 還沒有產品？先去 <Link to="/production" className="text-blue-600 underline">生產頁</Link> 新增產品。
+              或<Link to="/settings" className="text-blue-600 underline">⚙️ 設定頁</Link>載入示範資料。
+            </p>
+          )}
+        </div>
+      )}
     </div>
   )
 }
