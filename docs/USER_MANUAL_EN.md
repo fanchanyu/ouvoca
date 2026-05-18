@@ -1,6 +1,6 @@
 # LLM-ERP User Manual (English)
 
-> **Version**: v3.22 Conversational ERP (erpilot)
+> **Version**: v3.23 Conversational ERP (erpilot)
 > **Audience**: First-time ERP users — Owner, Sales, Plant Manager, Purchaser, Warehouse
 > **Reading time**: ~30 minutes to get productive; refer to §11 Troubleshooting when stuck
 > **Languages**: System supports 🇹🇼 繁體中文 and 🇺🇸 English with instant switching
@@ -21,6 +21,11 @@
 > - ✅ **Multi-stage approval workflow**: rules + pending / history (§3.14)
 > - 📊 **Process chain visualization**: 📊 button shows where the doc is in the chain (§3.15)
 > - 📝 **Document notes**: internal remarks on every PO/SO/WO (§3.16)
+
+> 🆕 **v3.23 new features (Sprint Q, 2026-05-18)**
+> - 📋 **Dashboard Todo Center**: see "pending my approval / low stock / draft POs / draft WOs" on login
+> - 🧬 **BOM Editor**: visual editor for Bill of Materials — **unblocks WO release**
+> - 📜 **Inventory Transaction History**: new tab on Inventory page; every inbound/outbound logged
 
 ---
 

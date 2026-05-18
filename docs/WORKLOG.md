@@ -137,6 +137,90 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-18｜會話 #46｜🎯 v3.23 Sprint Q：第 3 輪深度 audit + 補 3 大 SMB ERP 缺口
+
+**目標**：使用者第 3 次「站在小白觀點看完整 ERP，對標鼎新/正航/SAP，找缺口補強」。
+
+### 🔍 第 3 輪 audit 找出的 7 大剩餘缺口
+
+| 缺口 | 影響 | 對應功能 |
+|---|---|---|
+| Dashboard 太弱 | 登入第一眼空虛 | SAP Cockpit / 鼎新角色 widgets |
+| **BOM 編輯器沒前端** | **WO release 報錯（real bug blocker）** | 製造業核心 |
+| **庫存交易歷史沒 UI** | 倉管對帳找不到 | 鼎新「庫存異動查詢」 |
+| 應付帳款 (AP) 沒做 | P2P 流程鏈停在「進貨→應付 ⏳」 | 鼎新會計核心（defer）|
+| 多項目 PO/SO 編輯 | 超 1 項只能用 AI 對話 | 所有 ERP 基本（defer）|
+| 盤點 (Cycle Count) | 月底盤點沒地方做 | 鼎新標準（defer）|
+| 個人 Profile | 改密碼 / 語言設定沒地方 | 基本（defer）|
+
+優先做 TOP 3 影響最大：Dashboard + BOM + 庫存異動。
+
+### ✅ Sprint Q 成果
+
+**1. 📋 Dashboard 待辦中心（pages/Dashboard.tsx）**：
+- 新加 `<TodoCenter />` widget — 對標 SAP B1 Cockpit
+- 4 個 actionable 項目（待我審 / 缺貨警示 / 草稿 PO / 草稿 WO）
+- 每個可點 → 跳對應頁
+- 0 待辦時顯示 ✅「沒有待處理事項，做得好！」
+
+**2. 🧬 BOM 物料表編輯器（new components/BomEditor.tsx ~140 行）**：
+- modal 顯示產品 BOM 元件清單
+- 點「➕ 加元件」→ 選料件 + 填用量 → 儲存
+- 整合到 Production 頁 ProductionQuickCreateBar「🧬 管理 BOM」按鈕
+- **解開 WO release 業務規則 unblock**
+
+**3. 📜 庫存異動歷史（Inventory.tsx 加 tab）**：
+- 新加 `<TransactionsTab />` 內嵌 component
+- tab 切換：📦 料件 / 📜 異動歷史
+- 列每筆 inbound/outbound/transfer/adjust/receive/ship
+- 顏色標示（+ 綠 / - 紅）+ 來源單據連結
+- 可按料件過濾
+
+**API helpers (lib/api.ts)**：
+- 新加 `BOMItem` interface + `apiListBOM` + `apiCreateBOMItem`
+
+**手冊更新**：
+- USER_MANUAL_ZH/EN.md 加 §3.17-3.19（Dashboard 待辦 / BOM / 庫存異動）
+- 版本標頭 v3.22 → v3.23
+- README What's Inside 加 3 行 v3.23 callout
+
+### 📊 數字
+
+| 維度 | v3.22 結束 | v3.23 結束 |
+|---|---|---|
+| Frontend components | 14 | **15**（+BomEditor）|
+| Frontend tabs in pages | n | **+2**（Inventory 加 📜 / Production 加 🧬）|
+| Dashboard widgets | 4 KPI cards | **4 KPI + 4 actionable todo** |
+| WO release 可行性 | ⚠️ 需 BOM 但無 UI 建 | ✅ 有 BOM editor |
+| 倉管對帳 | ❌ 找不到歷史 | ✅ 異動歷史 tab |
+
+### 🪞 教訓 #32
+
+**「Backend 有 endpoint 不等於使用者用得到」**（重提教訓 #27）
+
+這輪 audit 抓到的 3 個缺口共通點：**backend 都有 endpoint**：
+- `/api/production/bom-items` (POST/GET) — 有
+- `/api/inventory/transactions` (GET) — 有
+- `/api/approvals/pending` (GET) — 有（agent Sprint P 加的）
+
+但前端**沒入口**就等於沒做。這已經是第 3 次踩同樣的坑。
+
+**新規矩**：寫進 CLAUDE.md sprint checklist 第 7 件：
+**「每加 backend endpoint → 立即在 frontend grep 是否有 page 呼叫」**。
+沒有就 sprint 不算完成。
+
+### 後續
+
+- 應付帳款 (AP) module — backend + 整 P2P 流程鏈
+- 多項目 SO/PO 編輯器
+- 盤點 (Cycle Count) UI
+- 個人 Profile 頁（改密碼 / 語言）
+- 員工 / 部門管理
+
+**Blocker**：無
+
+---
+
 ## 2026-05-18｜會話 #45｜📚 v3.22.1：操作手冊 + README + GitHub 同步補完
 
 **目標**：使用者「操作手冊及使用手冊記得要同步更新 / GITHUB 也要同步」

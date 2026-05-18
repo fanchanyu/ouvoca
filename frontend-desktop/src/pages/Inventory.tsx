@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { apiListParts, apiCreatePart, type Part } from '../lib/api'
+import { apiListParts, apiCreatePart, apiListInventoryTxns, type Part, type InventoryTransaction } from '../lib/api'
 import EmptyState from '../components/EmptyState'
 
 export default function Inventory() {
@@ -7,6 +7,7 @@ export default function Inventory() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [tab, setTab] = useState<'parts' | 'txns'>('parts')   // v3.23
   const [form, setForm] = useState({
     part_no: '', name: '', category: 'raw_material', unit: 'pcs',
     safety_stock: 0, unit_cost: 0, lead_time_days: 0,
@@ -39,12 +40,31 @@ export default function Inventory() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">庫存管理</h1>
-        <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          {showForm ? '取消' : '新增零件'}
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button onClick={() => setTab('parts')}
+              className={`px-3 py-1.5 text-sm rounded ${tab === 'parts' ? 'bg-white shadow' : 'text-gray-500'}`}>
+              📦 料件
+            </button>
+            <button onClick={() => setTab('txns')}
+              className={`px-3 py-1.5 text-sm rounded ${tab === 'txns' ? 'bg-white shadow' : 'text-gray-500'}`}>
+              📜 異動歷史
+            </button>
+          </div>
+          {tab === 'parts' && (
+            <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              {showForm ? '取消' : '新增零件'}
+            </button>
+          )}
+        </div>
       </div>
 
       {error && <div className="bg-red-50 text-red-700 px-3 py-2 rounded-lg mb-4 text-sm">{error}</div>}
+
+      {/* v3.23: Transactions tab */}
+      {tab === 'txns' && <TransactionsTab parts={parts} />}
+      {tab === 'parts' && <>
+      {/* end-tab-wrapper-open */}
 
       {showForm && (
         <div className="bg-white rounded-xl shadow p-6 mb-6">
@@ -119,6 +139,103 @@ export default function Inventory() {
       </div>
 
       <style>{`.input { width: 100%; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; }`}</style>
+      </>}
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+// v3.23: 庫存交易歷史 tab
+// ────────────────────────────────────────────────────────────
+function TransactionsTab({ parts }: { parts: Part[] }) {
+  const [txns, setTxns] = useState<InventoryTransaction[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filterPart, setFilterPart] = useState<string>('')
+
+  async function load() {
+    setLoading(true)
+    try { setTxns(await apiListInventoryTxns(filterPart || undefined, 200)) }
+    catch { setTxns([]) }
+    finally { setLoading(false) }
+  }
+
+  useEffect(() => { void load() }, [filterPart])
+
+  const partLabel = (id: string) => {
+    const p = parts.find(x => x.id === id)
+    return p ? `${p.part_no} ${p.name}` : id.slice(0, 8)
+  }
+
+  const typeLabel: Record<string, { label: string; color: string }> = {
+    inbound:  { label: '➕ 入庫', color: 'text-emerald-700 bg-emerald-50' },
+    outbound: { label: '➖ 出庫', color: 'text-red-700 bg-red-50' },
+    adjust:   { label: '🔧 調整', color: 'text-amber-700 bg-amber-50' },
+    transfer: { label: '🔄 調撥', color: 'text-blue-700 bg-blue-50' },
+    receive:  { label: '🚚 進貨', color: 'text-emerald-700 bg-emerald-50' },
+    ship:     { label: '📦 出貨', color: 'text-red-700 bg-red-50' },
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <select value={filterPart} onChange={(e) => setFilterPart(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm">
+          <option value="">全部料件</option>
+          {parts.map(p => <option key={p.id} value={p.id}>{p.part_no} {p.name}</option>)}
+        </select>
+        <button onClick={load}
+          className="px-3 py-1.5 border border-blue-500 text-blue-600 rounded text-sm hover:bg-blue-50">
+          ↻ 刷新
+        </button>
+      </div>
+
+      <div className="bg-white rounded-xl shadow overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="text-left p-3">時間</th>
+              <th className="text-left p-3">類型</th>
+              <th className="text-left p-3">料件</th>
+              <th className="text-right p-3">數量</th>
+              <th className="text-left p-3">來源單據</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={5} className="p-4 text-center text-gray-400">載入中…</td></tr>
+            ) : txns.length === 0 ? (
+              <tr><td colSpan={5} className="p-8 text-center">
+                <div className="text-4xl mb-2">📜</div>
+                <div className="text-sm text-gray-600">{filterPart ? '此料件尚無異動' : '尚無庫存異動記錄'}</div>
+                <div className="text-xs text-gray-400 mt-1">
+                  進貨 / 出貨 / 工單完工 都會自動產生紀錄
+                </div>
+              </td></tr>
+            ) : (
+              txns.map(t => {
+                const tInfo = typeLabel[t.transaction_type] || { label: t.transaction_type, color: 'text-gray-700 bg-gray-50' }
+                return (
+                  <tr key={t.id} className="border-t hover:bg-gray-50">
+                    <td className="p-3 text-xs font-mono text-gray-600">
+                      {new Date(t.created_at).toLocaleString('zh-TW', { hour12: false })}
+                    </td>
+                    <td className="p-3">
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${tInfo.color}`}>{tInfo.label}</span>
+                    </td>
+                    <td className="p-3 text-sm">{partLabel(t.part_id)}</td>
+                    <td className={`p-3 text-right font-mono ${['outbound', 'ship'].includes(t.transaction_type) ? 'text-red-600' : 'text-emerald-700'}`}>
+                      {['outbound', 'ship'].includes(t.transaction_type) ? '-' : '+'}{t.qty}
+                    </td>
+                    <td className="p-3 text-xs text-gray-500">
+                      {t.reference_type ? `${t.reference_type}: ${(t.reference_id || '').slice(0, 12)}` : '—'}
+                    </td>
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

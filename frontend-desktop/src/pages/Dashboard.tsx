@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   apiListParts, apiListWOs, apiListPOs, apiBelowSafety, apiListSOs, apiHealth,
+  apiListPendingApprovals,
 } from '../lib/api'
 import {
   Card, CardHeader, Skeleton, SkeletonStatCard, EmptyState,
@@ -118,11 +119,94 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* v3.23 待辦中心 — 對標鼎新 / SAP Cockpit */}
+      <TodoCenter data={data} />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RecentWorkOrders loading={loading} data={data} navigate={navigate} t={t} />
         <LowStockAlert loading={loading} data={data} navigate={navigate} toast={toast} t={t} />
       </div>
     </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+// v3.23 TodoCenter — 個人化待辦中心（4 actionable widgets）
+// ────────────────────────────────────────────────────────────
+function TodoCenter({ data }: { data: DashboardData | null }) {
+  const navigate = useNavigate()
+  const [pendingApprovals, setPendingApprovals] = useState<number>(0)
+  const [draftPOs, setDraftPOs] = useState<number>(0)
+  const [draftWOs, setDraftWOs] = useState<number>(0)
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [approvals, pos, wos] = await Promise.all([
+          apiListPendingApprovals().catch(() => []),
+          apiListPOs().catch(() => []),
+          apiListWOs().catch(() => []),
+        ])
+        setPendingApprovals(approvals.length)
+        setDraftPOs(pos.filter(p => p.status === 'draft').length)
+        setDraftWOs(wos.filter(w => w.status === 'draft').length)
+      } catch { /* ignore */ }
+    })()
+  }, [])
+
+  const lowStockCount = data?.lowStock.length || 0
+  const total = pendingApprovals + lowStockCount + draftPOs + draftWOs
+
+  return (
+    <Card padding="lg" className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+      <div className="flex items-start gap-4">
+        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center text-xl">
+          📋
+        </div>
+        <div className="flex-1">
+          <p className="text-caption text-amber-700 font-semibold uppercase tracking-wide">📋 今日待辦中心</p>
+          {total === 0 ? (
+            <p className="text-body-lg text-ink-800 mt-1">✅ 沒有待處理事項，做得好！</p>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+              <TodoItem
+                count={pendingApprovals} label="待我審"
+                color="bg-red-100 text-red-800 border-red-200"
+                onClick={() => navigate('/approvals')} hidden={pendingApprovals === 0}
+              />
+              <TodoItem
+                count={lowStockCount} label="缺貨警示"
+                color="bg-amber-100 text-amber-800 border-amber-200"
+                onClick={() => navigate('/inventory')} hidden={lowStockCount === 0}
+              />
+              <TodoItem
+                count={draftPOs} label="草稿 PO 待核准"
+                color="bg-blue-100 text-blue-800 border-blue-200"
+                onClick={() => navigate('/purchase')} hidden={draftPOs === 0}
+              />
+              <TodoItem
+                count={draftWOs} label="草稿 WO 待釋放"
+                color="bg-purple-100 text-purple-800 border-purple-200"
+                onClick={() => navigate('/production')} hidden={draftWOs === 0}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+function TodoItem({ count, label, color, onClick, hidden }: {
+  count: number; label: string; color: string; onClick: () => void; hidden: boolean
+}) {
+  if (hidden) return null
+  return (
+    <button onClick={onClick}
+      className={`text-left px-3 py-2 border rounded-lg hover:shadow transition-all ${color}`}>
+      <div className="text-2xl font-bold">{count}</div>
+      <div className="text-xs">{label} →</div>
+    </button>
   )
 }
 

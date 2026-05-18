@@ -8,6 +8,7 @@ import {
 } from '../lib/api'
 import ProcessChain, { deriveWOSteps } from '../components/ProcessChain'
 import NotesEditor from '../components/NotesEditor'
+import BomEditor from '../components/BomEditor'
 
 export default function Production() {
   const [wos, setWos] = useState<ProductionOrder[]>([])
@@ -15,6 +16,7 @@ export default function Production() {
   const [error, setError] = useState<string | null>(null)
   const [chainWO, setChainWO] = useState<ProductionOrder | null>(null)
   const [notesWO, setNotesWO] = useState<ProductionOrder | null>(null)
+  const [bomProduct, setBomProduct] = useState<Product | null>(null)
 
   async function load() {
     setLoading(true)
@@ -71,8 +73,8 @@ export default function Production() {
         <Stat title="待釋放工單" value={draft} color="yellow" />
       </div>
 
-      {/* v3.17: Quick create bar (Sprint K) */}
-      <ProductionQuickCreateBar onAfterCreate={load} />
+      {/* v3.17: Quick create bar (Sprint K) + v3.23 BOM 管理 */}
+      <ProductionQuickCreateBar onAfterCreate={load} onEditBom={setBomProduct} />
 
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <table className="w-full text-sm">
@@ -137,6 +139,11 @@ export default function Production() {
           onClose={() => setNotesWO(null)} onSaved={load} />
       )}
 
+      {/* v3.23: BOM 編輯 */}
+      {bomProduct && (
+        <BomEditor product={bomProduct} onClose={() => setBomProduct(null)} />
+      )}
+
       {/* v3.22: 工單流程鏈 */}
       {chainWO && (
         <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto"
@@ -186,10 +193,11 @@ function StatusBadge({ status }: { status: string }) {
 // ────────────────────────────────────────────────────────────
 // Quick create bar — 新增產品 + 快速建工單（Sprint K v3.17）
 // ────────────────────────────────────────────────────────────
-function ProductionQuickCreateBar({ onAfterCreate }: {
+function ProductionQuickCreateBar({ onAfterCreate, onEditBom }: {
   onAfterCreate: () => void | Promise<void>
+  onEditBom: (product: Product) => void
 }) {
-  const [mode, setMode] = useState<'closed' | 'product' | 'wo'>('closed')
+  const [mode, setMode] = useState<'closed' | 'product' | 'wo' | 'bom'>('closed')
   const [products, setProducts] = useState<Product[]>([])
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -202,7 +210,7 @@ function ProductionQuickCreateBar({ onAfterCreate }: {
   }
 
   useEffect(() => {
-    if ((mode === 'wo' || mode === 'product') && products.length === 0) {
+    if ((mode === 'wo' || mode === 'product' || mode === 'bom') && products.length === 0) {
       void loadProducts()
     }
   }, [mode])
@@ -243,6 +251,11 @@ function ProductionQuickCreateBar({ onAfterCreate }: {
         <button onClick={() => setMode(mode === 'wo' ? 'closed' : 'wo')}
           className={`px-3 py-1.5 rounded text-sm ${mode === 'wo' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
           🏭 新增工單
+        </button>
+        <button onClick={() => setMode(mode === 'bom' ? 'closed' : 'bom')}
+          className={`px-3 py-1.5 rounded text-sm ${mode === 'bom' ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}
+          title="編輯產品的物料表 (BOM)，沒 BOM 工單會 release 失敗">
+          🧬 管理 BOM
         </button>
         <Link to="/chat" className="px-3 py-1.5 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded text-sm">
           💬 用 AI 釋放工單
@@ -285,6 +298,30 @@ function ProductionQuickCreateBar({ onAfterCreate }: {
             <p className="text-xs text-gray-500 mt-2">
               💡 還沒有產品？先按上面的「➕ 新增產品」建一個。
             </p>
+          )}
+        </div>
+      )}
+
+      {mode === 'bom' && (
+        <div className="mt-3 pt-3 border-t">
+          <p className="text-sm text-gray-600 mb-2">
+            選一個產品編 BOM（物料表）：
+          </p>
+          {products.length === 0 ? (
+            <p className="text-xs text-gray-500 italic">
+              💡 還沒有產品，先按「➕ 新增產品」建立。
+            </p>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
+              {products.map(p => (
+                <button key={p.id} onClick={() => { onEditBom(p); setMode('closed') }}
+                  className="text-left px-3 py-2 border rounded hover:border-amber-500 hover:bg-amber-50 transition-colors">
+                  <div className="text-xs text-gray-500 font-mono">{p.product_no}</div>
+                  <div className="text-sm font-medium">{p.name}</div>
+                  <div className="text-xs text-amber-600 mt-1">🧬 編 BOM →</div>
+                </button>
+              ))}
+            </div>
           )}
         </div>
       )}

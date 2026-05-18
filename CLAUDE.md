@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-18（會話 #46 — v3.22.1 文件同步。USER_MANUAL_ZH/EN 補完 §3.8-3.16 9 個新章節（QuickCreate/會計/電子發票/報表/多國統編/Cmd+K/列印PDF/審批/流程鏈/備註），sidebar 12→17 頁，版本標頭 v3.16→v3.22。README What's Inside 加 9 行 v3.17-22 callout。修了 test_tenant_coverage 新加 approval_workflow 沒登記的 bug。35 PDFs 重 build 後同步 GitHub）
+**最後更新**：2026-05-18（會話 #47 v3.23 Sprint Q — 第 3 輪 audit 補 3 大 SMB ERP 缺口：(1) Dashboard 加 TodoCenter widget（4 actionable 項目 對標 SAP Cockpit）(2) BomEditor component + Production「🧬 管理 BOM」按鈕（unblock WO release business rule）(3) Inventory 加「📜 異動歷史」tab。手冊 §3.17-3.19 同步加。教訓 #32：backend endpoint 不等於使用者用得到，第 3 次踩同坑→ 寫進 CLAUDE.md sprint checklist 第 7 件強制 grep frontend）
 **維護者**：使用者 + Claude
 **版本**：3.13

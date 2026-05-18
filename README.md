@@ -418,6 +418,9 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **✅ 多階審批工作流**（v3.22）| 規則設定 + 待我審 + 歷史，EventBus 自動觸發（鼎新 / SAP 招牌功能）| Rules + pending / history; auto-trigger via EventBus (鼎新/SAP signature feature) |
 | **📊 流程鏈視覺化**（v3.22）| 每張 PO/SO/WO 點 📊 看流程鏈狀態（SAP B1 Process Flow Chart 風）| Each PO/SO/WO has 📊 showing chain status (SAP B1 Process Flow style) |
 | **📝 單據備註**（v3.22）| 每張 PO/SO/WO 可留 internal remarks（不會印給客戶）| Internal remarks on every PO/SO/WO (not printed to customer) |
+| **📋 Dashboard 待辦中心**（v3.23）| 登入第一眼看「待我審 / 缺貨 / 草稿 PO / 草稿 WO」+ 點即跳轉（鼎新 / SAP Cockpit 風）| Personalized Todo Center on dashboard (鼎新/SAP Cockpit style) |
+| **🧬 BOM 物料表編輯器**（v3.23）| Production 加「管理 BOM」按鈕，視覺化編輯 + unblock WO release | Visual BOM editor — unblocks WO release |
+| **📜 庫存異動歷史**（v3.23）| Inventory 加 tab，列每筆 inbound/outbound/工單完工/盤點調整 | New tab on Inventory listing every txn (inbound/outbound/WO complete/adjust) |
 | **Schema Mapping AI** | exact/alias/partial 3 級 confidence，把外部 DB（鼎新/正航/Excel）一鍵接進來 | 3-tier confidence mapping (exact/alias/partial) — one-click external DB integration (鼎新/正航/Excel) |
 | **Event Engine** | EventBus + 16+ ConstraintChecker 規則 + SSE 廣播 | EventBus + 16+ ConstraintChecker rules + SSE broadcasting |
 | **React + Vite + Tailwind** | 桌機前端，完整 CRUD UI（EntityRowActions + EntityFormModal）| Desktop frontend with full CRUD UI (reusable EntityRowActions + EntityFormModal components) |

@@ -347,6 +347,21 @@ export interface InventoryTransaction {
 export const apiListInventoryTxns = (part_id?: string, limit = 100) =>
   api.get<InventoryTransaction[]>(`/inventory/transactions?${part_id ? `part_id=${part_id}&` : ''}limit=${limit}`)
 
+// ─── BOM 物料表 (v3.23 Sprint Q) ───────────────────────
+export interface BOMItem {
+  id: string
+  product_id: string
+  component_part_id: string
+  qty_per: number
+  unit?: string | null
+  scrap_rate?: number
+  remark?: string | null
+}
+export const apiListBOM = (product_id: string) =>
+  api.get<BOMItem[]>(`/production/bom/${product_id}`)
+export const apiCreateBOMItem = (data: { product_id: string; component_part_id: string; qty_per: number; unit?: string; scrap_rate?: number }) =>
+  api.post<BOMItem>('/production/bom-items', data)
+
 // ─── 報表 URL 直接下載 ──────────────────────────────────
 export const reportUrlAR = (overdueOnly = false) =>
   `/api/reports/ar-aging.xlsx?overdue_only=${overdueOnly}`
