@@ -179,6 +179,14 @@ playwright-report/
 # docs/PRICING_INTERNAL.md
 # docs/REVENUE_PROJECTION.md
 
+# ─── 🤖 內部 AI 工作檔（v3.25.3 私有化）───────────────────
+# CLAUDE.md：AI 會話啟動讀的「北極星」總控檔（內部進度看板）
+# docs/WORKLOG.md：動態工作日誌（每次會話末尾追加）
+# 這兩份是 AI 協作的長期記憶，不是給客戶/貢獻者看的對外文件。
+# 對外請看 docs/ROADMAP.md / docs/ARCHITECTURE_DECISIONS.md。
+CLAUDE.md
+docs/WORKLOG.md
+
 # ─── 📦 PDF 中間檔（mermaid 暫存）────────────────────────
 scripts/build-pdfs/.tmp/
 **/llm-erp-mermaid-*/

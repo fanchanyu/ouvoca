@@ -13,8 +13,8 @@
 
 小修 bug / typo 可以直接送 PR，但**新功能或架構變動**請先開 issue 討論，
 避免做完才發現方向不對。erpilot 對「加功能 vs 砍功能」的態度是 **砍**
-（見 [`CLAUDE.md` §9 設計爭議仲裁](./CLAUDE.md)），所以提案時請順便講
-「這對 [MVP 6 大功能](./CLAUDE.md) 有什麼貢獻」。
+（見 [`docs/ARCHITECTURE_DECISIONS.md`](./docs/ARCHITECTURE_DECISIONS.md)），
+所以提案時請順便講「這對 erpilot 對話式 ERP 核心承諾有什麼貢獻」（自然語言操作 / ConfirmCard / 90秒 Undo）。
 
 ### Step 2 · Fork + 開 branch + 寫程式
 
@@ -139,11 +139,11 @@ PR 描述記得貼 `run_gates.sh` 輸出（PR 模板會提醒你）。
 
 | 想了解 | 看哪裡 |
 |---|---|
-| 專案北極星 | [`CLAUDE.md`](./CLAUDE.md) |
+| 專案北極星 | [`docs/ARCHITECTURE_DECISIONS.md`](./docs/ARCHITECTURE_DECISIONS.md) + [`docs/CONVERSATIONAL_ERP_DESIGN_ZH.md`](./docs/CONVERSATIONAL_ERP_DESIGN_ZH.md) |
 | 對話式 ERP 設計（必讀）| [`docs/CONVERSATIONAL_ERP_DESIGN_ZH.md`](./docs/CONVERSATIONAL_ERP_DESIGN_ZH.md) |
 | 開發 SOP | [`docs/DEVELOPMENT_SOP.md`](./docs/DEVELOPMENT_SOP.md) |
 | Gap 分析（找事做的好地方）| [`docs/GAP_ANALYSIS.md`](./docs/GAP_ANALYSIS.md) |
-| 動態工作日誌 | [`docs/WORKLOG.md`](./docs/WORKLOG.md) |
+| 動態工作日誌 | (內部 AI 工作檔，不公開) — 對外請看 [`docs/ROADMAP.md`](./docs/ROADMAP.md) |
 | 雙授權商業面 | [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md) |
 
 ---

@@ -14,7 +14,7 @@
 > ⚡ **v3.0 戰略軸轉 / Strategic Pivot (2026-05-15)**
 > 🇹🇼 砍 LINE Bot / Mobile App / 外協協同三線，全力做桌機對話式 ERP。
 > 🇺🇸 Cut LINE Bot / Mobile App / external-vendor portals — focused 100% on desktop conversational ERP.
-> See [`CLAUDE.md` §10](./CLAUDE.md) for the full rationale.
+> See [`docs/ARCHITECTURE_DECISIONS.md`](./docs/ARCHITECTURE_DECISIONS.md) for the full rationale.
 
 ---
 
@@ -765,12 +765,11 @@ LLM_VERIFY_SSL=false
 
 | 文件 / Doc | 用途 / Purpose |
 |---|---|
-| [`CLAUDE.md`](./CLAUDE.md) | 專案北極星、模組進度、設計決策 |
 | [`docs/DEVELOPMENT_SOP.md`](./docs/DEVELOPMENT_SOP.md) | 開發 SOP、新增 domain/tool/constraint 步驟 |
 | [`docs/GAP_ANALYSIS.md`](./docs/GAP_ANALYSIS.md) | Gap 分析（找事做的好地方） |
-| [`docs/WORKLOG.md`](./docs/WORKLOG.md) | 動態工作日誌 |
 | [`docs/CONVERSATIONAL_ERP_DESIGN_ZH.md`](./docs/CONVERSATIONAL_ERP_DESIGN_ZH.md) | 對話式 ERP 6 層架構（必讀）|
 | [`docs/ARCHITECTURE_DECISIONS.md`](./docs/ARCHITECTURE_DECISIONS.md) | ADR 架構決策紀錄 |
+| 📝 Sprint 紀錄 / 動態工作日誌 | （內部 AI 工作檔，不公開）|
 
 ---
 
