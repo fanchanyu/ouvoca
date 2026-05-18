@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-18（會話 #45 v3.22 Sprint P — 平行作業 6 件。1 agent 跑多階審批工作流（ApprovalRule + Request + Step + 7 endpoints + Approvals 頁 3 tab + 9/9 tests），foreground 跑 ProcessChain 流程鏈視覺化（P2P/O2C/WO 3 種推導）+ 出貨單列印 + 發票列印 + 單據備註（PO/SO/WO PATCH + NotesEditor modal）。教訓 #30：平行作業要明確 file boundary — append-only + 避開共用檔即可零衝突。52/52 tests pass + TS clean）
+**最後更新**：2026-05-18（會話 #46 — v3.22.1 文件同步。USER_MANUAL_ZH/EN 補完 §3.8-3.16 9 個新章節（QuickCreate/會計/電子發票/報表/多國統編/Cmd+K/列印PDF/審批/流程鏈/備註），sidebar 12→17 頁，版本標頭 v3.16→v3.22。README What's Inside 加 9 行 v3.17-22 callout。修了 test_tenant_coverage 新加 approval_workflow 沒登記的 bug。35 PDFs 重 build 後同步 GitHub）
 **維護者**：使用者 + Claude
 **版本**：3.13

@@ -410,6 +410,14 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **🤖 Auto CrmEvent**（erpilot 獨家 v3.16）| 訂單成立 / Lead 轉換 / 商機推進時自動產 CrmEvent 進 Customer timeline（業務不必手動加 activity log）| Orders / lead conversions / opportunity stage changes auto-create CRM events (no manual activity logging) |
 | **🤝 CRM 完整 UI**（v3.15）| Lead 漏斗 / 商機 Kanban / Customer 360 三 tab | Lead pipeline / Opportunity Kanban / Customer 360 (3 tabs) |
 | **⚙️ Settings 頁**（v3.13）| 自助 AI key 設定（測試 + 即時生效）/ 載入清除示範資料 / 檔案上傳 drag-and-drop | Self-service AI key setup (test + live apply) / demo data / file upload drag-and-drop |
+| **📒 會計 + 🧾 電子發票**（v3.18-19）| 傳票 / AR / 科目表 / 台灣 MIG 標準電子發票開立查詢作廢 | Journals / AR / Chart of Accounts / Taiwan MIG e-invoice issue/lookup/void |
+| **📈 報表中心**（v3.19）| KPI 即時（DSO/週轉/毛利率）+ AR aging xlsx + 月度庫存 xlsx + 401 報表 HTML | Live KPI + AR aging xlsx + monthly inventory xlsx + Taiwan 401 tax HTML |
+| **🌍 多國統編驗證**（v3.20）| 6 國內建（TW/CN/US/JP/EU+GENERIC）+ `register_validator()` 客戶可 plug-in 任何國家 | 6 built-in (TW/CN/US/JP/EU+GENERIC) + plug-in for any country |
+| **🔍 Cmd+K 全系統搜尋**（v3.21）| 8 種 entity + 10 快速命令，鍵盤導航（SAP B1 / Linear / Notion / Raycast 風） | Fuzzy search 8 entities + 10 quick commands; SAP/Linear-style |
+| **🖨 單據列印 PDF**（v3.21）| PO / SO / 出貨單 / 發票 一鍵印給供應商 / 客戶（標準台頭 + 簽章區）| PO / SO / Delivery Note / Invoice one-click PDF (standard header + signature blocks) |
+| **✅ 多階審批工作流**（v3.22）| 規則設定 + 待我審 + 歷史，EventBus 自動觸發（鼎新 / SAP 招牌功能）| Rules + pending / history; auto-trigger via EventBus (鼎新/SAP signature feature) |
+| **📊 流程鏈視覺化**（v3.22）| 每張 PO/SO/WO 點 📊 看流程鏈狀態（SAP B1 Process Flow Chart 風）| Each PO/SO/WO has 📊 showing chain status (SAP B1 Process Flow style) |
+| **📝 單據備註**（v3.22）| 每張 PO/SO/WO 可留 internal remarks（不會印給客戶）| Internal remarks on every PO/SO/WO (not printed to customer) |
 | **Schema Mapping AI** | exact/alias/partial 3 級 confidence，把外部 DB（鼎新/正航/Excel）一鍵接進來 | 3-tier confidence mapping (exact/alias/partial) — one-click external DB integration (鼎新/正航/Excel) |
 | **Event Engine** | EventBus + 16+ ConstraintChecker 規則 + SSE 廣播 | EventBus + 16+ ConstraintChecker rules + SSE broadcasting |
 | **React + Vite + Tailwind** | 桌機前端，完整 CRUD UI（EntityRowActions + EntityFormModal）| Desktop frontend with full CRUD UI (reusable EntityRowActions + EntityFormModal components) |

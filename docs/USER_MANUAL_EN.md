@@ -1,6 +1,6 @@
 # LLM-ERP User Manual (English)
 
-> **Version**: v3.16 Conversational ERP (erpilot)
+> **Version**: v3.22 Conversational ERP (erpilot)
 > **Audience**: First-time ERP users — Owner, Sales, Plant Manager, Purchaser, Warehouse
 > **Reading time**: ~30 minutes to get productive; refer to §11 Troubleshooting when stuck
 > **Languages**: System supports 🇹🇼 繁體中文 and 🇺🇸 English with instant switching
@@ -10,6 +10,17 @@
 > - 🤝 **CRM page**: Lead pipeline / Opportunity Kanban / Customer 360 with activity timeline (§3.6)
 > - 💡 **AskAI floating button**: always-on "live AI coach" on every page (§3.7)
 > - 🤖 **Auto activity logging**: orders / lead conversions / opportunity stage changes auto-create CRM events
+
+> 🚀 **v3.17-v3.22 new features (latest 6 sprints, 2026-05-18)**
+> - 📝 **QuickCreate per page**: Sales/Purchase/Production add entity + 1-line order UI (§3.8)
+> - 📒 **Accounting + E-Invoice**: Journals / AR / Chart of Accounts / e-invoice issue/lookup/void (§3.9)
+> - 📈 **Reports center**: DSO/Inventory turn/Gross margin live + AR aging xlsx + 401 (§3.10)
+> - 🌍 **Multi-country tax ID**: 6 built-in (TW/CN/US/JP/EU+GENERIC) + plug-in (§3.11)
+> - 🔍 **Cmd+K global search**: Ctrl+K/Cmd+K fuzzy search customers/parts/orders (§3.12)
+> - 🖨 **Print PDFs**: PO/SO/Delivery Note/Invoice one-click PDF for vendors/customers (§3.13)
+> - ✅ **Multi-stage approval workflow**: rules + pending / history (§3.14)
+> - 📊 **Process chain visualization**: 📊 button shows where the doc is in the chain (§3.15)
+> - 📝 **Document notes**: internal remarks on every PO/SO/WO (§3.16)
 
 ---
 
@@ -959,6 +970,6 @@ Or email your company's ERP support contact.
 
 ---
 
-**Manual version**: v3.16 (2026-05-17) — includes Settings page / CRM page / AskAI floating button / Auto CrmEvent
+**Manual version**: v3.22 (2026-05-18) — includes Settings / CRM / AskAI / QuickCreate / Accounting / E-Invoice / Reports / Multi-country tax ID / Cmd+K / Print PDF / Approval workflow / Process chain / Document notes
 **Chinese version**: [`USER_MANUAL_ZH.md`](./USER_MANUAL_ZH.md)
 **Companion docs**: [`CONVERSATIONAL_ERP_DESIGN_EN.md`](./CONVERSATIONAL_ERP_DESIGN_EN.md) (architecture) / `LICENSE-COMMERCIAL.md` (licensing)

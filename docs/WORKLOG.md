@@ -137,6 +137,79 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-18｜會話 #45｜📚 v3.22.1：操作手冊 + README + GitHub 同步補完
+
+**目標**：使用者「操作手冊及使用手冊記得要同步更新 / GITHUB 也要同步」
+
+### 🔍 Audit 缺口（grep 結果：0 命中）
+
+v3.17-v3.22 連續 6 個 sprint 加了 9 大功能，但 USER_MANUAL 沒提到任何一個：
+- 📝 QuickCreate 每頁建單（v3.17）
+- 📒 會計頁（v3.18）
+- 🧾 電子發票（v3.18-19）
+- 📈 報表中心（v3.19）
+- 🌍 多國統編（v3.20）
+- 🔍 Cmd+K 全系統搜尋（v3.21）
+- 🖨 PO/SO/出貨單/發票 列印 PDF（v3.21）
+- ✅ 多階審批工作流（v3.22）
+- 📊 流程鏈視覺化（v3.22）
+- 📝 單據備註（v3.22）
+
+### ✅ 修正
+
+**USER_MANUAL_ZH/EN.md**：
+- 版本標頭 v3.16 → **v3.22**
+- 頂部「v3.17-v3.22 新功能必看」清單（9 項）
+- §3.2 sidebar 12 大頁面 → **17 大頁面**（加 📒會計 / 🧾電子發票 / 📈報表 / ✅審批）
+- **新加 §3.8-3.16 共 9 個章節**：
+  - §3.8 每頁的新增按鈕（QuickCreateBar）
+  - §3.9 會計 + 電子發票
+  - §3.10 報表中心
+  - §3.11 多國統編驗證
+  - §3.12 Cmd+K 全系統搜尋
+  - §3.13 單據列印 PDF
+  - §3.14 多階審批工作流
+  - §3.15 流程鏈視覺化
+  - §3.16 單據備註
+
+**README.md What's Inside**：加 9 行 v3.18-22 callout，含「erpilot 獨家」標籤。
+
+**修 bug**：v3.22 加 approval_workflow model 沒登記到 test_tenant_coverage → 加進 EXPECTED_TENANT_MIXIN。
+
+**重 build 35 PDFs**（含新 USER_MANUAL 章節）→ commit + push 同步 GitHub。
+
+### 📊 數字
+
+| 維度 | 之前 | 之後 |
+|---|---|---|
+| USER_MANUAL_ZH 行數 | 1280 | **~1500+** |
+| Manual 提到的 v3.17+ 功能 | 0/9 | **9/9** |
+| README What's Inside 內含 erpilot 獨家 | 2 行 | **11 行**（含 v3.18-22）|
+| Sidebar 12 → 17 頁登錄文件 | ❌ | ✅ |
+| PDF 在 GitHub 是最新 v3.22 | ❌ | ✅ |
+
+### 🪞 教訓 #31
+
+**「Sprint 收尾 6 件 checklist 失守」**
+
+教訓 #24 我當時定的 sprint 收尾 6 件強制檢查：
+1. ✅ Backend 模型 + endpoint
+2. ✅ Frontend page + nav 入口
+3. ✅ Smoke tests
+4. **❌ USER_MANUAL 對應章節更新** ← 第 5、6 sprint 起又漏了
+5. **❌ README 對應 callout** ← 同上
+6. ✅ Commit + push 同步 GitHub
+
+連續 5 個 sprint（K/L/M/N/O/P）都只做 1-3, 6 就 push，文件落後越來越多。
+這次一次補齊 v3.17-v3.22 全部 9 個新功能的手冊章節。
+
+**結論**：sprint checklist 該寫進 CLAUDE.md §5.1 強制觸發，不靠記憶。
+或加 pre-push hook 偵測「過去 N commits 有新 feature 但 USER_MANUAL 沒改動」就警告。
+
+**Blocker**：無
+
+---
+
 ## 2026-05-18｜會話 #44｜🚀 v3.22 Sprint P：多階審批 + 流程鏈 + 出貨單 + 備註（平行作業）
 
 **目標**：使用者「同步平行處理」剩下的 6 件待做。
