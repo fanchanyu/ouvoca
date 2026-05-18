@@ -27,6 +27,13 @@
 > - 📖 **Recipe Editor**: renamed from "BOM" — visual editor — **unblocks WO release**
 > - 📜 **Inventory Transaction History**: new tab on Inventory page; every inbound/outbound logged
 
+> 🏛️ **v3.25 new feature: "House Rules"** — erpilot's signature differentiator
+> - **Not copying SAP/鼎新/Odoo's hardcoded rules** — erpilot data-fies rules: UI toggle / AI authoring / plugin extension
+> - 3 default rules: WO release needs Recipe / PO > NT$100k needs manager / PO must have ≥1 item
+> - Author by chat: "SO discount > 5% needs manager" → ConfirmCard → instant
+> - Manager override + full audit log
+> - **Full guide**: [`docs/HOUSE_RULES_GUIDE_EN.md`](./HOUSE_RULES_GUIDE_EN.md) 🇺🇸 / [`HOUSE_RULES_GUIDE_ZH.md`](./HOUSE_RULES_GUIDE_ZH.md) 🇹🇼
+
 > 🎨 **v3.24 erpilot's original vocabulary (don't copy competitors — memorable for beginners)**
 > - 🌱 **Sprout** = renamed from "Lead" (seed grows into customer)
 > - 🎯 **Chase** = renamed from "Opportunity" (deals salespeople chase daily)

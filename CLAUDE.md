@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-18（會話 #49 v3.25 Sprint S — 「家規 (House Rules)」資料化引擎，erpilot 原創詞。對應 WO release 需 BOM 寫死過硬的架構缺陷。新建 PolicyRule + PolicyAuditLog model + policy_engine service (4 內建 condition + register_condition plugin) + 9 endpoints API + 14/14 smoke tests。**WO release 已從寫死 if 改為 evaluate_policies**——客戶可在 UI 開關「需做法」規則立即生效。預設 3 條家規 startup 自動灌。教訓 #34：hardcode rule = 逼客戶改 code = 不是 SaaS。下次寫 raise BusinessRuleError 前先問「客戶會不會想關/改？」9 成答案是會→ 用 PolicyEngine）
+**最後更新**：2026-05-18（會話 #50 v3.25.1 — 家規 (House Rules) 獨立操作手冊。新建 docs/HOUSE_RULES_GUIDE_ZH.md + HOUSE_RULES_GUIDE_EN.md 雙語完整指南（~500 行 each：什麼是家規 / 對手對比 / 3 種設定方式 UI/AI/Plugin / 4 個積木 / 預設 3 條規則 / 真實情境阿玲一天 / FAQ 8 題 / 工程師技術細節）。README 加大型「招牌差異化」聚焦區塊（中英雙語對比表 + 連結到完整指南）。USER_MANUAL_ZH/EN 加 v3.25 callout 連結獨立指南。完成後同步 GitHub 上 v3.25 已 push）
 **維護者**：使用者 + Claude
 **版本**：3.13

@@ -137,6 +137,74 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-18｜會話 #49｜📖 v3.25.1：家規獨立操作手冊 + README 聚焦區塊
+
+**目標**：使用者「這段特別聲明和做出獨立的操作手冊讓小白可以理解 / 放在 GitHub 中特別說明 / 同步」
+
+### ✅ 新建 2 份雙語獨立指南
+
+**`docs/HOUSE_RULES_GUIDE_ZH.md`** (~500 行)：
+- 🤔 什麼是家規 + 為什麼需要 + 對比傳統 ERP 痛點
+- 🆚 對手分析表（SAP / 鼎新 / NetSuite / Odoo） + erpilot 差異化
+- 🚀 3 種設定方式：UI 點選 / AI 對話建 / API Plugin
+- 🏗 4 個積木：Trigger / Condition / Action / Override Role
+- 📦 預設 3 條規矩說明
+- 📖 真實情境：阿玲（採購）的一天 — 高額 PO 走審批
+- 🔍 稽核 log + ISO/GMP/FDA 合規說明
+- ❓ FAQ 8 題（多 tenant / 規則衝突 / Python 條件 / 撤回 / 濫用防止）
+- 🛠 工程師技術細節（Schema / Plugin / Integration）
+- 🎯 戰略價值說明：「這是 erpilot 真正能打贏鼎新/SAP 的關鍵差異化」
+
+**`docs/HOUSE_RULES_GUIDE_EN.md`** (~520 行)：
+英文版同步，所有結構對齊。
+
+### ✅ README 加大型聚焦區塊
+
+在 `## ⚡ 30 秒看懂 erpilot` 前插入：
+
+```markdown
+## 🏛️ 新功能聚焦：「家規 (House Rules)」⭐ erpilot 招牌差異化
+
+🇹🇼 雙語對比：
+不抄 SAP「Business Rule」/ 鼎新「業務規則」/ Odoo「Server Action」
+erpilot 自創「家規」概念...
+
+3 種設定方式：UI 點 / AI 講 / Plugin
+對手對比表 (5 行)
+連結到完整指南 ZH/EN
+
+🎯 這是 erpilot 真正能贏鼎新/SAP 的關鍵差異化
+```
+
+### ✅ USER_MANUAL_ZH/EN 同步加 callout
+
+加 v3.25 區塊 + 連結獨立指南。
+
+### 📊 數字
+
+| 維度 | 之前 | 之後 |
+|---|---|---|
+| 獨立功能指南文件 | 1 (HOW_TO_GET_LLM_API_KEY) | **3** (+ HOUSE_RULES_GUIDE ZH/EN)|
+| README 高度可見功能聚焦區塊 | 0 | **1 (家規大區塊)** |
+| 雙語文件 docs/ 總數 | 18 PDFs + 4 special | **+2 special** (HOUSE_RULES) |
+
+### 🪞 教訓 #35
+
+**「重要功能要當招牌寫，別藏在 What's Inside 表格裡」**
+
+之前家規藏在 README 表格第 N 行，小白讀完 README 不知道這是 erpilot 招牌。
+這次升級成 README 開頭「**新功能聚焦**」大區塊 + 獨立完整指南，**確保訪客 30 秒內知道這是核心 USP**。
+
+下次任何「真正能贏對手」的功能都該這樣處理：
+1. README 開頭大區塊聚焦
+2. 獨立完整指南 docs/XXX_GUIDE.md
+3. 中英雙語對齊
+4. 對手對比表 + 為什麼贏
+
+**Blocker**：無
+
+---
+
 ## 2026-05-18｜會話 #48｜🏛️ v3.25 Sprint S：「家規 (House Rules)」資料化引擎
 
 **目標**：使用者「WO release 需 BOM 寫死太硬，做彈性 API + LLM 客製化」打中架構缺陷

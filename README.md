@@ -50,6 +50,44 @@
 
 ---
 
+## 🏛️ 新功能聚焦：「家規 (House Rules)」⭐ erpilot 招牌差異化
+
+🇹🇼 **不抄 SAP「Business Rule」/ 鼎新「業務規則」/ Odoo「Server Action」**，erpilot 自創「家規」概念：
+🇺🇸 **Not copying SAP "Business Rule" / 鼎新 "Business Rules" / Odoo "Server Actions"** — erpilot's original concept "House Rules":
+
+> 🇹🇼 像家庭家規一樣，**每家公司有自己的規矩**（PO > 10 萬要老闆批 / WO 沒做法不能釋放 / 折扣 > 5% 要主管審…）。
+> 鼎新 / SAP 把規則寫死，改要等顧問 1 個月、花 5-20 萬。
+> erpilot 把規則**資料化**，你可以：
+>
+> 1. 🖱 **UI 點一點** 開關 / 改條件 / 新增（不用改 code）
+> 2. 💬 **對 AI 講話**「我們公司 SO 折扣超 5% 應該主管審」→ AI 回 ConfirmCard 確認 → 規矩立即上線
+> 3. 🔌 **Plugin 新條件**（給工程師擴充特殊國家 / 行業 logic）
+
+> 🇺🇸 Like household rules, **every company has their own** (PO > 100k needs boss approval / WO without Recipe can't release / discount > 5% needs manager review…).
+> SAP/鼎新 hardcodes rules — to change them, wait 1 month + pay $5k-20k for consultants.
+> erpilot **data-fies** rules. You can:
+>
+> 1. 🖱 **Click in UI** to toggle / edit / add (no code change)
+> 2. 💬 **Tell AI**: "SO discount > 5% needs manager approval" → AI returns ConfirmCard → rule goes live
+> 3. 🔌 **Plug-in new conditions** (engineers can extend for special countries / industries)
+
+| 對手 / Competitor | 改家規方式 / How to change | 缺點 / Drawback |
+|---|---|---|
+| SAP B1 | 顧問改 code | 等 1 個月 + 5-20 萬 / 1 month + $5-20k |
+| 鼎新 / 正航 | 設定畫面 | 條件死板 / Rigid |
+| NetSuite | SuiteScript (JS) | 要會寫程式 / Coding required |
+| Odoo | Python eval | 危險 / Unsafe |
+| **erpilot** ⭐ | **UI 點 / AI 講 / Plugin** | **小白能改、立刻生效** / **Anyone can edit, instant** |
+
+📖 **完整使用指南（給電腦小白）**：
+- 🇹🇼 中文 → [`docs/HOUSE_RULES_GUIDE_ZH.md`](./docs/HOUSE_RULES_GUIDE_ZH.md)
+- 🇺🇸 English → [`docs/HOUSE_RULES_GUIDE_EN.md`](./docs/HOUSE_RULES_GUIDE_EN.md)
+
+> 🎯 **這是 erpilot 真正能贏鼎新/SAP 的關鍵差異化**——他們做不到「使用者自己改規矩」。
+> 🎯 **This is erpilot's real edge over SAP/鼎新** — they can't let end users customize their own business rules.
+
+---
+
 ## ⚡ 30 秒看懂 erpilot / 30-Second Pitch
 
 🇹🇼 **erpilot 是台灣中小製造業的對話式 ERP**：員工坐在電腦前打一句話（「跟長江廠下 100 個 M6 螺絲，交期下週五」），AI 就把它變成完整的採購單，跳出 ConfirmCard 確認卡讓你按確認才執行。**不用學系統、不用教育訓練、2 小時上手**。20 人以內的小公司**完全免費**用整套（含鼎新 / 正航 connector）。

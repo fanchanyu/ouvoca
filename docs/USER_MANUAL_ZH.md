@@ -35,6 +35,13 @@
 >
 > 雙語對照（i18n）：見 `src/i18n/locales/{zh-TW,en}.ts` 的 `erpilotTerms`
 
+> 🏛️ **v3.25 新功能：「家規 (House Rules)」** — erpilot 招牌差異化
+> - **不抄 SAP/鼎新/Odoo 寫死 rule**，erpilot 規則資料化：UI 開關 / AI 對話建 / Plugin 擴充
+> - 預設 3 條家規：WO 釋放需做法、PO > 10 萬需主管審、PO 必須至少 1 項目
+> - 對話建規矩：「我們公司 SO 折扣超 5% 應該主管審」 → ConfirmCard 確認 → 立即生效
+> - 主管覆寫 + 完整 audit log
+> - **完整使用指南**：[`docs/HOUSE_RULES_GUIDE_ZH.md`](./HOUSE_RULES_GUIDE_ZH.md) 🇹🇼 / [`HOUSE_RULES_GUIDE_EN.md`](./HOUSE_RULES_GUIDE_EN.md) 🇺🇸
+
 ---
 
 ## 給第一次讀這份手冊的你
