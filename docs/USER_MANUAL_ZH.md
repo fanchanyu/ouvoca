@@ -24,8 +24,16 @@
 
 > 🆕 **v3.23 新功能（2026-05-18 Sprint Q）**
 > - 📋 **Dashboard 待辦中心**：登入第一眼看「待我審 / 缺貨警示 / 草稿 PO / 草稿 WO」（§3.17）
-> - 🧬 **BOM 物料表編輯器**：產品的 BOM 視覺化編輯，**unblock WO release**（§3.18）
+> - 📖 **產品做法 (Recipe) 編輯器**：原 BOM 改名「做法」（不抄鼎新詞）— 視覺化 + **unblock WO release**（§3.18）
 > - 📜 **庫存異動歷史**：Inventory 頁加 tab，看每筆 inbound/outbound（§3.19）
+
+> 🎨 **v3.24 erpilot 原創語彙（不抄對手，給小白好記）**
+> - 🌱 **新苗 (Sprout)** = 原 Lead 潛在客戶（種子發芽變客戶）
+> - 🎯 **追單 (Chase)** = 原 Opportunity 商機（業務每天追的單）
+> - 📖 **做法 (Recipe)** = 原 BOM 物料表（像食譜，產品由什麼料件組成）
+> - 👤 **客戶全貌** = Customer 360 視圖
+>
+> 雙語對照（i18n）：見 `src/i18n/locales/{zh-TW,en}.ts` 的 `erpilotTerms`
 
 ---
 

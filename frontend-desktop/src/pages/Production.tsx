@@ -254,8 +254,8 @@ function ProductionQuickCreateBar({ onAfterCreate, onEditBom }: {
         </button>
         <button onClick={() => setMode(mode === 'bom' ? 'closed' : 'bom')}
           className={`px-3 py-1.5 rounded text-sm ${mode === 'bom' ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}
-          title="編輯產品的物料表 (BOM)，沒 BOM 工單會 release 失敗">
-          🧬 管理 BOM
+          title="編輯產品做法 (Recipe)，沒做法工單會 release 失敗">
+          📖 編做法 (Recipe)
         </button>
         <Link to="/chat" className="px-3 py-1.5 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded text-sm">
           💬 用 AI 釋放工單
@@ -305,7 +305,7 @@ function ProductionQuickCreateBar({ onAfterCreate, onEditBom }: {
       {mode === 'bom' && (
         <div className="mt-3 pt-3 border-t">
           <p className="text-sm text-gray-600 mb-2">
-            選一個產品編 BOM（物料表）：
+            選一個產品編「<strong>做法 (Recipe)</strong>」 — 像食譜，告訴系統這產品由哪些料件組成：
           </p>
           {products.length === 0 ? (
             <p className="text-xs text-gray-500 italic">
@@ -318,7 +318,7 @@ function ProductionQuickCreateBar({ onAfterCreate, onEditBom }: {
                   className="text-left px-3 py-2 border rounded hover:border-amber-500 hover:bg-amber-50 transition-colors">
                   <div className="text-xs text-gray-500 font-mono">{p.product_no}</div>
                   <div className="text-sm font-medium">{p.name}</div>
-                  <div className="text-xs text-amber-600 mt-1">🧬 編 BOM →</div>
+                  <div className="text-xs text-amber-600 mt-1">📖 編做法 →</div>
                 </button>
               ))}
             </div>

@@ -204,6 +204,16 @@ export const en = {
       system: '⚙️ System', ai: '🤖 AI', mesh: '🌐 MESH',
     },
   },
+  // erpilot original vocabulary (v3.24 — coined for beginners, not copied from competitors)
+  erpilotTerms: {
+    sprout: 'Sprout',         // Lead → Sprout: a seed that grows into a customer
+    sproutHint: 'A prospect from trade show / ads / referral — like a seed, water daily and it grows into a customer',
+    chase: 'Chase',           // Opportunity → Chase: what salespeople chase daily
+    chaseHint: 'An active deal your sales is chasing (with intent to buy) — track amount + probability + stage',
+    recipe: 'Recipe',         // BOM → Recipe: like a cooking recipe
+    recipeHint: "A product's recipe = which parts it's made of + how many of each (just like a cooking recipe)",
+    customer360: 'Customer Full View',
+  },
   myPermissions: {
     title: 'My permissions',
     subtitle: 'See what your account can do',

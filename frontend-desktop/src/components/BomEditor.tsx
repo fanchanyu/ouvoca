@@ -1,10 +1,14 @@
 /**
- * BomEditor — 物料表編輯（Sprint Q v3.23）
+ * BomEditor — 產品「做法 (Recipe)」編輯（Sprint Q v3.23 / Sprint R 改名 v3.24）
  *
- * 製造業核心：每個產品的 BOM（Bill of Materials）= 該產品由哪些料件組成 + 用量。
- * WO release 業務規則需要 BOM，沒這個 release 會失敗。
+ * **erpilot 原創詞**：對手鼎新/SAP 叫 "BOM / 物料表"，我們叫「**做法 / Recipe**」。
+ * 像食譜，小白一看就懂「這產品怎麼做」。
  *
- * UI：modal 內顯示 (product → 料件清單)，可加新行 (component_part_id + qty_per)。
+ * 製造業核心：每個產品的「做法」= 該產品由哪些料件組成 + 用量。
+ * WO release 業務規則需要做法，沒這個 release 會失敗。
+ *
+ * UI：modal 內顯示 (product → 元件清單)，可加新行 (component_part_id + qty_per)。
+ * Backend 仍叫 BOMItem (向後相容)，UI 全 rebrand 為「做法 / Recipe」。
  */
 import { useEffect, useState } from 'react'
 import {
@@ -68,7 +72,7 @@ export default function BomEditor({ product, onClose }: Props) {
       <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-3 border-b">
           <div>
-            <h2 className="font-semibold">🧬 物料表 (BOM)</h2>
+            <h2 className="font-semibold">📖 產品做法 (Recipe)</h2>
             <p className="text-xs text-gray-500 mt-0.5">產品：{product.product_no} {product.name}</p>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:bg-gray-100 px-2 py-1 rounded text-sm">✕</button>
@@ -80,7 +84,7 @@ export default function BomEditor({ product, onClose }: Props) {
           <div className="flex justify-between items-center mb-3">
             <p className="text-sm text-gray-600">
               <strong>{items.length}</strong> 個元件
-              {items.length === 0 && <span className="text-amber-600 ml-2">⚠️ 無 BOM 工單將無法 release</span>}
+              {items.length === 0 && <span className="text-amber-600 ml-2">⚠️ 還沒填做法，工單將無法 release</span>}
             </p>
             <button onClick={() => setAdding(a => !a)}
               className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
@@ -120,10 +124,10 @@ export default function BomEditor({ product, onClose }: Props) {
             <div className="text-center text-gray-400 py-12">載入中…</div>
           ) : items.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-4xl mb-2">🧬</div>
-              <p className="text-sm text-gray-600">這個產品還沒有 BOM</p>
+              <div className="text-4xl mb-2">📖</div>
+              <p className="text-sm text-gray-600">這個產品還沒有「做法」(Recipe)</p>
               <p className="text-xs text-gray-400 mt-1">
-                BOM = 「產品由哪些料件組成 + 每樣多少個」<br/>
+                做法 = 「產品由哪些料件組成 + 每樣多少個」，就像食譜<br/>
                 例：M6 螺絲 1 個 + M6 螺帽 1 個 = 1 套螺絲組
               </p>
             </div>
@@ -150,7 +154,7 @@ export default function BomEditor({ product, onClose }: Props) {
         </div>
 
         <div className="border-t bg-gray-50 px-3 py-2 text-xs text-gray-500 text-center">
-          💡 BOM 設好後該產品的工單可以 release。MRP 也會自動算出每張工單需要拉多少料。
+          💡 「做法」設好後該產品的工單可以 release。MRP 也會自動算出每張工單需要拉多少料。
         </div>
       </div>
     </div>

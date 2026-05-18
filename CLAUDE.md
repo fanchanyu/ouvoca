@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-18（會話 #47 v3.23 Sprint Q — 第 3 輪 audit 補 3 大 SMB ERP 缺口：(1) Dashboard 加 TodoCenter widget（4 actionable 項目 對標 SAP Cockpit）(2) BomEditor component + Production「🧬 管理 BOM」按鈕（unblock WO release business rule）(3) Inventory 加「📜 異動歷史」tab。手冊 §3.17-3.19 同步加。教訓 #32：backend endpoint 不等於使用者用得到，第 3 次踩同坑→ 寫進 CLAUDE.md sprint checklist 第 7 件強制 grep frontend）
+**最後更新**：2026-05-18（會話 #48 v3.24 Sprint R — erpilot 原創語彙，不抄對手詞給小白好記。Rebrand 3 個對手詞：BOM → 📖 做法 (Recipe) / Lead → 🌱 新苗 (Sprout) / Opportunity → 🎯 追單 (Chase) / Customer 360 → 客戶全貌。BomEditor + Crm + Production UI 全面 rebrand，雙語 i18n 加 erpilotTerms namespace 對齊中英，USER_MANUAL/README 同步。教訓 #33：naming 是品牌的一部分，動物食物比喻+雙語雙顯+行為動詞最好記）
 **維護者**：使用者 + Claude
 **版本**：3.13

@@ -137,6 +137,84 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-18｜會話 #47｜🎨 v3.24 Sprint R：erpilot 原創語彙（不抄對手，小白好記，雙語版）
+
+**目標**：使用者「我們不要抄對手的專有名詞 / 創個好記的新詞 / 對象是小白 / 雙語版 / 同步 GitHub」
+
+### 🎯 對手詞 → erpilot 原創詞對照
+
+| 對手詞 | 鼎新/Salesforce/SAP 用 | **erpilot 原創** | 為什麼小白懂 |
+|---|---|---|---|
+| BOM (Bill of Materials) | 物料表 / 物料清單 | **📖 做法 (Recipe)** | 像食譜，「這產品怎麼做」秒懂 |
+| Lead | 潛在客戶 / Lead | **🌱 新苗 (Sprout)** | 種子發芽，會長成客戶 |
+| Opportunity | 商機 / Opportunity | **🎯 追單 (Chase)** | 業務每天都在追的單 |
+| Customer 360 | 客戶 360 視圖 | **👤 客戶全貌** | 中文一目了然 |
+
+設計原則：**雙語雙顯**（中文+英文括號），確保中英環境都好記。
+
+### ✅ 修正範圍
+
+**BomEditor.tsx**：
+- title: 「🧬 物料表 (BOM)」→「📖 產品做法 (Recipe)」
+- 「無 BOM 工單將無法 release」→「還沒填做法，工單將無法 release」
+- 「BOM = ...」說明 → 「做法 = ...就像食譜」
+
+**Production.tsx**：
+- 按鈕「🧬 管理 BOM」→「📖 編做法 (Recipe)」
+- 子標題「選一個產品編 BOM」→「選一個產品編做法 — 像食譜，告訴系統這產品由哪些料件組成」
+
+**Crm.tsx**：
+- Lead Pipeline tab → 「🌱 新苗漏斗 (Sprout)」
+- Opportunity Kanban tab → 「🎯 追單看板 (Chase)」
+- Customer 360 tab → 「👤 客戶全貌」
+- 「➕ 新增 Lead」→「🌱 新增新苗 (Sprout)」
+- 「➕ 新增商機」→「🎯 新增追單 (Chase)」
+- LEAD_STAGES 4 階段：新進/已接觸/已驗證 → 新接觸/已聊過/有意向
+- EmptyState 文案：「種子發芽變客戶」「業務每天追的單」生動比喻
+- Stat label「商機數」→「追單數」
+- SectionList「💼 商機」→「🎯 追單」
+
+**i18n bilingual 整合**：
+- 新加 `erpilotTerms` namespace 到 zh-TW.ts + en.ts
+- sprout / sproutHint / chase / chaseHint / recipe / recipeHint / customer360
+- 雙語對齊 — 中英 UI 都可以用 t('erpilotTerms.sprout')
+
+**手冊同步**：
+- USER_MANUAL_ZH/EN.md 加「🎨 v3.24 erpilot 原創語彙」清單
+- README What's Inside 加 1 行 v3.24 callout
+
+### 📊 數字
+
+| 維度 | 之前 | 之後 |
+|---|---|---|
+| 抄對手詞數 | 3 (BOM / Lead / Opportunity) | **0** |
+| erpilot 原創詞 | 已有 ConfirmCard / 90s Undo / AskAI / TodoCenter | **+4 (Sprout / Chase / Recipe / 客戶全貌)** |
+| i18n bilingual 對齊 | 部分 | **erpilotTerms namespace 完整對齊** |
+
+### 🪞 教訓 #33
+
+**「Naming 是品牌的一部分」**
+
+之前我直接拿 BOM / Lead / Opportunity 用，等於默認「我們是這幾家對手的山寨版」。
+真正的差異化從**取名**開始：
+- 鼎新 30 年品牌 = 物料表
+- Salesforce 25 年品牌 = Lead / Opportunity
+- erpilot 想贏 → 必須自己的詞
+
+新詞原則：
+1. **動物 / 食物 比喻**（小白生活化）— Sprout / Recipe / Chase
+2. **雙語雙顯**（中文+英文括號）— 過渡期讓老使用者也認得
+3. **行為動詞**（追單 vs 商機）— 「追」是動作，比抽象名詞好記
+
+下一波可以創的新詞：
+- AR aging → ?
+- Approval workflow → ?
+- Process chain → ?
+
+**Blocker**：無
+
+---
+
 ## 2026-05-18｜會話 #46｜🎯 v3.23 Sprint Q：第 3 輪深度 audit + 補 3 大 SMB ERP 缺口
 
 **目標**：使用者第 3 次「站在小白觀點看完整 ERP，對標鼎新/正航/SAP，找缺口補強」。

@@ -24,8 +24,16 @@
 
 > 🆕 **v3.23 new features (Sprint Q, 2026-05-18)**
 > - 📋 **Dashboard Todo Center**: see "pending my approval / low stock / draft POs / draft WOs" on login
-> - 🧬 **BOM Editor**: visual editor for Bill of Materials — **unblocks WO release**
+> - 📖 **Recipe Editor**: renamed from "BOM" — visual editor — **unblocks WO release**
 > - 📜 **Inventory Transaction History**: new tab on Inventory page; every inbound/outbound logged
+
+> 🎨 **v3.24 erpilot's original vocabulary (don't copy competitors — memorable for beginners)**
+> - 🌱 **Sprout** = renamed from "Lead" (seed grows into customer)
+> - 🎯 **Chase** = renamed from "Opportunity" (deals salespeople chase daily)
+> - 📖 **Recipe** = renamed from "BOM" (like cooking recipe — what parts the product is made of)
+> - 👤 **Customer Full View** = renamed from "Customer 360"
+>
+> Bilingual mapping: see `src/i18n/locales/{zh-TW,en}.ts` under `erpilotTerms`
 
 ---
 

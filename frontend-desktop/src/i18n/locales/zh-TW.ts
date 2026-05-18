@@ -276,6 +276,16 @@ export const zhTW = {
     superAdminHint: '您是系統最高權限使用者，可執行任何操作。',
     noPerms: '無權限',
   },
+  // erpilot 原創語彙（v3.24 — 不抄鼎新/Salesforce，創新詞給小白）
+  erpilotTerms: {
+    sprout: '新苗',           // Lead → 新苗 (Sprout)：種子發芽變客戶
+    sproutHint: '潛在客戶（從展會 / 廣告 / 介紹來）— 像種子，每天澆水會長成正式客戶',
+    chase: '追單',            // Opportunity → 追單 (Chase)：每天追的單
+    chaseHint: '業務每天追蹤的案子（已有付費意向）— 看金額 + 勝率 + 階段',
+    recipe: '做法',           // BOM → 做法 (Recipe)：像食譜
+    recipeHint: '產品的「做法」= 由哪些料件組成 + 每樣多少個（像食譜）',
+    customer360: '客戶全貌',  // Customer 360 → 客戶全貌
+  },
   // 使用者選單
   userMenu: { profile: '個人設定', myPerms: '我的權限', logout: '登出' },
   // Footer / 雜項

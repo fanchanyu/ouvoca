@@ -421,6 +421,7 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **📋 Dashboard 待辦中心**（v3.23）| 登入第一眼看「待我審 / 缺貨 / 草稿 PO / 草稿 WO」+ 點即跳轉（鼎新 / SAP Cockpit 風）| Personalized Todo Center on dashboard (鼎新/SAP Cockpit style) |
 | **🧬 BOM 物料表編輯器**（v3.23）| Production 加「管理 BOM」按鈕，視覺化編輯 + unblock WO release | Visual BOM editor — unblocks WO release |
 | **📜 庫存異動歷史**（v3.23）| Inventory 加 tab，列每筆 inbound/outbound/工單完工/盤點調整 | New tab on Inventory listing every txn (inbound/outbound/WO complete/adjust) |
+| **🎨 erpilot 原創語彙**（v3.24）| 🌱 新苗 (Sprout) = Lead / 🎯 追單 (Chase) = Opportunity / 📖 做法 (Recipe) = BOM — 不抄鼎新/Salesforce，給小白好記 | 🌱 Sprout = Lead / 🎯 Chase = Opportunity / 📖 Recipe = BOM — original vocabulary, memorable for beginners |
 | **Schema Mapping AI** | exact/alias/partial 3 級 confidence，把外部 DB（鼎新/正航/Excel）一鍵接進來 | 3-tier confidence mapping (exact/alias/partial) — one-click external DB integration (鼎新/正航/Excel) |
 | **Event Engine** | EventBus + 16+ ConstraintChecker 規則 + SSE 廣播 | EventBus + 16+ ConstraintChecker rules + SSE broadcasting |
 | **React + Vite + Tailwind** | 桌機前端，完整 CRUD UI（EntityRowActions + EntityFormModal）| Desktop frontend with full CRUD UI (reusable EntityRowActions + EntityFormModal components) |

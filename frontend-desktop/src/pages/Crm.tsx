@@ -1,15 +1,17 @@
 /**
- * CRM — 全新 CRM 主頁（Sprint I v3.15）
+ * CRM — 客戶關係管理（Sprint I v3.15 / Sprint R v3.24 rebrand）
  *
- * 3 個 tab，學 HubSpot + Salesforce + Pipedrive：
- *  1. 📋 Lead Pipeline — 4 欄漏斗（新進 / 接觸中 / 已驗證 / 失敗）
- *  2. 💼 商機 Kanban — 5 欄階段（探索 / 提案 / 議價 / 成交 / 失敗）
- *  3. 👤 客戶 360 — 選客戶 → 看訂單 / 商機 / 活動時間軸
+ * **erpilot 原創詞**（不抄 Salesforce / 鼎新）：
+ *  - Lead → 🌱「新苗 (Sprout)」 — 種子發芽，會長成正式客戶
+ *  - Opportunity → 🎯「追單 (Chase)」 — 業務每天在追的單
+ *  - Customer 360 → 「客戶全貌」
  *
- * 設計重點：
- *  - 不做 drag-and-drop（複雜，下個 sprint 再說）
- *  - 用「快速階段移動」按鈕代替
- *  - 空狀態走 EmptyState 給 actionable 出路
+ * 3 個 tab：
+ *  1. 🌱 新苗漏斗 (Sprout Pipeline) — 4 欄（新接觸 / 已聊過 / 有意向 / 失敗）
+ *  2. 🎯 追單看板 (Chase Board) — 5 欄階段（探索 / 提案 / 議價 / 成交 / 失敗）
+ *  3. 👤 客戶全貌 (Customer 360) — 選客戶 → 看訂單 / 追單 / 活動時間軸
+ *
+ * Backend 名仍叫 Lead / Opportunity (向後相容)，UI 全 rebrand。
  */
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -24,9 +26,9 @@ import EmptyState from '../components/EmptyState'
 type Tab = 'pipeline' | 'kanban' | 'customer360'
 
 const LEAD_STAGES: { value: string; label: string; color: string }[] = [
-  { value: 'new',       label: '🆕 新進',     color: 'border-t-gray-400 bg-gray-50' },
-  { value: 'contacted', label: '📞 已接觸',   color: 'border-t-blue-400 bg-blue-50' },
-  { value: 'qualified', label: '✅ 已驗證',   color: 'border-t-emerald-400 bg-emerald-50' },
+  { value: 'new',       label: '🌱 新接觸',   color: 'border-t-gray-400 bg-gray-50' },
+  { value: 'contacted', label: '📞 已聊過',   color: 'border-t-blue-400 bg-blue-50' },
+  { value: 'qualified', label: '✅ 有意向',   color: 'border-t-emerald-400 bg-emerald-50' },
   { value: 'lost',      label: '❌ 失敗',     color: 'border-t-red-400 bg-red-50' },
 ]
 
@@ -47,16 +49,16 @@ export default function Crm() {
         <div>
           <h1 className="text-2xl font-bold">🤝 CRM 客戶關係管理</h1>
           <p className="text-sm text-gray-500 mt-1">
-            管理潛在客戶（Lead）、商機追蹤（Opportunity）、客戶 360 視圖
+            🌱 新苗 (Sprout) · 🎯 追單 (Chase) · 👤 客戶全貌 — erpilot 原創語彙，小白秒懂
           </p>
         </div>
       </div>
 
       <div className="flex gap-1 border-b border-gray-200 mb-6">
         {[
-          { key: 'pipeline' as Tab,   label: '📋 Lead 漏斗' },
-          { key: 'kanban' as Tab,     label: '💼 商機 Kanban' },
-          { key: 'customer360' as Tab, label: '👤 客戶 360' },
+          { key: 'pipeline' as Tab,   label: '🌱 新苗漏斗 (Sprout)' },
+          { key: 'kanban' as Tab,     label: '🎯 追單看板 (Chase)' },
+          { key: 'customer360' as Tab, label: '👤 客戶全貌' },
         ].map(t => (
           <button
             key={t.key}
@@ -138,7 +140,7 @@ function LeadPipeline() {
           onClick={() => setCreating(c => !c)}
           className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
         >
-          {creating ? '取消' : '➕ 新增 Lead'}
+          {creating ? '取消' : '🌱 新增新苗 (Sprout)'}
         </button>
       </div>
 
@@ -176,9 +178,9 @@ function LeadPipeline() {
         <div className="bg-white rounded-xl shadow">
           <EmptyState
             icon="📋"
-            title="還沒有任何 Lead"
-            subtitle="Lead = 潛在客戶。從展會 / 廣告 / 介紹來的還沒成交的對象，先記在這裡追蹤。"
-            primaryAction={{ label: '➕ 新增第一個 Lead', onClick: () => setCreating(true) }}
+            title="還沒有任何「新苗 (Sprout)」"
+            subtitle="新苗 = 還沒成交的對象（從展會 / 廣告 / 介紹來的）。像種子，先記在這裡每天澆水追蹤，會長成客戶。"
+            primaryAction={{ label: '🌱 種第一顆苗', onClick: () => setCreating(true) }}
             secondaryAction={{ label: '⚙️ 載入示範資料', to: '/settings' }}
           />
         </div>
@@ -253,7 +255,7 @@ function OpportunityKanban() {
   useEffect(() => { load() }, [])
 
   async function createOpp() {
-    if (!newOpp.customer_id || !newOpp.name) { setErr('客戶 + 商機名稱必填'); return }
+    if (!newOpp.customer_id || !newOpp.name) { setErr('客戶 + 追單名稱 (e.g. Q3 大訂單)必填'); return }
     setErr(null)
     try {
       await apiCreateOpp(newOpp)
@@ -285,15 +287,16 @@ function OpportunityKanban() {
 
       <div className="flex items-center justify-between mb-4">
         <div className="text-sm text-gray-600">
-          📊 開放商機加權總值：<strong className="text-blue-700 text-base">
+          🎯 進行中追單加權總值：<strong className="text-blue-700 text-base">
             NT$ {totalValue.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}
           </strong>
+          <span className="text-xs text-gray-500 ml-2">(每張單金額 × 勝率%)</span>
         </div>
         <button
           onClick={() => setCreating(c => !c)}
           className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
         >
-          {creating ? '取消' : '➕ 新增商機'}
+          {creating ? '取消' : '🎯 新增追單 (Chase)'}
         </button>
       </div>
 
@@ -307,7 +310,7 @@ function OpportunityKanban() {
             {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
           <input
-            type="text" placeholder="商機名稱"
+            type="text" placeholder="追單名稱 (e.g. Q3 大訂單)"
             value={newOpp.name} onChange={(e) => setNewOpp({ ...newOpp, name: e.target.value })}
             className="border rounded px-2 py-1.5 text-sm"
           />
@@ -332,10 +335,10 @@ function OpportunityKanban() {
       {opps.length === 0 ? (
         <div className="bg-white rounded-xl shadow">
           <EmptyState
-            icon="💼"
-            title="還沒有任何商機"
-            subtitle="商機 = 已有付費意向的客戶機會。把每個業務追蹤中的案子記在這裡，看金額和勝率走勢。"
-            primaryAction={{ label: '➕ 新增第一個商機', onClick: () => setCreating(true) }}
+            icon="🎯"
+            title="還沒有任何「追單 (Chase)」"
+            subtitle="追單 = 業務每天在追的案子（已有付費意向）。記在這裡看金額 / 勝率 / 階段走勢，老闆一眼掌握 pipeline。"
+            primaryAction={{ label: '🎯 開始追第一單', onClick: () => setCreating(true) }}
           />
         </div>
       ) : (
@@ -486,7 +489,7 @@ function Customer360() {
       <div className="md:col-span-3 space-y-4">
         {!selected ? (
           <div className="bg-white rounded-xl shadow">
-            <EmptyState icon="👈" title="從左邊選一個客戶" subtitle="會顯示這個客戶的訂單、商機、活動記錄全貌" compact />
+            <EmptyState icon="👈" title="從左邊選一個客戶" subtitle="會顯示這個客戶的訂單、追單、活動記錄全貌（Customer 360）" compact />
           </div>
         ) : (
           <>
@@ -508,7 +511,7 @@ function Customer360() {
               </div>
               <div className="grid grid-cols-3 gap-3 mt-4 text-sm">
                 <Stat label="訂單數" value={orders.length} />
-                <Stat label="商機數" value={opps.length} />
+                <Stat label="追單數" value={opps.length} />
                 <Stat label="活動數" value={events.length} />
               </div>
             </div>
@@ -521,7 +524,7 @@ function Customer360() {
                 ))}
               </SectionList>
 
-              <SectionList title={`💼 商機（${opps.length}）`} empty="尚無商機">
+              <SectionList title={`🎯 追單 (${opps.length})`} empty="尚無追單">
                 {opps.map(o => (
                   <Item key={o.id} title={o.name} sub={`${o.stage} · ${o.probability}% · NT$ ${o.amount.toLocaleString('zh-TW')}`} />
                 ))}
