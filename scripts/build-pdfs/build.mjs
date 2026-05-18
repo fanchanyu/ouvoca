@@ -92,6 +92,17 @@ const DOCS_TO_BUILD = [
   // === 18 v3.5 Sales killer moments 一頁紙 ===
   { src: 'SALES_KILLER_MOMENTS_ZH.md', out: '18_業務demo一頁紙_中文.pdf',                title: '業務 demo 一頁紙 — 9 killer moments' },
   { src: 'SALES_KILLER_MOMENTS_EN.md', out: '18_Sales_Killer_Moments_EN.pdf',          title: 'Sales Demo One-Pager — 9 killer moments' },
+
+  // === 19 v3.14 LLM API Key 申請完整指南（小白導向）===
+  { src: 'HOW_TO_GET_LLM_API_KEY_ZH.md', out: '19_LLM_API_Key申請指南_中文.pdf',          title: 'LLM API Key 申請指南（小白版）' },
+  { src: 'HOW_TO_GET_LLM_API_KEY_EN.md', out: '19_How_to_Get_LLM_API_Key_EN.pdf',       title: 'How to Get an LLM API Key (Beginner-Friendly)' },
+
+  // === 20 v3.25 家規 (House Rules) 完整使用指南 — erpilot 招牌差異化 ===
+  { src: 'HOUSE_RULES_GUIDE_ZH.md',     out: '20_家規完整使用指南_中文.pdf',              title: '🏛️ 家規 (House Rules) 完整使用指南' },
+  { src: 'HOUSE_RULES_GUIDE_EN.md',     out: '20_House_Rules_Guide_EN.pdf',              title: '🏛️ House Rules — Complete User Guide' },
+
+  // === 21 v3.20 LICENSE 簡介 ===
+  { src: 'COMMERCIAL_LICENSING_FAQ_ZH.md', out: '21_商業授權FAQ_中文.pdf',                 title: 'erpilot 商業授權 FAQ（含小小企業免費條款）' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────

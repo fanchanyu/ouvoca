@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-18（會話 #50 v3.25.1 — 家規 (House Rules) 獨立操作手冊。新建 docs/HOUSE_RULES_GUIDE_ZH.md + HOUSE_RULES_GUIDE_EN.md 雙語完整指南（~500 行 each：什麼是家規 / 對手對比 / 3 種設定方式 UI/AI/Plugin / 4 個積木 / 預設 3 條規則 / 真實情境阿玲一天 / FAQ 8 題 / 工程師技術細節）。README 加大型「招牌差異化」聚焦區塊（中英雙語對比表 + 連結到完整指南）。USER_MANUAL_ZH/EN 加 v3.25 callout 連結獨立指南。完成後同步 GitHub 上 v3.25 已 push）
+**最後更新**：2026-05-18（會話 #51 v3.25.2 — 補 5 份雙語 PDF 給小白。使用者「小白不會用 MD」打中：之前寫好 HOW_TO_GET_LLM_API_KEY / HOUSE_RULES_GUIDE / COMMERCIAL_FAQ 等 MD 沒加進 PDF builder。修 scripts/build-pdfs/build.mjs 加 5 個對映 (19/20/21 編號)，run_gates EXPECTED 35→40，README PDFs badge 35→40 + 客戶文件表新增 3 行（家規指南標 ⭐ 招牌）。教訓 #36：寫客戶 MD 強制 checklist 5 件含「加進 PDF builder」）
 **維護者**：使用者 + Claude
 **版本**：3.13

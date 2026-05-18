@@ -137,6 +137,65 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-18｜會話 #50｜📄 v3.25.2：補 5 份雙語 PDF（小白不會看 MD）
+
+**目標**：使用者「有些文件應該要用 PDF 檔，小白不會用 MD」
+
+### ✅ build.mjs 加 5 個新 PDF 對映
+
+之前 MD 寫好但 PDF 沒產：
+- `HOW_TO_GET_LLM_API_KEY_ZH.md` (v3.14 寫的)
+- `HOW_TO_GET_LLM_API_KEY_EN.md`
+- `HOUSE_RULES_GUIDE_ZH.md` (v3.25.1 寫的)
+- `HOUSE_RULES_GUIDE_EN.md`
+- `COMMERCIAL_LICENSING_FAQ_ZH.md` (v3.20 寫的)
+
+### ✅ 新 PDF 編號
+
+```
+19_LLM_API_Key申請指南_中文.pdf      / 19_How_to_Get_LLM_API_Key_EN.pdf
+20_家規完整使用指南_中文.pdf 🏛️ ⭐  / 20_House_Rules_Guide_EN.pdf 🏛️ ⭐
+21_商業授權FAQ_中文.pdf
+```
+
+### ✅ run_gates.sh 升 35 → 40 PDF expectation
+
+預設 PDF 數量檢查同步更新。
+
+### ✅ README 同步
+
+- PDFs badge: 35 → 40 bilingual
+- 客戶文件章節：35 份 → 40 份
+- 「📚 客戶文件」表新增 3 行（19/20/21）
+- **第 20 行家規指南標** ⭐招牌 強調差異化
+
+### 📊 數字
+
+| 維度 | 之前 | 之後 |
+|---|---|---|
+| docs/pdf/ PDF 檔數 | 35 | **40** |
+| README PDF badge | 35 | **40** |
+| 對話式 ERP 招牌（家規）有 PDF | ❌ | ✅ |
+| 給小白看的 LLM Key 申請有 PDF | ❌ | ✅ |
+| 商業授權 FAQ 有 PDF | ❌ | ✅ |
+
+### 🪞 教訓 #36
+
+**「MD 是給工程師看的，小白要 PDF」**
+
+我前 6 sprint 寫了一堆好 MD 文件（HOW_TO / HOUSE_RULES / COMMERCIAL FAQ），但**沒同步加進 PDF builder**。小白訪客 README 看到「40 份雙語 PDF」但點進去發現家規招牌指南只有 MD 連結 → 體驗斷層。
+
+下次寫任何 `docs/*.md` 給「客戶看」的，**強制 checklist**：
+1. ✅ MD 內容寫好
+2. ✅ 加進 `scripts/build-pdfs/build.mjs` 對映表
+3. ✅ run_gates 的 EXPECTED PDF 數量同步
+4. ✅ 跑 build_pdfs.sh 確認 PDF 真的產出
+5. ✅ README 客戶文件表加 1 行
+
+**Blocker**：無
+
+---
+
 ## 2026-05-18｜會話 #49｜📖 v3.25.1：家規獨立操作手冊 + README 聚焦區塊
 
 **目標**：使用者「這段特別聲明和做出獨立的操作手冊讓小白可以理解 / 放在 GitHub 中特別說明 / 同步」
