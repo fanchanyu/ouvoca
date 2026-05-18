@@ -79,6 +79,15 @@ async def lifespan(app: FastAPI):
     from app.services.approval import install_approval_hooks
     install_approval_hooks()
 
+    # v3.25：家規 (House Rules) — 灌預設規則（idempotent，含「WO 釋放需有做法」）
+    from app.services.policy_engine import install_default_rules
+    from app.database import AsyncSessionLocal
+    async with AsyncSessionLocal() as _db:
+        try:
+            await install_default_rules(_db, tenant_id="HQ")
+        except Exception as exc:
+            log.warning("install_default_rules failed: %s", exc)
+
     # ConfirmCard pending dict 背景 GC（v3.7）：
     # 防止過期 card 的 executor closure 持續持有 db session 而 OOM。
     # 每 60 秒掃一次；無人叫 /pending 時也保證會清。
@@ -157,7 +166,7 @@ from app.api import (
     sales, quality, mps_mrp, accounting, warehouse, crm, events,
     permission, mesh, analytics, tax_tw, confirm_card, email_digest,
     agents_exec, reports, onboarding, files, llm_status,
-    approval,
+    approval, policy,
 )
 
 app.include_router(chat.router)
@@ -185,6 +194,7 @@ app.include_router(mesh.router)
 app.include_router(analytics.router)
 app.include_router(tax_tw.router)
 app.include_router(approval.router)
+app.include_router(policy.router)
 
 
 @app.get("/")

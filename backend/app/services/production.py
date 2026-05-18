@@ -99,10 +99,30 @@ async def release_production_order(db: AsyncSession, wo_id: str, user: Optional[
     if wo.status != "draft":
         raise BusinessRuleError(f"工單狀態 '{wo.status}' 不可釋放", wo_id=wo_id)
 
-    # Validate BOM exists
-    bom = await get_bom_tree(db, wo.product_id)
-    if not bom:
-        raise BusinessRuleError("產品尚未維護 BOM，無法釋放工單", product_id=wo.product_id)
+    # v3.25：用 PolicyEngine 取代寫死的「需 BOM」檢查
+    # 預設家規 "WO 釋放需有做法 (Recipe)" 會自動 evaluate
+    # 客戶可在 UI 開關 / 改條件，無需動 code
+    from app.services.policy_engine import evaluate_policies
+    result = await evaluate_policies(
+        db, "wo.release",
+        context={"product_id": wo.product_id, "wo_id": wo.id, "wo_no": wo.wo_no},
+        user_id=(user or {}).get("employee_id"),
+    )
+    if result.blocked:
+        raise BusinessRuleError(
+            result.message,
+            product_id=wo.product_id,
+            can_override=result.can_override,
+            override_role=result.override_role,
+            triggered_rule_id=result.triggered_rule_id,
+        )
+    if result.needs_approval:
+        # 進審批流（接 Sprint P 的 approval workflow，這裡簡化為阻擋）
+        raise BusinessRuleError(
+            f"本動作需要 {result.override_role or '主管'} 審批：{result.message}",
+            requires_approval=True,
+            triggered_rule_id=result.triggered_rule_id,
+        )
 
     wo.status = "released"
     wo.released_by = (user or {}).get("employee_id")

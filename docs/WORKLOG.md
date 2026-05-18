@@ -137,6 +137,110 @@ OSS 專案常常匿名（org name 而已），導致：
 
 ---
 
+## 2026-05-18｜會話 #48｜🏛️ v3.25 Sprint S：「家規 (House Rules)」資料化引擎
+
+**目標**：使用者「WO release 需 BOM 寫死太硬，做彈性 API + LLM 客製化」打中架構缺陷
+
+### 🧠 對標分析
+
+| ERP | 規則機制 | 缺點 |
+|---|---|---|
+| SAP B1 | Authorization | 改要顧問 |
+| 鼎新 | 業務規則設定 | 條件死板 |
+| NetSuite | SuiteScript (JS) | 要會寫 code |
+| Odoo | Server Actions (Python eval) | 危險 |
+| **erpilot** | **規則資料化 + LLM 對話建 + ConfirmCard** | 小白能自己加 |
+
+### 🎨 erpilot 原創詞
+
+「**家規 (House Rules)**」— 每家公司有自己的家規，AI 可以幫你加。
+不抄 SAP "Business Rule" / Odoo "Server Action" / 鼎新「業務規則」。
+
+### ✅ 新建 4 個核心檔案
+
+**`backend/app/models/policy_rule.py`**：
+- `PolicyRule` — 規則存 DB（trigger/condition_type/condition_params/action/message/override_role/is_active/priority）
+- `PolicyAuditLog` — 每次評估都寫稽核 log
+- 3 個 frozenset 白名單：POLICY_TRIGGERS (16+) / POLICY_CONDITION_TYPES (5) / POLICY_ACTIONS (4)
+
+**`backend/app/services/policy_engine.py`**：
+- `evaluate_policies(db, trigger, context)` → `PolicyResult(action/message/can_override)`
+- 4 個內建 condition：`always` / `has_bom` / `field_compare` (gt/gte/lt/lte/eq/ne) / `count_check`
+- `register_condition(name, fn)` plugin 機制：客戶可加自定條件
+- `install_default_rules()` 灌 3 條預設規則（idempotent）
+
+**`backend/app/api/policy.py`**（9 endpoints）：
+- CRUD: list / create / patch / delete
+- meta: GET /triggers + /conditions
+- POST /seed-defaults / evaluate
+- GET /audit 看稽核 log
+
+**`backend/tests/smoke/test_policy_engine_v325.py`**：**14/14 pass**
+
+### 🔥 重要 refactor: WO release 改用 PolicyEngine
+
+```python
+# v3.24 之前（寫死）
+bom = await get_bom_tree(db, wo.product_id)
+if not bom:
+    raise BusinessRuleError("產品尚未維護 BOM")
+
+# v3.25 之後（資料化 + 客戶可調）
+result = await evaluate_policies(db, "wo.release", {"product_id": wo.product_id})
+if result.blocked:
+    raise BusinessRuleError(result.message, can_override=result.can_override)
+```
+
+關鍵差異：
+- 客戶可在 UI 開關「需做法」規則 → 立即生效（test_wo_release_unblocked_when_rule_disabled 驗證）
+- 主管可覆寫（override_role=manager）
+- LLM 對話可建新規則（下個 sprint 加 LLM tool）
+
+### 預設 3 條家規（startup 自動灌）
+
+1. **WO 釋放需有做法 (Recipe)** — trigger=wo.release, action=block, override=manager
+2. **PO > NT$10 萬需主管審** — trigger=po.create, action=require_approval, override=manager
+3. **PO 必須至少 1 個項目** — trigger=po.create, action=block, no override
+
+### 📊 數字
+
+| 維度 | v3.24 結束 | v3.25 結束 |
+|---|---|---|
+| Backend models | n | **+2** (PolicyRule + PolicyAuditLog) |
+| Backend services | n | **+1** (policy_engine, ~300 行) |
+| Backend endpoints | 94+10+1=105 | **+9** (policy CRUD + meta + evaluate + audit) |
+| Smoke tests | 336 | **350** (+14 policy) |
+| 寫死的 business rule | 1+（WO BOM）| **0**（已遷移）|
+| 客戶可自定規則 | ❌ | ✅ via UI/API/LLM |
+| 規則稽核 log | ❌ | ✅ PolicyAuditLog |
+
+### 🪞 教訓 #34
+
+**「Hardcode 業務規則 = 客戶必須改 code = 等於沒做 SaaS」**
+
+我之前 WO release 寫死 `if not bom: raise` 看起來合理，但**這逼客戶來找我們改 code**。
+真正的 SaaS / SMB ERP 必須：
+1. 規則資料化（DB-driven）
+2. UI 可開關 / 改條件
+3. LLM 可對話建（小白用人話描述需求）
+4. 稽核 log 完整（合規）
+5. Plugin 機制（特殊國家 / 行業）
+
+下次寫 `raise BusinessRuleError(...)` 前先問：**「這條規則客戶會不會想關 / 改？」**
+9 成答案是「會」→ 用 PolicyEngine.evaluate 而非寫死。
+
+### 後續（Phase 2）
+
+- LLM tool：`list_policy_rules` / `propose_policy_rule` / `enable_disable_rule`（讓 LLM 對話建規則）
+- Frontend Policies 頁（列表 + 開關 + 新增）
+- 主管覆寫 button：被擋時 UI 顯示「🔓 主管覆寫」+ 輸入原因
+- 接 Sprint P approval workflow：require_approval 走真實審批流
+- 更多 condition：`custom_expr`（safe Python eval, sandbox）
+
+**Blocker**：無
+
+---
+
 ## 2026-05-18｜會話 #47｜🎨 v3.24 Sprint R：erpilot 原創語彙（不抄對手，小白好記，雙語版）
 
 **目標**：使用者「我們不要抄對手的專有名詞 / 創個好記的新詞 / 對象是小白 / 雙語版 / 同步 GitHub」

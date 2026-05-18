@@ -50,5 +50,9 @@ from app.models.attachment import Attachment, ATTACHMENT_CATEGORIES
 from app.models.approval_workflow import (
     ApprovalRule, ApprovalRequestV2, ApprovalStepV2,
 )
+from app.models.policy_rule import (
+    PolicyRule, PolicyAuditLog,
+    POLICY_TRIGGERS, POLICY_CONDITION_TYPES, POLICY_ACTIONS,
+)
 
 __all__ = ["Base"]

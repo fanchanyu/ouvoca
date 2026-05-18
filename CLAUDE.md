@@ -408,6 +408,6 @@ v1/v2 兩條 DNA 同時並存，互相消耗能量：
 
 ---
 
-**最後更新**：2026-05-18（會話 #48 v3.24 Sprint R — erpilot 原創語彙，不抄對手詞給小白好記。Rebrand 3 個對手詞：BOM → 📖 做法 (Recipe) / Lead → 🌱 新苗 (Sprout) / Opportunity → 🎯 追單 (Chase) / Customer 360 → 客戶全貌。BomEditor + Crm + Production UI 全面 rebrand，雙語 i18n 加 erpilotTerms namespace 對齊中英，USER_MANUAL/README 同步。教訓 #33：naming 是品牌的一部分，動物食物比喻+雙語雙顯+行為動詞最好記）
+**最後更新**：2026-05-18（會話 #49 v3.25 Sprint S — 「家規 (House Rules)」資料化引擎，erpilot 原創詞。對應 WO release 需 BOM 寫死過硬的架構缺陷。新建 PolicyRule + PolicyAuditLog model + policy_engine service (4 內建 condition + register_condition plugin) + 9 endpoints API + 14/14 smoke tests。**WO release 已從寫死 if 改為 evaluate_policies**——客戶可在 UI 開關「需做法」規則立即生效。預設 3 條家規 startup 自動灌。教訓 #34：hardcode rule = 逼客戶改 code = 不是 SaaS。下次寫 raise BusinessRuleError 前先問「客戶會不會想關/改？」9 成答案是會→ 用 PolicyEngine）
 **維護者**：使用者 + Claude
 **版本**：3.13

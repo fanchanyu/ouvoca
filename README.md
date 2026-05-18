@@ -422,6 +422,7 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **🧬 BOM 物料表編輯器**（v3.23）| Production 加「管理 BOM」按鈕，視覺化編輯 + unblock WO release | Visual BOM editor — unblocks WO release |
 | **📜 庫存異動歷史**（v3.23）| Inventory 加 tab，列每筆 inbound/outbound/工單完工/盤點調整 | New tab on Inventory listing every txn (inbound/outbound/WO complete/adjust) |
 | **🎨 erpilot 原創語彙**（v3.24）| 🌱 新苗 (Sprout) = Lead / 🎯 追單 (Chase) = Opportunity / 📖 做法 (Recipe) = BOM — 不抄鼎新/Salesforce，給小白好記 | 🌱 Sprout = Lead / 🎯 Chase = Opportunity / 📖 Recipe = BOM — original vocabulary, memorable for beginners |
+| **🏛️ 家規 (House Rules) 引擎**（v3.25 erpilot 原創）| 規則資料化（trigger / condition / action / override）不寫死 code；客戶可 UI 開關 / LLM 對話建；4 內建 condition + plugin 機制；WO release「需做法」已從寫死改用引擎 | Data-driven rule engine (vs SAP/Odoo hardcoded). Toggle/edit via UI; LLM can author rules. WO-release-needs-recipe rule migrated to engine |
 | **Schema Mapping AI** | exact/alias/partial 3 級 confidence，把外部 DB（鼎新/正航/Excel）一鍵接進來 | 3-tier confidence mapping (exact/alias/partial) — one-click external DB integration (鼎新/正航/Excel) |
 | **Event Engine** | EventBus + 16+ ConstraintChecker 規則 + SSE 廣播 | EventBus + 16+ ConstraintChecker rules + SSE broadcasting |
 | **React + Vite + Tailwind** | 桌機前端，完整 CRUD UI（EntityRowActions + EntityFormModal）| Desktop frontend with full CRUD UI (reusable EntityRowActions + EntityFormModal components) |

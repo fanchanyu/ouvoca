@@ -22,6 +22,7 @@ from app.models import _mixins as mixins_module
 EXPECTED_TENANT_MIXIN = {
     "accounting",
     "approval_workflow",  # v3.22 新增（多階審批，ApprovalRule + RequestV2 + Step）
+    "policy_rule",        # v3.25 新增（家規 House Rules：PolicyRule + AuditLog）
     "attachment",   # v3.13 新增（檔案上傳，按租戶隔離存 uploads/{tenant_id}/）
     "crm_sales",
     "inventory",
