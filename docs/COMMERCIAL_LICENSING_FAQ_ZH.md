@@ -19,6 +19,13 @@ SAP / Oracle 整合模組）。
 
 這是 erpilot 對 Taiwan SMB 的戰略差異化承諾。
 
+> ⚠️ **重要**：免費「含 connector」指的是 **erpilot 不收技術授權費**。要把
+> connector 接到您**現有商用 ERP**（鼎新 / 正航 / SAP B1 等），**仍須客戶
+> 自行向原 ERP 廠商取得書面授權**（多數採每位具名使用者授權，禁止以共用 /
+> 服務帳號連線）。erpilot **不協助、不代理、不承擔**與第三方 ERP 廠商之
+> 合約 / 授權事務。詳見 [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md) /
+> [EN](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)。
+
 ### SB2: 「同時在線」怎麼算？
 
 定義：**在過去 15 分鐘內**有任一經驗證行為（API 請求 / 頁面載入 /

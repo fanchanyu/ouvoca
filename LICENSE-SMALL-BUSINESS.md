@@ -105,8 +105,33 @@ You a **non-exclusive, royalty-free, non-transferable** license to:
 - (b) **Modify** erpilot's source code for internal use;
        修改 erpilot source code 供內部使用；
 - (c) **Use closed-source connectors** (鼎新 / 正航 / SAP / Oracle, etc.)
-       made available by the Project Maintainer;
-       使用維護者提供的閉源 connector（鼎新 / 正航 / SAP / Oracle 等）；
+       made available by the Project Maintainer **for technical connectivity only**;
+       使用維護者提供的閉源 connector（鼎新 / 正航 / SAP / Oracle 等）**僅作為技術連線元件**；
+
+       ⚠️ **IMPORTANT — Third-Party ERP Licensing**: The connector grant
+       under this license covers **erpilot's own technical components only**.
+       Connecting erpilot to Your incumbent commercial ERP system
+       (鼎新 Workflow / 正航 / SAP B1 / Vitals, etc.) is a separate matter:
+       most commercial ERPs are licensed **per-named-user** and **prohibit
+       shared / service-account connections**. **You** are solely responsible
+       for obtaining any required written authorization from the incumbent
+       ERP vendor before enabling a connector. The Project Maintainer
+       **does NOT negotiate, represent, or assume liability** for any
+       contracts or licensing matters with third-party ERP vendors, and
+       assumes no liability for any suspension, claim, or loss arising from
+       unauthorized connections. See
+       [`docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)
+       / [中文](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md).
+
+       ⚠️ **重要 — 第三方 ERP 授權**：本授權所提供之 connector 僅為
+       **erpilot 自身的技術元件**。將 erpilot 串接到貴司**現有商用 ERP**
+       系統（鼎新 Workflow / 正航 / SAP B1 / 叡揚 等）為**另一回事**：
+       多數商用 ERP 採「**每位具名使用者授權**」模式且**禁止以共用 / 服務
+       帳號連線**。**貴司**有獨自取得原 ERP 廠商書面授權之責任，方可啟用
+       connector。維護者**不協助、不代理、不承擔**與第三方 ERP 廠商之合約 /
+       授權事務，亦不承擔因未授權連線所生之任何停權、求償或損失。詳見
+       [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。
+
 - (d) **Deploy** erpilot across multiple physical facilities (MESH nodes)
        within Your single legal entity;
        在你的單一法人下跨多廠（MESH nodes）部署；

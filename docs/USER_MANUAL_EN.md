@@ -872,8 +872,10 @@ LLM-ERP ships under three licensing tracks — **picking the right one can save 
 | Track | For whom | Cost | Highlight |
 |---|---|---|---|
 | 🟢 **AGPL** | Want to inspect source, OK with sharing your modifications | Free | Fully open-source |
-| 🌱 **Small Business** | 50–100-person factory, ≤ 20 concurrent users | **Completely free** | **Includes closed-source connectors** (Digiwin / Chain Sea integrations) |
+| 🌱 **Small Business** | 50–100-person factory, ≤ 20 concurrent users | **Completely free** | **Includes closed-source connectors** (Digiwin / Chain Sea integrations) <sup>※</sup> |
 | 🔵 **Commercial** | > 20 concurrent users, ISVs, SaaS providers | Negotiated | Removes AGPL clauses |
+
+> ⚠️ <sup>※</sup> **IMPORTANT**: The connector provides **technical connectivity**. If you want to connect erpilot to an **existing commercial ERP** (Digiwin / Chain Sea / SAP B1 / Vitals, etc.), most are licensed **per-named-user** and **prohibit shared / service account connections**. You must first obtain written confirmation of authorization scope from your incumbent ERP vendor and purchase required add-on licenses if applicable. **erpilot does NOT assist, represent, or assume liability** for any contracts or licensing matters with the incumbent ERP vendor. See [`docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md).
 
 ### How to apply for Small Business?
 

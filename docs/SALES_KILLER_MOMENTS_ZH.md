@@ -113,6 +113,8 @@ AI（找最近 90 秒內由阿玲建的 PO）：
 
 ### Moment 6 — 跨 DB Federated Query
 
+> ⚠️ **demo 時務必補一句**：「但這個功能要連到您現有 ERP（鼎新 / 正航等），**請先和原 ERP 廠商書面確認授權範圍**。多數商用 ERP 是每位具名使用者授權，需取得書面同意 + 視情況加購 Integration / ODBC 授權。erpilot 不代理此類合約事務。詳見 [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。」
+
 ```
 王董：「我們鼎新的 5 月份訂單金額多少?」
 
@@ -124,10 +126,12 @@ AI 自動 chain：
 
 AI：「鼎新 5 月份 $3.2M（45 筆）+ LLM-ERP $580K（12 筆）= 合計 $3.78M」
 
-★ 「鼎新不用砍，繼續跑」★
+★ 「鼎新不用砍，繼續跑」★（前提：客戶已取得原 ERP 授權）
 ```
 
 ### Moment 7 — Schema Mapping + Migration（🏆 重磅）
+
+> ⚠️ **同上**：遷移動作仍須客戶先取得原 ERP 廠商書面授權（即使一次性匯入也屬「存取」）。詳見 [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md) §FAQ Q8。
 
 ```
 阿玲：「把鼎新的客戶都搬過來」
@@ -231,8 +235,12 @@ AI：preview_email_digest → 出當下摘要
 > **「我們不是又一個 ERP，我們是 ERP 的 AI 上層介面。」**
 >
 > 員工不用學系統，用講的就會。
-> 你的鼎新不用砍，我們直接讀 + 慢慢搬。
+> 你的鼎新不用砍，我們直接讀 + 慢慢搬（*需貴司先取得鼎新原廠書面授權*）。
 > 30 萬一年，2 週上線，2 小時上手。
+
+---
+
+> ⚠️ **業務 / 顧問必讀**：上述「直連鼎新 / 正航 / SAP B1」屬技術可行性陳述，**法律授權須客戶自行向原 ERP 廠商取得**。詳細合規邊界、客戶必做三件事、erpilot 責任界線，見 [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。**demo 時切勿說「廠商不會發現」或「繞過授權」**。
 >
 > **要試用嗎? 我們週四下午過去 demo 30 分鐘給你看。**
 

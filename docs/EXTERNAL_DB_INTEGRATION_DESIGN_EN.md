@@ -8,6 +8,18 @@ For full Chinese rationale and details see [EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md
 
 ---
 
+> ## ⚠️ IMPORTANT: Third-Party ERP Licensing Compliance Warning (Required Reading)
+>
+> Most commercial ERPs (**Workflow ERP, ChengHang, SAP B1, Vitals**, etc.) are licensed **per-named-user** and **prohibit shared or service accounts** from connecting. If erpilot connects to your existing ERP via a single service account, **you may violate that ERP's EULA**, resulting in suspension, claims, or back-licensing fees from the incumbent vendor.
+>
+> **Before enabling a connector, the customer MUST**: ① Obtain written authorization from the incumbent ERP vendor ② Purchase required add-ons (Integration / ODBC / API licenses) ③ Retain documentation.
+>
+> **erpilot provides the connector code only — we do NOT assist, represent, or assume liability** for contracts, licensing, or legal matters with third-party ERP vendors. All integration risk (including compliance) is borne by the customer.
+>
+> 📖 **Full compliance notice (required reading)**: [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) / [中文](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)
+
+---
+
 ## 1. Strategic Position
 
 ### 1.1 Why this matters more than mobile

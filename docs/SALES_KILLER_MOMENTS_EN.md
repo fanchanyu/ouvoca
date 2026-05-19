@@ -75,14 +75,18 @@ Procurement (30s after order): "cancel my last order"
 
 ### Moment 6 — Cross-DB federated query
 
+> ⚠️ **Always add during demo**: "But this requires connecting to your incumbent ERP (Dingxin/Chenghang). **Please first obtain written authorization** from your ERP vendor — most commercial ERPs license per-named-user and may require Integration / ODBC add-ons. erpilot does NOT negotiate or represent you in such contracts. See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)."
+
 ```
 Boss: "What's our Dingxin order amount for May?"
 → AI: list_external_connections → list_external_tables → query_external_db
 → "Dingxin: $3.2M (45 orders) + LLM-ERP: $580K (12) = $3.78M"
-★ "Don't kill Dingxin, run both" ★
+★ "Don't kill Dingxin, run both" ★ (provided customer has obtained written authorization)
 ```
 
 ### Moment 7 — Schema Mapping + Migration (🏆 KILLER)
+
+> ⚠️ **Same as above**: Migration still requires prior written authorization from the incumbent ERP vendor (even one-time imports count as "access"). See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) §FAQ Q8.
 
 ```
 Procurement: "migrate all customers from Dingxin"
@@ -154,8 +158,12 @@ Boss: "Send daily digest to wang@example.com at 7am"
 > **"We're not yet another ERP. We're the AI overlay on top of ERP."**
 >
 > Employees don't learn the system — just talk to it.
-> Your Dingxin doesn't get killed — we read it + migrate gradually.
+> Your Dingxin doesn't get killed — we read it + migrate gradually (*provided you've first obtained written authorization from your Dingxin vendor*).
 > $30k/year, 2-week deployment, 2-hour onboarding.
+
+---
+
+> ⚠️ **Required reading for sales / consultants**: The claims above about "direct connection to Dingxin / Chenghang / SAP B1" describe **technical feasibility**. **Legal authorization must be obtained by the customer from the incumbent ERP vendor.** See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) for the full compliance boundary, the three mandatory customer actions, and erpilot's scope of responsibility. **Never say "the vendor won't find out" or "we can bypass licensing" during a demo.**
 >
 > **Want a trial? We can demo 30 min this Thursday afternoon.**
 

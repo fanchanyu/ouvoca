@@ -1109,8 +1109,10 @@ LLM-ERP 採用三軌授權，**選對的省幾百萬**。
 | 軌道 | 適合誰 | 費用 | 重點 |
 |---|---|---|---|
 | 🟢 **AGPL** | 想看原始碼、不介意分享自己修改 | 免費 | 完全開源 |
-| 🌱 **Small Business** | 50-100 人廠、≤ 20 個同時上線的人 | **完全免費** | **含閉源 connector**（鼎新/正航接口） |
+| 🌱 **Small Business** | 50-100 人廠、≤ 20 個同時上線的人 | **完全免費** | **含閉源 connector**（鼎新/正航接口）<sup>※</sup> |
 | 🔵 **Commercial** | > 20 人同時上線、ISV、SaaS 業者 | 議價 | 解除 AGPL 條款限制 |
+
+> ⚠️ <sup>※</sup> **重要**：connector 提供的是**技術連線能力**。若您要把 erpilot 接到**現有鼎新 / 正航 / SAP B1 / 叡揚** 等商用 ERP，多數採「**每位具名使用者授權**」，**禁止以共用 / 服務帳號連線**。請先和您的原 ERP 廠商書面確認授權範圍 + 必要時加購整合授權。**erpilot 不協助、不代理、不承擔**與原 ERP 廠商之合約 / 授權事務。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。
 
 ### 怎麼申請 Small Business 軌？
 

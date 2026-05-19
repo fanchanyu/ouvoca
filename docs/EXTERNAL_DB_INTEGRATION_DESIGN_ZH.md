@@ -6,6 +6,18 @@
 
 ---
 
+> ## ⚠️ 重要：第三方 ERP 授權合規警告（必讀）
+>
+> 多數商用 ERP（**鼎新 / 正航 / SAP B1 / 叡揚** 等）採「**每位具名使用者授權（per-named-user）**」模式，**禁止以共用 / 服務帳號連線**。若 erpilot 以單一服務帳號連接您的原 ERP，**可能違反該 ERP 之 EULA**，導致原廠停權、求償或追加授權費。
+>
+> **客戶啟用 connector 前必做**：① 取得原 ERP 廠商書面授權 ② 必要時加購 Integration / ODBC / API 授權 ③ 留存證明文件。
+>
+> **erpilot 提供 connector 程式碼，但不協助、不代理、不承擔**與第三方 ERP 廠商之合約 / 授權 / 法律事務之協商。技術整合風險（含合規）由客戶自行承擔。
+>
+> 📖 **完整合規說明（必讀）**：[`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [English](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)
+
+---
+
 ## 1. 戰略定位
 
 ### 1.1 為什麼這比 mobile 還重要

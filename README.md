@@ -6,7 +6,7 @@
 
 [![Tests](https://img.shields.io/badge/tests-287%20passing-brightgreen)]()
 [![Gates](https://img.shields.io/badge/self--verify-7%2F7%20green-brightgreen)]()
-[![Docs](https://img.shields.io/badge/PDFs-40%20bilingual-blue)]()
+[![Docs](https://img.shields.io/badge/PDFs-42%20bilingual-blue)]()
 [![License](https://img.shields.io/badge/license-AGPL--3.0%20%2B%20SBL%20%2B%20Commercial-blue)](./LICENSE)
 [![Version](https://img.shields.io/badge/version-3.12-blueviolet)]()
 [![Author](https://img.shields.io/badge/by-Peter-lightgrey)](https://github.com/fanchanyu)
@@ -26,7 +26,7 @@
 | 我是... / I am... | 我需要... / I need... | 跳到 / Jump to |
 |---|---|---|
 | 👔 **老闆 / 採購 / 業務 / 倉管**<br>Boss / Buyer / Sales / Warehouse | 我要**用** erpilot，不會寫程式<br>I want to **use** erpilot, no coding | 👉 [**5 分鐘安裝指南**](#-5-分鐘安裝指南--5-minute-install-for-non-developers) |
-| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**40 份雙語 PDF**](#-40-份雙語客戶文件--40-bilingual-customer-pdfs) |
+| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**42 份雙語 PDF**](#-42-份雙語客戶文件--42-bilingual-customer-pdfs) |
 | 👨‍💻 **工程師 / IT / 想貢獻者**<br>Developer / IT / Contributor | 我要看**程式碼 / 開發環境 / PR**<br>I want **code / dev setup / PR** | 👉 [**開發者指南**](#-開發者指南--developer-guide) |
 
 ---
@@ -36,7 +36,7 @@
 - [⚡ 30 秒看懂 erpilot / 30-Second Pitch](#-30-秒看懂-erpilot--30-second-pitch)
 - [🚀 5 分鐘安裝指南 / 5-Minute Install](#-5-分鐘安裝指南--5-minute-install-for-non-developers)
 - [❓ 安裝常見問題 / Install FAQ](#-安裝常見問題--install-faq)
-- [📚 40 份雙語客戶文件 / 40 Bilingual PDFs](#-40-份雙語客戶文件--40-bilingual-customer-pdfs)
+- [📚 42 份雙語客戶文件 / 42 Bilingual PDFs](#-42-份雙語客戶文件--42-bilingual-customer-pdfs)
 - [🎯 內含什麼 / What's Inside](#-內含什麼--whats-inside)
 - [🏗 架構 / Architecture](#-架構--architecture)
 - [🗺 領域對照 / Domain Map](#-領域對照--domain-map)
@@ -90,9 +90,11 @@
 
 ## ⚡ 30 秒看懂 erpilot / 30-Second Pitch
 
-🇹🇼 **erpilot 是台灣中小製造業的對話式 ERP**：員工坐在電腦前打一句話（「跟長江廠下 100 個 M6 螺絲，交期下週五」），AI 就把它變成完整的採購單，跳出 ConfirmCard 確認卡讓你按確認才執行。**不用學系統、不用教育訓練、2 小時上手**。20 人以內的小公司**完全免費**用整套（含鼎新 / 正航 connector）。
+🇹🇼 **erpilot 是台灣中小製造業的對話式 ERP**：員工坐在電腦前打一句話（「跟長江廠下 100 個 M6 螺絲，交期下週五」），AI 就把它變成完整的採購單，跳出 ConfirmCard 確認卡讓你按確認才執行。**不用學系統、不用教育訓練、2 小時上手**。20 人以內的小公司**完全免費**用整套（含鼎新 / 正航 connector<sup>※</sup>）。
 
-🇺🇸 **erpilot is a conversational ERP for Taiwan SMB manufacturers.** Your staff types one sentence ("Order 100 M6 bolts from ChangJiang, delivery next Friday") and the AI turns it into a full purchase order, presenting a ConfirmCard for human approval before executing. **No training required, ready in 2 hours**. **Completely free for organizations with ≤20 concurrent users**, including closed-source connectors for 鼎新 / 正航 / SAP.
+🇺🇸 **erpilot is a conversational ERP for Taiwan SMB manufacturers.** Your staff types one sentence ("Order 100 M6 bolts from ChangJiang, delivery next Friday") and the AI turns it into a full purchase order, presenting a ConfirmCard for human approval before executing. **No training required, ready in 2 hours**. **Completely free for organizations with ≤20 concurrent users**, including closed-source connectors for 鼎新 / 正航 / SAP<sup>※</sup>.
+
+> ⚠️ <sup>※</sup> connector 是「**技術連線元件**」，不含原 ERP（鼎新/正航/SAP B1 等）的使用授權。多數商用 ERP 採每位具名使用者授權，禁止以共用 / 服務帳號連線，**客戶必須先和原 ERP 廠商書面取得授權**才能啟用。erpilot 不協助、不代理、不承擔此類合約事務。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。<br>The connector is a **technical connectivity component** and does NOT include the licensing of your incumbent ERP (Workflow / ChengHang / SAP B1, etc.). Most commercial ERPs are licensed per-named-user and **prohibit shared / service account connections** — **the customer must first obtain written authorization from the incumbent ERP vendor** before enabling. erpilot does NOT assist, represent, or assume liability for such contractual matters.
 
 | 為什麼選 erpilot? / Why erpilot? | 我們的解法 / Our Answer |
 |---|---|
@@ -200,7 +202,7 @@
 | 清掉示範資料 / Clear demo data | 登入 → ⚙️ 設定 → 📦 示範資料 → 🗑 清除 |
 | 停止 erpilot / Stop | `docker compose down`（在解壓目錄裡）或關掉 Docker Desktop |
 | 完全移除 / Uninstall | `docker compose down -v` → 刪 erpilot 資料夾 |
-| 連現有鼎新 / 正航 DB | 看 [`docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md`](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md) |
+| 連現有鼎新 / 正航 DB | 看 [`docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md`](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md)<br>⚠️ **連線前必讀**：[`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) — 多數商用 ERP 採每位具名使用者授權，連線前須客戶自行取得原 ERP 廠商書面授權，erpilot 不負責此類合約事務 |
 
 📘 **更詳細的「給老闆看的版本」（純圖文、零技術術語）**：
 - 中文 → [`docs/INSTALLATION_ZH.md`](./docs/INSTALLATION_ZH.md)
@@ -313,6 +315,8 @@
 
 **🌱 小小企業軌（≤20 人）免費含閉源 connector！**
 
+> ⚠️ **直連現有商用 ERP 前的合規警告**：多數商用 ERP（鼎新 / 正航 / SAP B1 / 叡揚 等）採「每位具名使用者授權」模式，禁止以共用 / 服務帳號連線。**客戶必須先和原 ERP 廠商書面確認授權範圍**並視情況加購整合授權，否則可能違反該 ERP 之 EULA。**erpilot 不協助、不代理、不承擔**與第三方 ERP 廠商之合約 / 授權 / 法律事務。完整說明：[`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。
+
 </details>
 
 <details>
@@ -401,7 +405,7 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 
 ---
 
-## 📚 40 份雙語客戶文件 / 40 Bilingual Customer PDFs
+## 📚 42 份雙語客戶文件 / 42 Bilingual Customer PDFs
 
 🇹🇼 點下面任一個直接下載 PDF（全部繁中 + English）：
 🇺🇸 Click any to download (all bilingual ZH + EN):
@@ -429,10 +433,12 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | 19 | LLM API Key 申請指南（小白版）/ How to Get LLM API Key | [📕 中文 PDF](./docs/pdf/19_LLM_API_Key申請指南_中文.pdf) | [📘 EN PDF](./docs/pdf/19_How_to_Get_LLM_API_Key_EN.pdf) |
 | **20** | 🏛️ **家規完整使用指南** ⭐招牌 / **House Rules — Complete Guide** | [📕 **中文 PDF**](./docs/pdf/20_家規完整使用指南_中文.pdf) | [📘 **EN PDF**](./docs/pdf/20_House_Rules_Guide_EN.pdf) |
 | 21 | 商業授權 FAQ（含 ≤20 人免費條款） | [📕 中文 PDF](./docs/pdf/21_商業授權FAQ_中文.pdf) | — |
+| **22** | ⚠️ **第三方 ERP 授權合規通知**（接舊鼎新/正航/SAP 前必讀）/ **External ERP Licensing Compliance Notice** | [📕 **中文 PDF**](./docs/pdf/22_第三方ERP授權合規通知_中文.pdf) | [📘 **EN PDF**](./docs/pdf/22_External_ERP_Licensing_Notice_EN.pdf) |
 
 📌 **特別文件**：
 - [**`HOW_TO_GET_LLM_API_KEY_ZH.md`**](./docs/HOW_TO_GET_LLM_API_KEY_ZH.md) · [EN](./docs/HOW_TO_GET_LLM_API_KEY_EN.md) — 5-10 分鐘申請 API Key 完整教學（DeepSeek/OpenAI/Anthropic/Ollama 比較）
 - [**`HOUSE_RULES_GUIDE_ZH.md`**](./docs/HOUSE_RULES_GUIDE_ZH.md) · [EN](./docs/HOUSE_RULES_GUIDE_EN.md) — ⭐ erpilot 招牌差異化「家規」完整指南
+- ⚠️ [**`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`**](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) · [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md) — **接舊 ERP 前必讀**：第三方 ERP 授權合規警告（鼎新/正航/SAP B1 等多採每位具名使用者授權）
 
 🇹🇼 **電腦小白優先讀**：00（產品說明書）→ 01（安裝指南）→ 02（快速入門）→ 03（使用者操作手冊）
 🇺🇸 **Beginners read first**: 00 → 01 → 02 → 03
@@ -635,7 +641,7 @@ opnetest/
 ├── war-room/                   ← 即時事件儀表板 / Live SSE dashboard
 │   ├── index.html
 │   └── Dockerfile
-├── docs/                       ← 40 份雙語文件 / 40 bilingual docs
+├── docs/                       ← 42 份雙語文件 / 42 bilingual docs
 │   ├── CONVERSATIONAL_ERP_DESIGN_ZH.md / _EN.md
 │   ├── COMMERCIAL_LICENSING_FAQ_ZH.md
 │   └── ... (32 more)
@@ -665,6 +671,8 @@ opnetest/
 > 🇹🇼 對齊 erpilot「**讓小小企業也快速上手**」承諾。Taiwan SMB 1-20 人廠把整套（含鼎新 / 正航 / SAP connector）拿去白用，等你長到 21 人並離不開 erpilot 再聊商業合約。
 >
 > 🇺🇸 Aligned with erpilot's promise to help small businesses get started fast. Taiwan SMBs (1-20 employees) get the full suite — including 鼎新 / 正航 / SAP connectors — for free. Talk commercial contract only when you grow past 20 and can't live without it.
+>
+> ⚠️ **重要 / IMPORTANT**：connector「免費」指的是 **erpilot 不收技術授權費**；要把 connector 接到您**現有商用 ERP**（鼎新 / 正航 / SAP B1 等），**仍須客戶自行向原 ERP 廠商取得書面授權**（多數採每位具名使用者授權）。erpilot 不負責此類第三方合約事務。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md) — "Free" here means **erpilot charges no technical license fee**; connecting to your incumbent ERP still requires **the customer to obtain written authorization** from the incumbent ERP vendor on their own. erpilot does NOT handle such third-party contracts.
 
 🇹🇼 不確定哪一軌？看 [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md) 決策樹。
 🇺🇸 Not sure which track? See the decision tree in [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md).

@@ -131,6 +131,8 @@ erpilot 採 **三軌授權（tri-license）**：
 > ⚠️ 注意：閉源 connector（鼎新 / 正航 / SAP / Oracle）對所有軌道都開放——
 > 小小企業軌**免費含**，AGPL 軌也可用（但要按 AGPL 揭露你自己的改動），
 > 商業軌包含在合約裡。
+>
+> ⚠️ **更重要的注意**：上述 connector 屬「**erpilot 技術元件**」，**不含**原 ERP（鼎新/正航/SAP B1 等）的使用授權。多數商用 ERP 採「**每位具名使用者授權**」且**禁止以共用 / 服務帳號連線**。**客戶必須先和原 ERP 廠商書面取得授權**才能啟用 connector。erpilot **不協助、不代理、不承擔**與第三方 ERP 廠商之合約 / 授權 / 法律事務之協商。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。
 
 ---
 
