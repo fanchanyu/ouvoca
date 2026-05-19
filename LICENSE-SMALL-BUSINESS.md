@@ -108,28 +108,33 @@ You a **non-exclusive, royalty-free, non-transferable** license to:
        made available by the Project Maintainer **for technical connectivity only**;
        使用維護者提供的閉源 connector（鼎新 / 正航 / SAP / Oracle 等）**僅作為技術連線元件**；
 
-       ⚠️ **IMPORTANT — Third-Party ERP Licensing**: The connector grant
-       under this license covers **erpilot's own technical components only**.
+       ⚠️ **Note — Third-Party ERP Licensing**: The connector grant under
+       this license covers **erpilot's own technical components only**.
        Connecting erpilot to Your incumbent commercial ERP system
-       (鼎新 Workflow / 正航 / SAP B1 / Vitals, etc.) is a separate matter:
-       most commercial ERPs are licensed **per-named-user** and **prohibit
-       shared / service-account connections**. **You** are solely responsible
-       for obtaining any required written authorization from the incumbent
-       ERP vendor before enabling a connector. The Project Maintainer
-       **does NOT negotiate, represent, or assume liability** for any
-       contracts or licensing matters with third-party ERP vendors, and
-       assumes no liability for any suspension, claim, or loss arising from
-       unauthorized connections. See
+       (e.g., products from vendors such as Workflow / ChengHang / SAP B1 /
+       Vitals) is a separate matter: each vendor's license agreement may
+       treat shared or service-account connections differently, and the
+       specifics depend on Your contract with that vendor. **You** are
+       responsible for confirming authorization scope with the incumbent
+       ERP vendor and obtaining any required written authorization before
+       enabling a connector. The Project Maintainer **does not participate
+       in or represent You in** any contracts or licensing matters with
+       third-party ERP vendors, and, to the maximum extent permitted by
+       applicable law, assumes no liability for consequences arising from
+       enabling a connection without obtaining appropriate authorization.
+       See
        [`docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)
        / [中文](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md).
 
-       ⚠️ **重要 — 第三方 ERP 授權**：本授權所提供之 connector 僅為
+       ⚠️ **附註 — 第三方 ERP 授權**：本授權所提供之 connector 僅為
        **erpilot 自身的技術元件**。將 erpilot 串接到貴司**現有商用 ERP**
-       系統（鼎新 Workflow / 正航 / SAP B1 / 叡揚 等）為**另一回事**：
-       多數商用 ERP 採「**每位具名使用者授權**」模式且**禁止以共用 / 服務
-       帳號連線**。**貴司**有獨自取得原 ERP 廠商書面授權之責任，方可啟用
-       connector。維護者**不協助、不代理、不承擔**與第三方 ERP 廠商之合約 /
-       授權事務，亦不承擔因未授權連線所生之任何停權、求償或損失。詳見
+       系統（例如 Workflow / ChengHang / SAP B1 / Vitals 等廠商之產品）
+       為另一議題：各廠商之授權合約對「以共用或服務帳號連線」之規定可能不同，
+       具體請依貴司與該廠商之合約為準。**貴司**負責與原 ERP 廠商確認授權
+       範圍，並於必要時取得書面授權，方啟用 connector。維護者**不參與、
+       不代理**貴司與第三方 ERP 廠商間之合約 / 授權事務；於適用法律所允許
+       之最大範圍內，對客戶未取得適當授權即啟用連線所衍生之後果不承擔責任。
+       詳見
        [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。
 
 - (d) **Deploy** erpilot across multiple physical facilities (MESH nodes)

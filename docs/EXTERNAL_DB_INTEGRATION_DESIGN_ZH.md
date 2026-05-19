@@ -6,15 +6,17 @@
 
 ---
 
-> ## ⚠️ 重要：第三方 ERP 授權合規警告（必讀）
+> ## ⚠️ 重要：第三方 ERP 授權合規提醒（建議閱讀）
 >
-> 多數商用 ERP（**鼎新 / 正航 / SAP B1 / 叡揚** 等）採「**每位具名使用者授權（per-named-user）**」模式，**禁止以共用 / 服務帳號連線**。若 erpilot 以單一服務帳號連接您的原 ERP，**可能違反該 ERP 之 EULA**，導致原廠停權、求償或追加授權費。
+> 部分商用 ERP（例如 Workflow / ChengHang / SAP B1 / Vitals 等廠商之產品）之授權合約對「**以共用或服務帳號**連線至 DB 或 API」可能有特定條款；具體內容**依各廠商與您之合約為準**。如未取得適當授權即啟用連線，依您與該廠商之合約條款，可能涉及相應之合約處理（例如服務調整、補繳授權費或合約爭議解決）。
 >
-> **客戶啟用 connector 前必做**：① 取得原 ERP 廠商書面授權 ② 必要時加購 Integration / ODBC / API 授權 ③ 留存證明文件。
+> **建議客戶於啟用 connector 前**：① 與原 ERP 廠商書面確認授權範圍 ② 視需要購買必要之整合授權 ③ 留存相關文件。
 >
-> **erpilot 提供 connector 程式碼，但不協助、不代理、不承擔**與第三方 ERP 廠商之合約 / 授權 / 法律事務之協商。技術整合風險（含合規）由客戶自行承擔。
+> erpilot 提供 connector 為技術元件；**erpilot 不參與、不代理**客戶與第三方 ERP 廠商間之合約 / 授權 / 法律事務。**於適用法律所允許之最大範圍內**，erpilot 對客戶未取得適當授權即啟用連線所衍生之後果不承擔責任。
 >
-> 📖 **完整合規說明（必讀）**：[`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [English](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)
+> 📖 **完整合規提醒（建議閱讀）**：[`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [English](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)
+>
+> _本提醒非法律意見，具體判定請諮詢您的法律顧問與該 ERP 廠商。_
 
 ---
 

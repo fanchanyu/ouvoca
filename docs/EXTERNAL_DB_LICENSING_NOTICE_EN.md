@@ -1,6 +1,6 @@
-# External ERP Licensing Compliance Notice
+# External ERP Licensing Compliance Reminder
 
-> **Required reading for legal compliance**: Before connecting erpilot to your **existing ERP** (Workflow ERP, ChengHang, SAP B1, Vitals, Odoo, Microsoft Dynamics, etc.), please read this document fully and complete the three actions listed.
+> **Nature of this document**: This is a compliance **reminder** only. It **does NOT constitute legal advice**, nor does it constitute any representation regarding the licensing policies of any specific third-party ERP vendor. Any specific licensing determination should be based on **the customer's contract with the relevant ERP vendor** and, where appropriate, the advice of legal counsel.
 >
 > **Language**: English version. Traditional Chinese: [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md).
 
@@ -10,168 +10,181 @@
 
 | Item | Detail |
 |---|---|
-| **Audience** | Customer **IT lead / purchasing decision-maker** intending to enable erpilot's "external DB connector / Schema Mapping AI / cross-DB query" features |
-| **Core risk** | Most commercial ERPs are licensed **per-named-user** and **prohibit shared or service accounts** from connecting to the DB or API |
-| **If violated** | Incumbent ERP vendor may issue **suspension / claims / back-licensing fees**; voided maintenance contracts; software audit (BSA / vendor periodic audit) findings |
-| **Customer must do** | ① Obtain written authorization ② Purchase add-on licenses as required ③ Retain authorization documents |
-| **erpilot does NOT do** | We **do not assist, represent, or assume liability** for contracts, licensing, or legal matters with third-party ERP vendors |
-| **Bottom line** | **Technical "can connect" ≠ Legal "allowed to connect."** Always obtain authorization before enabling a connector. |
+| **Intended audience** | Customer **IT lead / purchasing decision-maker** planning to enable erpilot's "external DB connector / Schema Mapping AI / cross-DB query" features |
+| **Compliance consideration** | Some commercial ERP license agreements may include specific terms or restrictions regarding **connections via shared or service accounts** to the DB or API |
+| **If appropriate authorization is not obtained** | Depending on the customer's contract with the ERP vendor, this may lead to contractual handling (e.g., service adjustments, retroactive license fees, dispute resolution) |
+| **Recommended customer preparation** | ① Confirm authorization scope with the incumbent ERP vendor ② Purchase any necessary integration licenses ③ Retain relevant documentation |
+| **erpilot's role** | We provide the connector as a technical component; we **do not participate in or represent the customer in** any contracts, licensing, or legal matters between the customer and the third-party ERP vendor |
+| **Bottom line** | **Technical "ability to connect" and legal "compliance with licensing" may be separate questions.** We recommend confirming authorization scope before enabling a connector. |
 
 ---
 
-## 1. Why Licensing Risk Exists
+## 1. Why We Recommend Confirming Authorization First
 
-### 1.1 Standard ERP Licensing Models
+### 1.1 Common Commercial ERP Licensing Models
 
-The following licensing models are common in Taiwan / global ERP markets — **triggering any of them may constitute a violation**:
+The following are licensing models commonly seen in the market. **Whether a specific model applies and how it treats "third-party system integration" varies by vendor and contract**—please refer to your **official license documentation or contract** with the incumbent ERP vendor as the authoritative source:
 
-| License model | Common vendors | Violation scenario |
+| Common licensing model | Description | Potential relationship to third-party integration |
 |---|---|---|
-| **Per-Named-User License** | 鼎新 Workflow, 正航 ChengHang, SAP B1, Oracle NetSuite | erpilot connects via "Integration" service account, but that account has no license |
-| **Concurrent User License** | Some Workflow / Vitals editions | erpilot's persistent queries consume a concurrent slot beyond purchased quota |
-| **Module License** | SAP B1, Microsoft Dynamics | erpilot queries across modules (e.g., FI + SD + MM), but customer only licensed FI |
-| **API / Integration License** | SAP B1 Service Layer, Vitals REST | API is a separately-priced add-on; calling without purchase is a violation |
-| **ODBC / External Database License** | Some 鼎新/正航 editions | Direct DB access requires a separate ODBC license |
-| **Read-Only License** | Some large-ERP modules | Even read-only access by a third-party system without explicit permission can be a violation |
+| **Per-Named-User** | Billed per individually named user | Some vendors' contracts may have specific terms regarding "service-account access" |
+| **Concurrent User** | Billed by concurrent sessions | A third-party system's persistent connections may occupy concurrent-user slots |
+| **Module License** | Billed by purchased functional modules | Cross-module data access may touch on modules not licensed |
+| **API / Integration License** | May be a separately-priced item per contract | Some vendors' APIs may be priced as an add-on |
+| **ODBC / External DB License** | May be a separately-priced item per contract | Some vendors may have separate add-ons for direct DB access |
+| **Read-Only / Read-Replica** | May be a separately-priced item per contract | Read-only access may still require appropriate authorization per contract |
 
-### 1.2 How Vendors Actually Audit
+> 💡 The above is a general overview and **does not represent that any specific vendor necessarily adopts any specific model or imposes any specific restriction**. For specific questions, please contact the ERP vendor's reseller or legal contact.
 
-> "If I just connect via SQL Server, the vendor will never know, right?" — **Do NOT think this way.**
+### 1.2 Channels Through Which Compliance Audits May Surface
 
-- **DB-side audit log**: Incumbent ERP vendor can retrieve DB connection logs during maintenance or upgrades
-- **License Manager software**: Many ERPs include built-in license monitoring that reports telemetry back to the vendor
-- **Annual audits (BSA / vendor periodic audit)**: Resellers bring license auditors to customer sites yearly
-- **Competitive tip-off**: If the incumbent vendor's sales team learns the customer bought a competing ERP (erpilot), they may proactively initiate a compliance audit
-- **DB connection metadata**: Service account names, connection strings, login frequency can all be analyzed
+Software compliance audits may be triggered or surface through channels including (but not limited to):
 
----
+- **DB-side audit logs**: Many commercial ERPs retain connection records at the DB layer
+- **License Manager / Telemetry**: Some ERPs include built-in license-monitoring components
+- **Annual or periodic compliance audits**: Per the customer's contract with the vendor or reseller
+- **DB connection metadata**: Service account names, connection strings, etc., may be analyzed
 
-## 2. Three Mandatory Actions Before Enabling a Connection
-
-### 2.1 ✅ Step 1 — Obtain Written Authorization
-
-Obtain **written** confirmation from the incumbent ERP vendor / reseller covering any of:
-
-> **Explicit agreement that a third-party system (erpilot) may use a shared or service account to access this ERP's database or API, with scope including [SELECT / partial UPDATE / Schema Mapping] operations.**
-
-Acceptable forms:
-- The incumbent ERP vendor's **official authorization letter**
-- A **contract amendment**
-- **Email reply** (retain full thread + vendor signature block)
-- The reseller's **written confirmation letter**
-
-> ⚠️ **Verbal consent does NOT count.** "Sales said it's fine" won't hold up under audit.
-
-### 2.2 ✅ Step 2 — Purchase Required Add-Ons
-
-Based on the vendor's response, you may need to purchase any of:
-
-| Add-on | Typical market price (USD / year) | Applies when |
-|---|---|---|
-| Integration License | $1,000 - 10,000 | Any third-party system integration |
-| ODBC License | $300 - 3,500 | Direct DB connection mode |
-| Service Account License | $300 - 1,800 / account | Shared / service account |
-| API License (per-call billing) | Usage-based | REST API / SOAP mode |
-| Read-Replica License | $1,800 - 7,000 | Read-only replica / reporting DB |
-
-> 💡 **Reference figures only**. **Actual amounts are subject to the incumbent ERP vendor's quote.** The erpilot connector is a technical component and **does not include** any of the above license fees.
-
-### 2.3 ✅ Step 3 — Retain Documentation
-
-Store the following documents **centrally** with the customer's Legal / IT lead:
-- The incumbent ERP vendor's **written authorization**
-- Add-on license **invoices / contracts**
-- erpilot connector activation **internal approval records**
-
-> ⚠️ Under audit, **the burden of proof is on the customer**. No written record = default violation.
+> ⚠️ We recommend handling authorization matters per your contract with the incumbent ERP vendor before enabling any external connection.
 
 ---
 
-## 3. erpilot's Scope of Responsibility
+## 2. Recommended Preparation Before Enabling a Connector
 
-### 3.1 ✅ What We Provide
+### 2.1 ✅ Step 1 — Confirm Authorization Scope with the Incumbent ERP Vendor
+
+We recommend confirming the following items in **writing** with your incumbent ERP vendor / reseller (adjust to your actual usage scenario):
+
+> **Our company plans to have a third-party system (erpilot) read this ERP's database or API via a shared / service account, with usage scope including [SELECT / partial UPDATE / Schema Mapping, etc.]. Please confirm whether this usage falls within our current authorization scope; if not, please advise how to address it.**
+
+Acceptable written forms (per your legal department's policy):
+- Official reply letter from the incumbent ERP vendor
+- Contract amendment
+- Written confirmation from the reseller
+- Email reply (we recommend retaining the full thread)
+
+> 💡 **Recommendation**: Written confirmation generally provides better reference value than verbal assurances in the event of a future dispute.
+
+### 2.2 ✅ Step 2 — Purchase Any Necessary Licenses Based on the Vendor's Reply
+
+Based on the vendor's reply, the following add-ons may be required (**whether they are required and at what price varies by vendor and contract**):
+
+| Potential add-on | When it may apply |
+|---|---|
+| Integration License | Third-party system integration |
+| ODBC License | Direct DB access |
+| Service Account License | Shared / service account |
+| API License | REST API / SOAP mode |
+| Read-Replica License | Read-only replica / reporting DB |
+
+> 💡 The connector erpilot provides is a **technical component** and **does not include** any third-party ERP license fees. Actual license fees follow your quote or contract with that vendor.
+
+### 2.3 ✅ Step 3 — Retain Relevant Documentation
+
+We recommend retaining the following documents per your company's document-management policy:
+- The incumbent ERP vendor's authorization confirmation
+- Add-on license contracts / invoices
+- Internal sign-off records for erpilot connector activation
+
+> 💡 Proper document management supports future compliance review or dispute resolution.
+
+---
+
+## 3. erpilot's Role and Scope of Responsibility
+
+### 3.1 ✅ What erpilot Provides
 
 | Item | Description |
 |---|---|
 | **Connector code** | sqlite / csv / SQL Server / REST API technical components |
-| **Schema Mapping AI** | 3-tier confidence (exact / alias / partial), AI auto-mapping columns |
+| **Schema Mapping AI** | 3-tier confidence (exact / alias / partial) column mapping |
 | **ConfirmCard migration tools** | Preview + confirm, skip / overwrite conflict strategies |
-| **Technical docs** | [External DB Integration Design](./EXTERNAL_DB_INTEGRATION_DESIGN_EN.md) |
-| **Technical support** | Connector code bug fixes / Schema Mapping model improvements |
+| **Technical documentation** | [External DB Integration Design](./EXTERNAL_DB_INTEGRATION_DESIGN_EN.md) |
+| **Technical support** | Connector code bug fixes / mapping model improvements |
 
-### 3.2 ❌ What We Do NOT Do
+### 3.2 ❌ What erpilot Does NOT Provide
 
 | Item | Description |
 |---|---|
-| Contract negotiation | We do NOT negotiate EULA / add-on licenses with third-party ERP vendors on the customer's behalf |
-| Legal opinion | We do NOT provide any legal opinion or compliance opinion letters |
-| License resale | We do NOT resell third-party ERP Integration / ODBC / API licenses |
-| Audit response | We do NOT represent the customer in responding to BSA / third-party ERP vendor software audits |
-| Liability for violations | erpilot **assumes no liability** for suspension / claims / losses caused by **the customer's failure to obtain authorization before connecting** |
+| Third-party contract negotiation | We do not represent the customer in negotiating EULAs / add-on licenses with third-party ERP vendors |
+| Legal opinion | We do not provide legal opinion or compliance opinion letters (please consult legal counsel) |
+| License resale | We do not resell third-party ERP Integration / ODBC / API licenses |
+| Audit representation | We do not represent the customer in software compliance audits by third-party ERP vendors |
 
-### 3.3 Customer Acknowledgment (Required Before Connector Activation)
+### 3.3 Scope of Liability Statement
 
-Before enabling any external DB connector, the customer is deemed to have acknowledged:
+> **To the maximum extent permitted by applicable law, erpilot does not assume responsibility for the following:**
+> - Contractual handling arising from the customer enabling a connection without obtaining appropriate authorization per this reminder (including but not limited to service adjustments, retroactive license fees, contract disputes)
+> - Fees or losses arising from a third-party ERP vendor's licensing determinations, compliance audits, or contract enforcement
+> - Changes in third-party ERP vendors' licensing policies
 
-> **The Customer has independently confirmed the scope of authorization with the incumbent ERP vendor and assumes full compliance responsibility for erpilot connecting to said ERP. erpilot bears no liability for any licensing determination, audit outcome, or claim by the third-party ERP vendor.**
+### 3.4 Customer Confirmation Before Activation
 
-This acknowledgment is also recorded in the **audit log at connector activation time** for future reference.
+We recommend the customer complete the following internal procedures before activating a connector:
+
+1. Complete the authorization confirmation, required procurement, and document retention described in §2
+2. Obtain written internal sign-off from IT / Legal / Procurement leads
+3. When activating the connector in erpilot, the system records the activation time, operator, and corresponding external data source in the **audit log** for the customer's future internal review
+
+> 💡 The act of activating a connector indicates that the customer has independently evaluated and assumed the relevant compliance responsibilities.
 
 ---
 
 ## 4. FAQ
 
-### Q1: We're a small company (30 employees). The incumbent ERP vendor won't audit us, right?
-**A**: Audit likelihood is not directly tied to company size. Resellers have annual KPIs, and **buying a competing ERP often becomes an audit hotspot**. The risk is not "will I be audited," but "can I produce written authorization when audited."
+### Q1: We're a small company (30 employees). Do we still need to be aware of this?
+**A**: Compliance responsibility is not directly tied to company size. We recommend handling per your contract with the incumbent ERP vendor. If in doubt, please contact the vendor or your legal counsel.
 
-### Q2: We only use erpilot to READ (SELECT), never to write to the original DB. Do we still need authorization?
-**A**: **Yes.** EULAs typically govern "**access**," not just "**writes**." Even read-only third-party access is a violation.
+### Q2: We only use erpilot to READ (SELECT), never to write back. Do we still need to confirm authorization?
+**A**: We recommend confirming with the vendor regardless. Many license agreements' applicable scope includes "access" behavior, not only "writes." Specific application depends on contract terms.
 
-### Q3: Can I just have my IT staff lend their personal account to erpilot? That counts as a "named user," right?
-**A**: **Not recommended.**
-- Most EULAs prohibit "sharing accounts with software / systems"
-- If that employee leaves, erpilot loses connection immediately
-- Personal accounts usually have **excessive privileges**; erpilot should use a "least-privilege service account"
-- Audits that uncover system integration via a personal account often deem this a **clearer violation**
+### Q3: Can we have an IT staff member's personal account used by erpilot?
+**A**: This is technically possible, but **we recommend careful evaluation**:
+- Some license agreements may have provisions regarding "scope of personal-account use"—please refer to contract terms
+- erpilot will lose connectivity when that employee leaves
+- Personal accounts typically have broader privileges; from a security best-practices standpoint, we recommend a "least-privilege service account"
+- We recommend confirming with your legal team / incumbent ERP vendor whether this falls within the authorized scope
 
-### Q4: The vendor says "I don't know" or "we don't offer that license" — what then?
-**A**: Demand a **written** reply stating "the vendor is aware that the customer will integrate with a third-party system and does not require additional license fees." No written record = no authorization — **better to pause the connector than take the risk**.
+### Q4: The vendor says "unclear" or "no corresponding license item available" — what do we do?
+**A**: We recommend requesting a **written reply** that explicitly records the vendor's understanding and position on this usage scenario. If no clear reply is available, we recommend careful evaluation before deciding whether to enable the connector, and consultation with legal counsel where appropriate.
 
-### Q5: I've already connected via erpilot and only now realize I need authorization — what do I do?
-**A**:
-1. **Immediately disable the connector** (in erpilot Settings → External Connections → Disable)
-2. Retain a copy of the "activation period / connection logs"
-3. Proactively contact the incumbent ERP vendor to explain and retroactively license (**proactive vs. caught in audit** — the vendor's posture differs vastly)
-4. Consult legal counsel
+### Q5: I already enabled the connector before seeing this reminder — what now?
+**A**: We recommend:
+1. Consider pausing the connection as appropriate
+2. Retain connection logs from the activation period
+3. Proactively communicate with the incumbent ERP vendor and follow their guidance
+4. Consult legal counsel where appropriate
 
-### Q6: Can erpilot help send an email to the incumbent vendor to negotiate licensing?
-**A**: **No.** erpilot does not represent any customer in communications with third-party ERP vendors. **We recommend the customer's IT lead contact their incumbent reseller directly** (they know the EULA details best).
+### Q6: Can erpilot help us communicate with the incumbent ERP vendor about licensing?
+**A**: erpilot does not participate in communications between the customer and third-party ERP vendors. We recommend the customer's IT / Legal / Procurement lead contact the incumbent vendor or reseller directly (they are most familiar with the licensing terms).
 
-### Q7: We use a free / trial edition (e.g., Odoo Community). Does this still apply?
-**A**: Open-source editions (AGPL / GPL) typically have **no such restriction**, but **Odoo Enterprise / SAP B1 trial / any commercial edition** are subject to this warning. Please confirm **which edition** you're running.
+### Q7: We use an open-source / trial edition of the ERP. Does this still apply?
+**A**: Open-source licenses (AGPL / GPL, etc.) typically have fewer restrictions on third-party system access, but **commercial / trial editions** vary by version. Please refer to the **official license documentation** for the edition you are using.
 
-### Q8: Can I use erpilot to migrate data once, then disable the connector?
-**A**: Technically yes — one-time migration then disconnect. But **the access during migration itself** requires authorization. Please follow §2 to obtain written authorization before any one-time migration.
+### Q8: We just want to do a one-time data migration then disconnect. Do we still need to confirm authorization?
+**A**: A one-time migration is technically feasible. However, "access during the migration period" still constitutes a use, and we recommend confirming authorization scope per §2 before proceeding.
 
 ---
 
-## 5. Reminders for erpilot Consultants / Resellers
+## 5. Guidance for erpilot Consultants / Resellers
 
-When demoing / pitching erpilot's "external DB connector" feature:
+When introducing erpilot's "external DB connector" feature, we recommend:
 
-✅ **You may say**:
-- "Our Schema Mapping AI can automatically connect to your ERP data"
-- "Technically we can connect to your 鼎新 / 正航 SQL Server in 2 minutes"
-- "Conversational ERP can read historical data from your legacy system"
+✅ **Suitable content to present**:
+- The technical capabilities of erpilot's Schema Mapping AI
+- The data source types the connector supports (sqlite / csv / SQL Server / REST API, etc.)
+- The conversational ERP experience for cross-source query and migration
 
-❌ **You must NEVER say**:
-- "Forget about your 鼎新 license, we'll work around it"
-- "The vendor will never find out"
-- "It's fine, everyone connects this way"
+✅ **Recommended companion statements**:
+- "**The connector is a technical component; before enabling, we recommend that your company first confirm the authorization scope in writing with the incumbent ERP vendor**"
+- "erpilot does not participate in contracts / licensing matters between your company and third-party ERP vendors"
+- "Specific authorization determinations should be based on your contract with the incumbent ERP vendor"
+- "**Detailed compliance reminder**: see [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)"
 
-⚠️ **You must always add**:
-- "However, please first obtain written confirmation of authorization scope from your incumbent ERP vendor"
-- "erpilot is not responsible for original ERP licensing compliance"
+❌ **Not recommended**:
+- Making definitive statements about any third-party ERP vendor's licensing policies or audit practices
+- Speculating on behalf of the customer about whether a vendor "will" or "won't" take particular action
+- Suggesting in any way that the customer should bypass or disregard the incumbent ERP vendor's licensing terms
 
 ---
 
@@ -183,10 +196,16 @@ When demoing / pitching erpilot's "external DB connector" feature:
 | **User manual** | [`USER_MANUAL_EN.md`](./USER_MANUAL_EN.md) |
 | **Sales killer moments** | [`SALES_KILLER_MOMENTS_EN.md`](./SALES_KILLER_MOMENTS_EN.md) |
 | **erpilot tri-license model** | [`COMMERCIAL_LICENSING_FAQ_ZH.md`](./COMMERCIAL_LICENSING_FAQ_ZH.md) (ZH-only) |
-| **Chinese version of this notice** | [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md) |
+| **Chinese version** | [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md) |
 
 ---
 
-**Last updated**: 2026-05-19 (v3.25.4 — added Third-Party ERP Licensing Compliance Notice)
-**Legal nature**: This document is **a compliance reminder only** and does NOT constitute legal advice. For specific licensing determinations, consult your own legal counsel and the incumbent ERP vendor.
-**Version**: 1.0
+## Statement of Legal Nature
+
+- This document is a **compliance reminder** and **does NOT constitute legal advice, a compliance opinion, or any representation about any third-party vendor's licensing policies**.
+- The licensing models, audit channels, and compliance steps described herein are general overviews. **The applicability to any specific situation should be based on the customer's contract with the relevant ERP vendor.**
+- For specific licensing determinations, compliance assessments, or dispute handling, please consult **your own legal counsel** and confirm with **the relevant ERP vendor**.
+- The content of this document may be updated as industry practices or regulations change, without separate notice.
+
+**Last updated**: 2026-05-19 (v3.25.5 — legal-language polishing pass)
+**Version**: 1.1

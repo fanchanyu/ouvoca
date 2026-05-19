@@ -94,7 +94,7 @@
 
 🇺🇸 **erpilot is a conversational ERP for Taiwan SMB manufacturers.** Your staff types one sentence ("Order 100 M6 bolts from ChangJiang, delivery next Friday") and the AI turns it into a full purchase order, presenting a ConfirmCard for human approval before executing. **No training required, ready in 2 hours**. **Completely free for organizations with ≤20 concurrent users**, including closed-source connectors for 鼎新 / 正航 / SAP<sup>※</sup>.
 
-> ⚠️ <sup>※</sup> connector 是「**技術連線元件**」，不含原 ERP（鼎新/正航/SAP B1 等）的使用授權。多數商用 ERP 採每位具名使用者授權，禁止以共用 / 服務帳號連線，**客戶必須先和原 ERP 廠商書面取得授權**才能啟用。erpilot 不協助、不代理、不承擔此類合約事務。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。<br>The connector is a **technical connectivity component** and does NOT include the licensing of your incumbent ERP (Workflow / ChengHang / SAP B1, etc.). Most commercial ERPs are licensed per-named-user and **prohibit shared / service account connections** — **the customer must first obtain written authorization from the incumbent ERP vendor** before enabling. erpilot does NOT assist, represent, or assume liability for such contractual matters.
+> ⚠️ <sup>※</sup> connector 為「**技術連線元件**」，不含原 ERP（如 Workflow / ChengHang / SAP B1 等廠商之產品）的使用授權；各廠商之授權合約規定可能不同，請依貴司與該廠商之合約為準。建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍。erpilot **不參與、不代理**此類合約事務；於適用法律所允許之最大範圍內不承擔相關責任。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。<br>The connector is a **technical connectivity component** and does NOT include the licensing of your incumbent ERP (e.g., products from vendors such as Workflow / ChengHang / SAP B1); each vendor's license terms may differ — please refer to your contract with that vendor. We recommend the customer confirm authorization scope in writing with the incumbent ERP vendor before enabling. erpilot **does not participate in or represent the customer in** such contractual matters; to the maximum extent permitted by applicable law, erpilot assumes no related liability.
 
 | 為什麼選 erpilot? / Why erpilot? | 我們的解法 / Our Answer |
 |---|---|
@@ -202,7 +202,7 @@
 | 清掉示範資料 / Clear demo data | 登入 → ⚙️ 設定 → 📦 示範資料 → 🗑 清除 |
 | 停止 erpilot / Stop | `docker compose down`（在解壓目錄裡）或關掉 Docker Desktop |
 | 完全移除 / Uninstall | `docker compose down -v` → 刪 erpilot 資料夾 |
-| 連現有鼎新 / 正航 DB | 看 [`docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md`](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md)<br>⚠️ **連線前必讀**：[`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) — 多數商用 ERP 採每位具名使用者授權，連線前須客戶自行取得原 ERP 廠商書面授權，erpilot 不負責此類合約事務 |
+| 連現有鼎新 / 正航 DB | 看 [`docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md`](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md)<br>⚠️ **建議閱讀**：[`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) — 商用 ERP 之授權條款依各廠商而異，建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍；erpilot 不參與此類合約事務 |
 
 📘 **更詳細的「給老闆看的版本」（純圖文、零技術術語）**：
 - 中文 → [`docs/INSTALLATION_ZH.md`](./docs/INSTALLATION_ZH.md)
@@ -315,7 +315,7 @@
 
 **🌱 小小企業軌（≤20 人）免費含閉源 connector！**
 
-> ⚠️ **直連現有商用 ERP 前的合規警告**：多數商用 ERP（鼎新 / 正航 / SAP B1 / 叡揚 等）採「每位具名使用者授權」模式，禁止以共用 / 服務帳號連線。**客戶必須先和原 ERP 廠商書面確認授權範圍**並視情況加購整合授權，否則可能違反該 ERP 之 EULA。**erpilot 不協助、不代理、不承擔**與第三方 ERP 廠商之合約 / 授權 / 法律事務。完整說明：[`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。
+> ⚠️ **直連現有商用 ERP 前的合規提醒**：商用 ERP（例如 Workflow / ChengHang / SAP B1 / Vitals 等）之授權合約對「以共用 / 服務帳號連線」之規定可能不同；具體請依貴司與該廠商之合約為準。建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍，必要時購買相應之整合授權。erpilot **不參與、不代理**與第三方 ERP 廠商之合約 / 授權事務；於適用法律所允許之最大範圍內不承擔相關責任。完整提醒：[`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。
 
 </details>
 
@@ -433,12 +433,12 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | 19 | LLM API Key 申請指南（小白版）/ How to Get LLM API Key | [📕 中文 PDF](./docs/pdf/19_LLM_API_Key申請指南_中文.pdf) | [📘 EN PDF](./docs/pdf/19_How_to_Get_LLM_API_Key_EN.pdf) |
 | **20** | 🏛️ **家規完整使用指南** ⭐招牌 / **House Rules — Complete Guide** | [📕 **中文 PDF**](./docs/pdf/20_家規完整使用指南_中文.pdf) | [📘 **EN PDF**](./docs/pdf/20_House_Rules_Guide_EN.pdf) |
 | 21 | 商業授權 FAQ（含 ≤20 人免費條款） | [📕 中文 PDF](./docs/pdf/21_商業授權FAQ_中文.pdf) | — |
-| **22** | ⚠️ **第三方 ERP 授權合規通知**（接舊鼎新/正航/SAP 前必讀）/ **External ERP Licensing Compliance Notice** | [📕 **中文 PDF**](./docs/pdf/22_第三方ERP授權合規通知_中文.pdf) | [📘 **EN PDF**](./docs/pdf/22_External_ERP_Licensing_Notice_EN.pdf) |
+| **22** | ⚠️ **第三方 ERP 授權合規提醒**（接舊系統前建議閱讀）/ **External ERP Licensing Compliance Reminder** | [📕 **中文 PDF**](./docs/pdf/22_第三方ERP授權合規通知_中文.pdf) | [📘 **EN PDF**](./docs/pdf/22_External_ERP_Licensing_Notice_EN.pdf) |
 
 📌 **特別文件**：
 - [**`HOW_TO_GET_LLM_API_KEY_ZH.md`**](./docs/HOW_TO_GET_LLM_API_KEY_ZH.md) · [EN](./docs/HOW_TO_GET_LLM_API_KEY_EN.md) — 5-10 分鐘申請 API Key 完整教學（DeepSeek/OpenAI/Anthropic/Ollama 比較）
 - [**`HOUSE_RULES_GUIDE_ZH.md`**](./docs/HOUSE_RULES_GUIDE_ZH.md) · [EN](./docs/HOUSE_RULES_GUIDE_EN.md) — ⭐ erpilot 招牌差異化「家規」完整指南
-- ⚠️ [**`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`**](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) · [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md) — **接舊 ERP 前必讀**：第三方 ERP 授權合規警告（鼎新/正航/SAP B1 等多採每位具名使用者授權）
+- ⚠️ [**`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`**](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) · [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md) — **接舊 ERP 前建議閱讀**：第三方 ERP 授權合規提醒（商用 ERP 之授權條款依各廠商而異；本文件非法律意見）
 
 🇹🇼 **電腦小白優先讀**：00（產品說明書）→ 01（安裝指南）→ 02（快速入門）→ 03（使用者操作手冊）
 🇺🇸 **Beginners read first**: 00 → 01 → 02 → 03
@@ -672,7 +672,7 @@ opnetest/
 >
 > 🇺🇸 Aligned with erpilot's promise to help small businesses get started fast. Taiwan SMBs (1-20 employees) get the full suite — including 鼎新 / 正航 / SAP connectors — for free. Talk commercial contract only when you grow past 20 and can't live without it.
 >
-> ⚠️ **重要 / IMPORTANT**：connector「免費」指的是 **erpilot 不收技術授權費**；要把 connector 接到您**現有商用 ERP**（鼎新 / 正航 / SAP B1 等），**仍須客戶自行向原 ERP 廠商取得書面授權**（多數採每位具名使用者授權）。erpilot 不負責此類第三方合約事務。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md) — "Free" here means **erpilot charges no technical license fee**; connecting to your incumbent ERP still requires **the customer to obtain written authorization** from the incumbent ERP vendor on their own. erpilot does NOT handle such third-party contracts.
+> ⚠️ **建議閱讀 / Recommended reading**：connector「免費」指的是 **erpilot 不收技術授權費**；要把 connector 接到您**現有商用 ERP**（如 Workflow / ChengHang / SAP B1 等廠商之產品），各廠商之授權合約規定可能不同，建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍。erpilot 不參與此類第三方合約事務。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md) — "Free" here means **erpilot charges no technical license fee**; connecting to your incumbent ERP still calls for **the customer to confirm authorization scope in writing with the incumbent ERP vendor**. erpilot does not participate in such third-party contractual matters.
 
 🇹🇼 不確定哪一軌？看 [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md) 決策樹。
 🇺🇸 Not sure which track? See the decision tree in [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md).

@@ -75,7 +75,7 @@ Procurement (30s after order): "cancel my last order"
 
 ### Moment 6 — Cross-DB federated query
 
-> ⚠️ **Always add during demo**: "But this requires connecting to your incumbent ERP (Dingxin/Chenghang). **Please first obtain written authorization** from your ERP vendor — most commercial ERPs license per-named-user and may require Integration / ODBC add-ons. erpilot does NOT negotiate or represent you in such contracts. See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)."
+> ⚠️ **Recommended companion statement during demo**: "This feature requires connecting to your incumbent ERP. **We recommend first confirming the authorization scope in writing with your ERP vendor**; specific licensing terms depend on your contract with that vendor, and add-on licenses may be needed. erpilot does not participate in such contractual matters. See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)."
 
 ```
 Boss: "What's our Dingxin order amount for May?"
@@ -86,7 +86,7 @@ Boss: "What's our Dingxin order amount for May?"
 
 ### Moment 7 — Schema Mapping + Migration (🏆 KILLER)
 
-> ⚠️ **Same as above**: Migration still requires prior written authorization from the incumbent ERP vendor (even one-time imports count as "access"). See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) §FAQ Q8.
+> ⚠️ **Same as above**: Access during a one-time migration still constitutes a use; we recommend the customer confirm authorization scope per their contract with the incumbent ERP vendor before proceeding. See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) §FAQ Q8.
 
 ```
 Procurement: "migrate all customers from Dingxin"
@@ -158,12 +158,12 @@ Boss: "Send daily digest to wang@example.com at 7am"
 > **"We're not yet another ERP. We're the AI overlay on top of ERP."**
 >
 > Employees don't learn the system — just talk to it.
-> Your Dingxin doesn't get killed — we read it + migrate gradually (*provided you've first obtained written authorization from your Dingxin vendor*).
+> Your legacy system doesn't get killed — we read it + migrate gradually (*we recommend the customer first confirm authorization scope in writing with the incumbent ERP vendor*).
 > $30k/year, 2-week deployment, 2-hour onboarding.
 
 ---
 
-> ⚠️ **Required reading for sales / consultants**: The claims above about "direct connection to Dingxin / Chenghang / SAP B1" describe **technical feasibility**. **Legal authorization must be obtained by the customer from the incumbent ERP vendor.** See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) for the full compliance boundary, the three mandatory customer actions, and erpilot's scope of responsibility. **Never say "the vendor won't find out" or "we can bypass licensing" during a demo.**
+> ⚠️ **Recommended reading for sales / consultants**: The above descriptions of "direct connection to incumbent ERPs (such as Workflow / ChengHang / SAP B1)" describe **technical feasibility**; specific authorization determinations should be based on the customer's contract with the relevant ERP vendor. See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) for the compliance reminder, the recommended customer preparation steps, and erpilot's scope of role. **We recommend focusing on technical capability and advising the customer to confirm licensing with the incumbent ERP vendor; please do not make definitive statements about any third-party vendor's policies or audit practices.**
 >
 > **Want a trial? We can demo 30 min this Thursday afternoon.**
 

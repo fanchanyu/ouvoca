@@ -8,15 +8,17 @@ For full Chinese rationale and details see [EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md
 
 ---
 
-> ## ⚠️ IMPORTANT: Third-Party ERP Licensing Compliance Warning (Required Reading)
+> ## ⚠️ IMPORTANT: Third-Party ERP Licensing Compliance Reminder (Recommended Reading)
 >
-> Most commercial ERPs (**Workflow ERP, ChengHang, SAP B1, Vitals**, etc.) are licensed **per-named-user** and **prohibit shared or service accounts** from connecting. If erpilot connects to your existing ERP via a single service account, **you may violate that ERP's EULA**, resulting in suspension, claims, or back-licensing fees from the incumbent vendor.
+> Some commercial ERP license agreements (e.g., for products from vendors such as Workflow / ChengHang / SAP B1 / Vitals) may include specific terms regarding **connections via shared or service accounts** to the DB or API; the specifics **depend on each vendor's contract with you**. If a connection is enabled without obtaining appropriate authorization, this may—depending on the customer's contract with the relevant vendor—lead to contractual handling (e.g., service adjustments, retroactive license fees, or dispute resolution).
 >
-> **Before enabling a connector, the customer MUST**: ① Obtain written authorization from the incumbent ERP vendor ② Purchase required add-ons (Integration / ODBC / API licenses) ③ Retain documentation.
+> **Before enabling a connector, we recommend the customer**: ① Confirm authorization scope in writing with the incumbent ERP vendor ② Purchase any necessary integration licenses ③ Retain relevant documentation.
 >
-> **erpilot provides the connector code only — we do NOT assist, represent, or assume liability** for contracts, licensing, or legal matters with third-party ERP vendors. All integration risk (including compliance) is borne by the customer.
+> The connector erpilot provides is a technical component; **erpilot does not participate in or represent the customer in** any contracts, licensing, or legal matters with third-party ERP vendors. **To the maximum extent permitted by applicable law**, erpilot does not assume responsibility for consequences arising from a customer enabling a connection without obtaining appropriate authorization.
 >
-> 📖 **Full compliance notice (required reading)**: [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) / [中文](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)
+> 📖 **Full compliance reminder (recommended reading)**: [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) / [中文](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)
+>
+> _This reminder is not legal advice; for specific determinations, please consult your legal counsel and the relevant ERP vendor._
 
 ---
 

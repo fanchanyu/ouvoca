@@ -1112,7 +1112,7 @@ LLM-ERP 採用三軌授權，**選對的省幾百萬**。
 | 🌱 **Small Business** | 50-100 人廠、≤ 20 個同時上線的人 | **完全免費** | **含閉源 connector**（鼎新/正航接口）<sup>※</sup> |
 | 🔵 **Commercial** | > 20 人同時上線、ISV、SaaS 業者 | 議價 | 解除 AGPL 條款限制 |
 
-> ⚠️ <sup>※</sup> **重要**：connector 提供的是**技術連線能力**。若您要把 erpilot 接到**現有鼎新 / 正航 / SAP B1 / 叡揚** 等商用 ERP，多數採「**每位具名使用者授權**」，**禁止以共用 / 服務帳號連線**。請先和您的原 ERP 廠商書面確認授權範圍 + 必要時加購整合授權。**erpilot 不協助、不代理、不承擔**與原 ERP 廠商之合約 / 授權事務。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。
+> ⚠️ <sup>※</sup> **建議閱讀**：connector 提供的是**技術連線元件**。若您要把 erpilot 接到**現有商用 ERP**（例如 Workflow / ChengHang / SAP B1 / Vitals 等廠商之產品），各廠商之授權合約對「以共用 / 服務帳號連線」之規定可能不同；具體請依您與該廠商之合約為準。建議於啟用前先與原 ERP 廠商書面確認授權範圍，必要時購買相應之整合授權。erpilot **不參與、不代理**與原 ERP 廠商之合約 / 授權事務，於適用法律所允許之最大範圍內，erpilot 對客戶未取得適當授權即啟用連線所衍生之後果不承擔責任。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。
 
 ### 怎麼申請 Small Business 軌？
 

@@ -104,9 +104,9 @@ const DOCS_TO_BUILD = [
   // === 21 v3.20 LICENSE 簡介 ===
   { src: 'COMMERCIAL_LICENSING_FAQ_ZH.md', out: '21_商業授權FAQ_中文.pdf',                 title: 'erpilot 商業授權 FAQ（含小小企業免費條款）' },
 
-  // === 22 v3.25.4 第三方 ERP 授權合規通知（接舊鼎新/正航/SAP 前必讀）===
-  { src: 'EXTERNAL_DB_LICENSING_NOTICE_ZH.md', out: '22_第三方ERP授權合規通知_中文.pdf',     title: '⚠️ 第三方 ERP 授權合規通知（接舊系統前必讀）' },
-  { src: 'EXTERNAL_DB_LICENSING_NOTICE_EN.md', out: '22_External_ERP_Licensing_Notice_EN.pdf', title: '⚠️ External ERP Licensing Compliance Notice (Required Before Connecting)' },
+  // === 22 v3.25.5 第三方 ERP 授權合規提醒（接舊系統前建議閱讀；非法律意見）===
+  { src: 'EXTERNAL_DB_LICENSING_NOTICE_ZH.md', out: '22_第三方ERP授權合規通知_中文.pdf',     title: '⚠️ 第三方 ERP 授權合規提醒（接舊系統前建議閱讀）' },
+  { src: 'EXTERNAL_DB_LICENSING_NOTICE_EN.md', out: '22_External_ERP_Licensing_Notice_EN.pdf', title: '⚠️ External ERP Licensing Compliance Reminder (Recommended Before Connecting)' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────
