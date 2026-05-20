@@ -87,10 +87,16 @@ async def exec_tool(
     if not isinstance(body, dict):
         raise HTTPException(400, "body 必須是 JSON object")
 
+    # v3.25.9 修 pre-existing bug：UserContext 沒有 .roles 屬性（有 permissions dict）
+    # 之前 user.roles 會直接 AttributeError 讓整個 endpoint 500。
     user_dict = {
         "employee_id": user.employee_id,
         "username": user.username,
-        "roles": user.roles,
+        "user_id": user.user_id,
+        "is_superuser": user.is_superuser,
+        "tenant_id": user.tenant_id,
+        # 給 tool 看：擁有的權限清單（從 UserContext.permissions dict 抽 keys）
+        "permissions": list(user.permissions.keys()),
     }
 
     # 走 engine.execute_tool（含 slot validation）

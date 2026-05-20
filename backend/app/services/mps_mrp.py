@@ -1,10 +1,15 @@
 """MPS/MRP service — master scheduling and material requirement planning.
 
-MRP algorithm (simplified):
+MRP algorithm:
 1. Load all MPS entries → planned_production per product per period.
-2. For each product, explode BOM (one level for now) to compute gross requirements per part.
+2. For each product, explode BOM **recursively (multi-level)** via
+   explode_bom_recursive() — handles 2+ 階 sub-assembly products as
+   parts (by part_no == product_no convention).
+   Cycle protection: visited set 阻止 A→B→A 無窮遞迴。
 3. Net = gross - on_hand - scheduled_receipts (we treat current inventory as period 0 on-hand).
 4. If net > 0 → planned_order_release in (period - part.lead_time_days).
+
+v3.25.9：升級單階 → 多階遞迴爆破。
 """
 import uuid
 from collections import defaultdict
@@ -75,16 +80,23 @@ async def run_mrp(db: AsyncSession, mps_id: str, user: Optional[dict] = None) ->
     db.add(mrp)
 
     # gross requirement bucket: { (part_id, period) -> qty }
+    # 同時記錄每個 part 出現時的最深 level（用於 MrpItem.bom_level）
     gross: dict[tuple[str, str], float] = defaultdict(float)
+    deepest_level: dict[str, int] = {}
+
+    # v3.25.9：多階遞迴爆破，自動處理半成品（part_no == product_no 對應的 sub-assembly）
+    from app.services.production import explode_bom_recursive
 
     for entry in mps.entries:
-        # explode one-level BOM
-        bom_q = await db.execute(
-            select(BOMItem).where(BOMItem.product_id == entry.product_id, BOMItem.is_active == True)
+        explosion = await explode_bom_recursive(
+            db, entry.product_id, qty=float(entry.planned_production)
         )
-        for bom in bom_q.scalars().all():
-            qty = entry.planned_production * bom.qty_per * (1 + bom.scrap_rate)
-            gross[(bom.part_id, entry.period)] += qty
+        for item in explosion:
+            gross[(item["part_id"], entry.period)] += item["qty"]
+            # 取最深的 level（同 part 可能在多個分支出現）
+            deepest_level[item["part_id"]] = max(
+                deepest_level.get(item["part_id"], 1), item["level"]
+            )
 
     for (part_id, period), gross_qty in gross.items():
         # on-hand snapshot
@@ -99,7 +111,7 @@ async def run_mrp(db: AsyncSession, mps_id: str, user: Optional[dict] = None) ->
             id=str(uuid.uuid4()),
             mrp_master_id=mrp.id,
             part_id=part_id,
-            bom_level=1,
+            bom_level=deepest_level.get(part_id, 1),
             order_type="buy" if (part and part.category == "raw_material") else "make",
             period=period,
             gross_requirement=gross_qty,

@@ -51,6 +51,160 @@ async def get_bom_tree(db: AsyncSession, product_id: str) -> List[BOMItem]:
     return list(result.scalars().all())
 
 
+# v3.25.9：多階 BOM 遞迴爆破
+# 規則：BOMItem.part_id → Part.part_no；若 Part.part_no 對應到某個 Product.product_no，
+#       則該 part 為「半成品 / 次組件」，需再爆破它自己的 BOM。
+async def explode_bom_recursive(
+    db: AsyncSession,
+    product_id: str,
+    qty: float = 1.0,
+    *,
+    level: int = 1,
+    visited: Optional[set] = None,
+) -> List[dict]:
+    """遞迴展開多階 BOM，回傳所有葉節點（不再有子 BOM 的 part）累計用量。
+
+    回傳格式：[{"part_id": ..., "qty": float, "level": int, "scrap_rate": float, "path": [...]}, ...]
+
+    循環依賴保護：若 product_id 已在 visited set 中，直接 return []（防止 A→B→A 無窮遞迴）。
+
+    用量計算：父階 qty × 子階 qty_per × (1 + scrap_rate)
+    """
+    if visited is None:
+        visited = set()
+    if product_id in visited:
+        # 循環依賴：A 用了 B，B 又用了 A → 截斷
+        return []
+    visited = visited | {product_id}  # 不直接修改傳入的 set
+
+    rows = (await db.execute(
+        select(BOMItem)
+        .where(BOMItem.product_id == product_id, BOMItem.is_active == True)
+        .order_by(BOMItem.level, BOMItem.sequence_no)
+    )).scalars().all()
+
+    # 用 Part / Product 兩張表批次查 part_no 對應的子 product_id
+    # （效能：先一次抓所有 part_no，避免每階 N+1 query）
+    from app.models.inventory import Part
+    part_ids = [r.part_id for r in rows]
+    if not part_ids:
+        return []
+
+    parts = (await db.execute(
+        select(Part).where(Part.id.in_(part_ids))
+    )).scalars().all()
+    part_by_id = {p.id: p for p in parts}
+
+    # 反查：哪些 part_no 對應到 product（是半成品）
+    part_nos = [p.part_no for p in parts]
+    sub_products = (await db.execute(
+        select(Product).where(Product.product_no.in_(part_nos))
+    )).scalars().all()
+    subprod_by_part_no = {p.product_no: p for p in sub_products}
+
+    result: List[dict] = []
+    for bom in rows:
+        part = part_by_id.get(bom.part_id)
+        if part is None:
+            continue
+        # 本階需求 = 父階 qty × 用量 × (1 + 耗損)
+        line_qty = qty * bom.qty_per * (1 + (bom.scrap_rate or 0))
+
+        sub_product = subprod_by_part_no.get(part.part_no)
+        if sub_product is not None:
+            # 半成品 → 再遞迴展子階；本階自己不算「葉節點需求」
+            sub_explosion = await explode_bom_recursive(
+                db, sub_product.id, line_qty,
+                level=level + 1, visited=visited,
+            )
+            result.extend(sub_explosion)
+        else:
+            # 葉節點（純料件）→ 累計用量
+            result.append({
+                "part_id": bom.part_id,
+                "part_no": part.part_no,
+                "qty": line_qty,
+                "level": level,
+                "scrap_rate": bom.scrap_rate or 0,
+                "is_critical": bom.is_critical or False,
+            })
+
+    return result
+
+
+# v3.25.9：where-used 反查（哪些產品的 BOM 用到這個料件）
+async def where_used(db: AsyncSession, part_id: str) -> List[dict]:
+    """回傳所有「BOM 中用到該 part」的產品清單 + 用量。"""
+    rows = (await db.execute(
+        select(BOMItem, Product)
+        .join(Product, Product.id == BOMItem.product_id)
+        .where(BOMItem.part_id == part_id, BOMItem.is_active == True)
+    )).all()
+    return [
+        {
+            "product_id": prod.id,
+            "product_no": prod.product_no,
+            "product_name": prod.name,
+            "qty_per": bom.qty_per,
+            "scrap_rate": bom.scrap_rate,
+            "level": bom.level,
+        }
+        for bom, prod in rows
+    ]
+
+
+# v3.25.9：BOM 行更新 / 刪除（搭 hard-write tools）
+BOM_ITEM_UPDATABLE_FIELDS = {
+    "qty_per", "scrap_rate", "sequence_no", "level",
+    "is_critical", "effective_from", "effective_to", "is_active",
+}
+
+
+async def update_bom_item(db: AsyncSession, item_id: str, data: dict) -> BOMItem:
+    item = (await db.execute(
+        select(BOMItem).where(BOMItem.id == item_id)
+    )).scalar_one_or_none()
+    if item is None:
+        raise NotFoundError("BOM 項目不存在", item_id=item_id)
+    changes = {}
+    for k, v in data.items():
+        if k not in BOM_ITEM_UPDATABLE_FIELDS:
+            continue
+        if getattr(item, k) != v:
+            changes[k] = {"from": getattr(item, k), "to": v}
+            setattr(item, k, v)
+    if not changes:
+        return item
+    await db.commit()
+    await db.refresh(item)
+    await EventBus.emit(DomainEvent(
+        name="bom_item.updated", domain="production",
+        entity_type="BOMItem", entity_id=item.id,
+        data={"product_id": item.product_id, "part_id": item.part_id, "changes": changes},
+    ))
+    return item
+
+
+async def delete_bom_item(db: AsyncSession, item_id: str, user: Optional[dict] = None) -> dict:
+    """軟刪除：is_active = False（保留審計軌跡，不真 DELETE）。"""
+    item = (await db.execute(
+        select(BOMItem).where(BOMItem.id == item_id)
+    )).scalar_one_or_none()
+    if item is None:
+        raise NotFoundError("BOM 項目不存在", item_id=item_id)
+    if not item.is_active:
+        return {"message": "BOM 項目已停用", "item_id": item_id}
+    item.is_active = False
+    await db.commit()
+    await EventBus.emit(DomainEvent(
+        name="bom_item.deactivated", domain="production",
+        entity_type="BOMItem", entity_id=item.id,
+        data={"product_id": item.product_id, "part_id": item.part_id,
+              "deactivated_by": (user or {}).get("employee_id")},
+    ))
+    return {"message": "✅ BOM 項目已停用", "item_id": item_id}
+
+
 # -------- Work Order --------
 
 async def create_production_order(db: AsyncSession, data: dict, user: Optional[dict] = None) -> ProductionOrder:

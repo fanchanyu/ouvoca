@@ -1017,6 +1017,275 @@ async def _complete_wo_with_confirm(db, user, wo_no: str, completed_qty: float):
     return card.to_chat_payload()
 
 
+# ============================================================
+# v3.25.9 — BOM (做法 / Recipe) 對話式管理：3 個 hard-write tools
+# ============================================================
+
+@register_tool(
+    name="add_bom_item_with_confirm",
+    domain="production",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "新增 BOM (做法 / Recipe) 行：指定產品 + 料件 + 用量 + 耗損率。"
+        "AI 會出 ConfirmCard 給使用者確認，確認後才寫入。"
+        "範例：「在產品 PROD-001 的做法中加 M6 螺絲 4 個」"
+    ),
+    slots=[
+        Slot("product_no", "string", required=True, description="產品編號（如 PROD-001）"),
+        Slot("part_no", "string", required=True, description="料件編號（如 M6-BOLT-20）"),
+        Slot("qty_per", "number", required=True, description="每單位產品需要幾個此料件"),
+        Slot("scrap_rate", "number", required=False, description="耗損率 0.0-1.0（如 0.05 = 5%）"),
+        Slot("sequence_no", "integer", required=False, description="排序順序"),
+    ],
+    required_permission="production.bom.create",
+)
+async def _add_bom_item_with_confirm(
+    db, user,
+    product_no: str, part_no: str, qty_per: float,
+    scrap_rate: float = 0.0, sequence_no: int = 0,
+):
+    from app.models.product import Product, BOMItem
+    from app.models.inventory import Part
+
+    product = (await db.execute(
+        select(Product).where(Product.product_no == product_no)
+    )).scalar_one_or_none()
+    if product is None:
+        return {"error": f"找不到產品「{product_no}」"}
+
+    part = (await db.execute(
+        select(Part).where(Part.part_no == part_no)
+    )).scalar_one_or_none()
+    if part is None:
+        return {"error": f"找不到料件「{part_no}」"}
+
+    # 防呆：同產品同料件已存在
+    existing = (await db.execute(
+        select(BOMItem).where(
+            BOMItem.product_id == product.id,
+            BOMItem.part_id == part.id,
+            BOMItem.is_active == True,
+        )
+    )).scalar_one_or_none()
+    if existing is not None:
+        return {
+            "error": f"產品「{product_no}」的做法中已存在料件「{part_no}」",
+            "hint": "用 update_bom_item_with_confirm 修改用量",
+        }
+
+    summary = [
+        f"產品：{product.product_no} ({product.name})",
+        f"料件：{part.part_no} ({part.name})",
+        f"用量：{qty_per:g} {part.unit} / 1 {product.unit}",
+        f"耗損率：{scrap_rate:.1%}" if scrap_rate else "耗損率：0%",
+        f"排序：{sequence_no}",
+    ]
+    card = make_card(
+        tool_name="add_bom_item_with_confirm",
+        title="確認新增 BOM 行",
+        summary=summary,
+        slots={
+            "product_id": product.id, "product_no": product.product_no,
+            "part_id": part.id, "part_no": part.part_no,
+            "qty_per": qty_per, "scrap_rate": scrap_rate,
+            "sequence_no": sequence_no,
+        },
+        risk_tier="hard-write",
+        created_by=(user or {}).get("employee_id") if user else None,
+    )
+
+    async def execute():
+        from app.services.production import add_bom_item
+        item = await add_bom_item(db, {
+            "product_id": product.id,
+            "part_id": part.id,
+            "qty_per": qty_per,
+            "scrap_rate": scrap_rate,
+            "sequence_no": sequence_no,
+            "level": 1,
+            "is_active": True,
+        })
+        return {
+            "bom_item_id": item.id,
+            "product_no": product.product_no,
+            "part_no": part.part_no,
+            "qty_per": item.qty_per,
+            "message": f"✅ 已加 {part.part_no} 到 {product.product_no} 的做法",
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
+@register_tool(
+    name="update_bom_item_with_confirm",
+    domain="production",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "修改 BOM 行的用量或耗損率。"
+        "AI 會出 ConfirmCard 給使用者確認，確認後才寫入。"
+        "範例：「把產品 PROD-001 的 M6 螺絲用量改成 6 個」"
+    ),
+    slots=[
+        Slot("product_no", "string", required=True, description="產品編號"),
+        Slot("part_no", "string", required=True, description="料件編號"),
+        Slot("qty_per", "number", required=False, description="新用量（不填則不改）"),
+        Slot("scrap_rate", "number", required=False, description="新耗損率（不填則不改）"),
+    ],
+    required_permission="production.bom.update",
+)
+async def _update_bom_item_with_confirm(
+    db, user,
+    product_no: str, part_no: str,
+    qty_per: float = None, scrap_rate: float = None,
+):
+    from app.models.product import Product, BOMItem
+    from app.models.inventory import Part
+
+    product = (await db.execute(
+        select(Product).where(Product.product_no == product_no)
+    )).scalar_one_or_none()
+    if product is None:
+        return {"error": f"找不到產品「{product_no}」"}
+    part = (await db.execute(
+        select(Part).where(Part.part_no == part_no)
+    )).scalar_one_or_none()
+    if part is None:
+        return {"error": f"找不到料件「{part_no}」"}
+
+    item = (await db.execute(
+        select(BOMItem).where(
+            BOMItem.product_id == product.id,
+            BOMItem.part_id == part.id,
+            BOMItem.is_active == True,
+        )
+    )).scalar_one_or_none()
+    if item is None:
+        return {
+            "error": f"產品「{product_no}」的做法中沒有料件「{part_no}」",
+            "hint": "用 add_bom_item_with_confirm 新增",
+        }
+
+    if qty_per is None and scrap_rate is None:
+        return {"error": "請至少指定 qty_per 或 scrap_rate 其中一個欄位"}
+
+    changes_summary = []
+    update_data = {}
+    if qty_per is not None and qty_per != item.qty_per:
+        changes_summary.append(f"用量：{item.qty_per:g} → {qty_per:g}")
+        update_data["qty_per"] = qty_per
+    if scrap_rate is not None and scrap_rate != item.scrap_rate:
+        changes_summary.append(f"耗損率：{(item.scrap_rate or 0):.1%} → {scrap_rate:.1%}")
+        update_data["scrap_rate"] = scrap_rate
+    if not update_data:
+        return {"message": "沒有變更", "product_no": product_no, "part_no": part_no}
+
+    summary = [
+        f"產品：{product.product_no} ({product.name})",
+        f"料件：{part.part_no} ({part.name})",
+        *changes_summary,
+    ]
+    card = make_card(
+        tool_name="update_bom_item_with_confirm",
+        title="確認修改 BOM 行",
+        summary=summary,
+        slots={"bom_item_id": item.id, **update_data,
+               "product_no": product_no, "part_no": part_no},
+        risk_tier="hard-write",
+        created_by=(user or {}).get("employee_id") if user else None,
+    )
+
+    async def execute():
+        from app.services.production import update_bom_item
+        updated = await update_bom_item(db, item.id, update_data)
+        return {
+            "bom_item_id": updated.id,
+            "product_no": product.product_no,
+            "part_no": part.part_no,
+            "qty_per": updated.qty_per,
+            "scrap_rate": updated.scrap_rate,
+            "message": f"✅ 已更新 {product.product_no} 的 {part.part_no} 做法",
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
+@register_tool(
+    name="delete_bom_item_with_confirm",
+    domain="production",
+    risk_tier=RiskTier.HARD_WRITE,
+    description=(
+        "從產品的 BOM 中移除一個料件（軟刪除：is_active=False 保留審計）。"
+        "AI 會出 ConfirmCard 給使用者確認，確認後才停用。"
+        "範例：「從 PROD-001 的做法移除 M6 螺絲」"
+    ),
+    slots=[
+        Slot("product_no", "string", required=True, description="產品編號"),
+        Slot("part_no", "string", required=True, description="料件編號"),
+        Slot("reason", "string", required=False, description="移除原因（審計用）"),
+    ],
+    required_permission="production.bom.delete",
+)
+async def _delete_bom_item_with_confirm(
+    db, user,
+    product_no: str, part_no: str, reason: str = "",
+):
+    from app.models.product import Product, BOMItem
+    from app.models.inventory import Part
+
+    product = (await db.execute(
+        select(Product).where(Product.product_no == product_no)
+    )).scalar_one_or_none()
+    if product is None:
+        return {"error": f"找不到產品「{product_no}」"}
+    part = (await db.execute(
+        select(Part).where(Part.part_no == part_no)
+    )).scalar_one_or_none()
+    if part is None:
+        return {"error": f"找不到料件「{part_no}」"}
+
+    item = (await db.execute(
+        select(BOMItem).where(
+            BOMItem.product_id == product.id,
+            BOMItem.part_id == part.id,
+            BOMItem.is_active == True,
+        )
+    )).scalar_one_or_none()
+    if item is None:
+        return {"error": f"產品「{product_no}」的做法中沒有 active 的料件「{part_no}」"}
+
+    summary = [
+        f"產品：{product.product_no} ({product.name})",
+        f"料件：{part.part_no} ({part.name})",
+        f"原用量：{item.qty_per:g}",
+        f"移除原因：{reason or '（未填）'}",
+        "⚠️ 軟刪除：保留紀錄但停用，未來可重啟用",
+    ]
+    card = make_card(
+        tool_name="delete_bom_item_with_confirm",
+        title="確認移除 BOM 行",
+        summary=summary,
+        slots={"bom_item_id": item.id, "product_no": product_no,
+               "part_no": part_no, "reason": reason},
+        risk_tier="hard-write",
+        created_by=(user or {}).get("employee_id") if user else None,
+    )
+
+    async def execute():
+        from app.services.production import delete_bom_item
+        result = await delete_bom_item(db, item.id, user=user)
+        return {
+            "bom_item_id": result["item_id"],
+            "product_no": product.product_no,
+            "part_no": part.part_no,
+            "message": f"✅ 已從 {product.product_no} 的做法移除 {part.part_no}",
+        }
+
+    await stash_card(card, execute)
+    return card.to_chat_payload()
+
+
 # ------------------------------------------------------------
 # 接到 4 個 domain agent 的 tool_names
 # ------------------------------------------------------------
@@ -1039,6 +1308,10 @@ _DOMAIN_TOOL_MAP = {
     ],
     "production": [
         "complete_work_order_with_confirm",
+        # v3.25.9：BOM (做法) 對話式管理
+        "add_bom_item_with_confirm",
+        "update_bom_item_with_confirm",
+        "delete_bom_item_with_confirm",
     ],
 }
 
