@@ -14,4 +14,5 @@ from app.agents.domains import (  # noqa: F401
     migration_tools,    # v3.4 Schema Mapping AI + migrate_from_external_with_confirm
     email_digest_tools, # v3.5 每日摘要 preview + send_with_confirm
     planning_llm_tools, # v3.30 把 v3.25.9-v3.29 全部演算法包成 LLM tools
+    crud_completion_tools,  # v3.31 補完 cancel/receive/ship/QC/JE/pick 等高頻 hard-write
 )
