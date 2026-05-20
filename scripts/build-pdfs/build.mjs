@@ -115,6 +115,10 @@ const DOCS_TO_BUILD = [
   // === 24 v3.26 產能感知 MRP 設計（Dixon-Silver 啟發法 + CLSP + 法律聲明）===
   { src: 'MRP_CAPACITY_AWARE_DESIGN_ZH.md', out: '24_產能感知MRP設計_中文.pdf',     title: '🏭 產能感知 MRP — Dixon-Silver CLSP 啟發法' },
   { src: 'MRP_CAPACITY_AWARE_DESIGN_EN.md', out: '24_Capacity_Aware_MRP_Design_EN.pdf', title: '🏭 Capacity-Aware MRP — Dixon-Silver CLSP Heuristic' },
+
+  // === 25 v3.27 可解釋規劃 + TOC 瓶頸（IE/Algo/ERP/AI 四域交集）===
+  { src: 'PLANNING_EXPLAINABILITY_DESIGN_ZH.md', out: '25_可解釋規劃與TOC瓶頸_中文.pdf',     title: '🔍 可解釋規劃 + TOC 瓶頸 — Goldratt + Cheney + Saltelli' },
+  { src: 'PLANNING_EXPLAINABILITY_DESIGN_EN.md', out: '25_Explainable_Planning_TOC_EN.pdf', title: '🔍 Explainable Planning + TOC Bottleneck Analysis' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────
