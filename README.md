@@ -6,7 +6,7 @@
 
 [![Tests](https://img.shields.io/badge/tests-287%20passing-brightgreen)]()
 [![Gates](https://img.shields.io/badge/self--verify-7%2F7%20green-brightgreen)]()
-[![Docs](https://img.shields.io/badge/PDFs-42%20bilingual-blue)]()
+[![Docs](https://img.shields.io/badge/PDFs-44%20bilingual-blue)]()
 [![License](https://img.shields.io/badge/license-AGPL--3.0%20%2B%20SBL%20%2B%20Commercial-blue)](./LICENSE)
 [![Version](https://img.shields.io/badge/version-3.12-blueviolet)]()
 [![Author](https://img.shields.io/badge/by-Peter-lightgrey)](https://github.com/fanchanyu)
@@ -26,7 +26,7 @@
 | 我是... / I am... | 我需要... / I need... | 跳到 / Jump to |
 |---|---|---|
 | 👔 **老闆 / 採購 / 業務 / 倉管**<br>Boss / Buyer / Sales / Warehouse | 我要**用** erpilot，不會寫程式<br>I want to **use** erpilot, no coding | 👉 [**5 分鐘安裝指南**](#-5-分鐘安裝指南--5-minute-install-for-non-developers) |
-| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**42 份雙語 PDF**](#-42-份雙語客戶文件--42-bilingual-customer-pdfs) |
+| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**44 份雙語 PDF**](#-44-份雙語客戶文件--44-bilingual-customer-pdfs) |
 | 👨‍💻 **工程師 / IT / 想貢獻者**<br>Developer / IT / Contributor | 我要看**程式碼 / 開發環境 / PR**<br>I want **code / dev setup / PR** | 👉 [**開發者指南**](#-開發者指南--developer-guide) |
 
 ---
@@ -36,7 +36,7 @@
 - [⚡ 30 秒看懂 erpilot / 30-Second Pitch](#-30-秒看懂-erpilot--30-second-pitch)
 - [🚀 5 分鐘安裝指南 / 5-Minute Install](#-5-分鐘安裝指南--5-minute-install-for-non-developers)
 - [❓ 安裝常見問題 / Install FAQ](#-安裝常見問題--install-faq)
-- [📚 42 份雙語客戶文件 / 42 Bilingual PDFs](#-42-份雙語客戶文件--42-bilingual-customer-pdfs)
+- [📚 44 份雙語客戶文件 / 44 Bilingual PDFs](#-44-份雙語客戶文件--44-bilingual-customer-pdfs)
 - [🎯 內含什麼 / What's Inside](#-內含什麼--whats-inside)
 - [🏗 架構 / Architecture](#-架構--architecture)
 - [🗺 領域對照 / Domain Map](#-領域對照--domain-map)
@@ -405,7 +405,7 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 
 ---
 
-## 📚 42 份雙語客戶文件 / 42 Bilingual Customer PDFs
+## 📚 44 份雙語客戶文件 / 44 Bilingual Customer PDFs
 
 🇹🇼 點下面任一個直接下載 PDF（全部繁中 + English）：
 🇺🇸 Click any to download (all bilingual ZH + EN):
@@ -434,6 +434,7 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **20** | 🏛️ **家規完整使用指南** ⭐招牌 / **House Rules — Complete Guide** | [📕 **中文 PDF**](./docs/pdf/20_家規完整使用指南_中文.pdf) | [📘 **EN PDF**](./docs/pdf/20_House_Rules_Guide_EN.pdf) |
 | 21 | 商業授權 FAQ（含 ≤20 人免費條款） | [📕 中文 PDF](./docs/pdf/21_商業授權FAQ_中文.pdf) | — |
 | **22** | ⚠️ **第三方 ERP 授權合規提醒**（接舊系統前建議閱讀）/ **External ERP Licensing Compliance Reminder** | [📕 **中文 PDF**](./docs/pdf/22_第三方ERP授權合規通知_中文.pdf) | [📘 **EN PDF**](./docs/pdf/22_External_ERP_Licensing_Notice_EN.pdf) |
+| **23** | 📐 **MRP-II 演算法設計（學術論文）** ⭐ Orlicky + Wagner-Whitin + Silver-Meal / **Multi-Echelon Time-Phased MRP-II Design** | [📕 **中文 PDF**](./docs/pdf/23_MRP演算法設計_中文.pdf) | [📘 **EN PDF**](./docs/pdf/23_MRP_Algorithm_Design_EN.pdf) |
 
 📌 **特別文件**：
 - [**`HOW_TO_GET_LLM_API_KEY_ZH.md`**](./docs/HOW_TO_GET_LLM_API_KEY_ZH.md) · [EN](./docs/HOW_TO_GET_LLM_API_KEY_EN.md) — 5-10 分鐘申請 API Key 完整教學（DeepSeek/OpenAI/Anthropic/Ollama 比較）
@@ -641,7 +642,7 @@ opnetest/
 ├── war-room/                   ← 即時事件儀表板 / Live SSE dashboard
 │   ├── index.html
 │   └── Dockerfile
-├── docs/                       ← 42 份雙語文件 / 42 bilingual docs
+├── docs/                       ← 44 份雙語文件 / 44 bilingual docs
 │   ├── CONVERSATIONAL_ERP_DESIGN_ZH.md / _EN.md
 │   ├── COMMERCIAL_LICENSING_FAQ_ZH.md
 │   └── ... (32 more)

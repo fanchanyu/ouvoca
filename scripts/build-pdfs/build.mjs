@@ -107,6 +107,10 @@ const DOCS_TO_BUILD = [
   // === 22 v3.25.5 第三方 ERP 授權合規提醒（接舊系統前建議閱讀；非法律意見）===
   { src: 'EXTERNAL_DB_LICENSING_NOTICE_ZH.md', out: '22_第三方ERP授權合規通知_中文.pdf',     title: '⚠️ 第三方 ERP 授權合規提醒（接舊系統前建議閱讀）' },
   { src: 'EXTERNAL_DB_LICENSING_NOTICE_EN.md', out: '22_External_ERP_Licensing_Notice_EN.pdf', title: '⚠️ External ERP Licensing Compliance Reminder (Recommended Before Connecting)' },
+
+  // === 23 v3.25.10 多階時序化 MRP-II 演算法設計（學術論文格式 + 法律聲明）===
+  { src: 'MRP_ALGORITHM_DESIGN_ZH.md', out: '23_MRP演算法設計_中文.pdf',           title: '📐 多階時序化 MRP-II 演算法設計（Orlicky + Wagner-Whitin）' },
+  { src: 'MRP_ALGORITHM_DESIGN_EN.md', out: '23_MRP_Algorithm_Design_EN.pdf',     title: '📐 Multi-Echelon Time-Phased MRP-II Algorithm Design' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────
