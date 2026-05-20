@@ -97,3 +97,74 @@ class DispatchLog(Base):
     production_order = relationship("ProductionOrder", back_populates="dispatch_logs")
     operation = relationship("Operation", back_populates="dispatch_logs")
     operator = relationship("Employee")
+
+
+# ════════════════════════════════════════════════════════════════════
+# v3.26 — Routing master template
+# ────────────────────────────────────────────────────────────────────
+# Routing = product-level template specifying which work centers + ops
+# are required to make 1 unit. RoutingStep = template line item.
+# WO Operation (existing) = instantiation of a step for a specific WO.
+# Reference: Vollmann et al. (2005) §7; Pinedo (2016) §1.2.
+# ════════════════════════════════════════════════════════════════════
+
+class Routing(Base, TenantMixin):
+    """Product-level routing master.
+
+    A Product can have at most one **default** Routing (is_default=True).
+    Multiple historical routings may co-exist for versioning purposes.
+
+    Reference: Vollmann et al. (2005) Ch.7 "Routing data is the
+    cornerstone of capacity planning."
+    """
+    __tablename__ = "routings"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    routing_no = Column(String(50), unique=True, nullable=False, index=True)
+    product_id = Column(String(36), ForeignKey("products.id"), nullable=False, index=True)
+    name = Column(String(200), nullable=False)
+    description = Column(Text)
+    is_default = Column(Boolean, default=True)  # at most one default per product
+    is_active = Column(Boolean, default=True)
+    version = Column(String(20), default="1.0")  # forward-compat for ECO/ECN
+    effective_from = Column(DateTime)
+    effective_to = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    product = relationship("Product", foreign_keys=[product_id])
+    steps = relationship("RoutingStep", back_populates="routing",
+                         cascade="all, delete-orphan",
+                         order_by="RoutingStep.sequence_no")
+
+
+class RoutingStep(Base):
+    """A single operation step in a Routing template.
+
+    Operation time decomposition (Karmarkar 1987 *Mgmt Sci* 33):
+        total_op_time = setup_time + (qty × run_time_per_unit)
+                        + queue_time + move_time + wait_time
+
+    For capacity-aware MRP, the capacity load contribution of producing
+    qty Q at work-center k in a single batch is:
+        load_k = setup_time + Q × run_time_per_unit
+    (queue/move/wait are not capacity-loading, only lead-time-loading)
+    """
+    __tablename__ = "routing_steps"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    routing_id = Column(String(36), ForeignKey("routings.id", ondelete="CASCADE"),
+                        nullable=False, index=True)
+    sequence_no = Column(Integer, nullable=False)
+    op_name = Column(String(200), nullable=False)
+    work_center_id = Column(String(36), ForeignKey("work_centers.id"), nullable=False)
+    setup_time = Column(Float, default=0)  # minutes, fixed per batch
+    run_time_per_unit = Column(Float, default=0)  # minutes per unit
+    queue_time = Column(Float, default=0)  # minutes (informational, not capacity)
+    move_time = Column(Float, default=0)
+    is_critical = Column(Boolean, default=False)  # bottleneck candidate
+    remark = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    routing = relationship("Routing", back_populates="steps")
+    work_center = relationship("WorkCenter")

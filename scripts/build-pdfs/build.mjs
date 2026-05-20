@@ -111,6 +111,10 @@ const DOCS_TO_BUILD = [
   // === 23 v3.25.10 多階時序化 MRP-II 演算法設計（學術論文格式 + 法律聲明）===
   { src: 'MRP_ALGORITHM_DESIGN_ZH.md', out: '23_MRP演算法設計_中文.pdf',           title: '📐 多階時序化 MRP-II 演算法設計（Orlicky + Wagner-Whitin）' },
   { src: 'MRP_ALGORITHM_DESIGN_EN.md', out: '23_MRP_Algorithm_Design_EN.pdf',     title: '📐 Multi-Echelon Time-Phased MRP-II Algorithm Design' },
+
+  // === 24 v3.26 產能感知 MRP 設計（Dixon-Silver 啟發法 + CLSP + 法律聲明）===
+  { src: 'MRP_CAPACITY_AWARE_DESIGN_ZH.md', out: '24_產能感知MRP設計_中文.pdf',     title: '🏭 產能感知 MRP — Dixon-Silver CLSP 啟發法' },
+  { src: 'MRP_CAPACITY_AWARE_DESIGN_EN.md', out: '24_Capacity_Aware_MRP_Design_EN.pdf', title: '🏭 Capacity-Aware MRP — Dixon-Silver CLSP Heuristic' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────

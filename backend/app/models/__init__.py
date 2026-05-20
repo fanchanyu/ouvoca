@@ -17,6 +17,7 @@ from app.models.purchase import (
 from app.models.product import Product, BOMItem
 from app.models.production import (
     ProductionOrder, WorkCenter, Operation, DispatchLog,
+    Routing, RoutingStep,  # v3.26: capacity-aware MRP routing master
 )
 from app.models.mps_mrp import (
     MpsMaster, MpsEntry, TimeFence, MrpMaster, MrpItem,
