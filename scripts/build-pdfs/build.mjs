@@ -127,6 +127,10 @@ const DOCS_TO_BUILD = [
   // === 27 v3.29 AI-Augmented Demand Forecasting（5 方法 + Croston + MASE + LLM regime hook）===
   { src: 'DEMAND_FORECASTING_DESIGN_ZH.md', out: '27_需求預測引擎_中文.pdf',                 title: '📈 AI 增強需求預測 — Hyndman + Croston + Makridakis M4/M5' },
   { src: 'DEMAND_FORECASTING_DESIGN_EN.md', out: '27_Demand_Forecasting_EN.pdf',           title: '📈 AI-Augmented Demand Forecasting — Classical + Croston + MASE' },
+
+  // === 28 v3.30 對話式規劃顧問（把 v3.25.9-v3.29 全部演算法包成 LLM tools + Daily Briefing）===
+  { src: 'CONVERSATIONAL_PLANNING_DESIGN_ZH.md', out: '28_對話式規劃顧問_中文.pdf',           title: '🤖 對話式規劃顧問 — 10 LLM tools + Daily Briefing' },
+  { src: 'CONVERSATIONAL_PLANNING_DESIGN_EN.md', out: '28_Conversational_Planning_EN.pdf',  title: '🤖 Conversational Planning Agent — 10 LLM tools + Daily Briefing' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────
