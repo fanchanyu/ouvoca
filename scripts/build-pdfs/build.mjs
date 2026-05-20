@@ -123,6 +123,10 @@ const DOCS_TO_BUILD = [
   // === 26 v3.28 Throughput Accounting + DBR + 訂單接受決策（完成 TOC 三部曲）===
   { src: 'THROUGHPUT_ACCOUNTING_DESIGN_ZH.md', out: '26_Throughput會計與訂單決策_中文.pdf',  title: '💰 Throughput Accounting + DBR + 訂單接受決策 — Goldratt TOC 完整篇' },
   { src: 'THROUGHPUT_ACCOUNTING_DESIGN_EN.md', out: '26_Throughput_Accounting_DBR_EN.pdf',  title: '💰 Throughput Accounting + DBR + Order Acceptance — Goldratt TOC Complete' },
+
+  // === 27 v3.29 AI-Augmented Demand Forecasting（5 方法 + Croston + MASE + LLM regime hook）===
+  { src: 'DEMAND_FORECASTING_DESIGN_ZH.md', out: '27_需求預測引擎_中文.pdf',                 title: '📈 AI 增強需求預測 — Hyndman + Croston + Makridakis M4/M5' },
+  { src: 'DEMAND_FORECASTING_DESIGN_EN.md', out: '27_Demand_Forecasting_EN.pdf',           title: '📈 AI-Augmented Demand Forecasting — Classical + Croston + MASE' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────
