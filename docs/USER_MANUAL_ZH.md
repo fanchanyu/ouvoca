@@ -1185,6 +1185,8 @@ Excel `.xlsx` 直出排在 Phase 2。
 | 瀏覽器顯示「無法連線到此網站」 | 確認 IT 已啟動後端（`docker compose ps`） |
 | 503 / 504 錯誤 | 請 IT 重啟：`docker compose restart backend` |
 | 401 一直跳出來 | 按 F12 → Application → Storage → Clear site data，重新整理 |
+| **Windows：頁面打得開，但表單 / 報表 / 列印都失敗** | **改用 `http://127.0.0.1:5173`**（不用 `localhost`）— Windows Docker Desktop 偶有 `localhost` 解析到 IPv6 ::1 + CORS 擋掉的問題；v3.25.7 已修預設綁 127.0.0.1 + CORS 補 127.0.0.1 變體 |
+| F12 console 一直跳 CORS 錯誤 | 同上，改用 `http://127.0.0.1:5173`；若仍不行，請 IT 在 `backend/.env` 加 `CORS_ORIGINS=["http://localhost:5173","http://127.0.0.1:5173","http://你的網域:5173"]` |
 
 ### 11.2 看不到資料
 

@@ -1,5 +1,15 @@
 name: llm-erp
 
+# ═══════════════════════════════════════════════════════════════════════
+# Dev compose — Port binding policy
+# ───────────────────────────────────────────────────────────────────────
+# 所有 host port 顯式綁 127.0.0.1（loopback only），不暴露到 LAN：
+#   ① 安全：避免同辦公網路其他人 hit 到你的 dev 環境
+#   ② 穩定：Windows Docker Desktop + WSL2 在 0.0.0.0 bind 偶有
+#     port forwarding 不到 localhost 的問題（v3.25.7 教訓 #38）
+# 若要對外（demo 給客戶），請改用 docker-compose.prod.yml
+# ═══════════════════════════════════════════════════════════════════════
+
 services:
   # ─── HQ backend ───────────────────────────────────────────────────────
   backend:
@@ -8,7 +18,7 @@ services:
       dockerfile: Dockerfile
     container_name: llm-erp-backend
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"  # loopback only — 同辦公網路他人連不到
     environment:
       DATABASE_DRIVER: ${DATABASE_DRIVER:-sqlite}
       DATABASE_URL: ${DATABASE_URL:-sqlite+aiosqlite:////app/data/erp.db}
@@ -19,7 +29,9 @@ services:
       LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ALLOW_DEMO_BYPASS: ${ALLOW_DEMO_BYPASS:-true}
-      CORS_ORIGINS: '["http://localhost:5173","http://localhost:3000","http://localhost:8080"]'
+      # CORS：同時允許 localhost 和 127.0.0.1 兩種訪問
+      # （Windows 上 localhost 可能解析到 IPv6 ::1，瀏覽器可能直接用 127.0.0.1）
+      CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173","http://localhost:3000","http://127.0.0.1:3000","http://localhost:8080","http://127.0.0.1:8080"]'
     volumes:
       - backend-data:/app/data
     healthcheck:
@@ -40,7 +52,7 @@ services:
       dockerfile: Dockerfile
     container_name: llm-erp-factory-a
     command: ["python", "factory_node.py"]
-    ports: ["8001:8001"]
+    ports: ["127.0.0.1:8001:8001"]
     environment:
       FACTORY_ID: factory-a
       FACTORY_NAME: Factory A
@@ -56,7 +68,7 @@ services:
       dockerfile: Dockerfile
     container_name: llm-erp-factory-b
     command: ["python", "factory_node.py"]
-    ports: ["8002:8002"]
+    ports: ["127.0.0.1:8002:8002"]
     environment:
       FACTORY_ID: factory-b
       FACTORY_NAME: Factory B
@@ -72,7 +84,7 @@ services:
       context: ./frontend-desktop
       dockerfile: Dockerfile
     container_name: llm-erp-frontend
-    ports: ["5173:80"]
+    ports: ["127.0.0.1:5173:80"]
     depends_on:
       backend:
         condition: service_healthy
@@ -90,7 +102,7 @@ services:
       context: ./war-room
       dockerfile: Dockerfile
     container_name: llm-erp-warroom
-    ports: ["8080:80"]
+    ports: ["127.0.0.1:8080:80"]
     depends_on:
       backend:
         condition: service_healthy

@@ -946,6 +946,8 @@ Native `.xlsx` export is scheduled for Phase 2.
 | Browser says "Cannot reach this site" | Have IT confirm backend is up: `docker compose ps` |
 | 503 / 504 errors | Ask IT to restart: `docker compose restart backend` |
 | 401 keeps popping up | Press F12 → Application → Storage → Clear site data, refresh |
+| **Windows: page loads but forms / reports / printing all fail** | **Use `http://127.0.0.1:5173`** instead of `localhost` — Windows Docker Desktop sometimes resolves `localhost` to IPv6 `::1` and CORS blocks it. v3.25.7 fixed this by defaulting to 127.0.0.1 binding + adding 127.0.0.1 variants to CORS |
+| F12 console keeps showing CORS errors | Same as above — try `http://127.0.0.1:5173`. If still failing, have IT add `CORS_ORIGINS=["http://localhost:5173","http://127.0.0.1:5173","http://your-domain:5173"]` in `backend/.env` |
 
 ### 11.2 No data shown
 

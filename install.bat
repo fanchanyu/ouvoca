@@ -111,6 +111,30 @@ echo   OK 後端就緒 ^(!count! 秒^) / Backend ready
 echo.
 
 REM ============================================================
+REM Step 4.5: 雙重 endpoint 驗證 (Windows Docker Desktop quirk)
+REM ============================================================
+echo [Step 4.5] 驗證 localhost + 127.0.0.1 雙路徑 / Verifying dual endpoints...
+
+set lh_ok=0
+set ip_ok=0
+curl -fsS http://localhost:8000/api/health > nul 2>&1
+if not errorlevel 1 set lh_ok=1
+curl -fsS http://127.0.0.1:8000/api/health > nul 2>&1
+if not errorlevel 1 set ip_ok=1
+
+if !lh_ok! equ 1 if !ip_ok! equ 1 (
+    echo   OK localhost + 127.0.0.1 都通 / Both endpoints work
+) else (
+    if !lh_ok! equ 0 echo   X localhost:8000 不通 / localhost:8000 unreachable
+    if !ip_ok! equ 0 echo   X 127.0.0.1:8000 不通 / 127.0.0.1:8000 unreachable
+    echo.
+    echo   提示：Windows Docker Desktop 若 0.0.0.0 bind 不穩，
+    echo   docker-compose.yml 已預設綁 127.0.0.1。
+    echo   若仍有問題，請改用 http://127.0.0.1:5173 訪問前端。
+)
+echo.
+
+REM ============================================================
 REM Step 5: Seed
 REM ============================================================
 echo [Step 5/5] 載入示範資料 / Loading demo data...

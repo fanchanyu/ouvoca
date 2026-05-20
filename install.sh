@@ -125,6 +125,25 @@ for i in $(seq 1 60); do
 done
 
 # ============================================================
+# Step 4.5: 雙路徑驗證（防 Windows Docker Desktop 的 0.0.0.0/localhost 路由問題）
+# ============================================================
+echo
+msg "${BLUE}🔍 驗證 localhost + 127.0.0.1 雙路徑...${NC}" \
+    "${BLUE}🔍 Verifying dual endpoints (localhost + 127.0.0.1)...${NC}"
+lh_ok=0
+ip_ok=0
+curl -fsS http://localhost:8000/api/health > /dev/null 2>&1 && lh_ok=1
+curl -fsS http://127.0.0.1:8000/api/health > /dev/null 2>&1 && ip_ok=1
+if [ $lh_ok -eq 1 ] && [ $ip_ok -eq 1 ]; then
+  msg "  ✅ localhost + 127.0.0.1 都通" "  ✅ Both endpoints reachable"
+else
+  [ $lh_ok -eq 0 ] && msg "  ⚠️  localhost:8000 不通" "  ⚠️  localhost:8000 unreachable"
+  [ $ip_ok -eq 0 ] && msg "  ⚠️  127.0.0.1:8000 不通" "  ⚠️  127.0.0.1:8000 unreachable"
+  msg "  💡 提示：請改用 http://127.0.0.1:5173 訪問前端" \
+      "  💡 Tip: try http://127.0.0.1:5173 in your browser"
+fi
+
+# ============================================================
 # Step 5: 首次 seed
 # ============================================================
 echo

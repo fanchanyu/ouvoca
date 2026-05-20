@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     LOG_JSON: bool = False
 
     # --- database ---
+    # sqlite 預設路徑：環境變數沒設時用相對路徑 ./erp.db。
+    # ⚠️ docker 環境一定要由 docker-compose 環境變數覆蓋為絕對路徑
+    #    （sqlite+aiosqlite:////app/data/erp.db）以對應 volume mount；
+    #    否則 backend 從不同 CWD 啟動會產生新空 DB，看起來「資料不見了」。
+    # 若要從專案根目錄跑 backend，建議在 backend/.env 設定：
+    #    DATABASE_URL=sqlite+aiosqlite:///./backend/data/erp.db
     DATABASE_URL: str = "sqlite+aiosqlite:///./erp.db"
     DATABASE_URL_PROD: str = "postgresql+asyncpg://user:pass@localhost:5432/erp"
     DATABASE_DRIVER: Literal["sqlite", "postgresql"] = "sqlite"
@@ -51,9 +57,14 @@ class Settings(BaseSettings):
     MESH_TIMEOUT_SECONDS: int = 5
 
     # --- middleware ---
+    # CORS：同時列 localhost 和 127.0.0.1 兩種寫法 —
+    # Windows 上 localhost 可能解析到 IPv6 ::1，瀏覽器自動 fallback 用 127.0.0.1，
+    # 若只列 localhost 會被 CORS 擋導致「所有表單 POST 失敗」（v3.25.7 教訓 #38）。
     CORS_ORIGINS: list[str] = [
-        "http://localhost:5173", "http://localhost:19006",
-        "http://localhost:8080", "http://localhost:3000",
+        "http://localhost:5173", "http://127.0.0.1:5173",
+        "http://localhost:3000", "http://127.0.0.1:3000",
+        "http://localhost:8080", "http://127.0.0.1:8080",
+        "http://localhost:19006", "http://127.0.0.1:19006",
     ]
     EVENT_SSE_ENABLED: bool = True
     AUDIT_LOG_ENABLED: bool = True

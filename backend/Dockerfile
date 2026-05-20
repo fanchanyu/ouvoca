@@ -18,6 +18,10 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+# 確保 sqlite 資料目錄存在（即使沒掛 volume 也不會 fail；
+# 掛了 volume 會被 volume 內容覆蓋，但保留 mount point）
+RUN mkdir -p /app/data && chmod 755 /app/data
+
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
