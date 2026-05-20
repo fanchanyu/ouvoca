@@ -119,6 +119,10 @@ const DOCS_TO_BUILD = [
   // === 25 v3.27 可解釋規劃 + TOC 瓶頸（IE/Algo/ERP/AI 四域交集）===
   { src: 'PLANNING_EXPLAINABILITY_DESIGN_ZH.md', out: '25_可解釋規劃與TOC瓶頸_中文.pdf',     title: '🔍 可解釋規劃 + TOC 瓶頸 — Goldratt + Cheney + Saltelli' },
   { src: 'PLANNING_EXPLAINABILITY_DESIGN_EN.md', out: '25_Explainable_Planning_TOC_EN.pdf', title: '🔍 Explainable Planning + TOC Bottleneck Analysis' },
+
+  // === 26 v3.28 Throughput Accounting + DBR + 訂單接受決策（完成 TOC 三部曲）===
+  { src: 'THROUGHPUT_ACCOUNTING_DESIGN_ZH.md', out: '26_Throughput會計與訂單決策_中文.pdf',  title: '💰 Throughput Accounting + DBR + 訂單接受決策 — Goldratt TOC 完整篇' },
+  { src: 'THROUGHPUT_ACCOUNTING_DESIGN_EN.md', out: '26_Throughput_Accounting_DBR_EN.pdf',  title: '💰 Throughput Accounting + DBR + Order Acceptance — Goldratt TOC Complete' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────

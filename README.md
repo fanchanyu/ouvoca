@@ -6,7 +6,7 @@
 
 [![Tests](https://img.shields.io/badge/tests-287%20passing-brightgreen)]()
 [![Gates](https://img.shields.io/badge/self--verify-7%2F7%20green-brightgreen)]()
-[![Docs](https://img.shields.io/badge/PDFs-48%20bilingual-blue)]()
+[![Docs](https://img.shields.io/badge/PDFs-50%20bilingual-blue)]()
 [![License](https://img.shields.io/badge/license-AGPL--3.0%20%2B%20SBL%20%2B%20Commercial-blue)](./LICENSE)
 [![Version](https://img.shields.io/badge/version-3.12-blueviolet)]()
 [![Author](https://img.shields.io/badge/by-Peter-lightgrey)](https://github.com/fanchanyu)
@@ -26,7 +26,7 @@
 | 我是... / I am... | 我需要... / I need... | 跳到 / Jump to |
 |---|---|---|
 | 👔 **老闆 / 採購 / 業務 / 倉管**<br>Boss / Buyer / Sales / Warehouse | 我要**用** erpilot，不會寫程式<br>I want to **use** erpilot, no coding | 👉 [**5 分鐘安裝指南**](#-5-分鐘安裝指南--5-minute-install-for-non-developers) |
-| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**48 份雙語 PDF**](#-48-份雙語客戶文件--48-bilingual-customer-pdfs) |
+| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**50 份雙語 PDF**](#-50-份雙語客戶文件--50-bilingual-customer-pdfs) |
 | 👨‍💻 **工程師 / IT / 想貢獻者**<br>Developer / IT / Contributor | 我要看**程式碼 / 開發環境 / PR**<br>I want **code / dev setup / PR** | 👉 [**開發者指南**](#-開發者指南--developer-guide) |
 
 ---
@@ -36,7 +36,7 @@
 - [⚡ 30 秒看懂 erpilot / 30-Second Pitch](#-30-秒看懂-erpilot--30-second-pitch)
 - [🚀 5 分鐘安裝指南 / 5-Minute Install](#-5-分鐘安裝指南--5-minute-install-for-non-developers)
 - [❓ 安裝常見問題 / Install FAQ](#-安裝常見問題--install-faq)
-- [📚 48 份雙語客戶文件 / 48 Bilingual PDFs](#-48-份雙語客戶文件--48-bilingual-customer-pdfs)
+- [📚 50 份雙語客戶文件 / 50 Bilingual PDFs](#-50-份雙語客戶文件--50-bilingual-customer-pdfs)
 - [🎯 內含什麼 / What's Inside](#-內含什麼--whats-inside)
 - [🏗 架構 / Architecture](#-架構--architecture)
 - [🗺 領域對照 / Domain Map](#-領域對照--domain-map)
@@ -405,7 +405,7 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 
 ---
 
-## 📚 48 份雙語客戶文件 / 48 Bilingual Customer PDFs
+## 📚 50 份雙語客戶文件 / 50 Bilingual Customer PDFs
 
 🇹🇼 點下面任一個直接下載 PDF（全部繁中 + English）：
 🇺🇸 Click any to download (all bilingual ZH + EN):
@@ -437,6 +437,7 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **23** | 📐 **MRP-II 演算法設計（學術論文）** ⭐ Orlicky + Wagner-Whitin + Silver-Meal / **Multi-Echelon Time-Phased MRP-II Design** | [📕 **中文 PDF**](./docs/pdf/23_MRP演算法設計_中文.pdf) | [📘 **EN PDF**](./docs/pdf/23_MRP_Algorithm_Design_EN.pdf) |
 | **24** | 🏭 **產能感知 MRP 設計（學術論文）** ⭐ Dixon-Silver CLSP heuristic + Routing / **Capacity-Aware MRP** | [📕 **中文 PDF**](./docs/pdf/24_產能感知MRP設計_中文.pdf) | [📘 **EN PDF**](./docs/pdf/24_Capacity_Aware_MRP_Design_EN.pdf) |
 | **25** | 🔍 **可解釋規劃 + TOC 瓶頸（學術論文）** ⭐ Goldratt + Cheney + Saltelli — IE/Algo/ERP/AI 四域交集 / **Explainable Planning** | [📕 **中文 PDF**](./docs/pdf/25_可解釋規劃與TOC瓶頸_中文.pdf) | [📘 **EN PDF**](./docs/pdf/25_Explainable_Planning_TOC_EN.pdf) |
+| **26** | 💰 **Throughput Accounting + 訂單接受決策（學術論文）** ⭐ 完成 Goldratt TOC 三部曲 — 「該不該接這張單？」最佳解 / **TA + DBR + Order Acceptance** | [📕 **中文 PDF**](./docs/pdf/26_Throughput會計與訂單決策_中文.pdf) | [📘 **EN PDF**](./docs/pdf/26_Throughput_Accounting_DBR_EN.pdf) |
 
 📌 **特別文件**：
 - [**`HOW_TO_GET_LLM_API_KEY_ZH.md`**](./docs/HOW_TO_GET_LLM_API_KEY_ZH.md) · [EN](./docs/HOW_TO_GET_LLM_API_KEY_EN.md) — 5-10 分鐘申請 API Key 完整教學（DeepSeek/OpenAI/Anthropic/Ollama 比較）
@@ -644,7 +645,7 @@ opnetest/
 ├── war-room/                   ← 即時事件儀表板 / Live SSE dashboard
 │   ├── index.html
 │   └── Dockerfile
-├── docs/                       ← 48 份雙語文件 / 48 bilingual docs
+├── docs/                       ← 50 份雙語文件 / 50 bilingual docs
 │   ├── CONVERSATIONAL_ERP_DESIGN_ZH.md / _EN.md
 │   ├── COMMERCIAL_LICENSING_FAQ_ZH.md
 │   └── ... (32 more)
