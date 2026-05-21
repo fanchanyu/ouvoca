@@ -63,6 +63,7 @@ export default function Chat() {
   })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [loadingSeconds, setLoadingSeconds] = useState(0)  // v3.35: 計時用於漸進式提示
   const [sessionId] = useState(() => 'sess-' + Math.random().toString(36).slice(2))
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -71,6 +72,25 @@ export default function Chat() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, loading])
+
+  // v3.35：等待計時 — 讓「以為當機」之客戶看到 AI 還在做事
+  useEffect(() => {
+    if (!loading) {
+      setLoadingSeconds(0)
+      return
+    }
+    const t = setInterval(() => setLoadingSeconds(s => s + 1), 1000)
+    return () => clearInterval(t)
+  }, [loading])
+
+  // v3.35：依等待時間給友善訊息
+  const loadingHint = (() => {
+    if (loadingSeconds < 3) return 'AI 思考中…'
+    if (loadingSeconds < 8) return `AI 正在查詢資料… (${loadingSeconds} 秒)`
+    if (loadingSeconds < 15) return `AI 正在計算… (${loadingSeconds} 秒，請稍候)`
+    if (loadingSeconds < 30) return `AI 正在跑複雜分析… (${loadingSeconds} 秒，快好了)`
+    return `已等 ${loadingSeconds} 秒 — 若超過 60 秒請刷新頁面或洽 IT`
+  })()
 
   // 持久化（截短最近 N 筆）
   useEffect(() => {
@@ -293,7 +313,7 @@ export default function Chat() {
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             </div>
-            <span>AI 思考中…</span>
+            <span>{loadingHint}</span>
           </div>
         )}
       </div>

@@ -9,10 +9,30 @@ const BASE = '/api'
 class ApiError extends Error {
   status: number
   payload: unknown
+  hint: string | null
   constructor(status: number, message: string, payload: unknown) {
     super(message)
     this.status = status
     this.payload = payload
+    // v3.35：從 backend 取友善 hint（中文化錯誤訊息）
+    this.hint = (payload as { hint?: string | null })?.hint || null
+  }
+  /** 友善訊息：優先用 backend hint，再 fallback 到 status code 中文對照 */
+  friendly(): string {
+    if (this.hint) return this.hint
+    const map: Record<number, string> = {
+      400: '請求格式有誤，請檢查輸入內容',
+      401: '尚未登入或登入過期，請重新登入',
+      403: '您沒有此功能的權限，請洽公司管理員 / 老闆',
+      404: '找不到您要的資料',
+      409: '資料衝突（可能重複或被他人修改）',
+      422: '資料格式不正確',
+      429: '操作太頻繁，請稍候再試',
+      500: '系統忙線中，請稍候再試；若持續發生請洽 IT',
+      503: '服務維護中',
+      504: '回應逾時，請稍候再試',
+    }
+    return map[this.status] || this.message
   }
 }
 
