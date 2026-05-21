@@ -16,4 +16,5 @@ from app.agents.domains import (  # noqa: F401
     planning_llm_tools, # v3.30 把 v3.25.9-v3.29 全部演算法包成 LLM tools
     crud_completion_tools,  # v3.31 補完 cancel/receive/ship/QC/JE/pick 等高頻 hard-write
     inventory_sales_tools,  # v3.32 進銷存深化（Quotation + StockCount + Reorder + 修改 PO/SO 行）
+    inventory_sales_deep_tools,  # v3.33 進銷存再深化（查/複製/寄報價 + 批次盤點 + 智慧採購 + PO/SO 加刪行 / 改交期）
 )

@@ -131,6 +131,10 @@ const DOCS_TO_BUILD = [
   // === 28 v3.30 對話式規劃顧問（把 v3.25.9-v3.29 全部演算法包成 LLM tools + Daily Briefing）===
   { src: 'CONVERSATIONAL_PLANNING_DESIGN_ZH.md', out: '28_對話式規劃顧問_中文.pdf',           title: '🤖 對話式規劃顧問 — 10 LLM tools + Daily Briefing' },
   { src: 'CONVERSATIONAL_PLANNING_DESIGN_EN.md', out: '28_Conversational_Planning_EN.pdf',  title: '🤖 Conversational Planning Agent — 10 LLM tools + Daily Briefing' },
+
+  // === 29 v3.32/v3.33 進銷存模組法律聲明（雙語）===
+  { src: 'INVENTORY_SALES_LEGAL_NOTICE_ZH.md', out: '29_進銷存法律聲明_中文.pdf',           title: '⚖️ 進銷存模組法律與責任聲明（v3.32/v3.33）' },
+  { src: 'INVENTORY_SALES_LEGAL_NOTICE_EN.md', out: '29_Inventory_Sales_Legal_EN.pdf',     title: '⚖️ Inventory/Sales Module Legal Notice (v3.32/v3.33)' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────
