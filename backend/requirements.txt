@@ -25,3 +25,7 @@ bcrypt==4.0.1  # passlib compat — see https://github.com/pyca/bcrypt/issues/68
 httpx>=0.27.0
 openai>=1.30.0
 anthropic>=0.28.0
+
+# --- PDF / Excel (v3.36 文件列印 + 匯出) ---
+reportlab>=4.0.0       # 純 Python PDF 產生器，無系統相依
+openpyxl>=3.1.0        # Excel .xlsx 讀寫

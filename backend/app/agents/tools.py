@@ -19,4 +19,5 @@ from app.agents.domains import (  # noqa: F401
     inventory_sales_deep_tools,  # v3.33 進銷存再深化（查/複製/寄報價 + 批次盤點 + 智慧採購 + PO/SO 加刪行 / 改交期）
     business_completion_tools,  # v3.34 業務面補完（Tax + Accounting + Approval + Warehouse pick + Quality NCR/CAPA）
     smb_friendly_tools,  # v3.35 電腦小白友善（whoami / system_health / list_what_can_i_do / customer_360 / grant_role）
+    print_export_tools,  # v3.36 PDF 列印 + CSV/Excel 匯出 + setup_status + seed_demo_data
 )

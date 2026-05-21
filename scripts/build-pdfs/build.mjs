@@ -139,6 +139,10 @@ const DOCS_TO_BUILD = [
   // === 30 v3.34 稅務/會計/審批模組法律聲明（雙語強化版）===
   { src: 'TAX_ACCOUNTING_LEGAL_NOTICE_ZH.md', out: '30_稅務會計法律聲明_中文.pdf',         title: '⚖️ 稅務/會計/審批模組法律與合規警告（v3.34）' },
   { src: 'TAX_ACCOUNTING_LEGAL_NOTICE_EN.md', out: '30_Tax_Accounting_Legal_EN.pdf',       title: '⚖️ Tax/Accounting/Approval Module Legal Notice (v3.34)' },
+
+  // === 31 v3.36 列印/匯出模組法律聲明（雙語）===
+  { src: 'PRINT_EXPORT_LEGAL_NOTICE_ZH.md', out: '31_列印匯出法律聲明_中文.pdf',           title: '⚖️ 列印/匯出模組法律與合規警告（v3.36）' },
+  { src: 'PRINT_EXPORT_LEGAL_NOTICE_EN.md', out: '31_Print_Export_Legal_EN.pdf',           title: '⚖️ Print/Export Module Legal Notice (v3.36)' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────

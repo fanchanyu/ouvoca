@@ -167,6 +167,7 @@ from app.api import (
     permission, mesh, analytics, tax_tw, confirm_card, email_digest,
     agents_exec, reports, onboarding, files, llm_status,
     approval, policy,
+    print_export,  # v3.36 PDF 列印 + CSV/Excel 匯出
 )
 
 app.include_router(chat.router)
@@ -195,6 +196,8 @@ app.include_router(analytics.router)
 app.include_router(tax_tw.router)
 app.include_router(approval.router)
 app.include_router(policy.router)
+app.include_router(print_export.print_router)
+app.include_router(print_export.export_router)
 
 
 @app.get("/")

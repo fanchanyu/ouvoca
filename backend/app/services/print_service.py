@@ -1,0 +1,429 @@
+"""PDF 列印服務 (v3.36) — Quotation / PO / SO / Invoice / Delivery Note
+
+用 reportlab 純 Python 產生 A4 PDF。中文字型 fallback 鏈：
+  系統內 NotoSansTC → Microsoft JhengHei → fallback 預設
+
+設計原則：
+  • 一個函式產一張 PDF（接 entity_id，回 bytes）
+  • 不寫檔，直接回 bytes → caller 走 FastAPI Response 下載
+  • 標準台頭 + 公司資訊（從 settings / FactoryConfig 動態）
+  • 簽章區（買方/賣方/業務員）
+
+電腦小白 demo：
+  Chat: 「印 QUO-001」→ LLM tool → 此服務 → 回 base64 → 前端下載
+"""
+from __future__ import annotations
+
+import io
+from datetime import datetime
+from typing import Optional
+
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.units import cm
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
+from reportlab.pdfgen import canvas
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak,
+)
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+
+# ════════════════════════════════════════════════════════════════════
+# 中文字型 fallback
+# ════════════════════════════════════════════════════════════════════
+
+_FONT_REGISTERED = False
+_FONT_NAME = "Helvetica"  # fallback
+
+
+def _try_register_chinese_font() -> str:
+    """嘗試註冊中文字型；找不到回 Helvetica fallback。"""
+    global _FONT_REGISTERED, _FONT_NAME
+    if _FONT_REGISTERED:
+        return _FONT_NAME
+
+    candidates = [
+        # Windows
+        ("MSJH", r"C:\Windows\Fonts\msjh.ttc"),
+        ("MSJH", r"C:\Windows\Fonts\msjh.ttf"),
+        ("MSYH", r"C:\Windows\Fonts\msyh.ttc"),
+        # macOS
+        ("PingFang", "/System/Library/Fonts/PingFang.ttc"),
+        # Linux (typical packages)
+        ("NotoSansCJK", "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+        ("NotoSans", "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"),
+        ("WQY", "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"),
+    ]
+    for name, path in candidates:
+        try:
+            import os
+            if os.path.exists(path):
+                pdfmetrics.registerFont(TTFont(name, path))
+                _FONT_NAME = name
+                _FONT_REGISTERED = True
+                return _FONT_NAME
+        except Exception:
+            continue
+
+    _FONT_REGISTERED = True
+    return _FONT_NAME  # Helvetica fallback (英文 + 部分符號)
+
+
+# ════════════════════════════════════════════════════════════════════
+# Common helpers
+# ════════════════════════════════════════════════════════════════════
+
+def _styles():
+    font = _try_register_chinese_font()
+    base = getSampleStyleSheet()
+    return {
+        "title": ParagraphStyle("title", parent=base["Title"],
+                                fontName=font, fontSize=20,
+                                alignment=TA_CENTER, spaceAfter=10),
+        "heading": ParagraphStyle("heading", parent=base["Heading2"],
+                                  fontName=font, fontSize=12,
+                                  spaceAfter=6),
+        "body": ParagraphStyle("body", parent=base["Normal"],
+                               fontName=font, fontSize=10,
+                               leading=14),
+        "small": ParagraphStyle("small", parent=base["Normal"],
+                                fontName=font, fontSize=9,
+                                textColor=colors.grey),
+        "right": ParagraphStyle("right", parent=base["Normal"],
+                                fontName=font, fontSize=10,
+                                alignment=TA_RIGHT),
+    }
+
+
+def _company_header(s, company_name: str = "erpilot 範例公司") -> list:
+    """頂部公司資訊區。"""
+    return [
+        Paragraph(f"<b>{company_name}</b>", s["title"]),
+        Paragraph("Powered by erpilot", s["small"]),
+        Spacer(1, 0.4 * cm),
+    ]
+
+
+def _signature_block(s) -> Table:
+    """底部簽章區（買方 / 賣方 / 業務）。"""
+    data = [
+        [Paragraph("買方簽章", s["body"]),
+         Paragraph("賣方簽章", s["body"]),
+         Paragraph("業務員簽章", s["body"])],
+        ["", "", ""],
+        ["", "", ""],
+    ]
+    t = Table(data, colWidths=[5.5 * cm, 5.5 * cm, 5.5 * cm], rowHeights=[0.6 * cm, 1.5 * cm, 0.3 * cm])
+    t.setStyle(TableStyle([
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("LINEABOVE", (0, 2), (-1, 2), 0.5, colors.grey),
+        ("INNERGRID", (0, 0), (-1, 0), 0.5, colors.grey),
+        ("FONTNAME", (0, 0), (-1, -1), _try_register_chinese_font()),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+    ]))
+    return t
+
+
+# ════════════════════════════════════════════════════════════════════
+# Quotation PDF
+# ════════════════════════════════════════════════════════════════════
+
+async def generate_quotation_pdf(
+    db: AsyncSession, quote_id: str, company_name: str = "erpilot 範例公司",
+) -> bytes:
+    """產生報價單 PDF（A4），回 bytes。"""
+    from app.models.quotation import Quotation
+    from app.models.crm_sales import Customer
+
+    quote = (await db.execute(
+        select(Quotation).options(selectinload(Quotation.items))
+        .where(Quotation.id == quote_id)
+    )).scalar_one_or_none()
+    if quote is None:
+        raise ValueError(f"找不到報價單 {quote_id}")
+
+    customer = (await db.execute(
+        select(Customer).where(Customer.id == quote.customer_id)
+    )).scalar_one_or_none() if quote.customer_id else None
+
+    s = _styles()
+    font = _try_register_chinese_font()
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4,
+                             leftMargin=2*cm, rightMargin=2*cm,
+                             topMargin=1.5*cm, bottomMargin=1.5*cm,
+                             title=f"報價單 {quote.quote_no}")
+
+    story = list(_company_header(s, company_name))
+
+    # 大標題
+    story.append(Paragraph(f"<b>報 價 單</b>", s["title"]))
+    story.append(Paragraph(f"Quotation No: {quote.quote_no}", s["small"]))
+    story.append(Spacer(1, 0.3 * cm))
+
+    # 客戶 + 日期 區塊
+    cu_name = f"{customer.code} - {customer.name}" if customer else "(未指定客戶)"
+    contact = customer.contact_person if customer else ""
+    addr = (customer.address or "")[:50] if customer else ""
+    info_data = [
+        ["客戶 / Customer:", cu_name],
+        ["聯絡人 / Contact:", contact],
+        ["地址 / Address:", addr],
+        ["報價日 / Date:", str(quote.quote_date.date()) if quote.quote_date else ""],
+        ["有效期 / Valid Until:", str(quote.valid_until.date()) if quote.valid_until else "(未設)"],
+    ]
+    t = Table(info_data, colWidths=[3.5 * cm, 12.5 * cm])
+    t.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), font),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("LINEBELOW", (0, -1), (-1, -1), 0.5, colors.grey),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
+    story.append(t)
+    story.append(Spacer(1, 0.5 * cm))
+
+    # 品項表
+    header = ["#", "品名 / Description", "數量", "單位", "單價", "折扣", "小計"]
+    table_data = [header]
+    for i, it in enumerate(quote.items, 1):
+        table_data.append([
+            str(i),
+            it.description[:40] if it.description else "",
+            f"{it.quantity:g}" if it.quantity else "0",
+            it.unit or "",
+            f"${it.unit_price:,.0f}" if it.unit_price else "$0",
+            f"{(it.discount_rate or 0):.0%}" if it.discount_rate else "-",
+            f"${it.line_total:,.0f}" if it.line_total else "$0",
+        ])
+    # 小計列
+    table_data.append(["", "", "", "", "", "小計", f"${quote.subtotal or 0:,.0f}"])
+    table_data.append(["", "", "", "", "", "稅額", f"${quote.tax_amount or 0:,.0f}"])
+    table_data.append(["", "", "", "", "", "**總計**", f"**${quote.total_amount or 0:,.0f}**"])
+
+    items_table = Table(
+        table_data,
+        colWidths=[0.8 * cm, 6 * cm, 1.8 * cm, 1.2 * cm, 2 * cm, 1.5 * cm, 2.7 * cm],
+    )
+    items_table.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), font),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#3b82f6")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, 0), 10),
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+        ("GRID", (0, 0), (-1, -4), 0.4, colors.grey),
+        ("BACKGROUND", (-2, -3), (-1, -1), colors.HexColor("#f3f4f6")),
+        ("ALIGN", (2, 1), (-1, -1), "RIGHT"),
+        ("FONTSIZE", (-2, -1), (-1, -1), 11),  # 總計加大
+    ]))
+    story.append(items_table)
+    story.append(Spacer(1, 0.5 * cm))
+
+    # 備註
+    if quote.notes:
+        story.append(Paragraph(f"<b>備註 / Notes:</b>", s["heading"]))
+        story.append(Paragraph(quote.notes, s["body"]))
+        story.append(Spacer(1, 0.3 * cm))
+
+    # 條款（小字）
+    story.append(Spacer(1, 0.3 * cm))
+    story.append(Paragraph(
+        "本報價單為要約之邀請，最終契約以雙方書面簽章為準。"
+        "報價金額除特別註明外含稅。逾有效期之報價恕不適用，需重新報價。",
+        s["small"]
+    ))
+    story.append(Spacer(1, 1 * cm))
+
+    # 簽章區
+    story.append(_signature_block(s))
+
+    doc.build(story)
+    return buf.getvalue()
+
+
+# ════════════════════════════════════════════════════════════════════
+# Purchase Order PDF
+# ════════════════════════════════════════════════════════════════════
+
+async def generate_po_pdf(
+    db: AsyncSession, po_id: str, company_name: str = "erpilot 範例公司",
+) -> bytes:
+    from app.models.purchase import PurchaseOrder, Supplier
+
+    po = (await db.execute(
+        select(PurchaseOrder).options(selectinload(PurchaseOrder.items))
+        .where(PurchaseOrder.id == po_id)
+    )).scalar_one_or_none()
+    if po is None:
+        raise ValueError(f"找不到 PO {po_id}")
+
+    supplier = (await db.execute(
+        select(Supplier).where(Supplier.id == po.supplier_id)
+    )).scalar_one_or_none() if po.supplier_id else None
+
+    s = _styles()
+    font = _try_register_chinese_font()
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=2*cm, rightMargin=2*cm,
+                             topMargin=1.5*cm, bottomMargin=1.5*cm,
+                             title=f"採購單 {po.po_no}")
+    story = list(_company_header(s, company_name))
+    story.append(Paragraph(f"<b>採 購 單 / Purchase Order</b>", s["title"]))
+    story.append(Paragraph(f"PO No: {po.po_no}", s["small"]))
+    story.append(Spacer(1, 0.3 * cm))
+
+    sup_name = f"{supplier.code} - {supplier.name}" if supplier else "(未指定供應商)"
+    info_data = [
+        ["供應商 / Supplier:", sup_name],
+        ["訂單日 / Date:", str(po.order_date.date()) if po.order_date else ""],
+        ["預計交期 / ETA:", str(po.expected_delivery_date.date()) if po.expected_delivery_date else "(未設)"],
+        ["狀態 / Status:", po.status or ""],
+    ]
+    t = Table(info_data, colWidths=[3.5 * cm, 12.5 * cm])
+    t.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), font),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("LINEBELOW", (0, -1), (-1, -1), 0.5, colors.grey),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
+    story.append(t)
+    story.append(Spacer(1, 0.5 * cm))
+
+    # 品項表
+    header = ["#", "料件 / Part", "數量", "單價", "小計"]
+    table_data = [header]
+    for i, it in enumerate(po.items, 1):
+        table_data.append([
+            str(i),
+            (it.part_id[:8] + "...") if it.part_id else "",
+            f"{it.ordered_qty:g}" if it.ordered_qty else "0",
+            f"${it.unit_price or 0:,.0f}",
+            f"${(it.ordered_qty or 0) * (it.unit_price or 0):,.0f}",
+        ])
+    table_data.append(["", "", "", "**總計**", f"**${po.total_amount or 0:,.0f}**"])
+
+    items_table = Table(
+        table_data,
+        colWidths=[0.8 * cm, 8.5 * cm, 2 * cm, 2.2 * cm, 2.7 * cm],
+    )
+    items_table.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), font),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f59e0b")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+        ("GRID", (0, 0), (-1, -2), 0.4, colors.grey),
+        ("BACKGROUND", (-2, -1), (-1, -1), colors.HexColor("#fef3c7")),
+        ("ALIGN", (2, 1), (-1, -1), "RIGHT"),
+        ("FONTSIZE", (-2, -1), (-1, -1), 11),
+    ]))
+    story.append(items_table)
+    story.append(Spacer(1, 0.5 * cm))
+
+    if po.remark:
+        story.append(Paragraph(f"<b>備註:</b> {po.remark}", s["body"]))
+        story.append(Spacer(1, 0.3 * cm))
+
+    story.append(Spacer(1, 1 * cm))
+    story.append(_signature_block(s))
+
+    doc.build(story)
+    return buf.getvalue()
+
+
+# ════════════════════════════════════════════════════════════════════
+# Sales Order / Delivery Note PDF
+# ════════════════════════════════════════════════════════════════════
+
+async def generate_so_pdf(
+    db: AsyncSession, so_id: str, doc_type: str = "sales_order",
+    company_name: str = "erpilot 範例公司",
+) -> bytes:
+    """產生銷售單或出貨單 PDF。doc_type = sales_order | delivery_note."""
+    from app.models.crm_sales import SalesOrder, Customer
+
+    so = (await db.execute(
+        select(SalesOrder).options(selectinload(SalesOrder.items))
+        .where(SalesOrder.id == so_id)
+    )).scalar_one_or_none()
+    if so is None:
+        raise ValueError(f"找不到 SO {so_id}")
+
+    customer = (await db.execute(
+        select(Customer).where(Customer.id == so.customer_id)
+    )).scalar_one_or_none() if so.customer_id else None
+
+    s = _styles()
+    font = _try_register_chinese_font()
+    buf = io.BytesIO()
+    title_zh = "銷售訂單" if doc_type == "sales_order" else "出貨單"
+    title_en = "Sales Order" if doc_type == "sales_order" else "Delivery Note"
+    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=2*cm, rightMargin=2*cm,
+                             topMargin=1.5*cm, bottomMargin=1.5*cm,
+                             title=f"{title_zh} {so.so_no}")
+
+    story = list(_company_header(s, company_name))
+    story.append(Paragraph(f"<b>{title_zh} / {title_en}</b>", s["title"]))
+    story.append(Paragraph(f"SO No: {so.so_no}", s["small"]))
+    story.append(Spacer(1, 0.3 * cm))
+
+    cu_name = f"{customer.code} - {customer.name}" if customer else "(未指定客戶)"
+    addr = (customer.address or "")[:50] if customer else ""
+    info_data = [
+        ["客戶 / Customer:", cu_name],
+        ["地址 / Address:", addr],
+        ["訂單日 / Date:", str(so.order_date.date()) if so.order_date else ""],
+        ["狀態 / Status:", so.status or ""],
+    ]
+    t = Table(info_data, colWidths=[3.5 * cm, 12.5 * cm])
+    t.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), font),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("LINEBELOW", (0, -1), (-1, -1), 0.5, colors.grey),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
+    story.append(t)
+    story.append(Spacer(1, 0.5 * cm))
+
+    header = ["#", "產品 / Product", "數量", "單價", "小計"]
+    table_data = [header]
+    for i, it in enumerate(so.items, 1):
+        table_data.append([
+            str(i),
+            (it.product_id[:8] + "...") if it.product_id else "",
+            f"{it.ordered_qty:g}" if it.ordered_qty else "0",
+            f"${it.unit_price or 0:,.0f}",
+            f"${it.line_total or 0:,.0f}",
+        ])
+    table_data.append(["", "", "", "**總計**", f"**${so.total_amount or 0:,.0f}**"])
+
+    items_table = Table(
+        table_data,
+        colWidths=[0.8 * cm, 8.5 * cm, 2 * cm, 2.2 * cm, 2.7 * cm],
+    )
+    items_table.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), font),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#10b981")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+        ("GRID", (0, 0), (-1, -2), 0.4, colors.grey),
+        ("BACKGROUND", (-2, -1), (-1, -1), colors.HexColor("#d1fae5")),
+        ("ALIGN", (2, 1), (-1, -1), "RIGHT"),
+        ("FONTSIZE", (-2, -1), (-1, -1), 11),
+    ]))
+    story.append(items_table)
+    story.append(Spacer(1, 1 * cm))
+
+    story.append(_signature_block(s))
+
+    doc.build(story)
+    return buf.getvalue()

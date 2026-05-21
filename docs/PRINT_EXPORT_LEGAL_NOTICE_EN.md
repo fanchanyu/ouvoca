@@ -1,0 +1,188 @@
+# Printing / Export Module — Legal & Compliance Notice (v3.36)
+
+> **Document nature**: Compliance reminder for PDF printing and CSV/Excel export. **Does not constitute legal advice.**
+> Cumulatively applies to all §6 disclaimers in v3.25.10 → v3.36.
+>
+> **Chinese version**: [`PRINT_EXPORT_LEGAL_NOTICE_ZH.md`](./PRINT_EXPORT_LEGAL_NOTICE_ZH.md)
+
+---
+
+## ⚠️ Important: Printed documents and exported files carry legal and compliance weight
+
+erpilot v3.36 print / export features cover:
+- **PDF Quotation / Purchase Order / Sales Order / Delivery Note** (outbound documents)
+- **Customer / Supplier / Part lists** (containing PII / trade secrets)
+- **Sales / Purchase orders / Inventory snapshots in Excel** (financial reference)
+
+Errors or leaks of these files may trigger:
+- 🔴 Contract disputes (counterparty relies on the PDF for price/spec/delivery)
+- 🔴 PII leakage (Taiwan PDPA / GDPR / equivalent)
+- 🔴 Trade secret leakage (Taiwan Trade Secrets Act)
+- 🔴 Financial misstatement (internal / external audit)
+
+**Use only under authorized review processes; sign before sending externally.**
+
+---
+
+## 1. PDF Legal Boundaries
+
+### 1.1 Quotation (`print_quotation_pdf`)
+
+| Risk | Customer Responsibility |
+|---|---|
+| Invitation to treat | PDF already includes "This quotation is an invitation to treat; the final contract is the signed paper version" |
+| Signature validity | erpilot PDF carries **no e-signature**; use a separate signing service (TWCA / SecureSign / DocuSign) |
+| Amount accuracy | Customer must manually verify amount, tax, validity period before sending |
+| Attachments | Spec sheets, warranty, payment terms are **not** auto-attached by erpilot |
+
+### 1.2 Purchase Order / Sales Order / Delivery Note
+
+| Risk | Customer Responsibility |
+|---|---|
+| External legal effect | A PDF emailed/printed to a supplier or customer may constitute an "offer" or "acceptance" |
+| No version history | erpilot PDF carries **no revision history**; reprint and recall old copies after corrections |
+| Delivery receipt | Delivery notes are evidence of **title transfer**; the recipient must have authority to sign |
+| Tax voucher | Delivery / sales notes are **not** equivalent to a uniform invoice; issue invoices via the e-invoice flow (see v3.34 §1) |
+
+### 1.3 Common Disclaimer
+
+To the maximum extent permitted by applicable law, erpilot is **not liable** for disputes arising from:
+- PDF content errors (amount / spec / delivery date)
+- PDF leakage, tampering, or impersonation
+- Customer being bound to a contract via the PDF
+- Unauthorized external transmission by customer staff
+
+---
+
+## 2. CSV / Excel Export & Data Protection
+
+### 2.1 PII Protection (PDPA / GDPR-equivalent)
+
+Exported **customer / supplier lists** may contain:
+- Name, phone, email (PII)
+- Company address, commercial terms (trade secret)
+
+After export, customers should:
+- ✅ **Encrypt at rest** (not loose on desktop / shared folders)
+- ✅ **Restrict access** to authorized personnel
+- ✅ Use **encrypted email** or **encrypted attachments** for external send
+- ❌ **Do not** resell, transfer, or lend to third parties
+- ❌ **Do not** use for non-business purposes (e.g. marketing SMS for another company)
+
+### 2.2 Trade Secret Protection
+
+Exported **part lists**, **inventory snapshots**, **sales/purchase orders** include:
+- Unit prices, costs, margins (trade secret under Taiwan Trade Secrets Act §2)
+- Customer/supplier transaction amounts & payment terms
+
+Improper disclosure may result in:
+- **Civil**: Damages (Trade Secrets Act §12-14)
+- **Criminal**: Up to 5 years imprisonment (Trade Secrets Act §13-1)
+
+### 2.3 Sending to Third Parties (CPA / Tax Agent)
+
+| Scenario | Recommended Practice |
+|---|---|
+| Mail to CPA firm | Encrypted zip + password via separate channel; no plaintext email |
+| Mail to tax agent | Confirm recipient uses dedicated firm email |
+| Mail to bank (credit / financing) | Bank's **secure upload portal**; not as email attachment |
+| Internal cross-department | Use erpilot's **permission control** to query directly; avoid repeated downloads |
+
+---
+
+## 3. Demo Data Seeding (`seed_demo_data_with_confirm`)
+
+### 3.1 Not for Production
+
+| Scenario | Usable? |
+|---|---|
+| Day-1 trial after install | ✅ Yes (DB empty) |
+| Customer demo environment | ✅ Yes (isolated DB) |
+| **Production DB** | ❌ **No** (avoid mixing with real data) |
+| Training environment | ✅ Yes (separate DB) |
+
+erpilot's `seed_demo_data_with_confirm` has built-in protection: **auto-skips when DB has data**.
+
+### 3.2 Post-Load Responsibility
+
+- Demo data is for functional verification only — does **not** reflect real business relationships
+- Demo customer / supplier / part **tax IDs, addresses, amounts are fictional**
+- Customers must **not** use demo data in external documents, reconciliation, or filings
+
+---
+
+## 4. Templates & Third-Party Licenses
+
+### 4.1 PDF Templates
+
+- erpilot's built-in PDF template is generated by erpilot's own reportlab code
+- It does **not** include specific customer templates (e.g. DataSystems / SunLike PDF styles)
+- For matching existing ERP templates, customers must **customize `print_service.py`** or commission custom work from our team
+
+### 4.2 Font Licensing
+
+erpilot's PDF fallback chain:
+1. Windows: Microsoft JhengHei (**OS-license**)
+2. macOS: PingFang (**Apple-license**)
+3. Linux: Noto Sans CJK (**Open Font License**, free commercial use)
+4. Fallback: Helvetica (**reportlab built-in PostScript**)
+
+Customers using these fonts in commercial environments must comply with the respective vendor's license. erpilot does **not** embed or redistribute these font files.
+
+---
+
+## 5. Record-Keeping & Audit
+
+### 5.1 Print / Export Audit Log
+
+- erpilot's ConfirmCard and LLM tool calls have **audit logs**
+- Printing PDFs (READ tier) is **not** mandatorily audited; for tracking "who printed what", customers should add logging at the API gateway layer
+- CSV/Excel exports do **not** automatically log "downloader"; for tracking, add logging at the enterprise SSO layer
+
+### 5.2 Statutory Retention Periods (Taiwan)
+
+| Document Type | Retention | Source |
+|---|---|---|
+| Quotations / Purchase orders / Sales orders | At least 5 years | Business Accounting Act §38 |
+| Uniform invoices (PDF copies) | **At least 5 years** | Value-Added & Non-VAT Business Tax Act §32 |
+| Inventory snapshots | At least 5 years | Business Accounting Act §38 |
+| Customer / supplier master files | Per business contract | Individual contract terms |
+
+erpilot does **not** auto-archive PDFs; customers must store them (recommendation: monthly export + cloud backup + encryption).
+
+---
+
+## 6. Disclaimer (Cumulative v3.25.10 → v3.36)
+
+To the maximum extent permitted by applicable law:
+
+**1. Printing**
+erpilot is **not liable** for the **legal effect, accounting accuracy, or tax compliance** of PDF content. Customer must verify and have authorized personnel sign before external transmission.
+
+**2. Export**
+erpilot is **not liable** for the **storage, transmission, or third-party processing** of exported files. Customer must manage controls per PDPA, Trade Secrets Act, and contractual obligations.
+
+**3. Templates**
+The PDF style is for **functional demonstration**. For official external documents, customer must confirm layout, terms, and seals conform to industry norms and legal requirements.
+
+**4. Demo Data**
+`seed_demo_data_with_confirm` content is **entirely fictional**; must not be used in external contracts, filings, or reconciliation.
+
+---
+
+## 7. Pre-Adoption Checklist
+
+Before adopting erpilot v3.36 print / export features, please confirm:
+
+- [ ] Designated **outbound document sign-off workflow** (who can send, who must review)
+- [ ] Established **PII and trade secret internal control policy**
+- [ ] Configured **file encryption / secure transmission channels** (GPG, encrypted ZIP, enterprise VPN)
+- [ ] Provided **employee training** on PDPA and Trade Secrets Act basics
+- [ ] Consulted **CPA / legal counsel** on paper archive workflow
+- [ ] Set up **at least 5-year print log backup** (per Business Accounting Act)
+
+---
+
+**Version**: v3.36 (2026-05-21)
+**Author**: erpilot Legal Team (internal)
+**Corresponds to code**: `backend/app/services/{print,export}_service.py`, `backend/app/api/print_export.py`, `backend/app/agents/domains/print_export_tools.py`
