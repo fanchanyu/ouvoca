@@ -23,6 +23,8 @@ EXPECTED_TENANT_MIXIN = {
     "accounting",
     "approval_workflow",  # v3.22 新增（多階審批，ApprovalRule + RequestV2 + Step）
     "policy_rule",        # v3.25 新增（家規 House Rules：PolicyRule + AuditLog）
+    "quotation",          # v3.32 新增（報價單 + 行）
+    "stock_count",        # v3.32 新增（盤點單 + 行）
     "attachment",   # v3.13 新增（檔案上傳，按租戶隔離存 uploads/{tenant_id}/）
     "crm_sales",
     "inventory",

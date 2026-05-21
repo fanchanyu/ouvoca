@@ -55,5 +55,8 @@ from app.models.policy_rule import (
     PolicyRule, PolicyAuditLog,
     POLICY_TRIGGERS, POLICY_CONDITION_TYPES, POLICY_ACTIONS,
 )
+# v3.32 進銷存深化
+from app.models.quotation import Quotation, QuotationItem
+from app.models.stock_count import StockCount, StockCountItem
 
 __all__ = ["Base"]
