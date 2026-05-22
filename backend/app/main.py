@@ -155,6 +155,9 @@ app.add_middleware(
 # Outermost (first to run) → SecurityHeaders → RequestID → Auth → Audit → handler.
 # add 順序：Audit → Auth → RequestID → SecurityHeaders（最後加 = 最先跑 = 最外層）
 app.add_middleware(AuditMiddleware)
+# v3.42 R4：per-user AI 用量限制（每人每日 N 次）
+from app.core.ai_rate_limit import AiRateLimitMiddleware
+app.add_middleware(AiRateLimitMiddleware)
 app.add_middleware(AuthMiddleware)
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
@@ -168,6 +171,7 @@ from app.api import (
     agents_exec, reports, onboarding, files, llm_status,
     approval, policy,
     print_export,  # v3.36 PDF 列印 + CSV/Excel 匯出
+    chat_feedback,  # v3.41 P7 chat thumbs up/down
 )
 
 app.include_router(chat.router)
@@ -198,6 +202,7 @@ app.include_router(approval.router)
 app.include_router(policy.router)
 app.include_router(print_export.print_router)
 app.include_router(print_export.export_router)
+app.include_router(chat_feedback.router)
 
 
 @app.get("/")

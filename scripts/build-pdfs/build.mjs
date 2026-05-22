@@ -143,6 +143,30 @@ const DOCS_TO_BUILD = [
   // === 31 v3.36 列印/匯出模組法律聲明（雙語）===
   { src: 'PRINT_EXPORT_LEGAL_NOTICE_ZH.md', out: '31_列印匯出法律聲明_中文.pdf',           title: '⚖️ 列印/匯出模組法律與合規警告（v3.36）' },
   { src: 'PRINT_EXPORT_LEGAL_NOTICE_EN.md', out: '31_Print_Export_Legal_EN.pdf',           title: '⚖️ Print/Export Module Legal Notice (v3.36)' },
+
+  // === 32 v3.37 安裝精靈 / Day 0-7 卡關修補法律聲明（雙語）===
+  { src: 'SETUP_WIZARD_LEGAL_NOTICE_ZH.md', out: '32_安裝精靈法律聲明_中文.pdf',           title: '⚖️ 安裝精靈/Day 0-7 卡關修補法律聲明（v3.37）' },
+  { src: 'SETUP_WIZARD_LEGAL_NOTICE_EN.md', out: '32_Setup_Wizard_Legal_EN.pdf',           title: '⚖️ Setup Wizard / Day 0-7 Beginner-Fix Legal Notice (v3.37)' },
+
+  // === 33 v3.38 第二輪小白卡關修補法律聲明（雙語）===
+  { src: 'POLISH_LEGAL_NOTICE_ZH.md', out: '33_第二輪卡關修補法律聲明_中文.pdf',           title: '⚖️ 第二輪小白卡關修補法律聲明（v3.38）' },
+  { src: 'POLISH_LEGAL_NOTICE_EN.md', out: '33_Polish_Legal_EN.pdf',                       title: '⚖️ Second-Round Beginner-Fix Legal Notice (v3.38)' },
+
+  // === 34 v3.39 第三輪小白卡關修補法律聲明（雙語）===
+  { src: 'POLISH_V339_LEGAL_NOTICE_ZH.md', out: '34_第三輪卡關修補法律聲明_中文.pdf',       title: '⚖️ 第三輪小白卡關修補法律聲明（v3.39 — LOGO/刪除/批次/分頁）' },
+  { src: 'POLISH_V339_LEGAL_NOTICE_EN.md', out: '34_Polish_V339_Legal_EN.pdf',              title: '⚖️ Third-Round Beginner-Fix Legal Notice (v3.39)' },
+
+  // === 35 v3.40 第四輪小白卡關修補法律聲明（雙語 — 高敏感：凍結/Undo/Audit）===
+  { src: 'POLISH_V340_LEGAL_NOTICE_ZH.md', out: '35_第四輪卡關修補法律聲明_中文.pdf',       title: '⚖️ 第四輪小白卡關修補法律聲明（v3.40 — 凍結/Undo/Audit/帳齡，高敏感）' },
+  { src: 'POLISH_V340_LEGAL_NOTICE_EN.md', out: '35_Polish_V340_Legal_EN.pdf',              title: '⚖️ Fourth-Round Beginner-Fix Legal Notice (v3.40)' },
+
+  // === 36 v3.41 第五輪小白卡關修補法律聲明（雙語 — 對外溝通最敏感）===
+  { src: 'POLISH_V341_LEGAL_NOTICE_ZH.md', out: '36_第五輪卡關修補法律聲明_中文.pdf',       title: '⚖️ 第五輪小白卡關修補法律聲明（v3.41 — 寄 PDF / 毛利率，對外最敏感）' },
+  { src: 'POLISH_V341_LEGAL_NOTICE_EN.md', out: '36_Polish_V341_Legal_EN.pdf',              title: '⚖️ Fifth-Round Beginner-Fix Legal Notice (v3.41)' },
+
+  // === 37 v3.42 第六輪小白卡關修補法律聲明（雙語 — 帳號管理最敏感）===
+  { src: 'POLISH_V342_LEGAL_NOTICE_ZH.md', out: '37_第六輪卡關修補法律聲明_中文.pdf',       title: '⚖️ 第六輪小白卡關修補法律聲明（v3.42 — 使用者帳號 / 全域搜尋 / AI 限額 / 工作天）' },
+  { src: 'POLISH_V342_LEGAL_NOTICE_EN.md', out: '37_Polish_V342_Legal_EN.pdf',              title: '⚖️ Sixth-Round Beginner-Fix Legal Notice (v3.42)' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────
@@ -240,6 +264,17 @@ async function buildOne({ src, out, title }) {
   if (!existsSync(srcPath)) {
     console.log(`  ⚠️  Skip (not found): ${src}`)
     return { skipped: true }
+  }
+
+  // v3.41：incremental — 若 PDF 已存在且比 source 新 → 跳過（除非 FORCE=1）
+  if (!process.env.FORCE && existsSync(outPath)) {
+    const { statSync } = await import('fs')
+    const srcMtime = statSync(srcPath).mtimeMs
+    const outMtime = statSync(outPath).mtimeMs
+    if (outMtime >= srcMtime) {
+      console.log(' ↩ cached')
+      return { skipped: true, cached: true }
+    }
   }
 
   let content = readFileSync(srcPath, 'utf-8')

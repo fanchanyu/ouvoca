@@ -56,10 +56,15 @@ def _try_register_chinese_font() -> str:
         ("MSYH", r"C:\Windows\Fonts\msyh.ttc"),
         # macOS
         ("PingFang", "/System/Library/Fonts/PingFang.ttc"),
-        # Linux (typical packages)
+        # Linux — Debian/Ubuntu fonts-noto-cjk 套件實際路徑（v3.37 修字型亂碼）
         ("NotoSansCJK", "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+        ("NotoSerifCJK", "/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc"),
+        ("NotoSansSC", "/usr/share/fonts/opentype/noto/NotoSansSC-Regular.otf"),
+        ("NotoSansTC", "/usr/share/fonts/opentype/noto/NotoSansTC-Regular.otf"),
+        # Fallback truetype paths
         ("NotoSans", "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"),
         ("WQY", "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"),
+        ("WQYZenHei", "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"),
     ]
     for name, path in candidates:
         try:
@@ -102,13 +107,59 @@ def _styles():
     }
 
 
-def _company_header(s, company_name: str = "erpilot 範例公司") -> list:
-    """頂部公司資訊區。"""
-    return [
-        Paragraph(f"<b>{company_name}</b>", s["title"]),
-        Paragraph("Powered by erpilot", s["small"]),
-        Spacer(1, 0.4 * cm),
-    ]
+def _company_header(s, company_name: str = "erpilot 範例公司",
+                    tax_id: str = "", address: str = "", phone: str = "",
+                    logo_b64: str = "") -> list:
+    """頂部公司資訊區（v3.37 統編/地址/電話、v3.39 LOGO）。"""
+    out: list = []
+    # v3.39 K1: LOGO（若有）→ 印頂部，限高 1.5cm
+    if logo_b64:
+        try:
+            import base64 as _b64
+            from reportlab.platypus import Image
+            img_bytes = _b64.b64decode(logo_b64)
+            img = Image(io.BytesIO(img_bytes), width=4 * cm, height=1.5 * cm, kind="bound")
+            img.hAlign = "LEFT"
+            out.append(img)
+            out.append(Spacer(1, 0.2 * cm))
+        except Exception:
+            # LOGO 壞掉 silent fallback — 不要 fail 整張 PDF
+            pass
+    out.append(Paragraph(f"<b>{company_name}</b>", s["title"]))
+    sub_parts = []
+    if tax_id:
+        sub_parts.append(f"統編：{tax_id}")
+    if phone:
+        sub_parts.append(f"電話：{phone}")
+    if address:
+        sub_parts.append(address[:60])
+    if sub_parts:
+        out.append(Paragraph(" · ".join(sub_parts), s["small"]))
+    out.append(Paragraph("Powered by erpilot", s["small"]))
+    out.append(Spacer(1, 0.4 * cm))
+    return out
+
+
+async def _resolve_company(db: AsyncSession) -> dict:
+    """從 Tenant.settings 撈當前公司資訊；找不到回 fallback。
+
+    Tenant.settings JSON 預期欄位：name / tax_id / address / phone。
+    若 settings 無 name 則 fallback 用 Tenant.name 本身。
+    """
+    from app.models.permission import Tenant
+    t = (await db.execute(
+        select(Tenant).where(Tenant.code == "HQ")
+    )).scalar_one_or_none()
+    if t is None:
+        return {"name": "erpilot 範例公司", "tax_id": "", "address": "", "phone": ""}
+    settings = t.settings or {}
+    return {
+        "name": settings.get("name") or t.name or "erpilot 範例公司",
+        "tax_id": settings.get("tax_id", ""),
+        "address": settings.get("address", ""),
+        "phone": settings.get("phone", ""),
+        "logo_b64": settings.get("logo_b64", ""),  # v3.39 K1
+    }
 
 
 def _signature_block(s) -> Table:
@@ -137,9 +188,12 @@ def _signature_block(s) -> Table:
 # ════════════════════════════════════════════════════════════════════
 
 async def generate_quotation_pdf(
-    db: AsyncSession, quote_id: str, company_name: str = "erpilot 範例公司",
+    db: AsyncSession, quote_id: str, company_name: Optional[str] = None,
 ) -> bytes:
-    """產生報價單 PDF（A4），回 bytes。"""
+    """產生報價單 PDF（A4），回 bytes。
+
+    company_name 留空時，自動從 Tenant.settings 撈（v3.37）。
+    """
     from app.models.quotation import Quotation
     from app.models.crm_sales import Customer
 
@@ -154,6 +208,10 @@ async def generate_quotation_pdf(
         select(Customer).where(Customer.id == quote.customer_id)
     )).scalar_one_or_none() if quote.customer_id else None
 
+    company = await _resolve_company(db)
+    if company_name:
+        company["name"] = company_name
+
     s = _styles()
     font = _try_register_chinese_font()
     buf = io.BytesIO()
@@ -162,7 +220,9 @@ async def generate_quotation_pdf(
                              topMargin=1.5*cm, bottomMargin=1.5*cm,
                              title=f"報價單 {quote.quote_no}")
 
-    story = list(_company_header(s, company_name))
+    story = list(_company_header(s, company["name"], company["tax_id"],
+                                  company["address"], company["phone"],
+                                  company.get("logo_b64", "")))
 
     # 大標題
     story.append(Paragraph(f"<b>報 價 單</b>", s["title"]))
@@ -254,7 +314,7 @@ async def generate_quotation_pdf(
 # ════════════════════════════════════════════════════════════════════
 
 async def generate_po_pdf(
-    db: AsyncSession, po_id: str, company_name: str = "erpilot 範例公司",
+    db: AsyncSession, po_id: str, company_name: Optional[str] = None,
 ) -> bytes:
     from app.models.purchase import PurchaseOrder, Supplier
 
@@ -269,13 +329,19 @@ async def generate_po_pdf(
         select(Supplier).where(Supplier.id == po.supplier_id)
     )).scalar_one_or_none() if po.supplier_id else None
 
+    company = await _resolve_company(db)
+    if company_name:
+        company["name"] = company_name
+
     s = _styles()
     font = _try_register_chinese_font()
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=2*cm, rightMargin=2*cm,
                              topMargin=1.5*cm, bottomMargin=1.5*cm,
                              title=f"採購單 {po.po_no}")
-    story = list(_company_header(s, company_name))
+    story = list(_company_header(s, company["name"], company["tax_id"],
+                                  company["address"], company["phone"],
+                                  company.get("logo_b64", "")))
     story.append(Paragraph(f"<b>採 購 單 / Purchase Order</b>", s["title"]))
     story.append(Paragraph(f"PO No: {po.po_no}", s["small"]))
     story.append(Spacer(1, 0.3 * cm))
@@ -345,7 +411,7 @@ async def generate_po_pdf(
 
 async def generate_so_pdf(
     db: AsyncSession, so_id: str, doc_type: str = "sales_order",
-    company_name: str = "erpilot 範例公司",
+    company_name: Optional[str] = None,
 ) -> bytes:
     """產生銷售單或出貨單 PDF。doc_type = sales_order | delivery_note."""
     from app.models.crm_sales import SalesOrder, Customer
@@ -361,6 +427,10 @@ async def generate_so_pdf(
         select(Customer).where(Customer.id == so.customer_id)
     )).scalar_one_or_none() if so.customer_id else None
 
+    company = await _resolve_company(db)
+    if company_name:
+        company["name"] = company_name
+
     s = _styles()
     font = _try_register_chinese_font()
     buf = io.BytesIO()
@@ -370,7 +440,9 @@ async def generate_so_pdf(
                              topMargin=1.5*cm, bottomMargin=1.5*cm,
                              title=f"{title_zh} {so.so_no}")
 
-    story = list(_company_header(s, company_name))
+    story = list(_company_header(s, company["name"], company["tax_id"],
+                                  company["address"], company["phone"],
+                                  company.get("logo_b64", "")))
     story.append(Paragraph(f"<b>{title_zh} / {title_en}</b>", s["title"]))
     story.append(Paragraph(f"SO No: {so.so_no}", s["small"]))
     story.append(Spacer(1, 0.3 * cm))

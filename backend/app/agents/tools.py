@@ -20,4 +20,10 @@ from app.agents.domains import (  # noqa: F401
     business_completion_tools,  # v3.34 業務面補完（Tax + Accounting + Approval + Warehouse pick + Quality NCR/CAPA）
     smb_friendly_tools,  # v3.35 電腦小白友善（whoami / system_health / list_what_can_i_do / customer_360 / grant_role）
     print_export_tools,  # v3.36 PDF 列印 + CSV/Excel 匯出 + setup_status + seed_demo_data
+    setup_wizard_tools,  # v3.37 Day 0/1 卡關修補：公司資料 / 改密碼 / 角色中文 / 匯入引導 / 主動推播
+    polish_tools,        # v3.38 第二輪卡關修補：成本 / 備份 / Undo / 客戶 disambiguation
+    polish_v339_tools,   # v3.39 第三輪卡關修補：LOGO / 刪除三件套 / 分頁 / 批次列印 / digest 觸發
+    polish_v340_tools,   # v3.40 第四輪卡關修補：相對日期 / 帳齡 / 凍結 / Audit / 比較 / case-insensitive
+    polish_v341_tools,   # v3.41 第五輪卡關修補：毛利率 / 訂單跟單 / 寄 PDF email / FAQ / 資料健康
+    polish_v342_tools,   # v3.42 第六輪卡關修補：使用者帳號 / 全域搜尋 / 附件 / 工作天 / transcript / 時區
 )

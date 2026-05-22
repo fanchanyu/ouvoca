@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   apiListParts, apiListWOs, apiListPOs, apiBelowSafety, apiListSOs, apiHealth,
   apiListPendingApprovals,
+  apiOnboardingStatus, type OnboardingStatus,  // v3.37 D0-3：接 wizard
 } from '../lib/api'
 import {
   Card, CardHeader, Skeleton, SkeletonStatCard, EmptyState,
@@ -13,6 +14,7 @@ import {
 } from '../components/ui'
 import { fmtNumber, fmtCurrency } from '../utils/format'
 import { useTranslation } from '../i18n'
+import OnboardingWizard from '../components/OnboardingWizard'  // v3.37 D0-3 死碼救活
 
 interface DashboardData {
   partsCount: number
@@ -35,6 +37,12 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<DashboardData | null>(null)
   const [health, setHealth] = useState<HealthInfo | null>(null)
+  // v3.37 D0-3：第一次安裝（DB 空）自動跳出引導
+  const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus | null>(null)
+  const [wizardOpen, setWizardOpen] = useState(false)
+  const [wizardDismissed, setWizardDismissed] = useState<boolean>(
+    () => localStorage.getItem('erpilot_wizard_dismissed') === '1'
+  )
 
   const load = useCallback(async () => {
     setLoading(true); setError(null)
@@ -62,16 +70,50 @@ export default function Dashboard() {
 
   useEffect(() => { load() }, [load])
 
+  // v3.37 D0-3 / v3.43 P0-3：載入時檢查是否首次登入
+  //
+  // 修補：install.bat 會自動 seed → DB 不會空 → 舊條件「empty=true」永遠不成立 → wizard 死碼
+  // 改用 localStorage `erpilot_first_seen` 旗號：使用者每個瀏覽器只看一次
+  // 若想再看，可手動清 localStorage 或開無痕模式
+  useEffect(() => {
+    if (wizardDismissed) return
+    const firstSeen = localStorage.getItem('erpilot_first_seen')
+    apiOnboardingStatus().then(s => {
+      setOnboardingStatus(s)
+      // 首次（localStorage 沒紀錄）→ 跳；或 DB 完全空（極少情況）→ 也跳
+      const dbEmpty = s.total_customers === 0 && s.total_suppliers === 0 && s.total_parts === 0
+      if (!firstSeen || dbEmpty) {
+        setWizardOpen(true)
+        try { localStorage.setItem('erpilot_first_seen', new Date().toISOString()) } catch { /* ignore */ }
+      }
+    }).catch(() => { /* 無權限就略過 */ })
+  }, [wizardDismissed])
+
+  const closeWizard = useCallback(() => {
+    setWizardOpen(false)
+    try { localStorage.setItem('erpilot_wizard_dismissed', '1') } catch { /* ignore */ }
+    setWizardDismissed(true)
+  }, [])
+
   if (error) {
     return <Card><ErrorState message={error} onRetry={() => { toast.info(t('common.refresh')); load() }} /></Card>
   }
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* v3.37 D0-3：第一次安裝的引導 wizard（DB 空時自動彈，user 可手動 dismiss） */}
+      {wizardOpen && (
+        <OnboardingWizard
+          initialStatus={onboardingStatus}
+          onClose={closeWizard}
+          onCompleted={() => { load() }}
+        />
+      )}
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <p className="text-body-sm text-ink-500">{getGreeting(t)} 👋</p>
-          <h1 className="text-h1 text-ink-900 mt-1 tracking-tight">{t('dashboard.title')}</h1>
+          {/* v3.42 R8：手機上字小一級 */}
+          <h1 className="text-2xl sm:text-h1 text-ink-900 mt-1 tracking-tight">{t('dashboard.title')}</h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <Badge tone={health?.llmReady ? 'success' : 'warning'} dot>

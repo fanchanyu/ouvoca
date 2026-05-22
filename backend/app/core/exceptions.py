@@ -118,6 +118,36 @@ def register_exception_handlers(app: FastAPI) -> None:
             },
         )
 
+    # v3.38 N6：業務邏輯拋出的 ValueError / KeyError 也要中文化
+    # 不然底層 traceback 對小白等於天書
+    @app.exception_handler(ValueError)
+    async def value_exc(_req: Request, exc: ValueError):
+        log.warning("ValueError: %s", exc)
+        msg = str(exc) or "輸入值有誤"
+        # 若拋出時已是中文則保留；否則加友善前綴
+        is_chinese = any('一' <= c <= '鿿' for c in msg)
+        detail = msg if is_chinese else f"輸入值有誤：{msg}"
+        return JSONResponse(
+            status_code=400,
+            content={
+                "code": "value_error",
+                "detail": detail,
+                "hint": "請檢查輸入內容是否合法（例如數字格式、必填欄位）",
+            },
+        )
+
+    @app.exception_handler(KeyError)
+    async def key_exc(_req: Request, exc: KeyError):
+        log.warning("KeyError: %s", exc)
+        return JSONResponse(
+            status_code=400,
+            content={
+                "code": "missing_field",
+                "detail": f"缺少必要欄位：{exc.args[0] if exc.args else '未知'}",
+                "hint": "請補齊欄位後再試一次",
+            },
+        )
+
     @app.exception_handler(Exception)
     async def fallback_exc(_req: Request, exc: Exception):
         log.exception("Unhandled exception")

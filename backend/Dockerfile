@@ -8,9 +8,10 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# System deps
+# System deps（v3.37: + fonts-noto-cjk 才不會 PDF 中文亂碼）
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential curl libpq-dev \
+        fonts-noto-cjk fonts-noto-cjk-extra \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

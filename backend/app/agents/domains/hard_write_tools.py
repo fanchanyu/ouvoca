@@ -748,12 +748,12 @@ async def _approve_po_with_confirm(db, user, po_no: str):
     domain="sales",
     risk_tier=RiskTier.HARD_WRITE,
     description=(
-        "新增客戶主檔。"
-        "範例：「新增客戶 富士康 編號 CUST-A005 等級 A」"
+        "新增客戶主檔。範例：「新增客戶 富士康」「新增客戶 ABC 公司 等級 A」。"
+        "v3.37：未提供編號時自動產生（CUS-0001、CUS-0002…），小白不必懂編碼。"
     ),
     slots=[
-        Slot("code", "string", required=True, description="客戶編號（如 CUST-A005）"),
         Slot("name", "string", required=True, description="客戶名稱"),
+        Slot("code", "string", required=False, description="客戶編號（留空自動產生 CUS-0001）"),
         Slot("grade", "string", required=False, description="等級 A/B/C/D，預設 C"),
         Slot("contact_person", "string", required=False, description="聯絡人"),
         Slot("contact_phone", "string", required=False, description="電話"),
@@ -763,13 +763,27 @@ async def _approve_po_with_confirm(db, user, po_no: str):
     required_permission="sales.customer.create",
 )
 async def _create_customer_with_confirm(
-    db, user, code: str, name: str,
+    db, user, name: str, code: str = "",
     grade: str = "C", contact_person: str = "",
     contact_phone: str = "", payment_terms: str = "",
     credit_limit: float = 0,
 ):
-    from sqlalchemy import select as _select
+    from sqlalchemy import select as _select, func as _func
     from app.models.crm_sales import Customer
+
+    # v3.37: 自動產編 — 找下一個 CUS-####
+    if not code or not code.strip():
+        max_code = (await db.execute(
+            _select(_func.max(Customer.code)).where(Customer.code.like("CUS-%"))
+        )).scalar()
+        next_num = 1
+        if max_code:
+            try:
+                next_num = int(max_code.split("-")[-1]) + 1
+            except (ValueError, IndexError):
+                next_num = 1
+        code = f"CUS-{next_num:04d}"
+
     existing = (await db.execute(
         _select(Customer).where(Customer.code == code)
     )).scalar_one_or_none()
@@ -839,7 +853,7 @@ async def _create_so_with_confirm(
     db, user, customer_keyword: str, items: list,
     requested_delivery_date: str, remark: str = "",
 ):
-    from sqlalchemy import select as _select
+    from sqlalchemy import select as _select, func as _func
     from app.models.crm_sales import Customer
     from app.models.product import Product
 
@@ -849,7 +863,7 @@ async def _create_so_with_confirm(
     )).scalar_one_or_none()
     if cust is None:
         cust = (await db.execute(
-            _select(Customer).where(Customer.name.like(f"%{customer_keyword}%")).limit(1)
+            _select(Customer).where(_func.lower(Customer.name).like(_func.lower(f"%{customer_keyword}%"))).limit(1)
         )).scalar_one_or_none()
     if cust is None:
         return {"error": f"找不到客戶 {customer_keyword!r}"}

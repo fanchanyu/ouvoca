@@ -18,6 +18,12 @@ interface Msg {
   cardSettled?: 'confirmed' | 'cancelled' | 'expired'
   /** v3.14：當 backend 回 setup_required=true 時 render 申請引導卡 */
   setupGuide?: { reason: 'no_api_key' | 'invalid_key' | 'quota_exceeded'; intent?: string }
+  /** v3.41 P4：訊息 id（給 pin / feedback 用） */
+  id?: string
+  /** v3.41 P4：是否被 pin（釘住） */
+  pinned?: boolean
+  /** v3.41 P7：使用者回饋（1 = 👍 / -1 = 👎） */
+  feedback?: 1 | -1
 }
 
 /**
@@ -40,6 +46,70 @@ function extractCard(tool_calls?: Array<{ tool: string; result: string | unknown
   return undefined
 }
 
+/**
+ * v3.37 D1-2/D1-3：從 tool_calls 找帶有檔案 (pdf_base64 / base64) 的回傳，
+ * 自動觸發瀏覽器下載（解決小白「點連結 401 / 看到 base64 沒反應」）。
+ *
+ * 偵測規則：
+ *   - tool_calls[i].result JSON 解析後若有 raw.pdf_base64 或 raw.base64
+ *     → 組 Blob → 觸發 a.download
+ *
+ * 副作用：每次 chat 回應後最多下載 1 個檔（最新的）。
+ */
+function triggerAutoDownload(tool_calls?: Array<{ tool: string; result: string | unknown }>) {
+  if (!tool_calls || tool_calls.length === 0) return
+  for (let i = tool_calls.length - 1; i >= 0; i--) {
+    const r = tool_calls[i].result
+    try {
+      const parsed = typeof r === 'string' ? JSON.parse(r) : r
+      if (!parsed || typeof parsed !== 'object') continue
+      const raw = (parsed as { raw?: Record<string, unknown> }).raw
+      if (!raw) continue
+
+      let b64: string | undefined
+      let filename: string | undefined
+      let mimeType: string = 'application/octet-stream'
+
+      if (typeof raw.pdf_base64 === 'string') {
+        b64 = raw.pdf_base64
+        mimeType = 'application/pdf'
+        // 用 download_url 倒推檔名
+        const url = typeof raw.download_url === 'string' ? raw.download_url : ''
+        filename = url.split('/').pop() || `document-${Date.now()}.pdf`
+      } else if (typeof raw.base64 === 'string') {
+        b64 = raw.base64
+        const fmt = (raw.fmt as string) || 'xlsx'
+        const entity = (raw.entity as string) || 'export'
+        mimeType = fmt === 'csv'
+          ? 'text/csv;charset=utf-8'
+          : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        filename = `${entity}-${new Date().toISOString().slice(0, 10)}.${fmt}`
+      }
+
+      if (!b64 || !filename) continue
+
+      try {
+        const byteChars = atob(b64)
+        const byteNums = new Uint8Array(byteChars.length)
+        for (let j = 0; j < byteChars.length; j++) byteNums[j] = byteChars.charCodeAt(j)
+        const blob = new Blob([byteNums], { type: mimeType })
+        const objectUrl = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = objectUrl
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        // 等 1 秒釋放 — 給瀏覽器時間真的下完
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
+        return  // 只下載最新一個
+      } catch (e) {
+        console.warn('[Chat] 自動下載失敗', e)
+      }
+    } catch { /* skip */ }
+  }
+}
+
 const HISTORY_KEY = 'erpilot_chat_history'
 const MAX_HISTORY = 200
 
@@ -51,6 +121,19 @@ const SUGGESTIONS = [
   '列出所有供應商',
   '本月有逾期的應收帳款嗎？',
 ]
+
+// v3.37 D1-1：第一次開啟 Chat 時，AI 主動講話而不是讓使用者盯著空白
+const FIRST_TIME_GREETING = `👋 **您好！我是 erpilot AI 助手。**
+
+我可以用講的幫您：
+
+- 📦 **庫存**：「哪些料件快沒了？」
+- 🤝 **客戶**：「新增客戶 ABC 公司」
+- 📄 **單據**：「印報價單 QUO-001」「匯出客戶清單 Excel」
+- 🏢 **設定**：「公司叫長江精密」「改密碼」
+- 🔔 **主動提醒**：「今天有什麼要注意的？」
+
+**第一次使用嗎？** 試試下面任一個按鈕，或直接打字告訴我您想做什麼。`
 
 export default function Chat() {
   const [messages, setMessages] = useState<Msg[]>(() => {
@@ -67,6 +150,14 @@ export default function Chat() {
   const [sessionId] = useState(() => 'sess-' + Math.random().toString(36).slice(2))
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  // v3.38 N8：AbortController — 讓使用者可以「取消」LLM 等待
+  const abortRef = useRef<AbortController | null>(null)
+  // v3.41 P3：短答模式 — 給 LLM hint「請 1-2 句」
+  const [briefMode, setBriefMode] = useState<boolean>(
+    () => localStorage.getItem('erpilot_chat_brief') === '1'
+  )
+  // v3.41 P4：是否顯示「已釘訊息」面板
+  const [showPinned, setShowPinned] = useState(false)
 
   // 自動捲到底
   useEffect(() => {
@@ -103,13 +194,25 @@ export default function Chat() {
   const send = useCallback(async (textArg?: string) => {
     const text = (textArg ?? input).trim()
     if (!text || loading) return
-    setMessages(prev => [...prev, { role: 'user', content: text, timestamp: Date.now() }])
+    const userMsgId = 'um-' + Math.random().toString(36).slice(2, 10)
+    setMessages(prev => [...prev, { id: userMsgId, role: 'user', content: text, timestamp: Date.now() }])
     setInput('')
     setLoading(true)
+    // v3.38 N8：建立可取消的請求
+    const controller = new AbortController()
+    abortRef.current = controller
     try {
-      const data = await apiChat(text, sessionId)
+      // v3.41 P3：短答模式 — 在訊息前綴加 hint 給 LLM
+      const textToSend = briefMode
+        ? `[請用 1-2 句精簡回答，不要 markdown 表格] ${text}`
+        : text
+      const data = await apiChat(textToSend, sessionId, controller.signal)
       const card = extractCard(data.tool_calls)
+      // v3.37 D1-2/D1-3：自動觸發 PDF / Excel 下載 — 小白不必點連結
+      triggerAutoDownload(data.tool_calls)
+      const assistantId = 'am-' + Math.random().toString(36).slice(2, 10)
       setMessages(prev => [...prev, {
+        id: assistantId,
         role: 'assistant',
         content: data.reply || (card ? '請確認以下操作：' : '(無回應)'),
         agent: data.agent,
@@ -121,17 +224,60 @@ export default function Chat() {
           : undefined,
       }])
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : '連線錯誤'
+      // v3.38 N8：使用者按取消時不算錯誤
+      const isAbort = e instanceof Error && (e.name === 'AbortError' || /abort/i.test(e.message))
+      const msg = isAbort ? '🚫 已取消' : (e instanceof Error ? e.message : '連線錯誤')
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `❌ ${msg}`,
+        content: isAbort ? msg : `❌ ${msg}`,
         timestamp: Date.now(),
-        isError: true,
+        isError: !isAbort,
       }])
     } finally {
+      abortRef.current = null
       setLoading(false)
     }
-  }, [input, loading, sessionId])
+  }, [input, loading, sessionId, briefMode])
+
+  // v3.38 N8：取消當前 LLM 請求
+  const cancelCurrent = useCallback(() => {
+    if (abortRef.current) {
+      abortRef.current.abort()
+    }
+  }, [])
+
+  // v3.41 P3：toggle 短答模式
+  const toggleBrief = useCallback(() => {
+    setBriefMode(v => {
+      const next = !v
+      try { localStorage.setItem('erpilot_chat_brief', next ? '1' : '0') } catch { /* ignore */ }
+      return next
+    })
+  }, [])
+
+  // v3.41 P4：toggle pin
+  const togglePin = useCallback((msgId: string) => {
+    setMessages(prev => prev.map(m =>
+      m.id === msgId ? { ...m, pinned: !m.pinned } : m
+    ))
+  }, [])
+
+  // v3.41 P7：thumbs up / down — 寫到後端 + 本地 state
+  const submitFeedback = useCallback(async (msgId: string, score: 1 | -1) => {
+    setMessages(prev => prev.map(m =>
+      m.id === msgId ? { ...m, feedback: score } : m
+    ))
+    try {
+      const { api } = await import('../lib/api')
+      await api.post('/chat/feedback', {
+        message_id: msgId,
+        session_id: sessionId,
+        score,
+      })
+    } catch (e) {
+      console.warn('[Chat] feedback submit failed', e)
+    }
+  }, [sessionId])
 
   const regenerate = useCallback(() => {
     // 找最後一筆 user message → 重發
@@ -194,11 +340,36 @@ export default function Chat() {
   }, [])
 
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)]">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">AI 助手</h1>
-        <div className="flex items-center gap-2 text-sm">
+    // v3.38 N5：手機版 viewport 高度修正（iOS Safari 動態 toolbar）
+    <div className="flex flex-col h-[calc(100vh-80px)] sm:h-[calc(100vh-80px)] min-h-[400px]">
+      {/* Header — 手機上字小一級 */}
+      <div className="flex items-center justify-between mb-2 sm:mb-4 flex-wrap gap-2">
+        <h1 className="text-lg sm:text-2xl font-bold">AI 助手</h1>
+        <div className="flex items-center gap-2 text-sm flex-wrap">
+          {/* v3.41 P3：短答模式 */}
+          <button
+            onClick={toggleBrief}
+            className={`px-3 py-1 rounded transition text-xs ${
+              briefMode
+                ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                : 'text-gray-500 hover:bg-gray-100 border border-transparent'
+            }`}
+            title={briefMode ? '已啟用短答（1-2 句）' : '啟用短答模式（給老闆看的簡答）'}
+          >
+            {briefMode ? '⚡ 短答 ON' : '⚡ 短答'}
+          </button>
+          {/* v3.41 P4：已釘訊息 */}
+          {messages.some(m => m.pinned) && (
+            <button
+              onClick={() => setShowPinned(v => !v)}
+              className={`px-3 py-1 rounded transition text-xs border ${
+                showPinned ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'text-gray-600 hover:bg-yellow-50 border-yellow-200'
+              }`}
+              title="顯示 / 隱藏已釘訊息"
+            >
+              📌 已釘 ({messages.filter(m => m.pinned).length})
+            </button>
+          )}
           {messages.length > 0 && (
             <>
               <span className="text-gray-400">{messages.length} 則訊息</span>
@@ -214,22 +385,49 @@ export default function Chat() {
         </div>
       </div>
 
+      {/* v3.41 P4：已釘訊息面板（toggle） */}
+      {showPinned && messages.some(m => m.pinned) && (
+        <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+          <div className="text-xs text-yellow-800 font-medium mb-2">📌 已釘訊息：</div>
+          <div className="space-y-2">
+            {messages.filter(m => m.pinned).map(m => (
+              <div key={`pin-${m.id}`} className="text-sm bg-white rounded p-2 border border-yellow-100">
+                <div className="text-xs text-gray-400 mb-1">
+                  {m.role === 'user' ? '👤 我' : '🤖 AI'} ·{' '}
+                  {m.timestamp && new Date(m.timestamp).toLocaleString('zh-TW', { hour: '2-digit', minute: '2-digit', month: '2-digit', day: '2-digit' })}
+                </div>
+                <div className="whitespace-pre-wrap line-clamp-3">{m.content}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 bg-white rounded-xl shadow p-4 overflow-y-auto mb-4">
         {messages.length === 0 && (
-          <div className="text-gray-500 text-center mt-20">
-            <div className="text-5xl mb-4">💬</div>
-            <div className="mb-6 text-base">向 AI 助手詢問任何 ERP 相關問題</div>
-            <div className="flex flex-wrap gap-2 justify-center max-w-2xl mx-auto">
-              {SUGGESTIONS.map(s => (
-                <button
-                  key={s}
-                  onClick={() => send(s)}
-                  className="px-4 py-2 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-sm rounded-full border border-blue-100 text-blue-700 transition"
-                >
-                  {s}
-                </button>
-              ))}
+          <div className="text-gray-700 max-w-3xl mx-auto mt-8">
+            {/* v3.37 D1-1：AI 主動歡迎 — 不讓小白盯空白 */}
+            <div className="inline-block bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl px-5 py-4 shadow-sm">
+              <div className="prose prose-sm max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {FIRST_TIME_GREETING}
+                </ReactMarkdown>
+              </div>
+            </div>
+            <div className="mt-6">
+              <div className="text-xs text-gray-500 mb-2 font-medium">💡 試試這些範例：</div>
+              <div className="flex flex-wrap gap-2">
+                {SUGGESTIONS.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => send(s)}
+                    className="px-3 py-1.5 bg-white hover:bg-blue-50 text-sm rounded-full border border-blue-200 text-blue-700 transition shadow-sm"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -239,7 +437,7 @@ export default function Chat() {
             className={`group mb-4 ${msg.role === 'user' ? 'flex flex-col items-end' : 'flex flex-col items-start'}`}
           >
             <div
-              className={`inline-block max-w-[85%] rounded-2xl px-4 py-3 ${
+              className={`inline-block max-w-[92%] sm:max-w-[85%] rounded-2xl px-4 py-3 ${
                 msg.role === 'user'
                   ? 'bg-blue-600 text-white'
                   : msg.isError
@@ -260,14 +458,14 @@ export default function Chat() {
 
             {/* v3.14: AI 設定引導卡（no_api_key / invalid_key / quota_exceeded） */}
             {msg.setupGuide && (
-              <div className="w-full max-w-[85%]">
+              <div className="w-full max-w-[92%] sm:max-w-[85%]">
                 <AiSetupGuide reason={msg.setupGuide.reason} detectedIntent={msg.setupGuide.intent} />
               </div>
             )}
 
             {/* v3.1: ConfirmCard 內嵌（在訊息泡泡下方） */}
             {msg.card && !msg.cardSettled && (
-              <div className="w-full max-w-[85%]">
+              <div className="w-full max-w-[92%] sm:max-w-[85%]">
                 <ConfirmCard
                   card={msg.card}
                   onResult={(r) => handleCardResult(msg.card!.id, r)}
@@ -277,7 +475,7 @@ export default function Chat() {
               </div>
             )}
             {msg.card && msg.cardSettled && (
-              <div className="w-full max-w-[85%] mt-1">
+              <div className="w-full max-w-[92%] sm:max-w-[85%] mt-1">
                 <div className="text-xs text-gray-500 italic px-3 py-1">
                   {msg.cardSettled === 'confirmed' && '✅ 已確認執行'}
                   {msg.cardSettled === 'cancelled' && '🚫 已取消'}
@@ -295,31 +493,76 @@ export default function Chat() {
                 <span>{new Date(msg.timestamp).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</span>
               )}
               {msg.role === 'assistant' && !msg.isError && (
-                <button
-                  onClick={() => copyToClipboard(msg.content)}
-                  className="opacity-0 group-hover:opacity-100 hover:text-blue-600 transition"
-                  title="複製"
-                >
-                  📋 複製
-                </button>
+                <>
+                  <button
+                    onClick={() => copyToClipboard(msg.content)}
+                    className="opacity-0 group-hover:opacity-100 hover:text-blue-600 transition"
+                    title="複製"
+                  >
+                    📋 複製
+                  </button>
+                  {/* v3.41 P4：pin */}
+                  {msg.id && (
+                    <button
+                      onClick={() => togglePin(msg.id!)}
+                      className={`${msg.pinned ? 'text-yellow-600' : 'opacity-0 group-hover:opacity-100 hover:text-yellow-600'} transition`}
+                      title={msg.pinned ? '取消釘住' : '釘住此回答'}
+                    >
+                      {msg.pinned ? '📌 已釘' : '📌 釘'}
+                    </button>
+                  )}
+                  {/* v3.41 P7：thumbs */}
+                  {msg.id && msg.feedback !== 1 && (
+                    <button
+                      onClick={() => submitFeedback(msg.id!, 1)}
+                      className="opacity-0 group-hover:opacity-100 hover:text-green-600 transition"
+                      title="這個答案有幫助"
+                    >
+                      👍
+                    </button>
+                  )}
+                  {msg.id && msg.feedback === 1 && (
+                    <span className="text-green-600">👍 已讚</span>
+                  )}
+                  {msg.id && msg.feedback !== -1 && (
+                    <button
+                      onClick={() => submitFeedback(msg.id!, -1)}
+                      className="opacity-0 group-hover:opacity-100 hover:text-red-600 transition"
+                      title="這個答案有錯"
+                    >
+                      👎
+                    </button>
+                  )}
+                  {msg.id && msg.feedback === -1 && (
+                    <span className="text-red-600">👎 已回報</span>
+                  )}
+                </>
               )}
             </div>
           </div>
         ))}
         {loading && (
-          <div className="flex items-center gap-2 text-gray-500 text-sm pl-2">
+          <div className="flex items-center gap-3 text-gray-500 text-sm pl-2">
             <div className="flex gap-1">
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             </div>
-            <span>{loadingHint}</span>
+            <span className="flex-1">{loadingHint}</span>
+            {/* v3.38 N8：取消按鈕 — 老闆等不下去可以中斷 */}
+            <button
+              onClick={cancelCurrent}
+              className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs rounded-full border border-red-200 transition"
+              title="取消這次 AI 請求"
+            >
+              ⏹ 取消
+            </button>
           </div>
         )}
       </div>
 
-      {/* Input bar */}
-      <div className="flex gap-2 items-end">
+      {/* Input bar — v3.38 N5 手機友善：間距變小、按鈕變方形 icon-only on mobile */}
+      <div className="flex gap-1.5 sm:gap-2 items-end">
         <textarea
           ref={inputRef}
           value={input}
@@ -330,14 +573,14 @@ export default function Chat() {
               void send()
             }
           }}
-          placeholder="輸入您的問題…  (Shift + Enter 換行)"
+          placeholder="輸入您的問題…"
           rows={1}
-          className="flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none max-h-32"
+          className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-base border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none max-h-32"
         />
         {messages.some(m => m.role === 'assistant' && !m.isError) && !loading && (
           <button
             onClick={regenerate}
-            className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition"
+            className="px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition"
             title="重新生成上一個回答"
           >
             🔄
@@ -346,7 +589,7 @@ export default function Chat() {
         <button
           onClick={() => send()}
           disabled={loading || !input.trim()}
-          className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          className="px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
         >
           送出
         </button>

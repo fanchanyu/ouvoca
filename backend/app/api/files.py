@@ -69,6 +69,12 @@ class AttachmentResponse(BaseModel):
     description: Optional[str]
     uploaded_by: Optional[str]
     uploaded_at: datetime
+    # v3.43 P1-1：暴露 v3.42 R3 attach_file_to_entity 寫入的解析結果
+    # 前端可據此知道「這檔已連到哪張單據」
+    parsed_status: Optional[str] = None
+    parsed_target_type: Optional[str] = None
+    parsed_target_id: Optional[str] = None
+    parsed_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

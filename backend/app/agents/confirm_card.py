@@ -27,7 +27,7 @@ from app.core.logging import get_logger
 log = get_logger(__name__)
 
 
-DEFAULT_TTL_SECONDS = 300  # 5 分鐘
+DEFAULT_TTL_SECONDS = 1800  # 30 分鐘（v3.38 N1：老闆喝杯茶/接電話也來得及）
 
 
 @dataclass

@@ -77,6 +77,9 @@ class Settings(BaseSettings):
     SEED_ADMIN_USERNAME: str = "admin"
     SEED_ADMIN_PASSWORD: str = "admin123"
 
+    # --- v3.42 R4：per-user AI 用量限制（每人每日 LLM call 上限） ---
+    AI_DAILY_LIMIT_PER_USER: int = 200
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

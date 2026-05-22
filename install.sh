@@ -101,6 +101,27 @@ else
 fi
 
 # ============================================================
+# Step 2.5: Port 預檢（v3.43 P0-1）
+# ============================================================
+echo
+msg "${BLUE}🔍 檢查 port 衝突...${NC}" "${BLUE}🔍 Checking port conflicts...${NC}"
+port_busy=0
+for p in 8000 5173 8080; do
+  if lsof -iTCP:$p -sTCP:LISTEN >/dev/null 2>&1 || nc -z localhost $p >/dev/null 2>&1; then
+    msg "  ❌ Port $p 已被佔用" "  ❌ Port $p already in use"
+    port_busy=1
+  fi
+done
+if [ "$port_busy" -eq 1 ]; then
+  msg "${RED}部分 port 已被佔用，請關閉佔用程式或編輯 docker-compose.yml${NC}" \
+      "${RED}Some ports in use; close them or edit docker-compose.yml${NC}"
+  msg "  常見：之前的 erpilot 未關 → 先跑 'docker compose down'" \
+      "  Common: prior erpilot still up → run 'docker compose down' first"
+  exit 1
+fi
+msg "  ✅ 所有 port 都可用" "  ✅ All ports available"
+
+# ============================================================
 # Step 3: 啟動 Docker Compose
 # ============================================================
 echo
@@ -181,6 +202,10 @@ echo
 msg "登入 / Login:" "Login:"
 echo -e "  ${CYAN}帳號 / Username:${NC}  ${GREEN}admin${NC}"
 echo -e "  ${CYAN}密碼 / Password:${NC}  ${GREEN}admin123${NC}"
+echo
+echo -e "  ${RED}⚠️  重要 IMPORTANT (v3.37):${NC}"
+echo -e "  ${RED}   登入後請立即在 Chat 講「改密碼」更換預設密碼${NC}"
+echo -e "  ${RED}   After login, immediately say \"change password\" in Chat${NC}"
 echo
 
 msg "${YELLOW}💡 提示 / Tip：${NC}" "${YELLOW}💡 Tip:${NC}"

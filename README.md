@@ -6,7 +6,7 @@
 
 [![Tests](https://img.shields.io/badge/tests-287%20passing-brightgreen)]()
 [![Gates](https://img.shields.io/badge/self--verify-7%2F7%20green-brightgreen)]()
-[![Docs](https://img.shields.io/badge/PDFs-60%20bilingual-blue)]()
+[![Docs](https://img.shields.io/badge/PDFs-72%20bilingual-blue)]()
 [![License](https://img.shields.io/badge/license-AGPL--3.0%20%2B%20SBL%20%2B%20Commercial-blue)](./LICENSE)
 [![Version](https://img.shields.io/badge/version-3.12-blueviolet)]()
 [![Author](https://img.shields.io/badge/by-Peter-lightgrey)](https://github.com/fanchanyu)
@@ -15,6 +15,36 @@
 > 🇹🇼 砍 LINE Bot / Mobile App / 外協協同三線，全力做桌機對話式 ERP。
 > 🇺🇸 Cut LINE Bot / Mobile App / external-vendor portals — focused 100% on desktop conversational ERP.
 > See [`docs/ARCHITECTURE_DECISIONS.md`](./docs/ARCHITECTURE_DECISIONS.md) for the full rationale.
+
+> 🆕 **v3.37 — 電腦小白卡關 14 條全修 (2026-05-21)**
+> 🇹🇼 誠實盤點 Day 0 / Day 1 / Day 2-7 後一次修補：Docker 中文字型亂碼、預設密碼提示、OnboardingWizard 救活、PDF 自動下載、Chat 主動歡迎、客戶自動編號、角色中文化、空品項警示、應收逾期主動推、匯入 Excel 引導。
+> 🇺🇸 Fixes 14 beginner-blocker issues: Chinese font Docker fix, default-password warning, OnboardingWizard wired in, PDF auto-download, Chat welcome, auto customer code, Chinese role names, empty-items warning, overdue receivables alert, Excel import guide.
+> 📄 **Legal**: [Setup Wizard Compliance Notice](./docs/pdf/32_安裝精靈法律聲明_中文.pdf) (ZH) · [EN](./docs/pdf/32_Setup_Wizard_Legal_EN.pdf)
+
+> 🆕 **v3.38 — 第二輪小白盤點再補 8 條 (2026-05-21)**
+> 🇹🇼 ConfirmCard TTL 5min → 30min（老闆喝杯茶不過期）/ Undo 涵蓋公司資料 + 改密碼 / AI 成本入口（今日 + 本月）/ 一鍵備份 + 列出備份 / 客戶 disambiguation 候選清單 / 業務錯誤中文化 / Chat 取消按鈕 + 手機 responsive。
+> 🇺🇸 Second-round audit fixes: ConfirmCard TTL 5→30 min, generic undo for company/password, AI cost entry, one-click backup, customer disambiguation, business-error sinicization, Chat cancel button + mobile responsive.
+> 📄 **Legal**: [Polish Compliance Notice](./docs/pdf/33_第二輪卡關修補法律聲明_中文.pdf) (ZH) · [EN](./docs/pdf/33_Polish_Legal_EN.pdf)
+
+> 🆕 **v3.39 — 第三輪小白盤點再補 8 條 (2026-05-21)**
+> 🇹🇼 PDF 印公司 LOGO（不再像影印紙）/ 客戶/料件/供應商 delete 三件套 + 預檢查 / LLM 工具分頁（1000 筆不爆 token）/ Slot-filling 3 次後 fallback / 後端離線具體指引 / Docker 容器 restart unless-stopped / 批次列印 ZIP / 手動觸發 digest。
+> 🇺🇸 Third-round audit fixes: company LOGO on PDF, delete customer/part/supplier trio with pre-check, LLM tool pagination, slot-filling 3-strike fallback, specific backend-offline guidance, Docker containers `restart: unless-stopped`, batch print ZIP, manual digest trigger.
+> 📄 **Legal**: [Polish v3.39 Compliance Notice](./docs/pdf/34_第三輪卡關修補法律聲明_中文.pdf) (ZH) · [EN](./docs/pdf/34_Polish_V339_Legal_EN.pdf)
+
+> 🆕 **v3.40 — 第四輪小白盤點再補 8 條（高敏感版）(2026-05-21)**
+> 🇹🇼 中文相對日期解析（上週/本月/Q1）/ 應收帳齡 LLM 入口 / 客戶搜尋大小寫不敏感 / Delete 三件套 90 秒可 Undo / **凍結 hard-write 安全模式**（老闆出國全鎖）/ **Audit log 跨人搜尋**（內控用）/ 訂單比較。
+> 🇺🇸 Fourth-round audit fixes: relative-date helper, AR aging LLM, case-insensitive search, **delete-undo with 90-sec window**, **hard-write freeze for owner travel**, cross-user audit search, order compare.
+> ⚖️ **法律 / Legal — 高敏感**：[v3.40 中文](./docs/pdf/35_第四輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/35_Polish_V340_Legal_EN.pdf) — **使用前務必由 CPA + 法律顧問 + 內控主管覆核**
+
+> 🆕 **v3.41 — 第五輪小白盤點再補 8 條（對外最敏感）(2026-05-22)**
+> 🇹🇼 **客戶毛利率分析**（賺不賺錢 + 議價情報）/ **訂單跟單**（Quote→SO→出貨→應收→收款 timeline）/ **寄 PDF Email 給客戶**（最敏感對外操作）/ FAQ 常見問答 / **資料健康檢查**（重複/循環/孤兒）/ Chat 👍👎 feedback + 📌 pin + ⚡ 短答模式。
+> 🇺🇸 Fifth-round audit fixes: **customer profitability**, **order lifecycle**, **email PDF to customer**, FAQ, **data health check**, Chat thumbs/pin/brief-mode.
+> ⚖️ **法律 / Legal — 對外最敏感**：[v3.41 中文](./docs/pdf/36_第五輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/36_Polish_V341_Legal_EN.pdf) — **使用前務必由 CPA + 法律 + 內控 + 業務主管覆核**
+
+> 🆕 **v3.42 — 第六輪小白盤點再補 8 條（帳號管理最敏感）(2026-05-22)**
+> 🇹🇼 **使用者帳號管理**（建立 / 停用 LLM tools）/ **全域跨表搜尋**（「ABC」一次找客戶+料件+供應商+員工）/ **附件 LLM 入口**（連附件到 SO/PO）/ **AI 每人每日上限**（防員工亂用燒爆）/ **台灣工作天計算**（內建 2026 國定假日）/ **時區設定**（公司在台灣 / 日本 / 美國）/ **對話 transcript 匯出** / Dashboard 手機 responsive。**163 LLM tools / 72 雙語 PDF / 374+ tests**。
+> 🇺🇸 Sixth-round audit fixes: **user account management**, **global cross-table search**, **attachment LLM entry**, **AI per-user daily limit**, **Taiwan business-day calculation**, **timezone setting**, **chat transcript export**, Dashboard mobile responsive.
+> ⚖️ **法律 / Legal — 帳號管理最敏感**：[v3.42 中文](./docs/pdf/37_第六輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/37_Polish_V342_Legal_EN.pdf) — **使用前務必由 IT + 法律 + HR 主管覆核**
 
 ---
 
@@ -26,7 +56,7 @@
 | 我是... / I am... | 我需要... / I need... | 跳到 / Jump to |
 |---|---|---|
 | 👔 **老闆 / 採購 / 業務 / 倉管**<br>Boss / Buyer / Sales / Warehouse | 我要**用** erpilot，不會寫程式<br>I want to **use** erpilot, no coding | 👉 [**5 分鐘安裝指南**](#-5-分鐘安裝指南--5-minute-install-for-non-developers) |
-| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**60 份雙語 PDF**](#-60-份雙語客戶文件--60-bilingual-customer-pdfs) |
+| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**72 份雙語 PDF**](#-72-份雙語客戶文件--72-bilingual-customer-pdfs) |
 | 👨‍💻 **工程師 / IT / 想貢獻者**<br>Developer / IT / Contributor | 我要看**程式碼 / 開發環境 / PR**<br>I want **code / dev setup / PR** | 👉 [**開發者指南**](#-開發者指南--developer-guide) |
 
 ---
@@ -36,7 +66,7 @@
 - [⚡ 30 秒看懂 erpilot / 30-Second Pitch](#-30-秒看懂-erpilot--30-second-pitch)
 - [🚀 5 分鐘安裝指南 / 5-Minute Install](#-5-分鐘安裝指南--5-minute-install-for-non-developers)
 - [❓ 安裝常見問題 / Install FAQ](#-安裝常見問題--install-faq)
-- [📚 60 份雙語客戶文件 / 60 Bilingual PDFs](#-60-份雙語客戶文件--60-bilingual-customer-pdfs)
+- [📚 72 份雙語客戶文件 / 60 Bilingual PDFs](#-72-份雙語客戶文件--72-bilingual-customer-pdfs)
 - [🎯 內含什麼 / What's Inside](#-內含什麼--whats-inside)
 - [🏗 架構 / Architecture](#-架構--architecture)
 - [🗺 領域對照 / Domain Map](#-領域對照--domain-map)
@@ -179,18 +209,49 @@
            登入 / Login:
               帳號 / Username:  admin
               密碼 / Password:  admin123
+
+           *** 重要 / IMPORTANT (v3.37) ***
+           登入後請立即在 Chat 講「改密碼」更換預設密碼
+           After login, say "change password" in Chat immediately
 ```
 
 🇹🇼 **完成！** 瀏覽器會自動打開登入畫面。輸入 `admin` / `admin123` 進去。
 🇺🇸 **Done!** Browser will auto-open the login page. Use `admin` / `admin123`.
 
-### 第一次進去要做什麼？/ What to do after first login?
+### 🎯 第一次進去做這 4 件事（v3.37 — 全用「講的」即可）/ First-Login Checklist
+
+> ⚠️ **電腦小白也會做** — 不用點選單、不用學系統，全部對 AI 打字就好。
+> Beginners-friendly — just type to the AI; no menus, no training needed.
 
 ```
-1. ⚙️ 點左側 [設定] 頁
-2. 📦 點「載入示範資料」← 已經自動載入了，但可以再點一次確認
-3. 💬 點左側 [AI 助手]，對它打字：「列出庫存低於安全庫存的零件」
-4. ✨ 看 AI 回你完整答案 → 你已經會用 erpilot 了！
+1️⃣ 立即改密碼（資安基本盤）
+    在 AI 助手講：「改密碼，我的新密碼是 MyN3wP@ss」
+    → AI 出 ConfirmCard → 點確認 → 下次用新密碼登入
+
+2️⃣ 設定公司資料（PDF 上要印的）
+    講：「公司叫 長江精密股份有限公司 統編 12345678 地址 台北市信義區...」
+    → AI 出 ConfirmCard → 點確認 → 之後所有 PDF 都印你公司名
+
+3️⃣ 載入示範資料（要不要玩玩看？）
+    講：「載入示範資料」
+    → 3 客戶 + 3 供應商 + 5 料件，可以開始玩
+
+4️⃣ 試講一句業務
+    講：「印 SO-001」「匯出客戶清單 Excel」「今天有什麼要注意的？」
+    → AI 自動產 PDF / Excel，瀏覽器直接彈出下載
+```
+
+🇺🇸 **First 4 things to do (v3.37 — all conversational)**:
+
+```
+1️⃣ Change password immediately:
+    Tell AI: "change password to MyN3wP@ss"
+2️⃣ Set company info (printed on PDFs):
+    Tell AI: "company name is Acme Inc., tax id 12345678"
+3️⃣ Load demo data (optional):
+    Tell AI: "load demo data"
+4️⃣ Try a business action:
+    Tell AI: "print SO-001" / "export customer list" / "what should I watch today?"
 ```
 
 ### 後續想做的事
@@ -405,7 +466,7 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 
 ---
 
-## 📚 60 份雙語客戶文件 / 60 Bilingual Customer PDFs
+## 📚 72 份雙語客戶文件 / 60 Bilingual Customer PDFs
 
 🇹🇼 點下面任一個直接下載 PDF（全部繁中 + English）：
 🇺🇸 Click any to download (all bilingual ZH + EN):
@@ -443,6 +504,12 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **29** | ⚖️ **進銷存模組法律聲明**（v3.32/v3.33）/ **Inventory/Sales Module Legal Notice** | [📕 **中文 PDF**](./docs/pdf/29_進銷存法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/29_Inventory_Sales_Legal_EN.pdf) |
 | **30** | ⚖️ **稅務/會計/審批模組法律與合規警告**（v3.34）/ **Tax/Accounting/Approval Compliance Notice** | [📕 **中文 PDF**](./docs/pdf/30_稅務會計法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/30_Tax_Accounting_Legal_EN.pdf) |
 | **31** | ⚖️ **列印/匯出模組法律與合規警告**（v3.36）/ **Print/Export Compliance Notice** | [📕 **中文 PDF**](./docs/pdf/31_列印匯出法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/31_Print_Export_Legal_EN.pdf) |
+| **32** | ⚖️ **安裝精靈 / Day 0-7 卡關修補法律聲明**（v3.37）/ **Setup Wizard & Beginner-Fix Notice** | [📕 **中文 PDF**](./docs/pdf/32_安裝精靈法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/32_Setup_Wizard_Legal_EN.pdf) |
+| **33** | ⚖️ **第二輪小白卡關修補法律聲明**（v3.38 — TTL / Undo / 備份 / AI 成本）/ **Second-Round Beginner-Fix Notice** | [📕 **中文 PDF**](./docs/pdf/33_第二輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/33_Polish_Legal_EN.pdf) |
+| **34** | ⚖️ **第三輪小白卡關修補法律聲明**（v3.39 — LOGO / 刪除 / 批次 / 分頁）/ **Third-Round Beginner-Fix Notice** | [📕 **中文 PDF**](./docs/pdf/34_第三輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/34_Polish_V339_Legal_EN.pdf) |
+| **35** | ⚖️ **第四輪小白卡關修補法律聲明 — 高敏感**（v3.40 — 凍結 hard-write / Delete Undo / 跨人 Audit / 應收帳齡）/ **Fourth-Round Beginner-Fix Notice — HIGH SENSITIVITY** | [📕 **中文 PDF**](./docs/pdf/35_第四輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/35_Polish_V340_Legal_EN.pdf) |
+| **36** | ⚖️ **第五輪小白卡關修補法律聲明 — 對外最敏感**（v3.41 — 寄 PDF Email / 客戶毛利率 / 訂單跟單）/ **Fifth-Round Beginner-Fix Notice — OUTBOUND-SENSITIVE** | [📕 **中文 PDF**](./docs/pdf/36_第五輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/36_Polish_V341_Legal_EN.pdf) |
+| **37** | ⚖️ **第六輪小白卡關修補法律聲明 — 帳號管理最敏感**（v3.42 — 使用者帳號 / 全域搜尋 / AI 每日限額 / 工作天 / 時區）/ **Sixth-Round Beginner-Fix Notice — ACCOUNT-MGMT-SENSITIVE** | [📕 **中文 PDF**](./docs/pdf/37_第六輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/37_Polish_V342_Legal_EN.pdf) |
 
 📌 **特別文件**：
 - [**`HOW_TO_GET_LLM_API_KEY_ZH.md`**](./docs/HOW_TO_GET_LLM_API_KEY_ZH.md) · [EN](./docs/HOW_TO_GET_LLM_API_KEY_EN.md) — 5-10 分鐘申請 API Key 完整教學（DeepSeek/OpenAI/Anthropic/Ollama 比較）
@@ -650,7 +717,7 @@ opnetest/
 ├── war-room/                   ← 即時事件儀表板 / Live SSE dashboard
 │   ├── index.html
 │   └── Dockerfile
-├── docs/                       ← 60 份雙語文件 / 60 bilingual docs
+├── docs/                       ← 72 份雙語文件 / 60 bilingual docs
 │   ├── CONVERSATIONAL_ERP_DESIGN_ZH.md / _EN.md
 │   ├── COMMERCIAL_LICENSING_FAQ_ZH.md
 │   └── ... (32 more)

@@ -15,8 +15,14 @@ export default function Login() {
   const loginAsDemo = useAuthStore(s => s.loginAsDemo)
   const { t, lang, setLang } = useTranslation()
 
-  const [username, setUsername] = useState('admin')
-  const [password, setPassword] = useState('admin123')
+  // v3.37 D0-2：拿掉預填密碼 — 強迫小白第一次自己打（資安基本盤）
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  // 記住 username 但**不**記密碼
+  useEffect(() => {
+    const savedUser = localStorage.getItem('erpilot_last_username')
+    if (savedUser) setUsername(savedUser)
+  }, [])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [demoBypass, setDemoBypass] = useState(false)
@@ -40,10 +46,28 @@ export default function Login() {
         id: res.user.id, username: res.user.username,
         employee_id: res.user.employee_id, is_superuser: res.user.is_superuser,
       })
+      // 記住 username 方便下次預填（不存密碼）
+      try { localStorage.setItem('erpilot_last_username', username) } catch { /* ignore */ }
+      // v3.37 D0-2：若還在用預設密碼，提示一定要改
+      if (password === 'admin123') {
+        toast.info('⚠️ 您正使用預設密碼，請立即在 Chat 講「改密碼」更換')
+      }
       toast.success(`${t('common.success')}: ${res.user.username}`)
       navigate('/')
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('login.backendOffline'))
+      // v3.39 K5：backend offline 時給具體指引，不只是 "backend offline"
+      // v3.43 P0-2：用 friendly() 把英文 HTTP 訊息轉中文
+      if (err instanceof ApiError) {
+        setError(err.friendly())
+      } else {
+        setError(
+          '🔌 連不到後端 — 請檢查：\n' +
+          '1. Docker Desktop 在跑嗎？（工作列右下角 🐳 圖示）\n' +
+          '2. 後端容器啟動了嗎？（命令列執行：docker compose ps）\n' +
+          '3. 防火牆有擋 port 8000 嗎？\n' +
+          '若以上都 OK 仍連不到，請洽 IT'
+        )
+      }
     } finally { setLoading(false) }
   }
 
@@ -107,7 +131,14 @@ export default function Login() {
           {error && (
             <div className="bg-danger-50 border border-danger-200 text-danger-700 px-3 py-2 rounded-input text-body-sm flex items-start gap-2">
               <span>⚠️</span>
-              <span>{error}</span>
+              <span className="whitespace-pre-line">{error}</span>
+            </div>
+          )}
+          {/* v3.37 D0-2：第一次安裝小白提示（無 username、無 password 時才顯示） */}
+          {!username && !password && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 px-3 py-2 rounded-input text-xs">
+              💡 <strong>第一次安裝？</strong> 預設帳號 <code className="bg-amber-100 px-1.5 py-0.5 rounded">admin</code>，密碼 <code className="bg-amber-100 px-1.5 py-0.5 rounded">admin123</code>。
+              <strong className="block mt-1">⚠️ 登入後請立即改密碼（在 Chat 講「改密碼」即可）。</strong>
             </div>
           )}
           <Button type="submit" variant="primary" size="lg"

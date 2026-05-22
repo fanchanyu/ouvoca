@@ -154,17 +154,37 @@ async def _print_sales_order_pdf(db, user, so_no: str):
     if so is None:
         return {"error": f"找不到銷售單「{so_no}」"}
 
+    # v3.37: 空品項警示 — 不然小白會以為 PDF 印壞了
+    from sqlalchemy.orm import selectinload
+    from app.models.crm_sales import SalesOrder
+    so_full = (await db.execute(
+        select(SalesOrder).options(selectinload(SalesOrder.items))
+        .where(SalesOrder.id == so.id)
+    )).scalar_one_or_none()
+    n_items = len(so_full.items) if so_full else 0
+    warning = None
+    if n_items == 0:
+        warning = (
+            f"⚠️ 銷售單 **{so.so_no}** 沒有任何品項，PDF 將是空表。\n"
+            "建議先用「新增 SO 行」或「複製其它 SO」加品項後再印。"
+        )
+
     from app.services.print_service import generate_so_pdf
     pdf_bytes = await generate_so_pdf(db, so.id, doc_type="sales_order")
+    summary_text = (
+        f"📄 銷售單 PDF 已產生：**{so.so_no}**（{n_items} 個品項）\n"
+        f"💾 大小：{len(pdf_bytes) / 1024:.1f} KB\n"
+        f"⬇️ 下載：[點此下載 PDF](/api/print/so/{so.id}.pdf)"
+    )
+    if warning:
+        summary_text = warning + "\n\n" + summary_text
     return {
-        "summary": (
-            f"📄 銷售單 PDF 已產生：**{so.so_no}**\n"
-            f"💾 大小：{len(pdf_bytes) / 1024:.1f} KB\n"
-            f"⬇️ 下載：[點此下載 PDF](/api/print/so/{so.id}.pdf)"
-        ),
+        "summary": summary_text,
+        "warning": warning,
         "raw": {
             "so_no": so.so_no,
             "so_id": so.id,
+            "item_count": n_items,
             "download_url": f"/api/print/so/{so.id}.pdf",
             "pdf_base64": base64.b64encode(pdf_bytes).decode("ascii"),
             "size_bytes": len(pdf_bytes),
@@ -191,17 +211,37 @@ async def _print_delivery_note_pdf(db, user, so_no: str):
     if so is None:
         return {"error": f"找不到銷售單「{so_no}」"}
 
+    # v3.37: 出貨單空品項警示（出貨單沒品項對客戶交貨會出大問題）
+    from sqlalchemy.orm import selectinload
+    from app.models.crm_sales import SalesOrder
+    so_full = (await db.execute(
+        select(SalesOrder).options(selectinload(SalesOrder.items))
+        .where(SalesOrder.id == so.id)
+    )).scalar_one_or_none()
+    n_items = len(so_full.items) if so_full else 0
+    warning = None
+    if n_items == 0:
+        warning = (
+            f"⚠️ SO **{so.so_no}** 沒有任何品項，出貨單將是空表 — "
+            "交貨會出大問題。請先補品項再印。"
+        )
+
     from app.services.print_service import generate_so_pdf
     pdf_bytes = await generate_so_pdf(db, so.id, doc_type="delivery_note")
+    summary_text = (
+        f"📄 出貨單 PDF 已產生（SO {so.so_no}，{n_items} 個品項）\n"
+        f"💾 大小：{len(pdf_bytes) / 1024:.1f} KB\n"
+        f"⬇️ 下載：[點此下載 PDF](/api/print/delivery/{so.id}.pdf)"
+    )
+    if warning:
+        summary_text = warning + "\n\n" + summary_text
     return {
-        "summary": (
-            f"📄 出貨單 PDF 已產生（SO {so.so_no}）\n"
-            f"💾 大小：{len(pdf_bytes) / 1024:.1f} KB\n"
-            f"⬇️ 下載：[點此下載 PDF](/api/print/delivery/{so.id}.pdf)"
-        ),
+        "summary": summary_text,
+        "warning": warning,
         "raw": {
             "so_no": so.so_no,
             "so_id": so.id,
+            "item_count": n_items,
             "download_url": f"/api/print/delivery/{so.id}.pdf",
             "pdf_base64": base64.b64encode(pdf_bytes).decode("ascii"),
             "size_bytes": len(pdf_bytes),

@@ -75,6 +75,35 @@ if not exist "backend\.env" (
 echo.
 
 REM ============================================================
+REM Step 2.5: Port 預檢（v3.43 P0-1：避免 docker 噴英文錯誤）
+REM ============================================================
+echo [Step 2.5] 檢查 port 衝突 / Checking port conflicts...
+set portbusy=0
+for %%p in (8000 5173 8080) do (
+    netstat -ano -p tcp | findstr ":%%p " | findstr "LISTENING" > nul
+    if not errorlevel 1 (
+        echo   X Port %%p 已被佔用 / Port %%p in use
+        set portbusy=1
+    )
+)
+if !portbusy! equ 1 (
+    echo.
+    echo   錯誤 / Error: 部分 port 已被佔用 / Some ports already used.
+    echo   請關閉佔用程式或修改 docker-compose.yml 內 port 映射
+    echo   Please close occupying programs OR edit docker-compose.yml port mapping
+    echo.
+    echo   小提示：常見佔用者
+    echo     - Skype 可能佔 80/443
+    echo     - 其他 dev server 占 5173 / 8080
+    echo     - 之前的 erpilot 沒關乾淨 → 跑 'docker compose down' 先
+    echo.
+    pause
+    exit /b 1
+)
+echo   OK 所有 port 都可用 / All ports available
+echo.
+
+REM ============================================================
 REM Step 3: Docker Compose
 REM ============================================================
 echo [Step 3/5] 啟動服務 (首次需 2-5 分鐘) / Starting services (first run 2-5min)...
@@ -168,10 +197,21 @@ echo   登入 / Login:
 echo     帳號 / Username:  admin
 echo     密碼 / Password:  admin123
 echo.
+echo   *** 重要 IMPORTANT (v3.37) ***
+echo     登入後請立即在 Chat 講「改密碼」更換預設密碼
+echo     After login, immediately say "change password" in Chat
+echo.
+echo   *** Windows 開機自啟（v3.39 K8）/ Auto-start on boot ***
+echo     erpilot 由 Docker 跑；Docker Desktop 需要先啟動。
+echo     開啟 Docker 設定 ^> General ^> 勾「Start Docker Desktop when you log in」
+echo     Open Docker Settings ^> General ^> check "Start Docker Desktop when you log in"
+echo     erpilot 容器設了 restart: unless-stopped 會自動隨 Docker 啟動。
+echo.
 echo   提示 / Tip:
 echo     - 編輯 backend\.env 填入 LLM_API_KEY 啟用 AI 助手
 echo     - Edit backend\.env to set LLM_API_KEY for AI assistant
 echo     - 停止服務 / Stop: docker compose down
+echo     - 設公司資料：在 Chat 講「公司叫 XX 公司 統編 12345678」
 echo.
 
 REM 自動開瀏覽器

@@ -93,15 +93,23 @@ async def chat_v2(
     if not settings.LLM_API_KEY and settings.LLM_PROVIDER != "ollama":
         # No API key — return structured flag so frontend can render setup guide card.
         # 不直接回錯字串，避免電腦小白看到 raw text 不知道怎辦。
-        await db.commit()  # 已寫入的 user message
+        setup_reply = (
+            "🤖 AI 助手還沒啟用\n\n"
+            f"我偵測到你想做：**{intent}**\n\n"
+            "但目前系統還沒有 LLM API key，所以我沒辦法幫你執行。\n"
+            "好消息是申請只要 3 分鐘 + 完全免費試用額度（DeepSeek 推薦）。\n\n"
+            "請點下面的「立刻申請 API Key」按鈕，跟著步驟做。"
+        )
+        # v3.43 P1-2：persist assistant reply 以便 session reload 後仍看得到 setup 提示
+        db.add(ConversationLog(
+            id=str(uuid.uuid4()), session_id=session_id,
+            user_id=user_id_for_log, role="assistant",
+            message=setup_reply, agent=intent,
+            tool_calls={"setup_required": True, "reason": "no_api_key"},
+        ))
+        await db.commit()
         return ChatResponse(
-            reply=(
-                "🤖 AI 助手還沒啟用\n\n"
-                f"我偵測到你想做：**{intent}**\n\n"
-                "但目前系統還沒有 LLM API key，所以我沒辦法幫你執行。\n"
-                "好消息是申請只要 3 分鐘 + 完全免費試用額度（DeepSeek 推薦）。\n\n"
-                "請點下面的「立刻申請 API Key」按鈕，跟著步驟做。"
-            ),
+            reply=setup_reply,
             agent=intent,
             session_id=session_id,
             tool_calls=None,

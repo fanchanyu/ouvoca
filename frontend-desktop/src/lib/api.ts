@@ -36,7 +36,7 @@ class ApiError extends Error {
   }
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+async function request<T>(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
   const token = useAuthStore.getState().token
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
@@ -45,6 +45,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    signal,
   })
 
   let payload: unknown = null
@@ -455,8 +456,9 @@ export const apiLogin = (username: string, password: string) =>
     '/auth/login', { username, password },
   )
 
-export const apiChat = (message: string, session_id: string) =>
-  api.post<ChatResponse>('/chat-v2', { message, session_id })
+// v3.38 N8：第三個 arg = AbortSignal（讓使用者可取消）
+export const apiChat = (message: string, session_id: string, signal?: AbortSignal) =>
+  request<ChatResponse>('POST', '/chat-v2', { message, session_id }, signal)
 
 // ============================================================
 // ConfirmCard (對話式 hard-write 確認卡，v3.1)
