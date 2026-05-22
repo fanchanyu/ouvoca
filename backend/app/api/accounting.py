@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/accounting", tags=["Accounting"])
 async def create_account(
     data: AccountCreate,
     db: AsyncSession = Depends(get_db),
-    user: UserContext = Depends(require_permission("accounting.account.list")),
+    user: UserContext = Depends(require_permission("accounting.account.create")),
 ):
     a = await svc.create_account(db, data.model_dump())
     return AccountResponse.model_validate(a)
@@ -71,7 +71,7 @@ async def list_journals(
 async def create_ar(
     data: ARCreate,
     db: AsyncSession = Depends(get_db),
-    user: UserContext = Depends(require_permission("accounting.ar.list")),
+    user: UserContext = Depends(require_permission("accounting.ar.create")),
 ):
     ar = await svc.create_receivable(db, data.model_dump())
     return ARResponse.model_validate(ar)

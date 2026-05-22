@@ -17,6 +17,7 @@ import {
   apiApprove, apiReject,
   apiListRules, apiCreateRule, apiDeleteRule,
   type ApprovalRequest, type ApprovalRule,
+  ApiError,
 } from '../lib/api'
 
 type Tab = 'pending' | 'history' | 'rules'
@@ -109,7 +110,7 @@ function PendingList() {
       await apiApprove(req.id, comment)
       await load()
     } catch (e) {
-      alert(e instanceof Error ? e.message : '批准失敗')
+      alert(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '批准失敗')
     }
   }
 
@@ -124,7 +125,7 @@ function PendingList() {
       await apiReject(req.id, comment)
       await load()
     } catch (e) {
-      alert(e instanceof Error ? e.message : '拒絕失敗')
+      alert(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '拒絕失敗')
     }
   }
 
@@ -350,7 +351,7 @@ function RulesPanel() {
       await apiDeleteRule(rule.id)
       await load()
     } catch (e) {
-      alert(e instanceof Error ? e.message : '刪除失敗')
+      alert(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '刪除失敗')
     }
   }
 
@@ -390,7 +391,7 @@ function RulesPanel() {
                   當 <span className="font-medium text-gray-700">{TRIGGER_LABEL[rule.trigger_type] ?? rule.trigger_type}</span>
                   {' '}的 <code className="text-gray-700">{rule.condition_field}</code>
                   {' '}<code className="text-gray-700">{rule.condition_op}</code>
-                  {' '}<code className="text-gray-700">{rule.condition_value.toLocaleString()}</code>
+                  {' '}<code className="text-gray-700">{rule.condition_value.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</code>
                   {' '}→ 通知 <span className="font-medium text-gray-700">{rule.approver_role}</span> 審
                   {' '}({rule.stages} 階)
                 </div>
@@ -456,7 +457,7 @@ function NewRuleModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       })
       await onCreated()
     } catch (err) {
-      alert(err instanceof Error ? err.message : '新增失敗')
+      alert(err instanceof ApiError ? err.friendly() : err instanceof Error ? err.message : '新增失敗')
     } finally { setBusy(false) }
   }
 

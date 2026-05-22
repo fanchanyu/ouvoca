@@ -54,7 +54,7 @@ def p2i_setup(seeded_client, admin_headers):
     r = c.post("/api/production/bom-items", json={
         "product_id": product["id"],
         "part_id": raw_part["id"],
-        "qty_per_unit": 2.0,
+        "qty_per": 2.0,
     }, headers=h)
     assert r.status_code in (200, 201), f"建 BOM 失敗 {r.status_code} {r.text}"
 

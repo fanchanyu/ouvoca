@@ -28,15 +28,20 @@ async def lifespan(app: FastAPI):
     if settings.demo_bypass_active:
         log.warning("⚠️  Demo bypass ACTIVE — Bearer 'demo' grants super-admin. "
                     "Set a real JWT_SECRET to disable.")
-    # Production 環境安全檢查 — 致命項直接 exit，警告項 log 紀錄
+    # JWT secret check — ALWAYS run, regardless of DEBUG
+    jwt_is_default = ("change-me" in settings.JWT_SECRET or len(settings.JWT_SECRET) < 32)
+    if jwt_is_default and not settings.ALLOW_DEMO_BYPASS:
+        log.error("🚨 JWT_SECRET 是預設值或太短，且 ALLOW_DEMO_BYPASS=False")
+        log.error("  立刻執行：openssl rand -hex 32  → 寫進 backend/.env")
+        log.error("  或本機演練：設 ALLOW_DEMO_BYPASS=true（不建議生產用）")
+        raise SystemExit(1)
+    elif jwt_is_default:
+        log.warning("⚠️ JWT_SECRET 是預設值；ALLOW_DEMO_BYPASS 已開啟，僅限測試/演練。")
+
+    # Production-only checks
     if not settings.DEBUG:
         fatal_errors: list[str] = []
 
-        if "change-me" in settings.JWT_SECRET or len(settings.JWT_SECRET) < 32:
-            fatal_errors.append(
-                "JWT_SECRET 是預設值或太短。production 不准跑。\n"
-                "  立刻執行：  openssl rand -hex 32  → 寫進 backend/.env"
-            )
         if "*" in settings.CORS_ORIGINS:
             fatal_errors.append(
                 "CORS_ORIGINS 含 '*'。production 必須改為明確 domain，例如：\n"

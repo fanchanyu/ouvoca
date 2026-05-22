@@ -33,12 +33,12 @@ EXPECTED_TENANT_MIXIN = {
     "production",
     "purchase",
     "quality",
+    "warehouse",   # v3.x P0 跨租戶洩漏修復：WarehouseZone/BinLocation/PickTask/CycleCount 全上 TenantMixin
 }
 
 # ─── 已知 gap：暫時沒上 TenantMixin（但有理由） ─────────────────
 KNOWN_GAPS = {
     "permission": "手動 tenant_id Column；super_admin 跨租戶刻意設計",
-    "warehouse": "v3.9 補（demo 用單租戶足夠；補需 Alembic migration）",
     "supplier_plus": "v3.9 補（同上）",
     "ai_governance": "v3.9 補（DecisionLog/ConversationLog 跨租戶分析有需求）",
     "organization": "保留討論：員工/部門可能屬公司而非租戶層級",

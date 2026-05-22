@@ -4,13 +4,13 @@ from datetime import datetime
 
 
 class ProductCreate(BaseModel):
-    product_no: str
-    name: str
+    product_no: str = Field(..., min_length=1)
+    name: str = Field(..., min_length=1)
     description: Optional[str] = None
     category: Optional[str] = None
     unit: str = "pcs"
-    selling_price: float = 0
-    standard_cost: float = 0
+    selling_price: float = Field(default=0, ge=0)
+    standard_cost: float = Field(default=0, ge=0)
     moq: float = 1
     lead_time_days: int = 0
 
@@ -36,8 +36,8 @@ class BOMItemCreate(BaseModel):
     parent_bom_id: Optional[str] = None
     level: int = 0
     sequence_no: int = 0
-    qty_per: float = 1
-    scrap_rate: float = 0
+    qty_per: float = Field(..., gt=0)
+    scrap_rate: float = Field(default=0, ge=0, le=1)
     is_critical: bool = False
 
 class BOMItemResponse(BaseModel):
@@ -79,27 +79,27 @@ class ProductionOrderResponse(BaseModel):
 
 
 class WorkCenterCreate(BaseModel):
-    code: str
-    name: str
-    capacity_per_day: float = 0
-    efficiency: float = 1.0
+    code: str = Field(..., min_length=1)
+    name: str = Field(..., min_length=1)
+    capacity_per_day: float = Field(default=0, ge=0)
+    efficiency: float = Field(default=1.0, ge=0)
     alternate_group: Optional[str] = None
-    hourly_rate: float = 0
+    hourly_rate: float = Field(default=0, ge=0)
 
 
 class OperationCreate(BaseModel):
     production_order_id: str
     op_no: int
-    op_name: str
+    op_name: str = Field(..., min_length=1)
     work_center_id: str
     operator_id: Optional[str] = None
-    setup_time: float = 0
-    run_time_per_unit: float = 0
-    scheduled_qty: float = 0
+    setup_time: float = Field(default=0, ge=0)
+    run_time_per_unit: float = Field(default=0, ge=0)
+    scheduled_qty: float = Field(default=0, ge=0)
 
 
 class DispatchLogCreate(BaseModel):
     production_order_id: str
     operation_id: str
     operator_id: Optional[str] = None
-    dispatched_qty: float = 0
+    dispatched_qty: float = Field(default=0, ge=0)

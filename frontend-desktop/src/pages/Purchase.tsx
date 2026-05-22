@@ -6,6 +6,7 @@ import {
   apiApprovePO, apiReceivePO, apiGetPO,
   apiListParts, type Part,
   type PurchaseOrder, type Supplier,
+  ApiError,
 } from '../lib/api'
 import EntityRowActions from '../components/EntityRowActions'
 import EntityFormModal, { type FieldDef } from '../components/EntityFormModal'
@@ -62,7 +63,7 @@ export default function Purchase() {
   const approvePO = async (po: PurchaseOrder) => {
     if (!confirm(`核准採購單 ${po.po_no}？`)) return
     try { await apiApprovePO(po.id); await load() }
-    catch (e: unknown) { alert(e instanceof Error ? e.message : '核准失敗') }
+    catch (e: unknown) { alert(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '核准失敗') }
   }
 
   // v3.18：進貨（一次全收）
@@ -79,7 +80,7 @@ export default function Purchase() {
       await apiReceivePO(po.id, receipts)
       await load()
       alert(`✅ 進貨完成：${receipts.length} 項`)
-    } catch (e: unknown) { alert(e instanceof Error ? e.message : '進貨失敗') }
+    } catch (e: unknown) { alert(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '進貨失敗') }
   }
 
   return (
@@ -117,7 +118,7 @@ export default function Purchase() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <Stat title="供應商總數" value={suppliers.length} />
         <Stat title="採購單總數" value={pos.length} />
-        <Stat title="總金額 (TWD)" value={pos.reduce((sum, p) => sum + p.total_amount, 0).toLocaleString()} />
+        <Stat title="總金額 (TWD)" value={pos.reduce((sum, p) => sum + p.total_amount, 0).toLocaleString('zh-TW', { maximumFractionDigits: 0 })} />
       </div>
 
       {tab === 'orders' ? (
@@ -144,7 +145,7 @@ export default function Purchase() {
                     <td className="p-3 font-mono text-xs">{po.po_no}</td>
                     <td className="p-3">{po.supplier?.name || po.supplier_id}</td>
                     <td className="p-3"><StatusBadge status={po.status} /></td>
-                    <td className="p-3 text-right">{po.total_amount.toLocaleString()}</td>
+                    <td className="p-3 text-right">{po.total_amount.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</td>
                     <td className="p-3">{new Date(po.order_date).toLocaleDateString('zh-TW')}</td>
                     <td className="p-3 text-right">
                       <div className="flex gap-1 justify-end">
@@ -276,7 +277,7 @@ export default function Purchase() {
             <tbody>
               <tr><td className="text-gray-600 py-1 w-32">供應商</td><td>{printPO.supplier?.name || printPO.supplier_id}</td></tr>
               <tr><td className="text-gray-600 py-1">狀態</td><td><StatusBadge status={printPO.status} /></td></tr>
-              <tr><td className="text-gray-600 py-1">金額（含稅）</td><td className="font-bold text-lg">NT$ {printPO.total_amount.toLocaleString()}</td></tr>
+              <tr><td className="text-gray-600 py-1">金額（含稅）</td><td className="font-bold text-lg">NT$ {printPO.total_amount.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</td></tr>
               <tr><td className="text-gray-600 py-1">下單日期</td><td>{new Date(printPO.order_date).toLocaleDateString('zh-TW')}</td></tr>
             </tbody>
           </table>
@@ -339,13 +340,16 @@ function PurchaseQuickCreateBar({ suppliers, onAfterCreate }: {
       setSup({ code: '', name: '', tier: 'T2', lead_time_days: 7 })
       setMode('closed')
       await onAfterCreate()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '新增失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '新增失敗') }
     finally { setBusy(false) }
   }
 
   async function createPO() {
     if (!po.supplier_id || !po.part_id || po.ordered_qty <= 0) {
       setErr('供應商 + 料件 + 數量必填'); return
+    }
+    if (po.unit_price <= 0) {
+      setErr('單價必須大於 0'); return
     }
     setBusy(true); setErr(null)
     try {
@@ -356,7 +360,7 @@ function PurchaseQuickCreateBar({ suppliers, onAfterCreate }: {
       setPo({ supplier_id: '', part_id: '', ordered_qty: 1, unit_price: 0 })
       setMode('closed')
       await onAfterCreate()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '建單失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '建單失敗') }
     finally { setBusy(false) }
   }
 
@@ -380,7 +384,7 @@ function PurchaseQuickCreateBar({ suppliers, onAfterCreate }: {
       {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mt-3 text-sm">{err}</div>}
 
       {mode === 'supplier' && (
-        <div className="grid md:grid-cols-5 gap-2 mt-3 pt-3 border-t">
+        <form onSubmit={(e) => { e.preventDefault(); createSupplier() }} className="grid md:grid-cols-5 gap-2 mt-3 pt-3 border-t">
           <input className="border rounded px-2 py-1.5 text-sm" placeholder="代碼* 例 SUP-001"
             value={sup.code} onChange={(e) => setSup({ ...sup, code: e.target.value })} />
           <input className="border rounded px-2 py-1.5 text-sm" placeholder="名稱*"
@@ -393,15 +397,15 @@ function PurchaseQuickCreateBar({ suppliers, onAfterCreate }: {
           </select>
           <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="交期天數" min="1"
             value={sup.lead_time_days} onChange={(e) => setSup({ ...sup, lead_time_days: Number(e.target.value) })} />
-          <button onClick={createSupplier} disabled={busy}
+          <button type="submit" disabled={busy}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50">
             {busy ? '儲存中…' : '✓ 儲存'}
           </button>
-        </div>
+        </form>
       )}
 
       {mode === 'po' && (
-        <div className="mt-3 pt-3 border-t">
+        <form onSubmit={(e) => { e.preventDefault(); createPO() }} className="mt-3 pt-3 border-t">
           <div className="grid md:grid-cols-5 gap-2">
             <select className="border rounded px-2 py-1.5 text-sm" value={po.supplier_id}
               onChange={(e) => setPo({ ...po, supplier_id: e.target.value })}>
@@ -417,7 +421,7 @@ function PurchaseQuickCreateBar({ suppliers, onAfterCreate }: {
               value={po.ordered_qty} onChange={(e) => setPo({ ...po, ordered_qty: Number(e.target.value) })} />
             <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="單價"
               value={po.unit_price || ''} onChange={(e) => setPo({ ...po, unit_price: Number(e.target.value) })} />
-            <button onClick={createPO} disabled={busy}
+            <button type="submit" disabled={busy}
               className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700 disabled:opacity-50">
               {busy ? '建單中…' : '✓ 建單'}
             </button>
@@ -427,7 +431,7 @@ function PurchaseQuickCreateBar({ suppliers, onAfterCreate }: {
               💡 還沒有料件？先去 <Link to="/inventory" className="text-blue-600 underline">庫存頁</Link> 新增。
             </p>
           )}
-        </div>
+        </form>
       )}
     </div>
   )

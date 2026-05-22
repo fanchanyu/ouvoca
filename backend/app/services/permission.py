@@ -365,25 +365,27 @@ async def get_effective_permissions(db: AsyncSession, user_id: str) -> dict:
         "user_id": user_id,
         "roles": [
             {
-                "role_id": r.role.id,
                 "role_code": r.role.code,
-                "role_name": r.role.name_zh,
-                "tenant_id": r.tenant_id,
-                "expires_at": str(r.expires_at) if r.expires_at else None,
-                "is_delegation": bool(r.delegation_from),
+                "granted_at": r.granted_at,
+                "granted_by": r.granted_by,
+                "scope": r.tenant_id,
             }
             for r in roles
         ],
         "permissions": [
-            {"code": code, "scope": scope}
+            {
+                "permission_code": code,
+                "source": "role",
+                "role_code": None,
+            }
             for code, scope in sorted(perms_map.items())
         ],
         "overrides": [
             {
-                "code": o.permission_code,
-                "type": o.grant_or_revoke,
-                "expires_at": str(o.expires_at) if o.expires_at else None,
+                "permission_code": o.permission_code,
+                "grant_or_deny": o.grant_or_revoke,
                 "reason": o.reason,
+                "granted_by": None,
             }
             for o in overrides
         ],

@@ -21,7 +21,7 @@ router = APIRouter(prefix="/api/warehouse", tags=["Warehouse"])
 async def create_zone(
     data: WarehouseZoneCreate,
     db: AsyncSession = Depends(get_db),
-    user: UserContext = Depends(require_permission("warehouse.zone.list")),
+    user: UserContext = Depends(require_permission("warehouse.zone.create")),
 ):
     z = await svc.create_zone(db, data.model_dump())
     return WarehouseZoneResponse.model_validate(z)
@@ -39,7 +39,7 @@ async def list_zones(
 async def create_bin(
     data: BinLocationCreate,
     db: AsyncSession = Depends(get_db),
-    user: UserContext = Depends(require_permission("warehouse.bin.list")),
+    user: UserContext = Depends(require_permission("warehouse.bin.create")),
 ):
     b = await svc.create_bin(db, data.model_dump())
     return BinLocationResponse.model_validate(b)
@@ -84,7 +84,7 @@ async def complete_pick(
     pick_id: str,
     payload: PickCompleteRequest,
     db: AsyncSession = Depends(get_db),
-    user: UserContext = Depends(require_permission("warehouse.pick.create")),
+    user: UserContext = Depends(require_permission("warehouse.pick.complete")),
 ):
     t = await svc.complete_pick(db, pick_id, payload.picked_qty, user.raw_user)
     return PickTaskResponse.model_validate(t)

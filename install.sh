@@ -91,6 +91,12 @@ if [ ! -f "$ENV_FILE" ]; then
     sed -i "s|change-me-in-production-please-use-openssl-rand-hex-32|$SECRET|" "$ENV_FILE"
   fi
 
+  # 驗證替換是否成功（v3.44 安全鏈）
+  if grep -q "change-me" backend/.env; then
+    echo "✗ JWT_SECRET 替換失敗，請手動編輯 backend/.env"
+    exit 1
+  fi
+
   msg "  ✓ JWT_SECRET 已自動產生（64 字元）" "  ✓ JWT_SECRET auto-generated (64 chars)"
 else
   msg "  ℹ️  .env 已存在，跳過" "  ℹ️  .env already exists, skipping"
@@ -102,7 +108,7 @@ fi
 echo
 msg "${BLUE}🔍 檢查 port 衝突...${NC}" "${BLUE}🔍 Checking port conflicts...${NC}"
 port_busy=0
-for p in 8000 5173 8080; do
+for p in 8000 5173 8080 8001 8002; do
   if lsof -iTCP:$p -sTCP:LISTEN >/dev/null 2>&1 || nc -z localhost $p >/dev/null 2>&1; then
     msg "  ❌ Port $p 已被佔用" "  ❌ Port $p already in use"
     port_busy=1
@@ -168,8 +174,12 @@ msg "${BLUE}🌱 步驟 5/5：載入示範資料...${NC}" "${BLUE}🌱 Step 5/5:
 
 if [ ! -f "backend/.seeded" ]; then
   docker compose exec -T backend python -m scripts.seed
-  touch backend/.seeded
-  msg "  ✅ 示範資料載入完成" "  ✅ Demo data loaded"
+  if [ $? -eq 0 ]; then
+    touch backend/.seeded
+    msg "  ✅ 示範資料載入完成" "  ✅ Demo data loaded"
+  else
+    msg "  ❌ Seed 失敗，下次安裝會重試" "  ❌ Seed failed, will retry on next install"
+  fi
 else
   msg "  ℹ️  已 seed 過，跳過" "  ℹ️  Already seeded, skipping"
 fi

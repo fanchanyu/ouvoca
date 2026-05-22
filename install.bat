@@ -73,6 +73,15 @@ if not exist "backend\.env" (
     REM 替換預設 JWT_SECRET
     powershell -Command "(Get-Content 'backend\.env') -replace 'change-me-in-production-please-use-openssl-rand-hex-32', '%SECRET%' | Set-Content 'backend\.env'"
 
+    REM 驗證替換是否成功（v3.44 安全鏈）
+    findstr /C:"change-me" backend\.env >nul
+    if not errorlevel 1 (
+        echo   X JWT_SECRET 替換失敗，請手動編輯 backend\.env
+        echo   X JWT_SECRET substitution failed, please edit backend\.env manually
+        pause
+        exit /b 1
+    )
+
     echo   OK .env 已建立，JWT_SECRET 已自動產生
     echo   OK .env created, JWT_SECRET auto-generated
 ) else (
@@ -85,7 +94,7 @@ REM Step 2.5: Port 預檢（v3.43 P0-1：避免 docker 噴英文錯誤）
 REM ============================================================
 echo [Step 2.5] 檢查 port 衝突 / Checking port conflicts...
 set portbusy=0
-for %%p in (8000 5173 8080) do (
+for %%p in (8000 5173 8080 8001 8002) do (
     netstat -ano -p tcp | findstr ":%%p " | findstr "LISTENING" > nul
     if not errorlevel 1 (
         echo   X Port %%p 已被佔用 / Port %%p in use
@@ -176,8 +185,12 @@ echo [Step 5/5] 載入示範資料 / Loading demo data...
 
 if not exist "backend\.seeded" (
     docker compose exec -T backend python -m scripts.seed
-    echo. > backend\.seeded
-    echo   OK 示範資料已載入 / Demo data loaded
+    if errorlevel 1 (
+        echo   X Seed 失敗，下次安裝會重試 / Seed failed, will retry on next install
+    ) else (
+        echo. > backend\.seeded
+        echo   OK 示範資料已載入 / Demo data loaded
+    )
 ) else (
     echo   i 已 seed 過 / Already seeded
 )

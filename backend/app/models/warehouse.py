@@ -3,9 +3,10 @@ from datetime import datetime
 from sqlalchemy import Column, String, Text, Float, Integer, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from app.core.base import Base
+from app.models._mixins import TenantMixin
 
 
-class WarehouseZone(Base):
+class WarehouseZone(Base, TenantMixin):
     __tablename__ = "warehouse_zones"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -18,7 +19,7 @@ class WarehouseZone(Base):
     bin_locations = relationship("BinLocation", back_populates="zone")
 
 
-class BinLocation(Base):
+class BinLocation(Base, TenantMixin):
     __tablename__ = "bin_locations"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -37,7 +38,7 @@ class BinLocation(Base):
     part = relationship("Part")
 
 
-class PickTask(Base):
+class PickTask(Base, TenantMixin):
     __tablename__ = "pick_tasks"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -60,7 +61,7 @@ class PickTask(Base):
     assignee = relationship("Employee")
 
 
-class CycleCount(Base):
+class CycleCount(Base, TenantMixin):
     __tablename__ = "cycle_counts"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

@@ -111,8 +111,8 @@ export default function Layout() {
               L
             </div>
             <div>
-              <p className="font-bold text-h3 leading-tight tracking-wide">LLM-ERP</p>
-              <p className="text-caption text-white/50">AI-Native ERP</p>
+              <p className="font-bold text-h3 leading-tight tracking-wide">Ouvoca</p>
+              <p className="text-caption text-white/50">對話式 AI 原生 ERP</p>
             </div>
           </div>
         </div>

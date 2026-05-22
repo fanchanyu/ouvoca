@@ -1,12 +1,12 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Literal
 from datetime import datetime
 
 
 class SupplierCreate(BaseModel):
     code: str = Field(..., min_length=1, max_length=50)
     name: str = Field(..., min_length=1)
-    tier: str = "T3"
+    tier: Literal["T1", "T2", "T3"] = "T3"
     parent_supplier_id: Optional[str] = None
     contact_person: Optional[str] = None
     contact_email: Optional[str] = None

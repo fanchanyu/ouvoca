@@ -246,8 +246,8 @@ async def get_my_permissions(
         # demo / super 直接回傳 wildcard 視圖
         return EffectivePermissionsView(
             user_id=user.user_id,
-            roles=[{"role_code": "super_admin", "tenant_id": user.tenant_id}],
-            permissions=[{"code": "*", "scope": "all"}],
+            roles=[{"role_code": "super_admin", "scope": user.tenant_id}],
+            permissions=[{"permission_code": "*", "source": "role", "role_code": "super_admin"}],
             overrides=[],
         )
     return EffectivePermissionsView(**await svc.get_effective_permissions(db, user.user_id))

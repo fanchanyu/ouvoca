@@ -1,12 +1,12 @@
-from datetime import datetime
-from typing import List, Optional
+from datetime import datetime, timezone
+from typing import List, Literal, Optional
 from pydantic import BaseModel, Field, model_validator
 
 
 class AccountCreate(BaseModel):
-    code: str
-    name: str
-    account_type: str
+    code: str = Field(..., min_length=1)
+    name: str = Field(..., min_length=1)
+    account_type: Literal["asset", "liability", "equity", "revenue", "expense"]
     parent_id: Optional[str] = None
     is_debit_normal: bool = True
 
@@ -38,7 +38,9 @@ class JournalLineCreate(BaseModel):
 
 
 class JournalEntryCreate(BaseModel):
-    entry_date: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    entry_date: Optional[datetime] = Field(
+        default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
+    )
     source_type: Optional[str] = None
     source_id: Optional[str] = None
     description: Optional[str] = None
@@ -76,7 +78,7 @@ class ARCreate(BaseModel):
     invoice_no: str
     invoice_date: datetime
     due_date: datetime
-    amount: float
+    amount: float = Field(..., gt=0)
 
 
 class ARResponse(BaseModel):

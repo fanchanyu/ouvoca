@@ -134,16 +134,23 @@ class PermissionResponse(BaseModel):
         from_attributes = True
 
 
+class ApprovalStepSpec(BaseModel):
+    """Single step in approval flow definition."""
+    step: int = Field(..., ge=1, description="步驟序號（1=第一關）")
+    approver_role: str = Field(..., min_length=1, description="批准者角色 code")
+    condition: Optional[str] = Field(None, description="觸發條件，例如 'amount>=100000'")
+
+
 class ApprovalFlowCreate(BaseModel):
     name: str
     entity_type: str
-    steps: List[dict]
+    steps: List[ApprovalStepSpec]
 
 class ApprovalFlowResponse(BaseModel):
     id: str
     name: str
     entity_type: str
-    steps: Any
+    steps: List[ApprovalStepSpec]
     is_active: bool
     created_at: datetime
 

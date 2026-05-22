@@ -19,6 +19,7 @@ import {
   apiListAR, apiListCustomers,
   type JournalEntry, type Account, type AccountsReceivable,
   type Customer, type JournalLineInput,
+  ApiError,
 } from '../lib/api'
 import EmptyState from '../components/EmptyState'
 
@@ -123,7 +124,7 @@ function JournalsTab() {
       setDraft({ description: '', debit_account_id: '', credit_account_id: '', amount: 0 })
       setCreating(false)
       await load()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '建立失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '建立失敗') }
     finally { setSubmitting(false) }
   }
 
@@ -134,7 +135,7 @@ function JournalsTab() {
       await apiPostJournal(entry.id)
       setMsg(`✅ ${entry.entry_no} 已過帳`)
       await load()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '過帳失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '過帳失敗') }
   }
 
   // (accountLabel helper removed — not yet used in render; JournalLine UI to be added next sprint)
@@ -161,7 +162,7 @@ function JournalsTab() {
       )}
 
       {creating && (
-        <div className="bg-white rounded-xl shadow p-4 mb-4">
+        <form onSubmit={(e) => { e.preventDefault(); createEntry() }} className="bg-white rounded-xl shadow p-4 mb-4">
           <h3 className="font-semibold text-sm mb-3">新增傳票（簡化版：1 借 1 貸）</h3>
           <div className="grid md:grid-cols-2 gap-3">
             <div className="md:col-span-2">
@@ -191,7 +192,7 @@ function JournalsTab() {
                 value={draft.amount || ''} onChange={(e) => setDraft({ ...draft, amount: Number(e.target.value) })} />
             </div>
             <div className="flex items-end">
-              <button onClick={createEntry} disabled={submitting}
+              <button type="submit" disabled={submitting}
                 className="w-full px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50">
                 {submitting ? '送出中…' : '✓ 建立傳票'}
               </button>
@@ -200,7 +201,7 @@ function JournalsTab() {
           <p className="text-xs text-gray-500 mt-3">
             💡 多行借貸的複合傳票請用 AI 對話：<Link to="/chat" className="text-blue-600 underline">💬 AI 助手</Link>
           </p>
-        </div>
+        </form>
       )}
 
       {loading ? (
@@ -391,7 +392,7 @@ function AccountsTab() {
   async function load() {
     setLoading(true); setErr(null)
     try { setAccounts(await apiListAccounts()) }
-    catch (e: unknown) { setErr(e instanceof Error ? e.message : '載入失敗') }
+    catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '載入失敗') }
     finally { setLoading(false) }
   }
 
@@ -405,7 +406,7 @@ function AccountsTab() {
       setDraft({ code: '', name: '', account_type: 'asset', is_debit_normal: true })
       setCreating(false)
       await load()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '新增失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '新增失敗') }
   }
 
   const grouped = useMemo(() => {

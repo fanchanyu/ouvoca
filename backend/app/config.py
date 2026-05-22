@@ -33,7 +33,8 @@ class Settings(BaseSettings):
     JWT_EXPIRE_MINUTES: int = 480
     # If true and JWT_SECRET is the default, allow Bearer "demo" to login as super-admin.
     # Production deploys MUST set a real JWT_SECRET; demo-bypass auto-disables in that case.
-    ALLOW_DEMO_BYPASS: bool = True
+    # 預設關閉；正式測試需明確設 true（避免任何環境意外開啟 Bearer demo 後門）
+    ALLOW_DEMO_BYPASS: bool = False
 
     # --- LLM ---
     LLM_PROVIDER: Literal["anthropic", "openai", "deepseek", "ollama"] = "deepseek"

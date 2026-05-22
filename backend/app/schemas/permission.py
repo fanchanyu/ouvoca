@@ -156,8 +156,28 @@ class PermissionOverrideResponse(BaseModel):
 
 # --- Effective Permissions View ---
 
+class EffectiveRoleItem(BaseModel):
+    role_code: str
+    granted_at: Optional[datetime] = None
+    granted_by: Optional[str] = None
+    scope: Optional[str] = None
+
+
+class EffectivePermissionItem(BaseModel):
+    permission_code: str
+    source: str  # "role" or "override"
+    role_code: Optional[str] = None
+
+
+class EffectiveOverrideItem(BaseModel):
+    permission_code: str
+    grant_or_deny: str  # "grant" or "deny"
+    reason: Optional[str] = None
+    granted_by: Optional[str] = None
+
+
 class EffectivePermissionsView(BaseModel):
     user_id: str
-    roles: List[dict]
-    permissions: List[dict]
-    overrides: List[dict]
+    roles: List[EffectiveRoleItem]
+    permissions: List[EffectivePermissionItem]
+    overrides: List[EffectiveOverrideItem]

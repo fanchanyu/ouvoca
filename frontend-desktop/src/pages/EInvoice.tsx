@@ -175,23 +175,23 @@ function IssueSection() {
                 <tr key={i} className="border-b border-gray-100">
                   <td className="p-2">{it.description}</td>
                   <td className="p-2 text-right">{it.qty}</td>
-                  <td className="p-2 text-right">{it.unit_price.toLocaleString()}</td>
-                  <td className="p-2 text-right">{(it.qty * it.unit_price).toLocaleString()}</td>
+                  <td className="p-2 text-right">{it.unit_price.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</td>
+                  <td className="p-2 text-right">{(it.qty * it.unit_price).toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr className="border-t-2 border-gray-400">
                 <td colSpan={3} className="p-2 text-right text-gray-600">未稅 / Sales Amount</td>
-                <td className="p-2 text-right font-mono">{printSnapshot.sales_amount.toLocaleString()}</td>
+                <td className="p-2 text-right font-mono">{printSnapshot.sales_amount.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</td>
               </tr>
               <tr>
                 <td colSpan={3} className="p-2 text-right text-gray-600">稅 5% / Tax</td>
-                <td className="p-2 text-right font-mono">{printSnapshot.tax.toLocaleString()}</td>
+                <td className="p-2 text-right font-mono">{printSnapshot.tax.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</td>
               </tr>
               <tr className="border-t">
                 <td colSpan={3} className="p-2 text-right font-bold">總計 / Total</td>
-                <td className="p-2 text-right font-bold text-lg">NT$ {printSnapshot.total.toLocaleString()}</td>
+                <td className="p-2 text-right font-bold text-lg">NT$ {printSnapshot.total.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</td>
               </tr>
             </tfoot>
           </table>
@@ -284,9 +284,9 @@ function IssueSection() {
 
         {/* 金額預覽 */}
         <div className="bg-gray-50 rounded p-3 grid grid-cols-3 gap-2 text-sm">
-          <div>未稅 NT$ <strong>{salesAmount.toLocaleString()}</strong></div>
-          <div>稅 (5%) NT$ <strong>{tax.toLocaleString()}</strong></div>
-          <div>含稅合計 NT$ <strong className="text-blue-700">{taxIncluded.toLocaleString()}</strong></div>
+          <div>未稅 NT$ <strong>{salesAmount.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</strong></div>
+          <div>稅 (5%) NT$ <strong>{tax.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</strong></div>
+          <div>含稅合計 NT$ <strong className="text-blue-700">{taxIncluded.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</strong></div>
         </div>
 
         <button onClick={issue} disabled={busy}

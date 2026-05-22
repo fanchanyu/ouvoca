@@ -20,6 +20,7 @@ import {
   apiListCustomers, apiListSOs, apiListCrmEvents, apiCreateCrmEvent,
   type Lead, type Opportunity, type CrmEvent,
   type Customer, type SalesOrder,
+  ApiError,
 } from '../lib/api'
 import EmptyState from '../components/EmptyState'
 
@@ -95,7 +96,7 @@ function LeadPipeline() {
   async function load() {
     setLoading(true)
     try { setLeads(await apiListLeads()) }
-    catch (e: unknown) { setErr(e instanceof Error ? e.message : '載入失敗') }
+    catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '載入失敗') }
     finally { setLoading(false) }
   }
 
@@ -109,7 +110,7 @@ function LeadPipeline() {
       setNewLead({ company_name: '', contact_person: '', contact_phone: '', source: '' })
       setCreating(false)
       await load()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '新增失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '新增失敗') }
   }
 
   async function convert(lead: Lead) {
@@ -119,7 +120,7 @@ function LeadPipeline() {
       await apiConvertLead(lead.id, { code, name: lead.company_name })
       alert(`✅ 已轉為客戶（代碼 ${code}）`)
       await load()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '轉換失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '轉換失敗') }
   }
 
   const grouped = useMemo(() => {
@@ -145,7 +146,7 @@ function LeadPipeline() {
       </div>
 
       {creating && (
-        <div className="bg-white rounded-lg shadow p-4 mb-4 grid md:grid-cols-4 gap-3">
+        <form onSubmit={(e) => { e.preventDefault(); createLead() }} className="bg-white rounded-lg shadow p-4 mb-4 grid md:grid-cols-4 gap-3">
           <input
             type="text" placeholder="公司名稱（必填）"
             value={newLead.company_name} onChange={(e) => setNewLead({ ...newLead, company_name: e.target.value })}
@@ -167,11 +168,11 @@ function LeadPipeline() {
               value={newLead.source} onChange={(e) => setNewLead({ ...newLead, source: e.target.value })}
               className="border rounded px-2 py-1.5 text-sm flex-1"
             />
-            <button onClick={createLead} className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+            <button type="submit" className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
               儲存
             </button>
           </div>
-        </div>
+        </form>
       )}
 
       {leads.length === 0 ? (
@@ -248,7 +249,7 @@ function OpportunityKanban() {
     try {
       const [o, c] = await Promise.all([apiListOpps(), apiListCustomers().catch(() => [])])
       setOpps(o); setCustomers(c)
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '載入失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '載入失敗') }
     finally { setLoading(false) }
   }
 
@@ -262,12 +263,12 @@ function OpportunityKanban() {
       setNewOpp({ customer_id: '', name: '', amount: 0, probability: 50 })
       setCreating(false)
       await load()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '新增失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '新增失敗') }
   }
 
   async function moveStage(opp: Opportunity, newStage: string) {
     try { await apiUpdateOppStage(opp.id, newStage); await load() }
-    catch (e: unknown) { setErr(e instanceof Error ? e.message : '更新失敗') }
+    catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '更新失敗') }
   }
 
   const grouped = useMemo(() => {
@@ -301,7 +302,7 @@ function OpportunityKanban() {
       </div>
 
       {creating && (
-        <div className="bg-white rounded-lg shadow p-4 mb-4 grid md:grid-cols-4 gap-3">
+        <form onSubmit={(e) => { e.preventDefault(); createOpp() }} className="bg-white rounded-lg shadow p-4 mb-4 grid md:grid-cols-4 gap-3">
           <select
             value={newOpp.customer_id} onChange={(e) => setNewOpp({ ...newOpp, customer_id: e.target.value })}
             className="border rounded px-2 py-1.5 text-sm"
@@ -325,11 +326,11 @@ function OpportunityKanban() {
               value={newOpp.probability} onChange={(e) => setNewOpp({ ...newOpp, probability: Number(e.target.value) })}
               className="border rounded px-2 py-1.5 text-sm flex-1"
             />
-            <button onClick={createOpp} className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+            <button type="submit" className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
               儲存
             </button>
           </div>
-        </div>
+        </form>
       )}
 
       {opps.length === 0 ? (
@@ -413,7 +414,7 @@ function Customer360() {
     (async () => {
       setLoading(true)
       try { setCustomers(await apiListCustomers()) }
-      catch (e: unknown) { setErr(e instanceof Error ? e.message : '載入失敗') }
+      catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '載入失敗') }
       finally { setLoading(false) }
     })()
   }, [])
@@ -430,7 +431,7 @@ function Customer360() {
         setOrders(allOrders.filter(o => o.customer_id === selected.id))
         setOpps(allOpps.filter(o => o.customer_id === selected.id))
         setEvents(ev)
-      } catch (e: unknown) { setErr(e instanceof Error ? e.message : '載入失敗') }
+      } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '載入失敗') }
     })()
   }, [selected])
 
@@ -445,7 +446,7 @@ function Customer360() {
         subject, description: desc,
       })
       setEvents(await apiListCrmEvents(selected.id, 50))
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '新增失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '新增失敗') }
   }
 
   if (loading) return <div className="text-center text-gray-400 py-12">載入中…</div>

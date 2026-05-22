@@ -6,6 +6,7 @@ import {
   apiConfirmSO, apiShipSO,
   apiListProducts, type Product,
   type SalesOrder, type Customer,
+  ApiError,
 } from '../lib/api'
 import EntityRowActions from '../components/EntityRowActions'
 import EntityFormModal, { type FieldDef } from '../components/EntityFormModal'
@@ -71,7 +72,7 @@ export default function Sales() {
   const confirmSO = async (so: SalesOrder) => {
     if (!confirm(`確認銷售訂單 ${so.so_no}？\n\n之後可出貨。`)) return
     try { await apiConfirmSO(so.id); await load() }
-    catch (e: unknown) { alert(e instanceof Error ? e.message : '確認失敗') }
+    catch (e: unknown) { alert(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '確認失敗') }
   }
 
   // v3.18：出貨（自動扣庫存 + 開 AR）
@@ -81,7 +82,7 @@ export default function Sales() {
       await apiShipSO(so.id)
       await load()
       alert(`🚚 ${so.so_no} 已出貨`)
-    } catch (e: unknown) { alert(e instanceof Error ? e.message : '出貨失敗') }
+    } catch (e: unknown) { alert(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '出貨失敗') }
   }
 
   return (
@@ -90,7 +91,7 @@ export default function Sales() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <Stat title="客戶總數" value={customers.length} />
         <Stat title="訂單總數" value={sos.length} />
-        <Stat title="累計營收 (TWD)" value={totalRevenue.toLocaleString()} />
+        <Stat title="累計營收 (TWD)" value={totalRevenue.toLocaleString('zh-TW', { maximumFractionDigits: 0 })} />
       </div>
 
       {/* v3.17: Quick create bar (Sprint K — 補小白沒 AI 也能建單的能力) */}
@@ -130,7 +131,7 @@ export default function Sales() {
                       'bg-blue-100 text-blue-800'
                     }`}>{SO_STATUS[so.status] ?? so.status}</span>
                   </td>
-                  <td className="p-3 text-right">{so.total_amount.toLocaleString()}</td>
+                  <td className="p-3 text-right">{so.total_amount.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</td>
                   <td className="p-3"><span className="text-xs text-gray-500">{PAYMENT_STATUS[so.payment_status] ?? so.payment_status}</span></td>
                   <td className="p-3 text-xs">{new Date(so.order_date).toLocaleDateString('zh-TW')}</td>
                   <td className="p-3 text-right">
@@ -200,7 +201,7 @@ export default function Sales() {
                       c.grade === 'B' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'
                     }`}>{c.grade}</span>
                   </td>
-                  <td className="p-3 text-right">{(c.credit_limit || 0).toLocaleString()}</td>
+                  <td className="p-3 text-right">{(c.credit_limit || 0).toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</td>
                   <td className="p-3 text-center">
                     <span className={`px-2 py-1 rounded-full text-xs ${c.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
                       {c.is_active ? '啟用' : '停用'}
@@ -275,7 +276,7 @@ export default function Sales() {
               <tr><td className="text-gray-600 py-1 w-32">對應訂單</td><td className="font-mono">{shipNoteSO.so_no}</td></tr>
               <tr><td className="text-gray-600 py-1">收貨客戶</td><td>{shipNoteSO.customer?.name || shipNoteSO.customer_id}</td></tr>
               <tr><td className="text-gray-600 py-1">出貨日期</td><td>{new Date().toLocaleDateString('zh-TW')}</td></tr>
-              <tr><td className="text-gray-600 py-1">訂單金額</td><td>NT$ {shipNoteSO.total_amount.toLocaleString()}（僅供核對，正式金額以發票為準）</td></tr>
+              <tr><td className="text-gray-600 py-1">訂單金額</td><td>NT$ {shipNoteSO.total_amount.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}（僅供核對，正式金額以發票為準）</td></tr>
               <tr><td className="text-gray-600 py-1">訂單狀態</td><td>{SO_STATUS[shipNoteSO.status] ?? shipNoteSO.status}</td></tr>
             </tbody>
           </table>
@@ -297,7 +298,7 @@ export default function Sales() {
               <tr><td className="text-gray-600 py-1">狀態</td>
                 <td><span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">{SO_STATUS[printSO.status] ?? printSO.status}</span></td></tr>
               <tr><td className="text-gray-600 py-1">付款狀態</td><td>{PAYMENT_STATUS[printSO.payment_status] ?? printSO.payment_status}</td></tr>
-              <tr><td className="text-gray-600 py-1">金額（含稅）</td><td className="font-bold text-lg text-blue-700">NT$ {printSO.total_amount.toLocaleString()}</td></tr>
+              <tr><td className="text-gray-600 py-1">金額（含稅）</td><td className="font-bold text-lg text-blue-700">NT$ {printSO.total_amount.toLocaleString('zh-TW', { maximumFractionDigits: 0 })}</td></tr>
               <tr><td className="text-gray-600 py-1">下單日期</td><td>{new Date(printSO.order_date).toLocaleDateString('zh-TW')}</td></tr>
             </tbody>
           </table>
@@ -349,13 +350,16 @@ function QuickCreateBar({ onAfterCreate, customers }: {
       setCust({ code: '', name: '', grade: 'B', contact_person: '', contact_phone: '' })
       setMode('closed')
       await onAfterCreate()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '新增失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '新增失敗') }
     finally { setBusy(false) }
   }
 
   async function createSO() {
     if (!so.customer_id || !so.product_id || so.ordered_qty <= 0) {
       setErr('客戶 + 產品 + 數量必填'); return
+    }
+    if (so.unit_price <= 0) {
+      setErr('單價必須大於 0'); return
     }
     setBusy(true); setErr(null)
     try {
@@ -366,7 +370,7 @@ function QuickCreateBar({ onAfterCreate, customers }: {
       setSo({ customer_id: '', product_id: '', ordered_qty: 1, unit_price: 0 })
       setMode('closed')
       await onAfterCreate()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '建單失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '建單失敗') }
     finally { setBusy(false) }
   }
 
@@ -390,7 +394,7 @@ function QuickCreateBar({ onAfterCreate, customers }: {
       {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mt-3 text-sm">{err}</div>}
 
       {mode === 'customer' && (
-        <div className="grid md:grid-cols-5 gap-2 mt-3 pt-3 border-t">
+        <form onSubmit={(e) => { e.preventDefault(); createCustomer() }} className="grid md:grid-cols-5 gap-2 mt-3 pt-3 border-t">
           <input className="border rounded px-2 py-1.5 text-sm" placeholder="代碼* 例 CUST-001"
             value={cust.code} onChange={(e) => setCust({ ...cust, code: e.target.value })} />
           <input className="border rounded px-2 py-1.5 text-sm" placeholder="名稱*"
@@ -402,15 +406,15 @@ function QuickCreateBar({ onAfterCreate, customers }: {
           </select>
           <input className="border rounded px-2 py-1.5 text-sm" placeholder="聯絡人"
             value={cust.contact_person} onChange={(e) => setCust({ ...cust, contact_person: e.target.value })} />
-          <button onClick={createCustomer} disabled={busy}
+          <button type="submit" disabled={busy}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50">
             {busy ? '儲存中…' : '✓ 儲存'}
           </button>
-        </div>
+        </form>
       )}
 
       {mode === 'so' && (
-        <div className="mt-3 pt-3 border-t">
+        <form onSubmit={(e) => { e.preventDefault(); createSO() }} className="mt-3 pt-3 border-t">
           <div className="grid md:grid-cols-5 gap-2">
             <select className="border rounded px-2 py-1.5 text-sm" value={so.customer_id}
               onChange={(e) => setSo({ ...so, customer_id: e.target.value })}>
@@ -426,7 +430,7 @@ function QuickCreateBar({ onAfterCreate, customers }: {
               value={so.ordered_qty} onChange={(e) => setSo({ ...so, ordered_qty: Number(e.target.value) })} />
             <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="單價"
               value={so.unit_price || ''} onChange={(e) => setSo({ ...so, unit_price: Number(e.target.value) })} />
-            <button onClick={createSO} disabled={busy}
+            <button type="submit" disabled={busy}
               className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700 disabled:opacity-50">
               {busy ? '建單中…' : '✓ 建單'}
             </button>
@@ -437,7 +441,7 @@ function QuickCreateBar({ onAfterCreate, customers }: {
               或<Link to="/settings" className="text-blue-600 underline">⚙️ 設定頁</Link>載入示範資料。
             </p>
           )}
-        </div>
+        </form>
       )}
     </div>
   )

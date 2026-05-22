@@ -76,7 +76,7 @@ class PurchaseOrderItem(Base):
     part = relationship("Part", back_populates="purchase_order_items")
 
 
-class SupplierPrice(Base):
+class SupplierPrice(Base, TenantMixin):
     __tablename__ = "supplier_prices"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -95,7 +95,7 @@ class SupplierPrice(Base):
     part = relationship("Part", back_populates="supplier_prices")
 
 
-class SupplierEvaluation(Base):
+class SupplierEvaluation(Base, TenantMixin):
     __tablename__ = "supplier_evaluations"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

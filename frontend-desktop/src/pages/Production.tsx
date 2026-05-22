@@ -5,6 +5,7 @@ import {
   apiListProducts, apiCreateProduct, apiCreateWO,
   apiCompleteWO,
   type ProductionOrder, type Product,
+  ApiError,
 } from '../lib/api'
 import ProcessChain, { deriveWOSteps } from '../components/ProcessChain'
 import NotesEditor from '../components/NotesEditor'
@@ -28,7 +29,7 @@ export default function Production() {
   async function release(id: string) {
     setError(null)
     try { await apiReleaseWO(id); load() }
-    catch (e: unknown) { setError(e instanceof Error ? e.message : '釋放失敗') }
+    catch (e: unknown) { setError(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '釋放失敗') }
   }
 
   // v3.19：完工（含填完工量 + 不良量）
@@ -44,7 +45,7 @@ export default function Production() {
     try {
       await apiCompleteWO(wo.id, { completed_qty: completed, rejected_qty: rejected })
       load()
-    } catch (e: unknown) { setError(e instanceof Error ? e.message : '完工失敗') }
+    } catch (e: unknown) { setError(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '完工失敗') }
   }
 
   async function cancel(wo: ProductionOrder) {
@@ -52,7 +53,7 @@ export default function Production() {
     if (reason === null) return
     setError(null)
     try { await apiCancelWO(wo.id, reason); load() }
-    catch (e: unknown) { setError(e instanceof Error ? e.message : '取消失敗') }
+    catch (e: unknown) { setError(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '取消失敗') }
   }
 
   const inProgress = wos.filter(w => w.status === 'released' || w.status === 'in_progress').length
@@ -226,7 +227,7 @@ function ProductionQuickCreateBar({ onAfterCreate, onEditBom }: {
       setMode('closed')
       await loadProducts()
       await onAfterCreate()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '新增失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '新增失敗') }
     finally { setBusy(false) }
   }
 
@@ -238,7 +239,7 @@ function ProductionQuickCreateBar({ onAfterCreate, onEditBom }: {
       setWo({ product_id: '', ordered_qty: 1, priority: 50 })
       setMode('closed')
       await onAfterCreate()
-    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '建單失敗') }
+    } catch (e: unknown) { setErr(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '建單失敗') }
     finally { setBusy(false) }
   }
 
@@ -267,20 +268,20 @@ function ProductionQuickCreateBar({ onAfterCreate, onEditBom }: {
       {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mt-3 text-sm">{err}</div>}
 
       {mode === 'product' && (
-        <div className="grid md:grid-cols-3 gap-2 mt-3 pt-3 border-t">
+        <form onSubmit={(e) => { e.preventDefault(); createProduct() }} className="grid md:grid-cols-3 gap-2 mt-3 pt-3 border-t">
           <input className="border rounded px-2 py-1.5 text-sm" placeholder="編號* 例 PROD-001"
             value={prod.product_no} onChange={(e) => setProd({ ...prod, product_no: e.target.value })} />
           <input className="border rounded px-2 py-1.5 text-sm" placeholder="產品名稱*"
             value={prod.name} onChange={(e) => setProd({ ...prod, name: e.target.value })} />
-          <button onClick={createProduct} disabled={busy}
+          <button type="submit" disabled={busy}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50">
             {busy ? '儲存中…' : '✓ 儲存'}
           </button>
-        </div>
+        </form>
       )}
 
       {mode === 'wo' && (
-        <div className="mt-3 pt-3 border-t">
+        <form onSubmit={(e) => { e.preventDefault(); createWO() }} className="mt-3 pt-3 border-t">
           <div className="grid md:grid-cols-4 gap-2">
             <select className="border rounded px-2 py-1.5 text-sm" value={wo.product_id}
               onChange={(e) => setWo({ ...wo, product_id: e.target.value })}>
@@ -291,7 +292,7 @@ function ProductionQuickCreateBar({ onAfterCreate, onEditBom }: {
               value={wo.ordered_qty} onChange={(e) => setWo({ ...wo, ordered_qty: Number(e.target.value) })} />
             <input type="number" className="border rounded px-2 py-1.5 text-sm" placeholder="優先級 1-100" min="1" max="100"
               value={wo.priority} onChange={(e) => setWo({ ...wo, priority: Number(e.target.value) })} />
-            <button onClick={createWO} disabled={busy}
+            <button type="submit" disabled={busy}
               className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700 disabled:opacity-50">
               {busy ? '建單中…' : '✓ 建單'}
             </button>
@@ -301,7 +302,7 @@ function ProductionQuickCreateBar({ onAfterCreate, onEditBom }: {
               💡 還沒有產品？先按上面的「➕ 新增產品」建一個。
             </p>
           )}
-        </div>
+        </form>
       )}
 
       {mode === 'bom' && (

@@ -68,7 +68,7 @@ class NonConformance(Base, TenantMixin):
     capa_records = relationship("CAPARecord", back_populates="non_conformance")
 
 
-class CAPARecord(Base):
+class CAPARecord(Base, TenantMixin):
     __tablename__ = "capa_records"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

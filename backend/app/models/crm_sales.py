@@ -75,7 +75,7 @@ class SalesOrderItem(Base):
     product = relationship("Product", back_populates="sales_order_items")
 
 
-class Lead(Base):
+class Lead(Base, TenantMixin):
     __tablename__ = "leads"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -94,7 +94,7 @@ class Lead(Base):
     assignee = relationship("Employee")
 
 
-class Opportunity(Base):
+class Opportunity(Base, TenantMixin):
     __tablename__ = "opportunities"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -113,7 +113,7 @@ class Opportunity(Base):
     assignee = relationship("Employee")
 
 
-class Contract(Base):
+class Contract(Base, TenantMixin):
     __tablename__ = "contracts"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -143,7 +143,7 @@ class ContractPricing(Base):
     product = relationship("Product")
 
 
-class CrmEvent(Base):
+class CrmEvent(Base, TenantMixin):
     __tablename__ = "crm_events"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

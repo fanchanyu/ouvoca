@@ -19,6 +19,30 @@ class ApiError extends Error {
   }
   /** 友善訊息：優先用 backend hint，再 fallback 到 status code 中文對照 */
   friendly(): string {
+    // Parse 422 Pydantic validation errors first
+    if (this.status === 422 && Array.isArray((this.payload as { detail?: unknown })?.detail)) {
+      const detail = (this.payload as { detail: Array<{ loc?: unknown[]; msg?: string }> }).detail[0]
+      const fieldRaw = detail?.loc?.slice(-1)[0] ?? ''
+      const FIELD_ZH: Record<string, string> = {
+        part_no: '料號', name: '名稱', code: '代碼',
+        ordered_qty: '訂購數量', unit_price: '單價',
+        qty: '數量', amount: '金額',
+        contact_email: '聯絡 Email', credit_limit: '信用額度',
+        product_no: '產品編號', qty_per: '單耗',
+        scrap_rate: '不良率', tier: '供應商等級',
+        account_type: '科目類型', entry_date: '日期',
+      }
+      const fieldZh = FIELD_ZH[fieldRaw as string] || (fieldRaw as string)
+      const msg: string = detail?.msg || ''
+      let msgZh = msg
+      if (msg.includes('greater than 0')) msgZh = '必須大於 0'
+      else if (msg.includes('greater than or equal to 0')) msgZh = '不可為負'
+      else if (msg.includes('at least 1 character')) msgZh = '不可空白'
+      else if (msg.includes('Field required')) msgZh = '此欄位必填'
+      else if (msg.includes('Input should be')) msgZh = '格式錯誤'
+      else if (msg.includes('valid email')) msgZh = 'Email 格式不正確'
+      return `${fieldZh}: ${msgZh}`
+    }
     if (this.hint) return this.hint
     const map: Record<number, string> = {
       400: '請求格式有誤，請檢查輸入內容',

@@ -76,7 +76,7 @@ class AccountsReceivable(Base, TenantMixin):
     customer = relationship("Customer", back_populates="receivables")
 
 
-class MonthEndClose(Base):
+class MonthEndClose(Base, TenantMixin):
     __tablename__ = "month_end_closes"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

@@ -11,11 +11,8 @@
 [![Version](https://img.shields.io/badge/version-3.12-blueviolet)]()
 [![Author](https://img.shields.io/badge/by-Peter-lightgrey)](https://github.com/fanchanyu)
 
-> 📋 **v3.44 — 專案重命名 / Project Renamed (2026-05-22)**
-> 🇹🇼 **原專案名 `erpilot` 因撞 ERPilot LLC / ERPilot.in 等既有商標**，自 2026-05-22 起正式更名為 **Ouvoca**。
-> 🇺🇸 **Renamed from `erpilot` to `Ouvoca`** on 2026-05-22 due to trademark conflict with ERPilot LLC / ERPilot.in.
-> 📄 詳細公告 / Full Notice: [中文](./docs/RENAME_NOTICE_ZH.md) · [English](./docs/RENAME_NOTICE_EN.md)
-> 🙏 對既有商標權人之**正式道歉聲明**已含於上述文件。
+> 🇹🇼 **本專案於 2026-05-22 因商標衝突更名為 Ouvoca** — 詳見 [RENAME_NOTICE_ZH.md](./docs/RENAME_NOTICE_ZH.md)
+> 🇺🇸 **Renamed to Ouvoca in 2026-05** due to trademark conflict — see [RENAME_NOTICE_EN.md](./docs/RENAME_NOTICE_EN.md)
 
 > ⚡ **v3.0 戰略軸轉 / Strategic Pivot (2026-05-15)**
 > 🇹🇼 砍 LINE Bot / Mobile App / 外協協同三線，全力做桌機對話式 ERP。
@@ -48,7 +45,7 @@
 > ⚖️ **法律 / Legal — 對外最敏感**：[v3.41 中文](./docs/pdf/36_第五輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/36_Polish_V341_Legal_EN.pdf) — **使用前務必由 CPA + 法律 + 內控 + 業務主管覆核**
 
 > 🆕 **v3.42 — 第六輪小白盤點再補 8 條（帳號管理最敏感）(2026-05-22)**
-> 🇹🇼 **使用者帳號管理**（建立 / 停用 LLM tools）/ **全域跨表搜尋**（「ABC」一次找客戶+料件+供應商+員工）/ **附件 LLM 入口**（連附件到 SO/PO）/ **AI 每人每日上限**（防員工亂用燒爆）/ **台灣工作天計算**（內建 2026 國定假日）/ **時區設定**（公司在台灣 / 日本 / 美國）/ **對話 transcript 匯出** / Dashboard 手機 responsive。**165 LLM tools / 76 雙語 PDF / 374+ tests**。
+> 🇹🇼 **使用者帳號管理**（建立 / 停用 LLM tools）/ **全域跨表搜尋**（「ABC」一次找客戶+料件+供應商+員工）/ **附件 LLM 入口**（連附件到 SO/PO）/ **AI 每人每日上限**（防員工亂用燒爆）/ **台灣工作天計算**（內建 2026 國定假日）/ **時區設定**（公司在台灣 / 日本 / 美國）/ **對話 transcript 匯出** / Dashboard 手機 responsive。**170 LLM tools / 76 雙語 PDF / 374+ tests**。
 > 🇺🇸 Sixth-round audit fixes: **user account management**, **global cross-table search**, **attachment LLM entry**, **AI per-user daily limit**, **Taiwan business-day calculation**, **timezone setting**, **chat transcript export**, Dashboard mobile responsive.
 > ⚖️ **法律 / Legal — 帳號管理最敏感**：[v3.42 中文](./docs/pdf/37_第六輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/37_Polish_V342_Legal_EN.pdf) — **使用前務必由 IT + 法律 + HR 主管覆核**
 
@@ -516,7 +513,7 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **35** | ⚖️ **第四輪小白卡關修補法律聲明 — 高敏感**（v3.40 — 凍結 hard-write / Delete Undo / 跨人 Audit / 應收帳齡）/ **Fourth-Round Beginner-Fix Notice — HIGH SENSITIVITY** | [📕 **中文 PDF**](./docs/pdf/35_第四輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/35_Polish_V340_Legal_EN.pdf) |
 | **36** | ⚖️ **第五輪小白卡關修補法律聲明 — 對外最敏感**（v3.41 — 寄 PDF Email / 客戶毛利率 / 訂單跟單）/ **Fifth-Round Beginner-Fix Notice — OUTBOUND-SENSITIVE** | [📕 **中文 PDF**](./docs/pdf/36_第五輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/36_Polish_V341_Legal_EN.pdf) |
 | **37** | ⚖️ **第六輪小白卡關修補法律聲明 — 帳號管理最敏感**（v3.42 — 使用者帳號 / 全域搜尋 / AI 每日限額 / 工作天 / 時區）/ **Sixth-Round Beginner-Fix Notice — ACCOUNT-MGMT-SENSITIVE** | [📕 **中文 PDF**](./docs/pdf/37_第六輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/37_Polish_V342_Legal_EN.pdf) |
-| **38** | 📋 **專案重命名公告 + 道歉聲明**（v3.44 — erpilot → Ouvoca）/ **Project Rename Notice + Apology** | [📕 **中文 PDF**](./docs/pdf/38_重命名公告_中文.pdf) | [📘 **EN PDF**](./docs/pdf/38_Rename_Notice_EN.pdf) |
+| **38** | ⚖️ **Ouvoca 商標合規 / Trademark Compliance** | [📕 **中文 PDF**](./docs/pdf/38_重命名公告_中文.pdf) | [📘 **EN PDF**](./docs/pdf/38_Rename_Notice_EN.pdf) |
 
 📌 **特別文件**：
 - [**`HOW_TO_GET_LLM_API_KEY_ZH.md`**](./docs/HOW_TO_GET_LLM_API_KEY_ZH.md) · [EN](./docs/HOW_TO_GET_LLM_API_KEY_EN.md) — 5-10 分鐘申請 API Key 完整教學（DeepSeek/OpenAI/Anthropic/Ollama 比較）

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { apiListParts, apiCreatePart, apiListInventoryTxns, type Part, type InventoryTransaction } from '../lib/api'
+import { apiListParts, apiCreatePart, apiListInventoryTxns, ApiError, type Part, type InventoryTransaction } from '../lib/api'
 import EmptyState from '../components/EmptyState'
 
 export default function Inventory() {
@@ -19,13 +19,17 @@ export default function Inventory() {
     try {
       setParts(await apiListParts())
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : '載入失敗')
+      setError(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '載入失敗')
     } finally { setLoading(false) }
   }
 
   useEffect(() => { load() }, [])
 
   async function submit() {
+    if (!form.part_no.trim() || !form.name.trim()) {
+      setError('料號和名稱必填')
+      return
+    }
     setError(null)
     setSubmitting(true)
     try {
@@ -34,7 +38,7 @@ export default function Inventory() {
       setForm({ part_no: '', name: '', category: 'raw_material', unit: 'pcs', safety_stock: 0, unit_cost: 0, lead_time_days: 0 })
       load()
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : '新增失敗')
+      setError(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '新增失敗')
     } finally {
       setSubmitting(false)
     }
@@ -73,7 +77,7 @@ export default function Inventory() {
       {/* end-tab-wrapper-open */}
 
       {showForm && (
-        <div className="bg-white rounded-xl shadow p-6 mb-6">
+        <form onSubmit={(e) => { e.preventDefault(); submit() }} className="bg-white rounded-xl shadow p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">新增零件</h2>
           <div className="grid grid-cols-2 gap-4">
             <Field label="料號 *"><input value={form.part_no} onChange={e => setForm({...form, part_no: e.target.value})} className="input" /></Field>
@@ -92,8 +96,8 @@ export default function Inventory() {
             <Field label="單位成本"><input type="number" value={form.unit_cost} onChange={e => setForm({...form, unit_cost: +e.target.value})} className="input" /></Field>
             <Field label="前置時間 (天)"><input type="number" value={form.lead_time_days} onChange={e => setForm({...form, lead_time_days: +e.target.value})} className="input" /></Field>
           </div>
-          <button onClick={submit} disabled={submitting} className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">{submitting ? '送出中…' : '送出'}</button>
-        </div>
+          <button type="submit" disabled={submitting} className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">{submitting ? '送出中…' : '送出'}</button>
+        </form>
       )}
 
       <div className="bg-white rounded-xl shadow overflow-hidden">

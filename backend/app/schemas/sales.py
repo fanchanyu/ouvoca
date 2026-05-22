@@ -1,17 +1,17 @@
 from datetime import datetime
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List, Literal, Optional
+from pydantic import BaseModel, EmailStr, Field
 
 
 class CustomerCreate(BaseModel):
-    code: str
-    name: str
-    grade: str = "C"
+    code: str = Field(..., min_length=1)
+    name: str = Field(..., min_length=1)
+    grade: Literal["A", "B", "C", "D"] = "C"
     contact_person: Optional[str] = None
-    contact_email: Optional[str] = None
+    contact_email: Optional[EmailStr] = None
     contact_phone: Optional[str] = None
     payment_terms: Optional[str] = None
-    credit_limit: float = 0
+    credit_limit: float = Field(default=0, ge=0)
 
 
 class CustomerResponse(BaseModel):
@@ -31,8 +31,8 @@ class CustomerResponse(BaseModel):
 
 class SalesOrderItemCreate(BaseModel):
     product_id: str
-    ordered_qty: float
-    unit_price: float = 0
+    ordered_qty: float = Field(..., gt=0)
+    unit_price: float = Field(default=0, ge=0)
     expected_date: Optional[datetime] = None
 
 
