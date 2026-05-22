@@ -123,16 +123,17 @@ def test_factory_insert_then_aggregate_locally(two_factories):
     assert rb.json()["results"]["total"] == 1500, rb.text
 
 
-def test_hq_aggregate_across_factories(two_factories, client):
+def test_hq_aggregate_across_factories(two_factories, seeded_client, admin_headers):
     """HQ 註冊兩廠後，呼叫 /aggregate 應拿到合計 4500（不含 M8）。
     這是 MESH 的核心承諾：跨廠聚合。
+    v3.47: 工廠管理端點加入 RBAC 認證，測試改用 admin_headers。
     """
     # 清舊 registry（測試之間污染防線）
-    client.post("/api/factory/_reset")
+    seeded_client.post("/api/factory/_reset", headers=admin_headers)
 
     # 註冊兩廠到 HQ
     for f in two_factories:
-        r = client.post("/api/factory/register", json={
+        r = seeded_client.post("/api/factory/register", headers=admin_headers, json={
             "factory_id": f["factory_id"],
             "name": f["name"],
             "endpoint": f["url"],
@@ -140,14 +141,15 @@ def test_hq_aggregate_across_factories(two_factories, client):
         assert r.status_code == 200, r.text
 
     # 列表確認
-    r = client.get("/api/factory/list")
+    r = seeded_client.get("/api/factory/list", headers=admin_headers)
     assert r.status_code == 200
     ids = {item["factory_id"] for item in r.json()}
     assert {"ftest-a", "ftest-b"}.issubset(ids)
 
     # 跨廠聚合 M6
-    r = client.post("/api/factory/aggregate",
-                    params={"domain": "inventory", "part_no": "M6-BOLT"})
+    r = seeded_client.post("/api/factory/aggregate",
+                           headers=admin_headers,
+                           params={"domain": "inventory", "part_no": "M6-BOLT"})
     assert r.status_code == 200, r.text
     data = r.json()
 
@@ -160,22 +162,23 @@ def test_hq_aggregate_across_factories(two_factories, client):
     assert data["elapsed_ms"] < 10000, f"聚合太慢：{data['elapsed_ms']}ms"
 
 
-def test_hq_aggregate_handles_offline_factory(two_factories, client):
+def test_hq_aggregate_handles_offline_factory(two_factories, seeded_client, admin_headers):
     """若某廠斷線，HQ 應該回 partial 結果（不是整個 fail）。"""
-    client.post("/api/factory/_reset")
+    seeded_client.post("/api/factory/_reset", headers=admin_headers)
 
     a, b = two_factories
     # 註冊兩廠，但把 b 的 endpoint 改成壞掉的
-    client.post("/api/factory/register", json={
+    seeded_client.post("/api/factory/register", headers=admin_headers, json={
         "factory_id": a["factory_id"], "name": a["name"], "endpoint": a["url"],
     })
-    client.post("/api/factory/register", json={
+    seeded_client.post("/api/factory/register", headers=admin_headers, json={
         "factory_id": b["factory_id"], "name": b["name"],
         "endpoint": "http://127.0.0.1:1",  # 故意壞掉的 port
     })
 
-    r = client.post("/api/factory/aggregate",
-                    params={"domain": "inventory", "part_no": "M6-BOLT", "timeout_seconds": 1.0})
+    r = seeded_client.post("/api/factory/aggregate",
+                           headers=admin_headers,
+                           params={"domain": "inventory", "part_no": "M6-BOLT", "timeout_seconds": 1.0})
     assert r.status_code == 200, r.text
     data = r.json()
 
@@ -187,16 +190,17 @@ def test_hq_aggregate_handles_offline_factory(two_factories, client):
     assert data["total"] == 3000
 
 
-def test_hq_aggregate_does_not_leak_raw_data(two_factories, client):
+def test_hq_aggregate_does_not_leak_raw_data(two_factories, seeded_client, admin_headers):
     """資料主權核心驗證：HQ 從 /aggregate 拿不到任何原始 row。"""
-    client.post("/api/factory/_reset")
+    seeded_client.post("/api/factory/_reset", headers=admin_headers)
     for f in two_factories:
-        client.post("/api/factory/register", json={
+        seeded_client.post("/api/factory/register", headers=admin_headers, json={
             "factory_id": f["factory_id"], "name": f["name"], "endpoint": f["url"],
         })
 
-    r = client.post("/api/factory/aggregate",
-                    params={"domain": "inventory", "part_no": "M6-BOLT"})
+    r = seeded_client.post("/api/factory/aggregate",
+                           headers=admin_headers,
+                           params={"domain": "inventory", "part_no": "M6-BOLT"})
     body = r.text.lower()
 
     # 不可以包含這些「原始資料的字眼」
