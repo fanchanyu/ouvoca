@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import Column, String, Float, Text, DateTime
-from app.database import Base
+from app.core.base import Base  # consistent with all other models
 
 
 class GlossaryItem(Base):

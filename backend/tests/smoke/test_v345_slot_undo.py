@@ -85,3 +85,36 @@ def test_undo_tools_imports_models():
     assert "from app.models.crm_sales import SalesOrder" in src
     # production model class is ProductionOrder (not WorkOrder)
     assert "from app.models.production import ProductionOrder" in src
+
+
+# ════════════════════════════════════════════════════════════════════
+# v3.46 P0: Glossary Alembic migration exists
+# ════════════════════════════════════════════════════════════════════
+
+def test_glossary_alembic_migration_exists():
+    """v002 migration must exist so existing prod Postgres deployments get the table."""
+    migrations = list((ROOT / "backend/alembic/versions").glob("v002*.py"))
+    assert migrations, (
+        "Alembic migration v002_add_glossary_items.py が見つかりません！\n"
+        "既存 PostgreSQL 環境で glossary_items テーブルが作成されません。"
+    )
+    src = migrations[0].read_text(encoding="utf-8")
+    assert "glossary_items" in src, "v002 migration must create glossary_items table"
+    assert "001_initial_baseline" in src, "v002 must chain from 001_initial_baseline"
+
+
+def test_glossary_model_uses_core_base():
+    """GlossaryItem must import Base from app.core.base (not app.database)."""
+    src = (ROOT / "backend/app/models/glossary.py").read_text(encoding="utf-8")
+    assert "from app.core.base import Base" in src, (
+        "glossary.py should import Base from app.core.base "
+        "(consistent with all 19 other models, ensures unified Alembic metadata)"
+    )
+    assert "from app.database import Base" not in src, \
+        "glossary.py must NOT import Base from app.database"
+
+
+def test_glossary_in_models_init():
+    """GlossaryItem must be imported in app/models/__init__.py for Alembic autogenerate."""
+    src = (ROOT / "backend/app/models/__init__.py").read_text(encoding="utf-8")
+    assert "glossary" in src, "app/models/__init__.py must import from glossary module"
