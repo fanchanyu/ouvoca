@@ -39,6 +39,13 @@ export default function App() {
         <Route path="/reports" element={<Reports />} />
         <Route path="/einvoice" element={<EInvoicePage />} />
         <Route path="/approvals" element={<Approvals />} />
+        <Route path="*" element={
+          <div className="flex flex-col items-center justify-center h-screen text-gray-400">
+            <div className="text-7xl mb-4">🔍</div>
+            <div className="text-xl font-semibold text-gray-600">找不到此頁面</div>
+            <div className="mt-2 text-sm">請從左側選單選擇功能模組</div>
+          </div>
+        } />
       </Route>
     </Routes>
   )

@@ -7,6 +7,7 @@ export default function Inventory() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
   const [tab, setTab] = useState<'parts' | 'txns'>('parts')   // v3.23
   const [form, setForm] = useState({
     part_no: '', name: '', category: 'raw_material', unit: 'pcs',
@@ -26,6 +27,7 @@ export default function Inventory() {
 
   async function submit() {
     setError(null)
+    setSubmitting(true)
     try {
       await apiCreatePart(form)
       setShowForm(false)
@@ -33,8 +35,12 @@ export default function Inventory() {
       load()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : '新增失敗')
+    } finally {
+      setSubmitting(false)
     }
   }
+
+  const CATEGORY_LABEL: Record<string,string> = { raw_material:'原料', semi_finished:'半成品', component:'零組件', consumable:'耗材', packaging:'包裝材', finished_good:'成品' }
 
   return (
     <div>
@@ -86,7 +92,7 @@ export default function Inventory() {
             <Field label="單位成本"><input type="number" value={form.unit_cost} onChange={e => setForm({...form, unit_cost: +e.target.value})} className="input" /></Field>
             <Field label="前置時間 (天)"><input type="number" value={form.lead_time_days} onChange={e => setForm({...form, lead_time_days: +e.target.value})} className="input" /></Field>
           </div>
-          <button onClick={submit} className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">送出</button>
+          <button onClick={submit} disabled={submitting} className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">{submitting ? '送出中…' : '送出'}</button>
         </div>
       )}
 
@@ -122,7 +128,7 @@ export default function Inventory() {
                 <tr key={p.id} className="border-t hover:bg-gray-50">
                   <td className="p-3 font-mono">{p.part_no}</td>
                   <td className="p-3">{p.name}</td>
-                  <td className="p-3">{p.category}</td>
+                  <td className="p-3">{CATEGORY_LABEL[p.category] ?? p.category}</td>
                   <td className="p-3 text-right">{p.safety_stock}</td>
                   <td className="p-3 text-right">{p.unit_cost.toFixed(2)}</td>
                   <td className="p-3 text-right">{p.lead_time_days}d</td>

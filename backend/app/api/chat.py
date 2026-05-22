@@ -121,8 +121,8 @@ async def chat_v2(
             try:
                 response = await chat_completion(messages, tools)
             except Exception as exc:
-                log.exception("LLM call failed")
-                assistant_reply = f"LLM 呼叫失敗: {exc}"
+                log.exception("LLM call failed: %s", exc)
+                assistant_reply = "AI 服務暫時無法連線，請稍後再試。"
                 break
 
             tc_list = response.get("tool_calls", []) or []

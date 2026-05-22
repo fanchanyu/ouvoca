@@ -82,11 +82,7 @@ if [ ! -f "$ENV_FILE" ]; then
   msg "  ✓ 已建立 .env" "  ✓ Created .env"
 
   # 自動產生 JWT_SECRET
-  if command -v openssl &> /dev/null; then
-    SECRET=$(openssl rand -hex 32)
-  else
-    SECRET=$(head -c 32 /dev/urandom | xxd -p -c 32)
-  fi
+  SECRET=$(openssl rand -hex 32 2>/dev/null || python3 -c "import secrets; print(secrets.token_hex(32))" 2>/dev/null || echo "CHANGE_ME_$(date +%s)")
 
   # macOS / Linux sed 差異
   if [[ "$OSTYPE" == "darwin"* ]]; then

@@ -11,11 +11,11 @@ class PartCreate(BaseModel):
     unit: str = "pcs"
     specification: Optional[str] = None
     drawing_no: Optional[str] = None
-    min_stock: float = 0
-    max_stock: float = 0
-    safety_stock: float = 0
-    lead_time_days: int = 0
-    unit_cost: float = 0
+    min_stock: float = Field(default=0, ge=0)
+    max_stock: float = Field(default=0, ge=0)
+    safety_stock: float = Field(default=0, ge=0)
+    lead_time_days: int = Field(default=0, ge=0)
+    unit_cost: float = Field(default=0, ge=0)
     is_critical: bool = False
 
 class PartUpdate(BaseModel):
@@ -66,7 +66,7 @@ class InventoryResponse(BaseModel):
 class InventoryTransactionCreate(BaseModel):
     part_id: str
     transaction_type: str
-    qty: float
+    qty: float = Field(..., ne=0)  # zero-qty transactions have no effect; use negative for outbound/adjustment
     reference_type: Optional[str] = None
     reference_id: Optional[str] = None
     source_location: Optional[str] = None

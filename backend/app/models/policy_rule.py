@@ -24,6 +24,7 @@
 """
 from __future__ import annotations
 
+import uuid
 from datetime import datetime, UTC
 
 from sqlalchemy import Column, String, Boolean, Integer, Text, DateTime, JSON
@@ -72,7 +73,7 @@ class PolicyRule(Base, TenantMixin):
     """家規 — 規則資料化，不寫死 code。"""
     __tablename__ = "policy_rules"
 
-    id              = Column(String(36), primary_key=True)
+    id              = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name            = Column(String(200), nullable=False)         # "WO 釋放需有做法"
     description     = Column(Text, nullable=True)                  # 給使用者看的詳細說明
 
@@ -96,7 +97,7 @@ class PolicyAuditLog(Base, TenantMixin):
     """每次規則 evaluate 的稽核 log（給合規 / debug 用）。"""
     __tablename__ = "policy_audit_logs"
 
-    id              = Column(String(36), primary_key=True)
+    id              = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     rule_id         = Column(String(36), nullable=True, index=True)
     trigger         = Column(String(50), nullable=False, index=True)
     action_taken    = Column(String(30), nullable=False)  # 'allowed' / 'blocked' / 'overridden' / 'warned'

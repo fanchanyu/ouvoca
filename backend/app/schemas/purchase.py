@@ -1,11 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
 
 class SupplierCreate(BaseModel):
-    code: str
-    name: str
+    code: str = Field(..., min_length=1, max_length=50)
+    name: str = Field(..., min_length=1)
     tier: str = "T3"
     parent_supplier_id: Optional[str] = None
     contact_person: Optional[str] = None
@@ -31,8 +31,8 @@ class SupplierResponse(BaseModel):
 
 class PurchaseOrderItemCreate(BaseModel):
     part_id: str
-    ordered_qty: float
-    unit_price: float = 0
+    ordered_qty: float = Field(..., gt=0)
+    unit_price: float = Field(default=0, ge=0)
     expected_date: Optional[datetime] = None
 
 class PurchaseOrderCreate(BaseModel):
@@ -73,7 +73,7 @@ class PurchaseOrderResponse(BaseModel):
 class SupplierPriceCreate(BaseModel):
     supplier_id: str
     part_id: str
-    unit_price: float
+    unit_price: float = Field(..., gt=0)
     currency: str = "TWD"
     moq: float = 0
     lead_time_days: int = 0

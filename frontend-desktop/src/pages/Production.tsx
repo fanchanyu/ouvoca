@@ -179,6 +179,8 @@ function Stat({ title, value, color }: { title: string; value: number; color: st
   )
 }
 
+const WO_STATUS: Record<string,string> = { draft:'草稿', released:'已釋放', in_progress:'生產中', completed:'已完工', cancelled:'已取消' }
+
 function StatusBadge({ status }: { status: string }) {
   const m: Record<string, string> = {
     draft: 'bg-gray-100 text-gray-700',
@@ -187,7 +189,7 @@ function StatusBadge({ status }: { status: string }) {
     completed: 'bg-emerald-100 text-emerald-800',
     cancelled: 'bg-red-100 text-red-800',
   }
-  return <span className={`px-2 py-1 rounded-full text-xs ${m[status] || 'bg-gray-100'}`}>{status}</span>
+  return <span className={`px-2 py-1 rounded-full text-xs ${m[status] || 'bg-gray-100'}`}>{WO_STATUS[status] ?? status}</span>
 }
 
 // ────────────────────────────────────────────────────────────

@@ -74,6 +74,7 @@ function JournalsTab() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
 
@@ -108,6 +109,7 @@ function JournalsTab() {
       return
     }
     setErr(null); setMsg(null)
+    setSubmitting(true)
     try {
       const lines: JournalLineInput[] = [
         { account_id: draft.debit_account_id, debit: draft.amount, credit: 0 },
@@ -122,6 +124,7 @@ function JournalsTab() {
       setCreating(false)
       await load()
     } catch (e: unknown) { setErr(e instanceof Error ? e.message : '建立失敗') }
+    finally { setSubmitting(false) }
   }
 
   async function postEntry(entry: JournalEntry) {
@@ -188,9 +191,9 @@ function JournalsTab() {
                 value={draft.amount || ''} onChange={(e) => setDraft({ ...draft, amount: Number(e.target.value) })} />
             </div>
             <div className="flex items-end">
-              <button onClick={createEntry}
-                className="w-full px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
-                ✓ 建立傳票
+              <button onClick={createEntry} disabled={submitting}
+                className="w-full px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50">
+                {submitting ? '送出中…' : '✓ 建立傳票'}
               </button>
             </div>
           </div>

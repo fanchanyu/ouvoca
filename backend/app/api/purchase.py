@@ -139,7 +139,7 @@ async def update_supplier_endpoint(
     db: AsyncSession = Depends(get_db),
     user: UserContext = Depends(require_permission("purchase.supplier.update")),
 ):
-    patch = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
+    patch = data.model_dump(exclude_unset=True)
     s = await svc.update_supplier(db, supplier_id, patch, user=user.raw_user)
     return SupplierResponse.model_validate(s)
 

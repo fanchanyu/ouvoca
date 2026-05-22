@@ -60,6 +60,12 @@ echo [Step 2/5] 設定環境變數 / Configuring environment...
 
 if not exist "backend\.env" (
     copy backend\.env.example backend\.env > nul
+    if errorlevel 1 (
+        echo [ERROR] 找不到 backend\.env.example，安裝中止
+        echo 請確認 ouvoca 資料夾完整解壓縮
+        pause
+        exit /b 1
+    )
 
     REM 用 PowerShell 產生 JWT_SECRET
     for /f %%i in ('powershell -Command "[Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(48)).Replace('+','').Replace('/','').Replace('=','').Substring(0,64)"') do set "SECRET=%%i"

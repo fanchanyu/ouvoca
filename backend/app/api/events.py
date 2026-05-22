@@ -8,10 +8,11 @@ import json
 from datetime import datetime, UTC
 from typing import AsyncGenerator
 
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Depends, Request, Query
 from sse_starlette.sse import EventSourceResponse
 
 from app.events.engine import EventBus, DomainEvent
+from app.core.deps import get_current_user
 from app.core.logging import get_logger
 
 log = get_logger(__name__)
@@ -19,7 +20,11 @@ router = APIRouter(prefix="/api/events", tags=["Events"])
 
 
 @router.get("/recent")
-async def recent_events(name: str = Query(None), limit: int = Query(50, le=500)):
+async def recent_events(
+    name: str = Query(None),
+    limit: int = Query(50, le=500),
+    _user: dict = Depends(get_current_user),
+):
     """Return the most recent events buffered in memory."""
     events = EventBus.get_history(name=name, limit=limit)
     return [
@@ -36,7 +41,10 @@ async def recent_events(name: str = Query(None), limit: int = Query(50, le=500))
 
 
 @router.get("/stream")
-async def event_stream(request: Request) -> EventSourceResponse:
+async def event_stream(
+    request: Request,
+    _user: dict = Depends(get_current_user),
+) -> EventSourceResponse:
     """Server-Sent Events endpoint.
 
     Sends initial backlog + a hello message, then live events as they fire.

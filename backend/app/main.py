@@ -55,8 +55,23 @@ async def lifespan(app: FastAPI):
             log.warning("⚠️  Using SQLite in non-debug mode. Consider PostgreSQL for multi-user.")
 
     # auto-create tables when running on SQLite dev or first prod boot
-    from app.database import init_db
+    from app.database import init_db, AsyncSessionLocal
     await init_db()
+
+    # Startup DB connectivity check — fail fast with clear message
+    try:
+        from sqlalchemy import text as _sql_text
+        async with AsyncSessionLocal() as _probe_session:
+            await _probe_session.execute(_sql_text("SELECT 1"))
+        log.info("✅ DB 連線正常")
+    except Exception as _db_exc:
+        log.critical(
+            "🚨 DB 無法連線！請確認 DATABASE_URL 設定是否正確。\n"
+            "  SQLite: 確認 backend/ 目錄有寫入權限\n"
+            "  PostgreSQL: 確認 DATABASE_URL_PROD 和資料庫服務運行中\n"
+            "  錯誤詳情: %s", _db_exc
+        )
+        raise SystemExit(1)
 
     # register event rules (idempotent)
     import app.events  # noqa: F401
@@ -82,7 +97,6 @@ async def lifespan(app: FastAPI):
     # v3.25：家規 (House Rules) — 灌預設規則（idempotent，含「WO 釋放需有做法」）
     # v3.46：Glossary DB 載入（Phase 2 G-201，重啟後同義詞不丟失）
     from app.services.policy_engine import install_default_rules
-    from app.database import AsyncSessionLocal
     from app.agents.glossary import db_load_glossary
     async with AsyncSessionLocal() as _db:
         try:

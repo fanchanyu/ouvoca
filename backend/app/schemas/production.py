@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
@@ -56,7 +56,7 @@ class BOMItemResponse(BaseModel):
 
 class ProductionOrderCreate(BaseModel):
     product_id: str
-    ordered_qty: float
+    ordered_qty: float = Field(..., gt=0)
     so_id: Optional[str] = None
     scheduled_start: Optional[datetime] = None
     scheduled_end: Optional[datetime] = None

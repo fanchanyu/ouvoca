@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
 
 
 class AccountCreate(BaseModel):
@@ -30,9 +30,15 @@ class JournalLineCreate(BaseModel):
     description: Optional[str] = None
     reference: Optional[str] = None
 
+    @model_validator(mode="after")
+    def check_not_both_zero(self) -> "JournalLineCreate":
+        if self.debit == 0 and self.credit == 0:
+            raise ValueError("借貸雙方不能同時為零")
+        return self
+
 
 class JournalEntryCreate(BaseModel):
-    entry_date: Optional[datetime] = None
+    entry_date: Optional[datetime] = Field(default_factory=datetime.utcnow)
     source_type: Optional[str] = None
     source_id: Optional[str] = None
     description: Optional[str] = None

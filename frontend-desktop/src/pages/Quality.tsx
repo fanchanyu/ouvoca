@@ -5,11 +5,19 @@ export default function Quality() {
   const [inspections, setInspections] = useState<Array<{ id: string; inspection_no: string; part_id: string; accepted_qty: number; rejected_qty: number; status: string }>>([])
   const [ncs, setNcs] = useState<Array<{ id: string; nc_no: string; severity: string; description: string; qty_affected: number }>>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string|null>(null)
 
   useEffect(() => {
-    Promise.all([apiListInspections().catch(() => []), apiListNCs().catch(() => [])])
+    Promise.all([apiListInspections(), apiListNCs()])
       .then(([i, n]) => { setInspections(i); setNcs(n); setLoading(false) })
+      .catch(() => {
+        setLoadError('資料載入失敗，請重新整理頁面或確認網路連線')
+        setLoading(false)
+      })
   }, [])
+
+  const SEVERITY_LABEL: Record<string,string> = { critical:'嚴重', major:'重大', minor:'輕微' }
+  const INSPECT_STATUS: Record<string,string> = { pending:'待檢', passed:'通過', failed:'不合格', in_progress:'檢驗中' }
 
   const totalInspected = inspections.reduce((s, i) => s + (i.accepted_qty + i.rejected_qty), 0)
   const totalRejected = inspections.reduce((s, i) => s + i.rejected_qty, 0)
@@ -17,6 +25,11 @@ export default function Quality() {
 
   return (
     <div>
+      {loadError && (
+        <div className="mx-4 mt-4 p-3 bg-red-50 border border-red-300 rounded-lg text-red-700 text-sm">
+          ⚠️ {loadError}
+        </div>
+      )}
       <h1 className="text-2xl font-bold mb-6">品質管理</h1>
       <div className="grid grid-cols-4 gap-4 mb-6">
         <Stat title="檢驗單" value={inspections.length} />
@@ -47,7 +60,7 @@ export default function Quality() {
                   <td className="p-3 font-mono text-xs">{i.inspection_no}</td>
                   <td className="p-3 text-right">{i.accepted_qty}</td>
                   <td className="p-3 text-right text-red-600">{i.rejected_qty}</td>
-                  <td className="p-3"><span className="px-2 py-1 bg-gray-100 rounded-full text-xs">{i.status}</span></td>
+                  <td className="p-3"><span className="px-2 py-1 bg-gray-100 rounded-full text-xs">{INSPECT_STATUS[i.status] ?? i.status}</span></td>
                 </tr>
               ))
             )}
@@ -77,7 +90,7 @@ export default function Quality() {
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       n.severity === 'critical' ? 'bg-red-100 text-red-800' :
                       n.severity === 'major' ? 'bg-orange-100 text-orange-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>{n.severity}</span>
+                    }`}>{SEVERITY_LABEL[n.severity] ?? n.severity}</span>
                   </td>
                   <td className="p-3">{n.description}</td>
                   <td className="p-3 text-right">{n.qty_affected}</td>

@@ -19,9 +19,11 @@ from typing import Any
 from dataclasses import dataclass, field, asdict
 
 import httpx
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
+from app.core.deps import get_current_user
+from app.core.security import require_permission, UserContext
 from app.core.logging import get_logger
 
 log = get_logger(__name__)
@@ -71,7 +73,10 @@ class AggregateResponse(BaseModel):
 
 # ─── Endpoints ──────────────────────────────────────────────
 @router.post("/register", response_model=FactoryInfo)
-async def register_factory(req: FactoryRegisterRequest):
+async def register_factory(
+    req: FactoryRegisterRequest,
+    _user: UserContext = Depends(require_permission("mesh.factory.register")),
+):
     """Factory node 上線時呼叫，HQ 記下端點以後可以查它。
     冪等：同一個 factory_id 重複註冊 = 更新 endpoint + last_seen。
     """
@@ -99,7 +104,9 @@ async def register_factory(req: FactoryRegisterRequest):
 
 
 @router.get("/list", response_model=list[FactoryInfo])
-async def list_factories():
+async def list_factories(
+    _user: UserContext = Depends(require_permission("mesh.factory.list")),
+):
     """列出所有已註冊的 factory node。"""
     now = time.time()
     return [
@@ -113,7 +120,10 @@ async def list_factories():
 
 
 @router.delete("/{factory_id}")
-async def unregister_factory(factory_id: str):
+async def unregister_factory(
+    factory_id: str,
+    _user: UserContext = Depends(require_permission("mesh.factory.delete")),
+):
     """取消註冊（factory 下線或 admin 手動移除）。"""
     if factory_id not in _registry:
         raise HTTPException(404, f"factory_id={factory_id} 不存在")
@@ -188,7 +198,9 @@ async def aggregate(
 
 # ─── 測試/開發輔助 ─────────────────────────────────────────
 @router.post("/_reset", include_in_schema=False)
-async def _reset():
+async def _reset(
+    _user: UserContext = Depends(require_permission("system.admin")),
+):
     """測試用：清空註冊表。"""
     _registry.clear()
     return {"detail": "registry cleared"}

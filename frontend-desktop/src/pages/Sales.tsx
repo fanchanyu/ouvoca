@@ -55,6 +55,9 @@ export default function Sales() {
 
   useEffect(() => { void load() }, [])
 
+  const SO_STATUS: Record<string,string> = { draft:'草稿', confirmed:'已確認', shipped:'已出貨', cancelled:'已取消', invoiced:'已開票' }
+  const PAYMENT_STATUS: Record<string,string> = { unpaid:'未付款', partial:'部分付款', paid:'已付清', overdue:'逾期' }
+
   const totalRevenue = sos.reduce((sum, s) => sum + s.total_amount, 0)
 
   const cancelSO = async (so: SalesOrder) => {
@@ -125,10 +128,10 @@ export default function Sales() {
                       so.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                       so.status === 'shipped' ? 'bg-green-100 text-green-800' :
                       'bg-blue-100 text-blue-800'
-                    }`}>{so.status}</span>
+                    }`}>{SO_STATUS[so.status] ?? so.status}</span>
                   </td>
                   <td className="p-3 text-right">{so.total_amount.toLocaleString()}</td>
-                  <td className="p-3"><span className="text-xs text-gray-500">{so.payment_status}</span></td>
+                  <td className="p-3"><span className="text-xs text-gray-500">{PAYMENT_STATUS[so.payment_status] ?? so.payment_status}</span></td>
                   <td className="p-3 text-xs">{new Date(so.order_date).toLocaleDateString('zh-TW')}</td>
                   <td className="p-3 text-right">
                     <div className="flex gap-1 justify-end">
@@ -273,7 +276,7 @@ export default function Sales() {
               <tr><td className="text-gray-600 py-1">收貨客戶</td><td>{shipNoteSO.customer?.name || shipNoteSO.customer_id}</td></tr>
               <tr><td className="text-gray-600 py-1">出貨日期</td><td>{new Date().toLocaleDateString('zh-TW')}</td></tr>
               <tr><td className="text-gray-600 py-1">訂單金額</td><td>NT$ {shipNoteSO.total_amount.toLocaleString()}（僅供核對，正式金額以發票為準）</td></tr>
-              <tr><td className="text-gray-600 py-1">訂單狀態</td><td>{shipNoteSO.status}</td></tr>
+              <tr><td className="text-gray-600 py-1">訂單狀態</td><td>{SO_STATUS[shipNoteSO.status] ?? shipNoteSO.status}</td></tr>
             </tbody>
           </table>
           <div className="text-xs text-gray-500 italic mb-4">
@@ -292,8 +295,8 @@ export default function Sales() {
             <tbody>
               <tr><td className="text-gray-600 py-1 w-32">客戶</td><td>{printSO.customer?.name || printSO.customer_id}</td></tr>
               <tr><td className="text-gray-600 py-1">狀態</td>
-                <td><span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">{printSO.status}</span></td></tr>
-              <tr><td className="text-gray-600 py-1">付款狀態</td><td>{printSO.payment_status}</td></tr>
+                <td><span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">{SO_STATUS[printSO.status] ?? printSO.status}</span></td></tr>
+              <tr><td className="text-gray-600 py-1">付款狀態</td><td>{PAYMENT_STATUS[printSO.payment_status] ?? printSO.payment_status}</td></tr>
               <tr><td className="text-gray-600 py-1">金額（含稅）</td><td className="font-bold text-lg text-blue-700">NT$ {printSO.total_amount.toLocaleString()}</td></tr>
               <tr><td className="text-gray-600 py-1">下單日期</td><td>{new Date(printSO.order_date).toLocaleDateString('zh-TW')}</td></tr>
             </tbody>

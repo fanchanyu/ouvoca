@@ -41,19 +41,30 @@ async function request<T>(method: string, path: string, body?: unknown, signal?:
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
 
-  const resp = await fetch(BASE + path, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-    signal,
-  })
+  let resp: Response
+  try {
+    resp = await fetch(BASE + path, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      signal,
+    })
+  } catch (err) {
+    if (err instanceof TypeError) {
+      throw new Error('⚠️ 無法連線到伺服器，請確認網路連線或系統是否在線')
+    }
+    throw err
+  }
 
   let payload: unknown = null
   try { payload = await resp.json() } catch { /* ignore */ }
 
   if (!resp.ok) {
     const msg = (payload as { detail?: string })?.detail || resp.statusText
-    if (resp.status === 401) useAuthStore.getState().logout()
+    if (resp.status === 401) {
+      useAuthStore.getState().logout()
+      window.location.replace('/login')
+    }
     throw new ApiError(resp.status, msg, payload)
   }
   return payload as T
@@ -387,7 +398,7 @@ export const apiCreateBOMItem = (data: { product_id: string; component_part_id: 
 export const reportUrlAR = (overdueOnly = false) =>
   `/api/reports/ar-aging.xlsx?overdue_only=${overdueOnly}`
 export const reportUrlInventoryMonthly = (yyyymm: string) =>
-  `/api/reports/inventory-monthly.xlsx?period=${yyyymm}`
+  `/api/reports/inventory-monthly.xlsx?period_label=${encodeURIComponent(yyyymm)}`
 export const reportUrlTax401 = (year: number, periodNo: number, companyName = '') =>
   `/api/reports/tax-401.html?year=${year}&period_no=${periodNo}&company_name=${encodeURIComponent(companyName)}`
 

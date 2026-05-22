@@ -27,11 +27,7 @@ PUBLIC_PATHS = {
     # token parsing → handler always got 401). Caught by smoke test.
     "/docs", "/redoc", "/openapi.json", "/favicon.ico",
 }
-# Factory node register / list are public for MVP (廠端啟動時自報).
-# 生產環境應加 shared-secret header 或 mTLS 驗證 — TODO.
 PUBLIC_PREFIXES = (
-    "/api/events/",
-    "/api/factory/",
     "/api/tax/tw/validate-tax-id",  # 純驗證算法，無 DB / 無敏感資料（含 /-countries 子路徑）
 )
 

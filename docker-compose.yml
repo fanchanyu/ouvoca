@@ -28,7 +28,7 @@ services:
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      ALLOW_DEMO_BYPASS: ${ALLOW_DEMO_BYPASS:-true}
+      ALLOW_DEMO_BYPASS: ${ALLOW_DEMO_BYPASS:-false}  # 安全預設：false；僅測試環境可改 true（Bearer demo = 超管）
       # CORS：同時允許 localhost 和 127.0.0.1 兩種訪問
       # （Windows 上 localhost 可能解析到 IPv6 ::1，瀏覽器可能直接用 127.0.0.1）
       CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173","http://localhost:3000","http://127.0.0.1:3000","http://localhost:8080","http://127.0.0.1:8080"]'

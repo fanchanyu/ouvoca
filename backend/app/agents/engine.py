@@ -164,6 +164,12 @@ async def execute_tool(name: str, args: dict, db=None, user=None) -> str:
     if meta is None or meta.func is None:
         return json.dumps({"error": f"Unknown tool: {name}"}, ensure_ascii=False)
 
+    # NOTE: meta.required_permission is stored in registry and visible via to_llm_dict().
+    # Engine-level enforcement is NOT done here because the JWT carries "permissions": []
+    # (actual RBAC permissions live in DB, not JWT). Permission enforcement must happen at
+    # the API layer (agents_exec.py) via RBAC service lookup before execute_tool() is called.
+    # Phase 3 task: add async RBAC check here using db session when available.
+
     # v3.40 M5：hard-write 凍結檢查（讓「解凍」工具本身可以執行）
     if (meta.risk_tier == RiskTier.HARD_WRITE
             and name != "toggle_hard_write_freeze_with_confirm"
@@ -247,7 +253,7 @@ async def execute_tool(name: str, args: dict, db=None, user=None) -> str:
         return json.dumps(result, default=str, ensure_ascii=False)
     except Exception as exc:
         log.exception("Tool %s execution failed", name)
-        return json.dumps({"error": str(exc)}, ensure_ascii=False)
+        return json.dumps({"error": "工具執行失敗，請稍後再試。", "code": "TOOL_ERROR"}, ensure_ascii=False)
 
 
 _NO_REGISTRY_META: set[str] = set()
