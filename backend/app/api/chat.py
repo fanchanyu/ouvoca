@@ -149,7 +149,25 @@ async def chat_v2(
         else:
             assistant_reply = "處理超過最大工具呼叫回合，請簡化您的查詢。"
 
-    # 5) Persist assistant reply
+    # 5) Detect slot-filling needs_input from tool results
+    needs_slot_input = False
+    slot_ask: Optional[str] = None
+    for tc in tool_calls_log:
+        raw = tc.get("result", "")
+        if isinstance(raw, str) and raw.startswith("{"):
+            try:
+                parsed = json.loads(raw)
+                if parsed.get("needs_input") is True:
+                    needs_slot_input = True
+                    slot_ask = parsed.get("ask")
+                    # 若 LLM 沒產生文字回覆，直接用 ask 文字讓使用者看到問題
+                    if not assistant_reply.strip():
+                        assistant_reply = slot_ask or "請補充必要資訊。"
+                    break
+            except Exception:
+                pass
+
+    # 6) Persist assistant reply
     db.add(ConversationLog(
         id=str(uuid.uuid4()), session_id=session_id,
         user_id=user_id_for_log, role="assistant",
@@ -161,6 +179,8 @@ async def chat_v2(
     return ChatResponse(
         reply=assistant_reply, agent=intent, session_id=session_id,
         tool_calls=tool_calls_log if tool_calls_log else None,
+        needs_slot_input=needs_slot_input or None,
+        slot_ask=slot_ask,
     )
 
 

@@ -158,6 +158,8 @@ export default function Chat() {
   )
   // v3.41 P4：是否顯示「已釘訊息」面板
   const [showPinned, setShowPinned] = useState(false)
+  // v3.45：槽位填充反問 — 當 backend 回 needs_slot_input=true 時高亮輸入框
+  const [slotAsk, setSlotAsk] = useState<string | null>(null)
 
   // 自動捲到底
   useEffect(() => {
@@ -196,6 +198,7 @@ export default function Chat() {
     if (!text || loading) return
     const userMsgId = 'um-' + Math.random().toString(36).slice(2, 10)
     setMessages(prev => [...prev, { id: userMsgId, role: 'user', content: text, timestamp: Date.now() }])
+    setSlotAsk(null)  // v3.45：使用者送出時清除槽位提示
     setInput('')
     setLoading(true)
     // v3.38 N8：建立可取消的請求
@@ -210,6 +213,10 @@ export default function Chat() {
       const card = extractCard(data.tool_calls)
       // v3.37 D1-2/D1-3：自動觸發 PDF / Excel 下載 — 小白不必點連結
       triggerAutoDownload(data.tool_calls)
+      // v3.45：槽位填充 — 後端缺欄位時設定反問提示
+      if (data.needs_slot_input && data.slot_ask) {
+        setSlotAsk(data.slot_ask)
+      }
       const assistantId = 'am-' + Math.random().toString(36).slice(2, 10)
       setMessages(prev => [...prev, {
         id: assistantId,
@@ -573,9 +580,13 @@ export default function Chat() {
               void send()
             }
           }}
-          placeholder="輸入您的問題…"
+          placeholder={slotAsk ?? "輸入您的問題…"}
           rows={1}
-          className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-base border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none max-h-32"
+          className={`flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-base border rounded-xl focus:outline-none resize-none max-h-32 ${
+            slotAsk
+              ? 'border-amber-400 focus:ring-2 focus:ring-amber-400 bg-amber-50 placeholder-amber-600'
+              : 'focus:ring-2 focus:ring-blue-500'
+          }`}
         />
         {messages.some(m => m.role === 'assistant' && !m.isError) && !loading && (
           <button

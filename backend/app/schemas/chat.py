@@ -17,6 +17,9 @@ class ChatResponse(BaseModel):
     # v3.14：當 LLM_API_KEY 未設時，前端依此 flag render AI 申請引導卡
     setup_required: Optional[bool] = None
     setup_reason: Optional[str] = None  # 'no_api_key' / 'invalid_key' / 'quota_exceeded'
+    # v3.45：槽位填充缺欄位時，前端亮起「輸入提示」UI
+    needs_slot_input: Optional[bool] = None
+    slot_ask: Optional[str] = None  # 反問語句，前端可顯示為輸入框 placeholder
 
 
 class ConversationLogResponse(BaseModel):

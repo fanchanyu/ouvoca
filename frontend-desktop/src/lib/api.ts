@@ -447,6 +447,9 @@ export interface ChatResponse {
   // v3.14：當 LLM_API_KEY 未設或失效時，前端依此 flag render 申請引導卡
   setup_required?: boolean
   setup_reason?: 'no_api_key' | 'invalid_key' | 'quota_exceeded'
+  // v3.45：槽位填充缺欄位時，後端主動問使用者
+  needs_slot_input?: boolean
+  slot_ask?: string  // 反問語句 — 前端可用作 textarea placeholder
 }
 
 export const apiHealth = () => api.get<HealthResponse>('/health')
