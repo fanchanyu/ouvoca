@@ -110,7 +110,8 @@ echo -e "${B}[Gate 3 · 文件閘 / Doc Gate]${N}"
 if [ -d scripts/build-pdfs/node_modules ]; then
   run_check "PDF builder dry-run (產 74 份)" \
     "cd scripts/build-pdfs && node build.mjs"
-  # 74 PDFs: 72 base + v3.44 RENAME_NOTICE (ZH+EN, erpilot → Ouvoca 法律合規)
+  # 74 PDFs: files 00-38 (some numbers are single/combined; 02 bilingual, 04 not built)
+  # Uses -ge: gate passes if actual >= expected
   EXPECTED=74
   ACTUAL=$(ls docs/pdf/*.pdf 2>/dev/null | wc -l)
   if [ "$ACTUAL" -ge "$EXPECTED" ]; then
