@@ -65,7 +65,7 @@ export const zhTW = {
   },
   // 登入
   login: {
-    title: 'LLM-ERP',
+    title: 'Ouvoca',
     subtitle: 'AI 原生企業資源規劃系統',
     username: '帳號',
     password: '密碼',
@@ -276,8 +276,8 @@ export const zhTW = {
     superAdminHint: '您是系統最高權限使用者，可執行任何操作。',
     noPerms: '無權限',
   },
-  // erpilot 原創語彙（v3.24 — 不抄鼎新/Salesforce，創新詞給小白）
-  erpilotTerms: {
+  // Ouvoca 原創語彙（v3.24 — 不抄鼎新/Salesforce，創新詞給小白）
+  ouvocaTerms: {
     sprout: '新苗',           // Lead → 新苗 (Sprout)：種子發芽變客戶
     sproutHint: '潛在客戶（從展會 / 廣告 / 介紹來）— 像種子，每天澆水會長成正式客戶',
     chase: '追單',            // Opportunity → 追單 (Chase)：每天追的單

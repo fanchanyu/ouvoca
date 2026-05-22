@@ -107,7 +107,7 @@ def _styles():
     }
 
 
-def _company_header(s, company_name: str = "erpilot 範例公司",
+def _company_header(s, company_name: str = "Ouvoca 範例公司",
                     tax_id: str = "", address: str = "", phone: str = "",
                     logo_b64: str = "") -> list:
     """頂部公司資訊區（v3.37 統編/地址/電話、v3.39 LOGO）。"""
@@ -135,7 +135,7 @@ def _company_header(s, company_name: str = "erpilot 範例公司",
         sub_parts.append(address[:60])
     if sub_parts:
         out.append(Paragraph(" · ".join(sub_parts), s["small"]))
-    out.append(Paragraph("Powered by erpilot", s["small"]))
+    out.append(Paragraph("Powered by Ouvoca", s["small"]))
     out.append(Spacer(1, 0.4 * cm))
     return out
 
@@ -151,10 +151,10 @@ async def _resolve_company(db: AsyncSession) -> dict:
         select(Tenant).where(Tenant.code == "HQ")
     )).scalar_one_or_none()
     if t is None:
-        return {"name": "erpilot 範例公司", "tax_id": "", "address": "", "phone": ""}
+        return {"name": "Ouvoca 範例公司", "tax_id": "", "address": "", "phone": ""}
     settings = t.settings or {}
     return {
-        "name": settings.get("name") or t.name or "erpilot 範例公司",
+        "name": settings.get("name") or t.name or "Ouvoca 範例公司",
         "tax_id": settings.get("tax_id", ""),
         "address": settings.get("address", ""),
         "phone": settings.get("phone", ""),

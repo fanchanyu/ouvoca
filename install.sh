@@ -115,8 +115,8 @@ done
 if [ "$port_busy" -eq 1 ]; then
   msg "${RED}部分 port 已被佔用，請關閉佔用程式或編輯 docker-compose.yml${NC}" \
       "${RED}Some ports in use; close them or edit docker-compose.yml${NC}"
-  msg "  常見：之前的 erpilot 未關 → 先跑 'docker compose down'" \
-      "  Common: prior erpilot still up → run 'docker compose down' first"
+  msg "  常見：之前的 Ouvoca 未關 → 先跑 'docker compose down'" \
+      "  Common: prior Ouvoca still up → run 'docker compose down' first"
   exit 1
 fi
 msg "  ✅ 所有 port 都可用" "  ✅ All ports available"

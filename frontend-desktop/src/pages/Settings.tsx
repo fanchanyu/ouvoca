@@ -130,7 +130,7 @@ function AiSettingsSection() {
       </div>
       <p className="text-sm text-gray-500 mb-4">
         申請 LLM API Key 啟用對話式 CRUD（查 / 增 / 改 / 刪 用講的）。
-        <strong className="ml-1">不設也能用所有非 AI 功能</strong>，但會少了 erpilot 最大的賣點。
+        <strong className="ml-1">不設也能用所有非 AI 功能</strong>，但會少了 Ouvoca 最大的賣點。
       </p>
 
       {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mb-3 text-sm">{err}</div>}
@@ -232,7 +232,7 @@ function AiSettingsSection() {
       <div className="mt-4 text-xs text-gray-600 bg-blue-50 rounded p-3">
         📖 不知道怎麼申請？看完整教學：
         <a
-          href="https://github.com/fanchanyu/erpilot/blob/main/docs/HOW_TO_GET_LLM_API_KEY_ZH.md"
+          href="https://github.com/fanchanyu/ouvoca/blob/main/docs/HOW_TO_GET_LLM_API_KEY_ZH.md"
           target="_blank" rel="noopener noreferrer"
           className="text-blue-600 underline ml-1"
         >
@@ -516,15 +516,15 @@ function SystemInfoSection() {
   return (
     <section className="bg-white rounded-xl shadow p-6">
       <h2 className="text-lg font-semibold mb-1">ℹ️ 系統資訊</h2>
-      <p className="text-sm text-gray-500 mb-4">關於 erpilot 此安裝</p>
+      <p className="text-sm text-gray-500 mb-4">關於 Ouvoca 此安裝</p>
 
       <div className="grid md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
         <InfoRow label="版本" value="v3.13" />
         <InfoRow label="作者" value={<a className="text-blue-600 hover:underline" href="https://github.com/fanchanyu" target="_blank" rel="noopener noreferrer">by Peter</a>} />
         <InfoRow label="授權" value="AGPL-3.0 / Small Business / Commercial" />
-        <InfoRow label="文件" value={<a className="text-blue-600 hover:underline" href="https://github.com/fanchanyu/erpilot" target="_blank" rel="noopener noreferrer">GitHub Repo</a>} />
+        <InfoRow label="文件" value={<a className="text-blue-600 hover:underline" href="https://github.com/fanchanyu/ouvoca" target="_blank" rel="noopener noreferrer">GitHub Repo</a>} />
         <InfoRow label="小小企業免費門檻" value="≤ 20 concurrent users" />
-        <InfoRow label="商業授權諮詢" value={<a className="text-blue-600 hover:underline" href="https://github.com/fanchanyu/erpilot/blob/main/LICENSE-COMMERCIAL.md" target="_blank" rel="noopener noreferrer">查看方案</a>} />
+        <InfoRow label="商業授權諮詢" value={<a className="text-blue-600 hover:underline" href="https://github.com/fanchanyu/ouvoca/blob/main/LICENSE-COMMERCIAL.md" target="_blank" rel="noopener noreferrer">查看方案</a>} />
       </div>
     </section>
   )

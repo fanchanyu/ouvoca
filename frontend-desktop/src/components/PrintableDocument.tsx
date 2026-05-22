@@ -42,8 +42,8 @@ export default function PrintableDocument({ title, onClose, children }: Props) {
       <style>{`
         @media print {
           body * { visibility: hidden; }
-          .erpilot-print-area, .erpilot-print-area * { visibility: visible; }
-          .erpilot-print-area {
+          .ouvoca-print-area, .ouvoca-print-area * { visibility: visible; }
+          .ouvoca-print-area {
             position: absolute; top: 0; left: 0; width: 100%;
             background: white; padding: 20mm 15mm;
           }
@@ -71,7 +71,7 @@ export default function PrintableDocument({ title, onClose, children }: Props) {
           </div>
 
           {/* 列印區域 — 列印時只剩這 */}
-          <div className="erpilot-print-area p-6">
+          <div className="ouvoca-print-area p-6">
             {children}
           </div>
 
@@ -92,7 +92,7 @@ interface DocHeaderProps {
   docType: string         // 「採購單」/「銷售單」/「出貨單」
   docNo: string
   date: string
-  companyName?: string    // 預設 erpilot 演示公司
+  companyName?: string    // 預設 Ouvoca 演示公司
 }
 
 export function DocHeader({ docType, docNo, date, companyName = '示範公司股份有限公司' }: DocHeaderProps) {
@@ -132,7 +132,7 @@ export function DocFooter({ note }: { note?: string }) {
         </div>
       </div>
       <div className="text-center text-xs text-gray-400 mt-6">
-        — 本單據由 erpilot 開立 · https://github.com/fanchanyu/erpilot —
+        — 本單據由 Ouvoca 開立 · https://github.com/fanchanyu/ouvoca —
       </div>
     </div>
   )

@@ -34,7 +34,7 @@ LEGAL / 法律說明
   - 不可僅依 LLM 之 summary 自動執行
   - 重大金額 / 重大客戶 / 重大供應商交易應額外有主管覆核流程
 
-於適用法律所允許之最大範圍內，erpilot 對於 LLM 抽錯 slot 或客戶
+於適用法律所允許之最大範圍內，Ouvoca 對於 LLM 抽錯 slot 或客戶
 誤按確認所衍生之契約 / 財務 / 稅務後果，不承擔責任。詳見
 docs/CONVERSATIONAL_PLANNING_DESIGN_ZH.md §6 累積適用之聲明。
 

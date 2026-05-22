@@ -6,11 +6,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        歡迎成為 erpilot contributor 🙏
+        歡迎成為 Ouvoca contributor 🙏
 
         第一次貢獻前請花 30 秒填這份確認，讓我們留紀錄。
 
-        **完整條款**：[`CLA.md`](https://github.com/fanchanyu/erpilot/blob/main/CLA.md)
+        **完整條款**：[`CLA.md`](https://github.com/fanchanyu/ouvoca/blob/main/CLA.md)
 
         > ⚠️ 後續每個 commit 還是要加 `git commit -s`（Signed-off-by trailer）。
 
@@ -48,7 +48,7 @@ body:
     attributes:
       label: 我確認以下事項
       options:
-        - label: 我已讀完 [CLA.md](https://github.com/fanchanyu/erpilot/blob/main/CLA.md) 全部條款
+        - label: 我已讀完 [CLA.md](https://github.com/fanchanyu/ouvoca/blob/main/CLA.md) 全部條款
           required: true
         - label: 我同意把我提交的 contribution 授權給維護者，可用 AGPL-3.0 **及**其他條款（含商業授權）再授權
           required: true

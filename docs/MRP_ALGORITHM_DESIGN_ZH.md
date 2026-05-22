@@ -1,12 +1,12 @@
 # 多階時序化 MRP-II 演算法設計（Multi-Echelon Time-Phased MRP-II）
 
-> **本檔性質**：演算法**方法論文件**，描述 erpilot 之 MRP-II 引擎（v3.25.10）所採用之經典作業研究方法、複雜度分析、實作選擇與驗證策略。寫作風格採學術論文章節格式。
+> **本檔性質**：演算法**方法論文件**，描述 Ouvoca 之 MRP-II 引擎（v3.25.10）所採用之經典作業研究方法、複雜度分析、實作選擇與驗證策略。寫作風格採學術論文章節格式。
 
 ---
 
 ## 摘要（Abstract）
 
-erpilot v3.25.10 實作工業界標準之 **MRP-II（Manufacturing Resource Planning II）** 演算法，整合 Orlicky (1975) 之 Low-Level Code (LLC) 排序、Vollmann 等 (2005) 之時序化淨需求計算、以及五種批量決策政策（含 Wagner & Whitin 1958 之最佳化動態規劃）。此設計修正 v3.25.9 之兩個演算法正確性缺陷：(i) 缺乏 LLC 排序導致共用料件被重複扣抵；(ii) 缺乏 lead-time offset 導致計畫永遠遲到。本文敘述方法論、複雜度為 O(|V|·T²)、以及採用 Wagner-Whitin 1958 原始論文之數值範例與 Silver-Meal 1973 之啟發法 30% 上界進行驗證。
+Ouvoca v3.25.10 實作工業界標準之 **MRP-II（Manufacturing Resource Planning II）** 演算法，整合 Orlicky (1975) 之 Low-Level Code (LLC) 排序、Vollmann 等 (2005) 之時序化淨需求計算、以及五種批量決策政策（含 Wagner & Whitin 1958 之最佳化動態規劃）。此設計修正 v3.25.9 之兩個演算法正確性缺陷：(i) 缺乏 LLC 排序導致共用料件被重複扣抵；(ii) 缺乏 lead-time offset 導致計畫永遠遲到。本文敘述方法論、複雜度為 O(|V|·T²)、以及採用 Wagner-Whitin 1958 原始論文之數值範例與 Silver-Meal 1973 之啟發法 30% 上界進行驗證。
 
 **關鍵字**：MRP-II、Low-Level Code、Wagner-Whitin、批量決策、多階 BOM、作業研究
 
@@ -16,7 +16,7 @@ erpilot v3.25.10 實作工業界標準之 **MRP-II（Manufacturing Resource Plan
 
 物料需求規劃（Material Requirements Planning, MRP）為製造業 ERP 之核心模組，旨在依主生產排程（Master Production Schedule, MPS）反推各層級料件之**何時下單、下多少**。Orlicky (1975) 於 IBM 任職時奠定其方法論基礎，後續演進為包含產能與成本面之 MRP-II。
 
-erpilot v3.25.9 之前的 MRP 實作存在兩項已知缺陷：
+Ouvoca v3.25.9 之前的 MRP 實作存在兩項已知缺陷：
 
 1. **單階爆破**：僅展開 BOM 一階，2+ 階半成品結構無法正確聚合需求。v3.25.9 修正為遞迴爆破。
 2. **缺 LLC 排序**：當同一料件出現於多個層級（如螺絲同時用於 A 產品與 A 之子組件），未按 LLC 排序之 netting 可能重複扣抵 on-hand 或安全庫存，違反 Orlicky (1975, §4) 之正確性原則。
@@ -174,7 +174,7 @@ backend/app/services/mrp_advanced.py
 
 1. **LLC 從 leaf 向上 vs root 向下**：採後者（BFS from roots），因 BOM 通常 root 數遠少於 leaf 數，BFS frontier 較小。
 2. **Persistence**：僅持久化 $G(t) > 0$ 或 $R(t) > 0$ 之 MrpItem，節省 DB 空間（典型工廠 sparse rate ~70%）。
-3. **半成品識別**：沿用 erpilot 既有慣例 `Part.part_no == Product.product_no`，避免新增 join table。
+3. **半成品識別**：沿用 Ouvoca 既有慣例 `Part.part_no == Product.product_no`，避免新增 join table。
 4. **Cost rollup 與 MRP 共用 LLC**：因兩者皆需 topological order traversal。
 
 ---
@@ -217,7 +217,7 @@ backend/app/services/mrp_advanced.py
 
 | 議題 | 為何不做 | 將來方向 |
 |---|---|---|
-| **隨機需求 / 安全庫存最佳化** | erpilot 為確定性 MRP；隨機版本需 (Q, r) policy 或多階 stochastic | Clark & Scarf (1960) 多階最佳；Graves & Willems (2000) safety stock placement |
+| **隨機需求 / 安全庫存最佳化** | Ouvoca 為確定性 MRP；隨機版本需 (Q, r) policy 或多階 stochastic | Clark & Scarf (1960) 多階最佳；Graves & Willems (2000) safety stock placement |
 | **產能限制（CRP）** | 本版本不約束 work center capacity；現實工廠 CRP 是後續 pass | Capacitated Lot-Sizing Problem (CLSP) — NP-hard，需 MIP solver |
 | **替代料**（alternate parts） | 需擴展 BOMGraph 為替代圖 | Sprint X：substitution graph + cost-ranked matching |
 | **工序路由（Routing）** | 本版本僅料件層級，未含工序與工作中心 | Sprint Y：Operation precedence DAG + Pinedo 排程 |
@@ -261,13 +261,13 @@ backend/app/services/mrp_advanced.py
 >
 >    上述假設於實務多不嚴格成立。若貴司情境偏離上述假設過遠，演算法輸出可能與最佳實務有顯著差距。
 >
-> 4. **不擔保條款**：於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），erpilot 對於下列事項不承擔責任：
+> 4. **不擔保條款**：於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），Ouvoca 對於下列事項不承擔責任：
 >    - 因採用本演算法輸出所衍生之**過量採購、缺料停線、庫存減損**等業務後果
 >    - 因實際情境偏離演算法假設所造成之**規劃失準**
 >    - 因 BOM / 庫存 / lead-time 等輸入資料不正確所造成之**錯誤計畫**
 >    - 第三方（如供應商、客戶）依本計畫採取行動所衍生之**契約爭議**
 >
-> 5. **學術引用之中立性**：本檔對 Wagner-Whitin、Silver-Meal 等方法之引用**不代表 erpilot 或原作者所屬機構**對任何使用情境作擔保。讀者如需學術精確性，建議直接閱讀原始論文。
+> 5. **學術引用之中立性**：本檔對 Wagner-Whitin、Silver-Meal 等方法之引用**不代表 Ouvoca 或原作者所屬機構**對任何使用情境作擔保。讀者如需學術精確性，建議直接閱讀原始論文。
 >
 > ### 建議實務做法
 >
@@ -313,6 +313,6 @@ backend/app/services/mrp_advanced.py
 ---
 
 **最後更新**：2026-05-20（v3.25.10）
-**作者**：erpilot 工程團隊（含 IE/OR 學術方法論引用）
+**作者**：Ouvoca 工程團隊（含 IE/OR 學術方法論引用）
 **版本**：1.0
 **English version**：[`MRP_ALGORITHM_DESIGN_EN.md`](./MRP_ALGORITHM_DESIGN_EN.md)

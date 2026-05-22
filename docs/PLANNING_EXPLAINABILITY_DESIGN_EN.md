@@ -1,6 +1,6 @@
 # Explainable Planning + TOC Bottleneck Analysis Design — v3.27
 
-> **Nature of this document**: Cross-domain methodology paper spanning **Operations Research / Algorithms / ERP / Explainable AI**, describing erpilot v3.27's **Explainable Planning** engine and **Goldratt (1984) Theory of Constraints (TOC)** bottleneck analysis module — design, implementation, and validation.
+> **Nature of this document**: Cross-domain methodology paper spanning **Operations Research / Algorithms / ERP / Explainable AI**, describing Ouvoca v3.27's **Explainable Planning** engine and **Goldratt (1984) Theory of Constraints (TOC)** bottleneck analysis module — design, implementation, and validation.
 
 > 📘 Prerequisites: [`MRP_ALGORITHM_DESIGN_EN.md`](./MRP_ALGORITHM_DESIGN_EN.md) (v3.25.10) / [`MRP_CAPACITY_AWARE_DESIGN_EN.md`](./MRP_CAPACITY_AWARE_DESIGN_EN.md) (v3.26)
 
@@ -8,7 +8,7 @@
 
 ## Abstract
 
-While erpilot v3.25.10 and v3.26 achieve operations-research rigor for MRP-II and CLSP heuristics respectively, their outputs remain **black-box** — customers cannot answer fundamental questions like "Why are we pulling so many M6 bolts next week?" This paper describes v3.27's three pillars: (i) **Provenance Graph** [Cheney, Chiticariu & Tan 2009] — tracing upstream causal chain for any planned order; (ii) **TOC Five-Focusing Steps** [Goldratt 1984, 1990] — automatic bottleneck identification from v3.26's CRP load with action suggestions; (iii) **OAT Sensitivity Analysis** [Saltelli et al. 2008] — marginal effect of +20% capacity. We argue these three modules form a **research-grade contribution at the intersection of IE/Algo/ERP/AI**, validated via 12 structural-invariant tests including Schragenheim-Ronen's (1990) 0.85 queueing threshold.
+While Ouvoca v3.25.10 and v3.26 achieve operations-research rigor for MRP-II and CLSP heuristics respectively, their outputs remain **black-box** — customers cannot answer fundamental questions like "Why are we pulling so many M6 bolts next week?" This paper describes v3.27's three pillars: (i) **Provenance Graph** [Cheney, Chiticariu & Tan 2009] — tracing upstream causal chain for any planned order; (ii) **TOC Five-Focusing Steps** [Goldratt 1984, 1990] — automatic bottleneck identification from v3.26's CRP load with action suggestions; (iii) **OAT Sensitivity Analysis** [Saltelli et al. 2008] — marginal effect of +20% capacity. We argue these three modules form a **research-grade contribution at the intersection of IE/Algo/ERP/AI**, validated via 12 structural-invariant tests including Schragenheim-Ronen's (1990) 0.85 queueing threshold.
 
 **Keywords**: Explainable AI, Theory of Constraints, data provenance, sensitivity analysis, ERP
 
@@ -214,7 +214,7 @@ See [`PLANNING_EXPLAINABILITY_DESIGN_ZH.md`](./PLANNING_EXPLAINABILITY_DESIGN_ZH
 >    - **TOC**: 0.85 threshold from G/G/1 queue assumption; may differ for multi-server / batch / priority cases
 >    - **OAT**: doesn't capture factor interactions [Saltelli 2008]
 >
-> 6. **Disclaimer**: **to the maximum extent permitted by applicable law**, erpilot assumes no responsibility for:
+> 6. **Disclaimer**: **to the maximum extent permitted by applicable law**, Ouvoca assumes no responsibility for:
 >    - **Erroneous accusations** against suppliers/customers/employees based on this explanation
 >    - **Capital investment errors** due to TOC bottleneck mis-identification
 >    - **Planning inaccuracy** from counterfactual deviating from reality
@@ -277,6 +277,6 @@ See [`PLANNING_EXPLAINABILITY_DESIGN_ZH.md`](./PLANNING_EXPLAINABILITY_DESIGN_ZH
 ---
 
 **Last updated**: 2026-05-20 (v3.27)
-**Authors**: erpilot engineering team (with IE/OR/AI cross-domain academic methodology)
+**Authors**: Ouvoca engineering team (with IE/OR/AI cross-domain academic methodology)
 **Version**: 1.0
 **Chinese version**: [`PLANNING_EXPLAINABILITY_DESIGN_ZH.md`](./PLANNING_EXPLAINABILITY_DESIGN_ZH.md)

@@ -5,19 +5,19 @@
  * 點「下次再說」會關掉並 localStorage 記住 → 永遠不再跳。
  *
  * 4 步驟：
- *  1. 歡迎 + erpilot 是什麼
+ *  1. 歡迎 + Ouvoca 是什麼
  *  2. 載入示範資料（不想等帶我去 settings）
  *  3. 申請 LLM API Key 啟用 AI 對話（不想等帶我去 settings）
  *  4. 4 個快速試試（chat / 庫存 / 銷售 / 設定）
  *
  * 觸發條件：
- *  - localStorage 沒 erpilot_onboarding_done flag
+ *  - localStorage 沒 ouvoca_onboarding_done flag
  *  - 在 Layout 內全頁顯示（modal）
  */
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-const LS_KEY = 'erpilot_onboarding_done'
+const LS_KEY = 'ouvoca_onboarding_done'
 
 export default function OnboardingTour() {
   const [open, setOpen] = useState(false)
@@ -47,10 +47,10 @@ export default function OnboardingTour() {
   const steps = [
     {
       icon: '👋',
-      title: '歡迎使用 erpilot',
+      title: '歡迎使用 Ouvoca',
       body: (
         <>
-          <p>erpilot 是給 50-100 人小型製造業的<strong>對話式 ERP</strong>。</p>
+          <p>Ouvoca 是給 50-100 人小型製造業的<strong>對話式 ERP</strong>。</p>
           <p className="mt-2">不用學系統、不用受訓 — <strong>用講的就會用</strong>。</p>
           <p className="mt-2 text-sm text-gray-500">
             這個歡迎引導會帶你 4 步走完最重要的設定。隨時可以 [下次再說]。

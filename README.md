@@ -1,4 +1,4 @@
-# erpilot — Conversational AI-Native ERP for SMB Manufacturers
+# Ouvoca — Conversational AI-Native ERP for SMB Manufacturers
 
 > 🇹🇼 **給 50-100 人小型製造業的桌機對話式 ERP** — 講話就能查/增/改/刪，AI 取代教育訓練。
 >
@@ -6,10 +6,16 @@
 
 [![Tests](https://img.shields.io/badge/tests-287%20passing-brightgreen)]()
 [![Gates](https://img.shields.io/badge/self--verify-7%2F7%20green-brightgreen)]()
-[![Docs](https://img.shields.io/badge/PDFs-72%20bilingual-blue)]()
+[![Docs](https://img.shields.io/badge/PDFs-74%20bilingual-blue)]()
 [![License](https://img.shields.io/badge/license-AGPL--3.0%20%2B%20SBL%20%2B%20Commercial-blue)](./LICENSE)
 [![Version](https://img.shields.io/badge/version-3.12-blueviolet)]()
 [![Author](https://img.shields.io/badge/by-Peter-lightgrey)](https://github.com/fanchanyu)
+
+> 📋 **v3.44 — 專案重命名 / Project Renamed (2026-05-22)**
+> 🇹🇼 **原專案名 `erpilot` 因撞 ERPilot LLC / ERPilot.in 等既有商標**，自 2026-05-22 起正式更名為 **Ouvoca**。
+> 🇺🇸 **Renamed from `erpilot` to `Ouvoca`** on 2026-05-22 due to trademark conflict with ERPilot LLC / ERPilot.in.
+> 📄 詳細公告 / Full Notice: [中文](./docs/RENAME_NOTICE_ZH.md) · [English](./docs/RENAME_NOTICE_EN.md)
+> 🙏 對既有商標權人之**正式道歉聲明**已含於上述文件。
 
 > ⚡ **v3.0 戰略軸轉 / Strategic Pivot (2026-05-15)**
 > 🇹🇼 砍 LINE Bot / Mobile App / 外協協同三線，全力做桌機對話式 ERP。
@@ -50,23 +56,23 @@
 
 ## 🙋 你是誰？/ Who Are You?
 
-🇹🇼 erpilot 有 3 種讀者，**請點下面的連結直接跳到你需要的章節**：
-🇺🇸 erpilot has 3 audiences. **Jump to your section**:
+🇹🇼 Ouvoca 有 3 種讀者，**請點下面的連結直接跳到你需要的章節**：
+🇺🇸 Ouvoca has 3 audiences. **Jump to your section**:
 
 | 我是... / I am... | 我需要... / I need... | 跳到 / Jump to |
 |---|---|---|
-| 👔 **老闆 / 採購 / 業務 / 倉管**<br>Boss / Buyer / Sales / Warehouse | 我要**用** erpilot，不會寫程式<br>I want to **use** erpilot, no coding | 👉 [**5 分鐘安裝指南**](#-5-分鐘安裝指南--5-minute-install-for-non-developers) |
-| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**72 份雙語 PDF**](#-72-份雙語客戶文件--72-bilingual-customer-pdfs) |
+| 👔 **老闆 / 採購 / 業務 / 倉管**<br>Boss / Buyer / Sales / Warehouse | 我要**用** Ouvoca，不會寫程式<br>I want to **use** Ouvoca, no coding | 👉 [**5 分鐘安裝指南**](#-5-分鐘安裝指南--5-minute-install-for-non-developers) |
+| 📚 **採購決策者 / 顧問**<br>Buyer decider / Consultant | 我要看**文件 / 報價 / 規格書**<br>I need **docs / quotes / specs** | 👉 [**74 份雙語 PDF**](#-74-份雙語客戶文件--74-bilingual-customer-pdfs) |
 | 👨‍💻 **工程師 / IT / 想貢獻者**<br>Developer / IT / Contributor | 我要看**程式碼 / 開發環境 / PR**<br>I want **code / dev setup / PR** | 👉 [**開發者指南**](#-開發者指南--developer-guide) |
 
 ---
 
 ## 📑 目錄 / Table of Contents
 
-- [⚡ 30 秒看懂 erpilot / 30-Second Pitch](#-30-秒看懂-erpilot--30-second-pitch)
+- [⚡ 30 秒看懂 Ouvoca / 30-Second Pitch](#-30-秒看懂-ouvoca--30-second-pitch)
 - [🚀 5 分鐘安裝指南 / 5-Minute Install](#-5-分鐘安裝指南--5-minute-install-for-non-developers)
 - [❓ 安裝常見問題 / Install FAQ](#-安裝常見問題--install-faq)
-- [📚 72 份雙語客戶文件 / 60 Bilingual PDFs](#-72-份雙語客戶文件--72-bilingual-customer-pdfs)
+- [📚 74 份雙語客戶文件 / 74 Bilingual PDFs](#-74-份雙語客戶文件--74-bilingual-customer-pdfs)
 - [🎯 內含什麼 / What's Inside](#-內含什麼--whats-inside)
 - [🏗 架構 / Architecture](#-架構--architecture)
 - [🗺 領域對照 / Domain Map](#-領域對照--domain-map)
@@ -80,14 +86,14 @@
 
 ---
 
-## 🏛️ 新功能聚焦：「家規 (House Rules)」⭐ erpilot 招牌差異化
+## 🏛️ 新功能聚焦：「家規 (House Rules)」⭐ Ouvoca 招牌差異化
 
-🇹🇼 **不抄 SAP「Business Rule」/ 鼎新「業務規則」/ Odoo「Server Action」**，erpilot 自創「家規」概念：
-🇺🇸 **Not copying SAP "Business Rule" / 鼎新 "Business Rules" / Odoo "Server Actions"** — erpilot's original concept "House Rules":
+🇹🇼 **不抄 SAP「Business Rule」/ 鼎新「業務規則」/ Odoo「Server Action」**，Ouvoca 自創「家規」概念：
+🇺🇸 **Not copying SAP "Business Rule" / 鼎新 "Business Rules" / Odoo "Server Actions"** — Ouvoca's original concept "House Rules":
 
 > 🇹🇼 像家庭家規一樣，**每家公司有自己的規矩**（PO > 10 萬要老闆批 / WO 沒做法不能釋放 / 折扣 > 5% 要主管審…）。
 > 鼎新 / SAP 把規則寫死，改要等顧問 1 個月、花 5-20 萬。
-> erpilot 把規則**資料化**，你可以：
+> Ouvoca 把規則**資料化**，你可以：
 >
 > 1. 🖱 **UI 點一點** 開關 / 改條件 / 新增（不用改 code）
 > 2. 💬 **對 AI 講話**「我們公司 SO 折扣超 5% 應該主管審」→ AI 回 ConfirmCard 確認 → 規矩立即上線
@@ -95,7 +101,7 @@
 
 > 🇺🇸 Like household rules, **every company has their own** (PO > 100k needs boss approval / WO without Recipe can't release / discount > 5% needs manager review…).
 > SAP/鼎新 hardcodes rules — to change them, wait 1 month + pay $5k-20k for consultants.
-> erpilot **data-fies** rules. You can:
+> Ouvoca **data-fies** rules. You can:
 >
 > 1. 🖱 **Click in UI** to toggle / edit / add (no code change)
 > 2. 💬 **Tell AI**: "SO discount > 5% needs manager approval" → AI returns ConfirmCard → rule goes live
@@ -107,26 +113,26 @@
 | 鼎新 / 正航 | 設定畫面 | 條件死板 / Rigid |
 | NetSuite | SuiteScript (JS) | 要會寫程式 / Coding required |
 | Odoo | Python eval | 危險 / Unsafe |
-| **erpilot** ⭐ | **UI 點 / AI 講 / Plugin** | **小白能改、立刻生效** / **Anyone can edit, instant** |
+| **Ouvoca** ⭐ | **UI 點 / AI 講 / Plugin** | **小白能改、立刻生效** / **Anyone can edit, instant** |
 
 📖 **完整使用指南（給電腦小白）**：
 - 🇹🇼 中文 → [`docs/HOUSE_RULES_GUIDE_ZH.md`](./docs/HOUSE_RULES_GUIDE_ZH.md)
 - 🇺🇸 English → [`docs/HOUSE_RULES_GUIDE_EN.md`](./docs/HOUSE_RULES_GUIDE_EN.md)
 
-> 🎯 **這是 erpilot 真正能贏鼎新/SAP 的關鍵差異化**——他們做不到「使用者自己改規矩」。
-> 🎯 **This is erpilot's real edge over SAP/鼎新** — they can't let end users customize their own business rules.
+> 🎯 **這是 Ouvoca 真正能贏鼎新/SAP 的關鍵差異化**——他們做不到「使用者自己改規矩」。
+> 🎯 **This is Ouvoca's real edge over SAP/鼎新** — they can't let end users customize their own business rules.
 
 ---
 
-## ⚡ 30 秒看懂 erpilot / 30-Second Pitch
+## ⚡ 30 秒看懂 Ouvoca / 30-Second Pitch
 
-🇹🇼 **erpilot 是台灣中小製造業的對話式 ERP**：員工坐在電腦前打一句話（「跟長江廠下 100 個 M6 螺絲，交期下週五」），AI 就把它變成完整的採購單，跳出 ConfirmCard 確認卡讓你按確認才執行。**不用學系統、不用教育訓練、2 小時上手**。20 人以內的小公司**完全免費**用整套（含鼎新 / 正航 connector<sup>※</sup>）。
+🇹🇼 **Ouvoca 是台灣中小製造業的對話式 ERP**：員工坐在電腦前打一句話（「跟長江廠下 100 個 M6 螺絲，交期下週五」），AI 就把它變成完整的採購單，跳出 ConfirmCard 確認卡讓你按確認才執行。**不用學系統、不用教育訓練、2 小時上手**。20 人以內的小公司**完全免費**用整套（含鼎新 / 正航 connector<sup>※</sup>）。
 
-🇺🇸 **erpilot is a conversational ERP for Taiwan SMB manufacturers.** Your staff types one sentence ("Order 100 M6 bolts from ChangJiang, delivery next Friday") and the AI turns it into a full purchase order, presenting a ConfirmCard for human approval before executing. **No training required, ready in 2 hours**. **Completely free for organizations with ≤20 concurrent users**, including closed-source connectors for 鼎新 / 正航 / SAP<sup>※</sup>.
+🇺🇸 **Ouvoca is a conversational ERP for Taiwan SMB manufacturers.** Your staff types one sentence ("Order 100 M6 bolts from ChangJiang, delivery next Friday") and the AI turns it into a full purchase order, presenting a ConfirmCard for human approval before executing. **No training required, ready in 2 hours**. **Completely free for organizations with ≤20 concurrent users**, including closed-source connectors for 鼎新 / 正航 / SAP<sup>※</sup>.
 
-> ⚠️ <sup>※</sup> connector 為「**技術連線元件**」，不含原 ERP（如 Workflow / ChengHang / SAP B1 等廠商之產品）的使用授權；各廠商之授權合約規定可能不同，請依貴司與該廠商之合約為準。建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍。erpilot **不參與、不代理**此類合約事務；於適用法律所允許之最大範圍內不承擔相關責任。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。<br>The connector is a **technical connectivity component** and does NOT include the licensing of your incumbent ERP (e.g., products from vendors such as Workflow / ChengHang / SAP B1); each vendor's license terms may differ — please refer to your contract with that vendor. We recommend the customer confirm authorization scope in writing with the incumbent ERP vendor before enabling. erpilot **does not participate in or represent the customer in** such contractual matters; to the maximum extent permitted by applicable law, erpilot assumes no related liability.
+> ⚠️ <sup>※</sup> connector 為「**技術連線元件**」，不含原 ERP（如 Workflow / ChengHang / SAP B1 等廠商之產品）的使用授權；各廠商之授權合約規定可能不同，請依貴司與該廠商之合約為準。建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍。Ouvoca **不參與、不代理**此類合約事務；於適用法律所允許之最大範圍內不承擔相關責任。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。<br>The connector is a **technical connectivity component** and does NOT include the licensing of your incumbent ERP (e.g., products from vendors such as Workflow / ChengHang / SAP B1); each vendor's license terms may differ — please refer to your contract with that vendor. We recommend the customer confirm authorization scope in writing with the incumbent ERP vendor before enabling. Ouvoca **does not participate in or represent the customer in** such contractual matters; to the maximum extent permitted by applicable law, Ouvoca assumes no related liability.
 
-| 為什麼選 erpilot? / Why erpilot? | 我們的解法 / Our Answer |
+| 為什麼選 Ouvoca? / Why Ouvoca? | 我們的解法 / Our Answer |
 |---|---|
 | 🇹🇼 SAP / Oracle 太貴 / Too expensive | NT$30-50 万/年（小小企業 ≤20 人 NT$0）|
 | 🇹🇼 員工不愛學系統 / No one wants training | 用講的就會用，AI 取代訓練 |
@@ -147,7 +153,7 @@
 │    Step 1️⃣          Step 2️⃣          Step 3️⃣                  │
 │  ┌──────────┐    ┌──────────┐    ┌──────────┐                │
 │  │ 📥 下載   │ →  │ 🐳 裝     │ →  │ ▶️ 雙擊  │ → http://...   │
-│  │ erpilot  │    │  Docker   │    │ install  │   localhost    │
+│  │ Ouvoca  │    │  Docker   │    │ install  │   localhost    │
 │  │  zip 檔  │    │ Desktop   │    │   .bat   │   :5173        │
 │  └──────────┘    └──────────┘    └──────────┘                │
 │   2 分鐘 / 2min   5-10 分鐘     2-5 分鐘     登入 admin/admin123 │
@@ -155,22 +161,22 @@
 └────────────────────────────────────────────────────────────────┘
 ```
 
-### Step 1️⃣ · 下載 erpilot / Download erpilot（2 分鐘）
+### Step 1️⃣ · 下載 Ouvoca / Download Ouvoca（2 分鐘）
 
 🇹🇼 **方法 A（最簡單，不用裝 git）**：
-1. 用瀏覽器打開 https://github.com/fanchanyu/erpilot
+1. 用瀏覽器打開 https://github.com/fanchanyu/ouvoca
 2. 點頁面上方綠色按鈕 **[`< > Code`]** → 選 **[Download ZIP]**
-3. 把 zip 解壓到任何資料夾（建議 `C:\erpilot` 或 `D:\erpilot`）
+3. 把 zip 解壓到任何資料夾（建議 `C:\Ouvoca` 或 `D:\Ouvoca`）
 
-🇺🇸 **Method A (easiest, no git needed)**: Open https://github.com/fanchanyu/erpilot → click green **[`< > Code`]** button → **[Download ZIP]** → unzip anywhere (e.g. `C:\erpilot`).
+🇺🇸 **Method A (easiest, no git needed)**: Open https://github.com/fanchanyu/ouvoca → click green **[`< > Code`]** button → **[Download ZIP]** → unzip anywhere (e.g. `C:\Ouvoca`).
 
-🇹🇼 方法 B（會用 git）：`git clone https://github.com/fanchanyu/erpilot`
-🇺🇸 Method B (if you have git): `git clone https://github.com/fanchanyu/erpilot`
+🇹🇼 方法 B（會用 git）：`git clone https://github.com/fanchanyu/ouvoca`
+🇺🇸 Method B (if you have git): `git clone https://github.com/fanchanyu/ouvoca`
 
 ### Step 2️⃣ · 安裝 Docker Desktop（一次性，5-10 分鐘）
 
-🇹🇼 **Docker 是什麼？** 就像一個「保護箱」，把 erpilot 包起來不影響你電腦其他軟體。
-🇺🇸 **What's Docker?** A "container" that bundles erpilot so it doesn't mess with your other software.
+🇹🇼 **Docker 是什麼？** 就像一個「保護箱」，把 Ouvoca 包起來不影響你電腦其他軟體。
+🇺🇸 **What's Docker?** A "container" that bundles Ouvoca so it doesn't mess with your other software.
 
 | 系統 / OS | 下載連結 / Download | 安裝步驟 / Steps |
 |---|---|---|
@@ -186,7 +192,7 @@
 | 系統 / OS | 怎麼跑 / How to run |
 |---|---|
 | 🪟 Windows | 在你解壓的資料夾裡 **雙擊 `install.bat`** |
-| 🍎 Mac | 在 Terminal 跑：`cd ~/erpilot && ./install.sh` |
+| 🍎 Mac | 在 Terminal 跑：`cd ~/ouvoca && ./install.sh` |
 | 🐧 Linux | 同 Mac |
 
 🇹🇼 你會看到視窗自動跑這 5 步：
@@ -261,9 +267,9 @@
 | 啟動 AI 對話功能 / Enable AI chat | 登入 → ⚙️ 設定 → 🤖 AI 助手設定 → 貼 API Key + 測試 + 儲存（**即時生效不需重啟**）。詳見 [`HOW_TO_GET_LLM_API_KEY_ZH.md`](./docs/HOW_TO_GET_LLM_API_KEY_ZH.md)（含 3 個 provider 比較 + 5 分鐘申請步驟） |
 | 上傳我的舊報價單 / 發票 PDF | 登入 → ⚙️ 設定 → 📁 上傳業務文件 → 拖檔案進去 |
 | 清掉示範資料 / Clear demo data | 登入 → ⚙️ 設定 → 📦 示範資料 → 🗑 清除 |
-| 停止 erpilot / Stop | `docker compose down`（在解壓目錄裡）或關掉 Docker Desktop |
-| 完全移除 / Uninstall | `docker compose down -v` → 刪 erpilot 資料夾 |
-| 連現有鼎新 / 正航 DB | 看 [`docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md`](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md)<br>⚠️ **建議閱讀**：[`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) — 商用 ERP 之授權條款依各廠商而異，建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍；erpilot 不參與此類合約事務 |
+| 停止 Ouvoca / Stop | `docker compose down`（在解壓目錄裡）或關掉 Docker Desktop |
+| 完全移除 / Uninstall | `docker compose down -v` → 刪 Ouvoca 資料夾 |
+| 連現有鼎新 / 正航 DB | 看 [`docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md`](./docs/EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md)<br>⚠️ **建議閱讀**：[`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) — 商用 ERP 之授權條款依各廠商而異，建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍；Ouvoca 不參與此類合約事務 |
 
 📘 **更詳細的「給老闆看的版本」（純圖文、零技術術語）**：
 - 中文 → [`docs/INSTALLATION_ZH.md`](./docs/INSTALLATION_ZH.md)
@@ -306,7 +312,7 @@
 首次下載 Docker images（~2 GB）需要 2-5 分鐘，**請耐心等**。
 網速慢可能要 10-20 分鐘。
 
-確認方法：另開一個 terminal/cmd 跑 `docker ps`，看到 erpilot-backend / erpilot-frontend 在 Up 狀態 = 進度正常。
+確認方法：另開一個 terminal/cmd 跑 `docker ps`，看到 ouvoca-backend / ouvoca-frontend 在 Up 狀態 = 進度正常。
 
 </details>
 
@@ -339,7 +345,7 @@
 <details>
 <summary><strong>Q6. Windows Defender / 防毒軟體擋住了 install.bat</strong></summary>
 
-第一次跑批次檔常見現象。erpilot 是開源 (AGPL-3.0)，可以在 GitHub 完整檢視程式碼。
+第一次跑批次檔常見現象。Ouvoca 是開源 (AGPL-3.0)，可以在 GitHub 完整檢視程式碼。
 
 按「**更多資訊 → 仍要執行 (Run anyway)**」就好。
 
@@ -376,7 +382,7 @@
 
 **🌱 小小企業軌（≤20 人）免費含閉源 connector！**
 
-> ⚠️ **直連現有商用 ERP 前的合規提醒**：商用 ERP（例如 Workflow / ChengHang / SAP B1 / Vitals 等）之授權合約對「以共用 / 服務帳號連線」之規定可能不同；具體請依貴司與該廠商之合約為準。建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍，必要時購買相應之整合授權。erpilot **不參與、不代理**與第三方 ERP 廠商之合約 / 授權事務；於適用法律所允許之最大範圍內不承擔相關責任。完整提醒：[`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。
+> ⚠️ **直連現有商用 ERP 前的合規提醒**：商用 ERP（例如 Workflow / ChengHang / SAP B1 / Vitals 等）之授權合約對「以共用 / 服務帳號連線」之規定可能不同；具體請依貴司與該廠商之合約為準。建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍，必要時購買相應之整合授權。Ouvoca **不參與、不代理**與第三方 ERP 廠商之合約 / 授權事務；於適用法律所允許之最大範圍內不承擔相關責任。完整提醒：[`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。
 
 </details>
 
@@ -439,7 +445,7 @@ asyncio.run(reset())
 看 **同時在線使用者數**（24 小時內任一時刻的峰值，15 分鐘 idle 算下線）。
 
 舉例：
-- 公司 50 人有 erpilot 帳號，但同時在線最多 18 人 → ✅ 適格（白用）
+- 公司 50 人有 Ouvoca 帳號，但同時在線最多 18 人 → ✅ 適格（白用）
 - 公司 25 人，同時在線常 22 人 → ❌ 不適格（需商業授權）
 - 公司 100 人但只 5 個業務在用 → ✅ 適格
 
@@ -451,7 +457,7 @@ asyncio.run(reset())
 <summary><strong>Q13. 升級到新版怎麼弄？/ How to upgrade?</strong></summary>
 
 ```bash
-cd erpilot
+cd Ouvoca
 git pull origin main          # 或重下載 ZIP 覆蓋
 docker compose down
 docker compose up -d --build  # 重 build 新版
@@ -462,11 +468,11 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 
 </details>
 
-⚠️ **還沒解的問題？** 開 [GitHub Issue](https://github.com/fanchanyu/erpilot/issues/new) 我們處理。
+⚠️ **還沒解的問題？** 開 [GitHub Issue](https://github.com/fanchanyu/ouvoca/issues/new) 我們處理。
 
 ---
 
-## 📚 72 份雙語客戶文件 / 60 Bilingual Customer PDFs
+## 📚 74 份雙語客戶文件 / 74 Bilingual Customer PDFs
 
 🇹🇼 點下面任一個直接下載 PDF（全部繁中 + English）：
 🇺🇸 Click any to download (all bilingual ZH + EN):
@@ -500,7 +506,7 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **25** | 🔍 **可解釋規劃 + TOC 瓶頸（學術論文）** ⭐ Goldratt + Cheney + Saltelli — IE/Algo/ERP/AI 四域交集 / **Explainable Planning** | [📕 **中文 PDF**](./docs/pdf/25_可解釋規劃與TOC瓶頸_中文.pdf) | [📘 **EN PDF**](./docs/pdf/25_Explainable_Planning_TOC_EN.pdf) |
 | **26** | 💰 **Throughput Accounting + 訂單接受決策（學術論文）** ⭐ 完成 Goldratt TOC 三部曲 — 「該不該接這張單？」最佳解 / **TA + DBR + Order Acceptance** | [📕 **中文 PDF**](./docs/pdf/26_Throughput會計與訂單決策_中文.pdf) | [📘 **EN PDF**](./docs/pdf/26_Throughput_Accounting_DBR_EN.pdf) |
 | **27** | 📈 **AI 增強需求預測（學術論文）** ⭐ Hyndman + Croston + Makridakis M4/M5 — 自動 MPS 上游補完 / **Demand Forecasting** | [📕 **中文 PDF**](./docs/pdf/27_需求預測引擎_中文.pdf) | [📘 **EN PDF**](./docs/pdf/27_Demand_Forecasting_EN.pdf) |
-| **28** | 🤖 **對話式規劃顧問** ⭐⭐ 把 v3.25.9-v3.29 全部演算法包成 LLM tools + Daily Briefing — erpilot 北極星補完 / **Conversational Planning Agent** | [📕 **中文 PDF**](./docs/pdf/28_對話式規劃顧問_中文.pdf) | [📘 **EN PDF**](./docs/pdf/28_Conversational_Planning_EN.pdf) |
+| **28** | 🤖 **對話式規劃顧問** ⭐⭐ 把 v3.25.9-v3.29 全部演算法包成 LLM tools + Daily Briefing — Ouvoca 北極星補完 / **Conversational Planning Agent** | [📕 **中文 PDF**](./docs/pdf/28_對話式規劃顧問_中文.pdf) | [📘 **EN PDF**](./docs/pdf/28_Conversational_Planning_EN.pdf) |
 | **29** | ⚖️ **進銷存模組法律聲明**（v3.32/v3.33）/ **Inventory/Sales Module Legal Notice** | [📕 **中文 PDF**](./docs/pdf/29_進銷存法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/29_Inventory_Sales_Legal_EN.pdf) |
 | **30** | ⚖️ **稅務/會計/審批模組法律與合規警告**（v3.34）/ **Tax/Accounting/Approval Compliance Notice** | [📕 **中文 PDF**](./docs/pdf/30_稅務會計法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/30_Tax_Accounting_Legal_EN.pdf) |
 | **31** | ⚖️ **列印/匯出模組法律與合規警告**（v3.36）/ **Print/Export Compliance Notice** | [📕 **中文 PDF**](./docs/pdf/31_列印匯出法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/31_Print_Export_Legal_EN.pdf) |
@@ -510,16 +516,17 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **35** | ⚖️ **第四輪小白卡關修補法律聲明 — 高敏感**（v3.40 — 凍結 hard-write / Delete Undo / 跨人 Audit / 應收帳齡）/ **Fourth-Round Beginner-Fix Notice — HIGH SENSITIVITY** | [📕 **中文 PDF**](./docs/pdf/35_第四輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/35_Polish_V340_Legal_EN.pdf) |
 | **36** | ⚖️ **第五輪小白卡關修補法律聲明 — 對外最敏感**（v3.41 — 寄 PDF Email / 客戶毛利率 / 訂單跟單）/ **Fifth-Round Beginner-Fix Notice — OUTBOUND-SENSITIVE** | [📕 **中文 PDF**](./docs/pdf/36_第五輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/36_Polish_V341_Legal_EN.pdf) |
 | **37** | ⚖️ **第六輪小白卡關修補法律聲明 — 帳號管理最敏感**（v3.42 — 使用者帳號 / 全域搜尋 / AI 每日限額 / 工作天 / 時區）/ **Sixth-Round Beginner-Fix Notice — ACCOUNT-MGMT-SENSITIVE** | [📕 **中文 PDF**](./docs/pdf/37_第六輪卡關修補法律聲明_中文.pdf) | [📘 **EN PDF**](./docs/pdf/37_Polish_V342_Legal_EN.pdf) |
+| **38** | 📋 **專案重命名公告 + 道歉聲明**（v3.44 — erpilot → Ouvoca）/ **Project Rename Notice + Apology** | [📕 **中文 PDF**](./docs/pdf/38_重命名公告_中文.pdf) | [📘 **EN PDF**](./docs/pdf/38_Rename_Notice_EN.pdf) |
 
 📌 **特別文件**：
 - [**`HOW_TO_GET_LLM_API_KEY_ZH.md`**](./docs/HOW_TO_GET_LLM_API_KEY_ZH.md) · [EN](./docs/HOW_TO_GET_LLM_API_KEY_EN.md) — 5-10 分鐘申請 API Key 完整教學（DeepSeek/OpenAI/Anthropic/Ollama 比較）
-- [**`HOUSE_RULES_GUIDE_ZH.md`**](./docs/HOUSE_RULES_GUIDE_ZH.md) · [EN](./docs/HOUSE_RULES_GUIDE_EN.md) — ⭐ erpilot 招牌差異化「家規」完整指南
+- [**`HOUSE_RULES_GUIDE_ZH.md`**](./docs/HOUSE_RULES_GUIDE_ZH.md) · [EN](./docs/HOUSE_RULES_GUIDE_EN.md) — ⭐ Ouvoca 招牌差異化「家規」完整指南
 - ⚠️ [**`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`**](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) · [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md) — **接舊 ERP 前建議閱讀**：第三方 ERP 授權合規提醒（商用 ERP 之授權條款依各廠商而異；本文件非法律意見）
 
 🇹🇼 **電腦小白優先讀**：00（產品說明書）→ 01（安裝指南）→ 02（快速入門）→ 03（使用者操作手冊）
 🇺🇸 **Beginners read first**: 00 → 01 → 02 → 03
 
-📦 全部 PDF 在 [`docs/pdf/`](./docs/pdf/) 目錄。要全部下載？clone repo 或 [download ZIP](https://github.com/fanchanyu/erpilot/archive/refs/heads/main.zip)。
+📦 全部 PDF 在 [`docs/pdf/`](./docs/pdf/) 目錄。要全部下載？clone repo 或 [download ZIP](https://github.com/fanchanyu/ouvoca/archive/refs/heads/main.zip)。
 
 ---
 
@@ -530,8 +537,8 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **FastAPI backend** | 12 個業務領域（庫存/採購/生產/MPS/MRP/品質/銷售/會計/倉儲/CRM/HR/AI 治理）| 12 business domains (Inventory, Purchase, Production, MPS/MRP, Quality, Sales, Accounting, Warehouse, CRM, HR, AI Governance) |
 | **Multi-Agent LLM Engine** | 10 agents、**40 tools**（22 read / 4 soft-write / 14 hard-write），DeepSeek 為預設供應商 | 10 agents, **40 tools** (22 read / 4 soft-write / 14 hard-write), DeepSeek as default LLM provider |
 | **ConfirmCard 確認卡** | hard-write 操作出卡，使用者點「確認」才執行（5 分鐘 TTL + Slot-filling 反問 + 90 秒 Undo）| Hard-write actions issue confirmation cards; user must click "confirm" to execute (5-min TTL + slot-filling reverse-ask + 90s undo) |
-| **💡 AskAI 浮球**（erpilot 獨家 v3.16）| 每頁右下角的「現場 AI 教練」，問「這頁怎麼用」AI 直接答（取代別家的 onboarding tour / help bubble） | "Live AI coach" on every page — ask "how do I use this page?" and AI answers (replaces traditional tours / tooltips) |
-| **🤖 Auto CrmEvent**（erpilot 獨家 v3.16）| 訂單成立 / Lead 轉換 / 商機推進時自動產 CrmEvent 進 Customer timeline（業務不必手動加 activity log）| Orders / lead conversions / opportunity stage changes auto-create CRM events (no manual activity logging) |
+| **💡 AskAI 浮球**（Ouvoca 獨家 v3.16）| 每頁右下角的「現場 AI 教練」，問「這頁怎麼用」AI 直接答（取代別家的 onboarding tour / help bubble） | "Live AI coach" on every page — ask "how do I use this page?" and AI answers (replaces traditional tours / tooltips) |
+| **🤖 Auto CrmEvent**（Ouvoca 獨家 v3.16）| 訂單成立 / Lead 轉換 / 商機推進時自動產 CrmEvent 進 Customer timeline（業務不必手動加 activity log）| Orders / lead conversions / opportunity stage changes auto-create CRM events (no manual activity logging) |
 | **🤝 CRM 完整 UI**（v3.15）| Lead 漏斗 / 商機 Kanban / Customer 360 三 tab | Lead pipeline / Opportunity Kanban / Customer 360 (3 tabs) |
 | **⚙️ Settings 頁**（v3.13）| 自助 AI key 設定（測試 + 即時生效）/ 載入清除示範資料 / 檔案上傳 drag-and-drop | Self-service AI key setup (test + live apply) / demo data / file upload drag-and-drop |
 | **📒 會計 + 🧾 電子發票**（v3.18-19）| 傳票 / AR / 科目表 / 台灣 MIG 標準電子發票開立查詢作廢 | Journals / AR / Chart of Accounts / Taiwan MIG e-invoice issue/lookup/void |
@@ -545,8 +552,8 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 | **📋 Dashboard 待辦中心**（v3.23）| 登入第一眼看「待我審 / 缺貨 / 草稿 PO / 草稿 WO」+ 點即跳轉（鼎新 / SAP Cockpit 風）| Personalized Todo Center on dashboard (鼎新/SAP Cockpit style) |
 | **🧬 BOM 物料表編輯器**（v3.23）| Production 加「管理 BOM」按鈕，視覺化編輯 + unblock WO release | Visual BOM editor — unblocks WO release |
 | **📜 庫存異動歷史**（v3.23）| Inventory 加 tab，列每筆 inbound/outbound/工單完工/盤點調整 | New tab on Inventory listing every txn (inbound/outbound/WO complete/adjust) |
-| **🎨 erpilot 原創語彙**（v3.24）| 🌱 新苗 (Sprout) = Lead / 🎯 追單 (Chase) = Opportunity / 📖 做法 (Recipe) = BOM — 不抄鼎新/Salesforce，給小白好記 | 🌱 Sprout = Lead / 🎯 Chase = Opportunity / 📖 Recipe = BOM — original vocabulary, memorable for beginners |
-| **🏛️ 家規 (House Rules) 引擎**（v3.25 erpilot 原創）| 規則資料化（trigger / condition / action / override）不寫死 code；客戶可 UI 開關 / LLM 對話建；4 內建 condition + plugin 機制；WO release「需做法」已從寫死改用引擎 | Data-driven rule engine (vs SAP/Odoo hardcoded). Toggle/edit via UI; LLM can author rules. WO-release-needs-recipe rule migrated to engine |
+| **🎨 Ouvoca 原創語彙**（v3.24）| 🌱 新苗 (Sprout) = Lead / 🎯 追單 (Chase) = Opportunity / 📖 做法 (Recipe) = BOM — 不抄鼎新/Salesforce，給小白好記 | 🌱 Sprout = Lead / 🎯 Chase = Opportunity / 📖 Recipe = BOM — original vocabulary, memorable for beginners |
+| **🏛️ 家規 (House Rules) 引擎**（v3.25 Ouvoca 原創）| 規則資料化（trigger / condition / action / override）不寫死 code；客戶可 UI 開關 / LLM 對話建；4 內建 condition + plugin 機制；WO release「需做法」已從寫死改用引擎 | Data-driven rule engine (vs SAP/Odoo hardcoded). Toggle/edit via UI; LLM can author rules. WO-release-needs-recipe rule migrated to engine |
 | **Schema Mapping AI** | exact/alias/partial 3 級 confidence，把外部 DB（鼎新/正航/Excel）一鍵接進來 | 3-tier confidence mapping (exact/alias/partial) — one-click external DB integration (鼎新/正航/Excel) |
 | **Event Engine** | EventBus + 16+ ConstraintChecker 規則 + SSE 廣播 | EventBus + 16+ ConstraintChecker rules + SSE broadcasting |
 | **React + Vite + Tailwind** | 桌機前端，完整 CRUD UI（EntityRowActions + EntityFormModal）| Desktop frontend with full CRUD UI (reusable EntityRowActions + EntityFormModal components) |
@@ -596,8 +603,8 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
   ★ 原始資料不離廠 / Raw data stays local; only aggregates returned (VMI-friendly)
 ```
 
-🇹🇼 **VMI 友善設計**：每個工廠跑自己的本地 erpilot 節點（factory_node.py），中央只拿聚合資料、不直接存取原始細目，符合代工廠對「客戶資料保密」的硬性要求。
-🇺🇸 **VMI-friendly design**: Each factory runs its own local erpilot node (factory_node.py); the central instance only receives aggregates, never raw details — meeting the strict data confidentiality requirements of contract manufacturers.
+🇹🇼 **VMI 友善設計**：每個工廠跑自己的本地 Ouvoca 節點（factory_node.py），中央只拿聚合資料、不直接存取原始細目，符合代工廠對「客戶資料保密」的硬性要求。
+🇺🇸 **VMI-friendly design**: Each factory runs its own local Ouvoca node (factory_node.py); the central instance only receives aggregates, never raw details — meeting the strict data confidentiality requirements of contract manufacturers.
 
 ---
 
@@ -717,7 +724,7 @@ opnetest/
 ├── war-room/                   ← 即時事件儀表板 / Live SSE dashboard
 │   ├── index.html
 │   └── Dockerfile
-├── docs/                       ← 72 份雙語文件 / 60 bilingual docs
+├── docs/                       ← 74 份雙語文件 / 74 bilingual docs
 │   ├── CONVERSATIONAL_ERP_DESIGN_ZH.md / _EN.md
 │   ├── COMMERCIAL_LICENSING_FAQ_ZH.md
 │   └── ... (32 more)
@@ -733,8 +740,8 @@ opnetest/
 
 ## ⚖️ 三軌授權 / Tri-License Model
 
-🇹🇼 erpilot 同時提供三種授權，依你的情境選擇：
-🇺🇸 erpilot offers three license tracks — choose based on your scenario:
+🇹🇼 Ouvoca 同時提供三種授權，依你的情境選擇：
+🇺🇸 Ouvoca offers three license tracks — choose based on your scenario:
 
 | 軌道 / Track | 條款 / Terms | 適用 / For | 費用 / Cost |
 |---|---|---|---|
@@ -744,11 +751,11 @@ opnetest/
 
 > 🌱 **「20 人以內全免費」戰略 / "Free for ≤20 users" strategy**
 >
-> 🇹🇼 對齊 erpilot「**讓小小企業也快速上手**」承諾。Taiwan SMB 1-20 人廠把整套（含鼎新 / 正航 / SAP connector）拿去白用，等你長到 21 人並離不開 erpilot 再聊商業合約。
+> 🇹🇼 對齊 Ouvoca「**讓小小企業也快速上手**」承諾。Taiwan SMB 1-20 人廠把整套（含鼎新 / 正航 / SAP connector）拿去白用，等你長到 21 人並離不開 Ouvoca 再聊商業合約。
 >
-> 🇺🇸 Aligned with erpilot's promise to help small businesses get started fast. Taiwan SMBs (1-20 employees) get the full suite — including 鼎新 / 正航 / SAP connectors — for free. Talk commercial contract only when you grow past 20 and can't live without it.
+> 🇺🇸 Aligned with Ouvoca's promise to help small businesses get started fast. Taiwan SMBs (1-20 employees) get the full suite — including 鼎新 / 正航 / SAP connectors — for free. Talk commercial contract only when you grow past 20 and can't live without it.
 >
-> ⚠️ **建議閱讀 / Recommended reading**：connector「免費」指的是 **erpilot 不收技術授權費**；要把 connector 接到您**現有商用 ERP**（如 Workflow / ChengHang / SAP B1 等廠商之產品），各廠商之授權合約規定可能不同，建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍。erpilot 不參與此類第三方合約事務。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md) — "Free" here means **erpilot charges no technical license fee**; connecting to your incumbent ERP still calls for **the customer to confirm authorization scope in writing with the incumbent ERP vendor**. erpilot does not participate in such third-party contractual matters.
+> ⚠️ **建議閱讀 / Recommended reading**：connector「免費」指的是 **Ouvoca 不收技術授權費**；要把 connector 接到您**現有商用 ERP**（如 Workflow / ChengHang / SAP B1 等廠商之產品），各廠商之授權合約規定可能不同，建議客戶於啟用前先和原 ERP 廠商書面確認授權範圍。Ouvoca 不參與此類第三方合約事務。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md) — "Free" here means **Ouvoca charges no technical license fee**; connecting to your incumbent ERP still calls for **the customer to confirm authorization scope in writing with the incumbent ERP vendor**. Ouvoca does not participate in such third-party contractual matters.
 
 🇹🇼 不確定哪一軌？看 [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md) 決策樹。
 🇺🇸 Not sure which track? See the decision tree in [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md).
@@ -797,7 +804,7 @@ scripts\git-hooks\install_hooks.bat
 ### 🐳 Docker 模式（與 ERP 使用者裝法相同 / Same as user install）
 
 ```bash
-cd erpilot
+cd Ouvoca
 cp backend/.env.example backend/.env    # optionally set LLM_API_KEY
 docker compose up -d --build
 docker compose exec backend python -m scripts.seed
@@ -883,4 +890,4 @@ CLA Section 2(b) is the lifeline of the dual-license model: your contributions g
 
 ---
 
-<sub>by [Peter](https://github.com/fanchanyu) · [Issues](https://github.com/fanchanyu/erpilot/issues) · [Commercial License](./LICENSE-COMMERCIAL.md)</sub>
+<sub>by [Peter](https://github.com/fanchanyu) · [Issues](https://github.com/fanchanyu/ouvoca/issues) · [Commercial License](./LICENSE-COMMERCIAL.md)</sub>

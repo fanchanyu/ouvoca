@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  erpilot · 安裝 git hooks（一鍵）
+#  Ouvoca · 安裝 git hooks（一鍵）
 #  Mac / Linux / Git Bash on Windows 都能跑
 # ============================================================
 set -e
@@ -14,7 +14,7 @@ if [ ! -d "$REPO_ROOT/.git" ]; then
     exit 1
 fi
 
-echo "📦 安裝 erpilot git hooks..."
+echo "📦 安裝 Ouvoca git hooks..."
 
 for hook in pre-commit pre-push; do
     if [ -f "$HOOKS_SRC/$hook" ]; then

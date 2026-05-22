@@ -10,11 +10,11 @@
 
 | 項目 | 內容 |
 |---|---|
-| **建議對象** | 任何規劃啟用 erpilot「外部 DB connector / Schema Mapping AI / 跨 DB 查詢」功能的**客戶 IT 主管 / 採購決策者** |
+| **建議對象** | 任何規劃啟用 Ouvoca「外部 DB connector / Schema Mapping AI / 跨 DB 查詢」功能的**客戶 IT 主管 / 採購決策者** |
 | **合規關切點** | 部分商用 ERP 之授權合約對於「**以共用或服務帳號**連線至 DB 或 API」可能有特定條款或限制 |
 | **如未取得適當授權** | 依您與該 ERP 廠商之契約條款，可能涉及相應之合約處理（例如服務調整、補繳授權費、合約爭議解決等） |
 | **建議客戶準備** | ① 與原 ERP 廠商確認授權範圍 ② 視情形購買必要之整合授權 ③ 留存相關文件 |
-| **erpilot 的角色** | 提供 connector 技術元件；**不參與**、**不代理**客戶與第三方 ERP 廠商間之合約 / 授權 / 法律事務 |
+| **Ouvoca 的角色** | 提供 connector 技術元件；**不參與**、**不代理**客戶與第三方 ERP 廠商間之合約 / 授權 / 法律事務 |
 | **底線** | **技術上「能連」與法律上「合於授權」可能是不同議題。** 建議於啟用 connector 前先確認授權範圍。 |
 
 ---
@@ -55,7 +55,7 @@
 
 建議與您原 ERP 廠商 / 經銷商**以書面**確認下列事項（內容依貴司實際使用情境調整）：
 
-> **本公司計畫由第三方系統（erpilot）以共用 / 服務帳號讀取本 ERP 之資料庫或 API，使用範圍包含 [SELECT / 部分 UPDATE / Schema Mapping 等]。請貴司確認本使用方式是否在現行授權範圍內，如否，需如何補足。**
+> **本公司計畫由第三方系統（Ouvoca）以共用 / 服務帳號讀取本 ERP 之資料庫或 API，使用範圍包含 [SELECT / 部分 UPDATE / Schema Mapping 等]。請貴司確認本使用方式是否在現行授權範圍內，如否，需如何補足。**
 
 可接受之書面形式（依貴司法務政策決定）：
 - 原 ERP 廠商之正式回函
@@ -77,22 +77,22 @@
 | API License | REST API / SOAP 模式 |
 | Read-Replica License | 唯讀副本 / 報表 DB |
 
-> 💡 erpilot 提供之 connector 為**技術元件**，**不含**任何第三方 ERP 之授權費用。具體授權費依貴司與該廠商之報價或合約。
+> 💡 Ouvoca 提供之 connector 為**技術元件**，**不含**任何第三方 ERP 之授權費用。具體授權費依貴司與該廠商之報價或合約。
 
 ### 2.3 ✅ Step 3 — 留存相關文件
 
 建議將下列文件依貴司文件管理政策保存：
 - 原 ERP 廠商之授權確認文件
 - 附加授權之合約 / 發票
-- erpilot connector 啟用之內部簽核紀錄
+- Ouvoca connector 啟用之內部簽核紀錄
 
 > 💡 完善之文件管理有助於日後合規查核或爭議解決。
 
 ---
 
-## 3. erpilot 的角色與責任界線
+## 3. Ouvoca 的角色與責任界線
 
-### 3.1 ✅ erpilot 提供（What We Provide）
+### 3.1 ✅ Ouvoca 提供（What We Provide）
 
 | 項目 | 說明 |
 |---|---|
@@ -102,7 +102,7 @@
 | **技術文件** | [外部 DB 串接設計](./EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md) |
 | **技術支援** | connector 程式碼之 bug 修復 / 對映模型優化 |
 
-### 3.2 ❌ erpilot 不提供（What We Do NOT Provide）
+### 3.2 ❌ Ouvoca 不提供（What We Do NOT Provide）
 
 | 項目 | 說明 |
 |---|---|
@@ -113,7 +113,7 @@
 
 ### 3.3 責任範圍聲明
 
-> **於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），erpilot 對於下列事項不承擔責任：**
+> **於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），Ouvoca 對於下列事項不承擔責任：**
 > - 客戶未依本提醒所述步驟取得適當授權即啟用連線所衍生之合約處理（包含但不限於服務調整、補繳授權費、合約爭議等）
 > - 因第三方 ERP 廠商之授權判定、合規稽核或合約執行而生之費用或損失
 > - 第三方 ERP 廠商授權政策之變動
@@ -124,7 +124,7 @@
 
 1. 依 §2 完成授權確認、必要採購與文件留存
 2. 由 IT / 法務 / 採購主管書面內部簽核
-3. 於 erpilot 啟用 connector 時，系統將記錄啟用時間、操作者及對應之外部資料來源於 **audit log** 中，供貴司日後內部稽核參考
+3. 於 Ouvoca 啟用 connector 時，系統將記錄啟用時間、操作者及對應之外部資料來源於 **audit log** 中，供貴司日後內部稽核參考
 
 > 💡 啟用 connector 之動作，代表貴司已自行評估並承擔相關合規責任。
 
@@ -135,13 +135,13 @@
 ### Q1：我們是小公司（30 人），是否仍需注意？
 **A**：合規責任與公司規模無直接關係，建議依您與原 ERP 廠商之合約條款處理。若有疑慮，請逕洽該廠商或您的法律顧問。
 
-### Q2：我們只用 erpilot 讀（SELECT），不會改原 DB，是否仍需確認授權？
+### Q2：我們只用 Ouvoca 讀（SELECT），不會改原 DB，是否仍需確認授權？
 **A**：建議仍與原廠確認。許多授權合約之適用範圍包含「存取」行為，並不僅限於「寫入」。具體適用情形請依合約條款。
 
-### Q3：我請我們 IT 同事的個人帳號讓 erpilot 用，這樣可以嗎？
+### Q3：我請我們 IT 同事的個人帳號讓 Ouvoca 用，這樣可以嗎？
 **A**：此種做法在技術上可行，但**建議審慎評估**：
 - 部分授權合約對「個人帳號之使用範圍」有規範，請以合約條款為準
-- 該員工離職時 erpilot 將失去連線能力
+- 該員工離職時 Ouvoca 將失去連線能力
 - 個人帳號權限通常較廣，從資安最佳實務而言，建議使用「最小權限服務帳號」
 - 建議與貴司法務 / 原 ERP 廠商確認該方式是否在授權範圍內
 
@@ -155,8 +155,8 @@
 3. 主動與原 ERP 廠商溝通說明，依其指引處理
 4. 必要時諮詢法律顧問
 
-### Q6：erpilot 可以幫忙與原 ERP 廠商溝通授權嗎？
-**A**：erpilot 不參與客戶與第三方 ERP 廠商間之溝通。建議由貴司 IT / 法務 / 採購主管直接洽詢原廠或經銷商（對授權條款最為熟悉）。
+### Q6：Ouvoca 可以幫忙與原 ERP 廠商溝通授權嗎？
+**A**：Ouvoca 不參與客戶與第三方 ERP 廠商間之溝通。建議由貴司 IT / 法務 / 採購主管直接洽詢原廠或經銷商（對授權條款最為熟悉）。
 
 ### Q7：我們是用開源版 / 試用版的 ERP，是否仍適用？
 **A**：開源授權（AGPL / GPL 等）通常對第三方系統存取較無限制，但**商業版 / 試用版**之授權條款依各版本而異。請以您所使用版本之**官方授權文件**為準。
@@ -166,18 +166,18 @@
 
 ---
 
-## 5. 給 erpilot 顧問 / 經銷商的建議
+## 5. 給 Ouvoca 顧問 / 經銷商的建議
 
-在介紹 erpilot「外部 DB connector」功能時，建議：
+在介紹 Ouvoca「外部 DB connector」功能時，建議：
 
 ✅ **可介紹的內容**：
-- erpilot Schema Mapping AI 之技術能力
+- Ouvoca Schema Mapping AI 之技術能力
 - connector 對應之資料源類型（sqlite / csv / SQL Server / REST API 等）
 - 對話式 ERP 之跨資料源查詢與遷移體驗
 
 ✅ **建議同步說明**：
 - 「**connector 為技術元件，啟用前建議貴司先和原 ERP 廠商書面確認授權範圍**」
-- 「erpilot 不參與貴司與第三方 ERP 廠商間之合約 / 授權事務」
+- 「Ouvoca 不參與貴司與第三方 ERP 廠商間之合約 / 授權事務」
 - 「具體授權判定請依貴司與原 ERP 廠商之合約條款為準」
 - 「**詳細合規提醒見** [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)」
 
@@ -195,7 +195,7 @@
 | **技術設計（如何接）** | [`EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md`](./EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md) |
 | **使用者操作手冊** | [`USER_MANUAL_ZH.md`](./USER_MANUAL_ZH.md) |
 | **業務 demo 一頁紙** | [`SALES_KILLER_MOMENTS_ZH.md`](./SALES_KILLER_MOMENTS_ZH.md) |
-| **erpilot 三軌授權說明** | [`COMMERCIAL_LICENSING_FAQ_ZH.md`](./COMMERCIAL_LICENSING_FAQ_ZH.md) |
+| **Ouvoca 三軌授權說明** | [`COMMERCIAL_LICENSING_FAQ_ZH.md`](./COMMERCIAL_LICENSING_FAQ_ZH.md) |
 | **英文版本** | [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) |
 
 ---

@@ -56,7 +56,7 @@ export default function AiSetupGuide({ reason = 'no_api_key', detectedIntent }: 
             </p>
           </Step>
 
-          <Step n={2} title="貼進 erpilot 設定頁">
+          <Step n={2} title="貼進 Ouvoca 設定頁">
             <Link
               to="/settings"
               className="inline-flex items-center gap-1 mt-1 px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 transition-colors"
@@ -95,13 +95,13 @@ export default function AiSetupGuide({ reason = 'no_api_key', detectedIntent }: 
         <Link to="/production" className="underline mx-1">生產</Link>·
         <Link to="/" className="underline mx-1">儀表板</Link>
         <br />
-        — erpilot 沒 API key 也跑得起來，只是少了「對話式 CRUD」這個賣點。
+        — Ouvoca 沒 API key 也跑得起來，只是少了「對話式 CRUD」這個賣點。
       </div>
 
       <div className="mt-3 text-xs text-blue-600">
         📖 完整申請教學：
         <a
-          href="https://github.com/fanchanyu/erpilot/blob/main/docs/HOW_TO_GET_LLM_API_KEY_ZH.md"
+          href="https://github.com/fanchanyu/ouvoca/blob/main/docs/HOW_TO_GET_LLM_API_KEY_ZH.md"
           target="_blank" rel="noopener noreferrer"
           className="underline ml-1"
         >

@@ -1,6 +1,6 @@
 #!/bin/sh
 # ============================================================
-#  erpilot · pre-push hook — push 前強制跑 8 道 gate
+#  Ouvoca · pre-push hook — push 前強制跑 8 道 gate
 # ============================================================
 #  替代 GitHub branch protection（免費 private 不支援）
 #  跳過：git push --no-verify（**不建議**）

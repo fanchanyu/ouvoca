@@ -110,7 +110,7 @@ function triggerAutoDownload(tool_calls?: Array<{ tool: string; result: string |
   }
 }
 
-const HISTORY_KEY = 'erpilot_chat_history'
+const HISTORY_KEY = 'ouvoca_chat_history'
 const MAX_HISTORY = 200
 
 const SUGGESTIONS = [
@@ -123,7 +123,7 @@ const SUGGESTIONS = [
 ]
 
 // v3.37 D1-1：第一次開啟 Chat 時，AI 主動講話而不是讓使用者盯著空白
-const FIRST_TIME_GREETING = `👋 **您好！我是 erpilot AI 助手。**
+const FIRST_TIME_GREETING = `👋 **您好！我是 Ouvoca AI 助手。**
 
 我可以用講的幫您：
 
@@ -154,7 +154,7 @@ export default function Chat() {
   const abortRef = useRef<AbortController | null>(null)
   // v3.41 P3：短答模式 — 給 LLM hint「請 1-2 句」
   const [briefMode, setBriefMode] = useState<boolean>(
-    () => localStorage.getItem('erpilot_chat_brief') === '1'
+    () => localStorage.getItem('ouvoca_chat_brief') === '1'
   )
   // v3.41 P4：是否顯示「已釘訊息」面板
   const [showPinned, setShowPinned] = useState(false)
@@ -250,7 +250,7 @@ export default function Chat() {
   const toggleBrief = useCallback(() => {
     setBriefMode(v => {
       const next = !v
-      try { localStorage.setItem('erpilot_chat_brief', next ? '1' : '0') } catch { /* ignore */ }
+      try { localStorage.setItem('ouvoca_chat_brief', next ? '1' : '0') } catch { /* ignore */ }
       return next
     })
   }, [])

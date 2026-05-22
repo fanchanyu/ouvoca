@@ -1,7 +1,7 @@
 /**
  * CRM — 客戶關係管理（Sprint I v3.15 / Sprint R v3.24 rebrand）
  *
- * **erpilot 原創詞**（不抄 Salesforce / 鼎新）：
+ * **Ouvoca 原創詞**（不抄 Salesforce / 鼎新）：
  *  - Lead → 🌱「新苗 (Sprout)」 — 種子發芽，會長成正式客戶
  *  - Opportunity → 🎯「追單 (Chase)」 — 業務每天在追的單
  *  - Customer 360 → 「客戶全貌」
@@ -49,7 +49,7 @@ export default function Crm() {
         <div>
           <h1 className="text-2xl font-bold">🤝 CRM 客戶關係管理</h1>
           <p className="text-sm text-gray-500 mt-1">
-            🌱 新苗 (Sprout) · 🎯 追單 (Chase) · 👤 客戶全貌 — erpilot 原創語彙，小白秒懂
+            🌱 新苗 (Sprout) · 🎯 追單 (Chase) · 👤 客戶全貌 — Ouvoca 原創語彙，小白秒懂
           </p>
         </div>
       </div>

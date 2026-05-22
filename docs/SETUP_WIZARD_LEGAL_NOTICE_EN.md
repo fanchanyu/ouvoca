@@ -82,7 +82,7 @@ When LLM dialogue contains "print SO-001" / "export customers", the Chat compone
 ### 3.2 Browser Security
 
 - Some browsers (Chrome / Edge) prompt **allow auto-download** on consecutive triggers
-- Customer should guide users to **allow erpilot origin**
+- Customer should guide users to **allow Ouvoca origin**
 - If denied, user manually clicks the [Download PDF] link in the chat message
 
 ### 3.3 File handling
@@ -133,13 +133,13 @@ To disable:
 To the maximum extent permitted by applicable law:
 
 **1. Install Wizard**
-erpilot's OnboardingWizard is a **functional guide**; not liable for business loss from customer entering wrong data or skipping the wizard.
+Ouvoca's OnboardingWizard is a **functional guide**; not liable for business loss from customer entering wrong data or skipping the wizard.
 
 **2. Default Password**
-erpilot has **alerted** customer to change the default. erpilot is **not liable** for **any security incident, data leak, or contract dispute** arising from un-changed defaults.
+Ouvoca has **alerted** customer to change the default. Ouvoca is **not liable** for **any security incident, data leak, or contract dispute** arising from un-changed defaults.
 
 **3. Company Master**
-erpilot **does not validate** the **legal authenticity** of tax ID / company name / address; customer must self-verify consistency with MOEA registration.
+Ouvoca **does not validate** the **legal authenticity** of tax ID / company name / address; customer must self-verify consistency with MOEA registration.
 
 **4. Auto-Download**
 Auto-download is a **convenience feature**; customer must evaluate IT policy compatibility; post-download file handling is the customer's responsibility.
@@ -151,7 +151,7 @@ Auto-download is a **convenience feature**; customer must evaluate IT policy com
 
 ## 7. Pre-Adoption Checklist (v3.37 reinforced)
 
-Before adopting erpilot v3.37, please confirm:
+Before adopting Ouvoca v3.37, please confirm:
 
 ### 7.1 D0 Install
 - [ ] Ran install.bat / install.sh and saw "Installation Done"
@@ -165,10 +165,10 @@ Before adopting erpilot v3.37, please confirm:
 
 ### 7.3 D0 Company info
 - [ ] In Chat: "company name is [Your Co.] tax id [8 digits]"
-- [ ] Print a SO PDF → verify header shows new company name (not "erpilot 範例公司")
+- [ ] Print a SO PDF → verify header shows new company name (not "Ouvoca 範例公司")
 
 ### 7.4 D1 First conversation
-- [ ] Chat opens with "Hello! I'm erpilot AI assistant" greeting
+- [ ] Chat opens with "Hello! I'm Ouvoca AI assistant" greeting
 - [ ] Click any example question → AI responds
 - [ ] Say "print SO-XXX" → browser auto-downloads PDF (or prompts for permission)
 
@@ -182,12 +182,12 @@ Before adopting erpilot v3.37, please confirm:
 - [ ] Completed **all** v3.25.10 → v3.36 checklists (PDPA / trade secrets / font licensing)
 - [ ] **Officially replaced** default password (all employees included)
 - [ ] **Established** outbound PDF **sign-off workflow**
-- [ ] **Trained employees** on a 1-hour erpilot orientation
+- [ ] **Trained employees** on a 1-hour Ouvoca orientation
 
 ---
 
 **Version**: v3.37 (2026-05-21)
-**Author**: erpilot Legal Team (internal)
+**Author**: Ouvoca Legal Team (internal)
 **Corresponds to code**:
 - `backend/app/agents/domains/setup_wizard_tools.py`
 - `backend/app/services/print_service.py` (company master integration)

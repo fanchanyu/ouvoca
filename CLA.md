@@ -1,15 +1,15 @@
-# Contributor License Agreement (CLA) — erpilot
+# Contributor License Agreement (CLA) — Ouvoca
 
 > **中文 / English bilingual** — both versions are equally authoritative.
 > Last updated: 2026-05-16
 
 ## Why this CLA exists / 為什麼需要這份 CLA
 
-erpilot is released under **AGPL-3.0** for the open-source community.
+Ouvoca is released under **AGPL-3.0** for the open-source community.
 
 To keep the project sustainable, the maintainer (currently fanchanyu) also
 offers **commercial licenses** to organizations that cannot comply with
-AGPL-3.0 (e.g. they need to embed erpilot in closed-source products, or
+AGPL-3.0 (e.g. they need to embed Ouvoca in closed-source products, or
 run a SaaS without disclosing their modifications).
 
 For this dual-license model to work, the maintainer needs the right to
@@ -21,8 +21,8 @@ This CLA grants exactly — and only — the permissions needed for that.
 You keep your copyright. You can still use your own contribution however
 you like (including in projects with incompatible licenses).
 
-erpilot 採 **AGPL-3.0** 對社群開放。為了讓專案能長期維護，維護者另外提供
-**商業授權**給無法遵守 AGPL-3.0 的客戶（例：要把 erpilot 嵌入閉源產品、
+Ouvoca 採 **AGPL-3.0** 對社群開放。為了讓專案能長期維護，維護者另外提供
+**商業授權**給無法遵守 AGPL-3.0 的客戶（例：要把 Ouvoca 嵌入閉源產品、
 或不想公開 SaaS 修改的客戶）。
 
 這份 CLA 給維護者一項權利：**把你的 contribution 用 AGPL-3.0 以外的條款再
@@ -142,10 +142,10 @@ your commit is submitted under its terms.
 加 `Signed-off-by:` 等同聲明：你已讀過本 CLA，且這個 commit 依本 CLA 提交。
 
 **First-time contributors**: please also open an issue using the
-[CLA Acknowledgement template](https://github.com/fanchanyu/erpilot/issues/new?template=cla-acknowledgement.yml)
+[CLA Acknowledgement template](https://github.com/fanchanyu/ouvoca/issues/new?template=cla-acknowledgement.yml)
 so we can record your acceptance.
 
-**第一次貢獻者**：請另用 [CLA 確認 issue 模板](https://github.com/fanchanyu/erpilot/issues/new?template=cla-acknowledgement.yml)
+**第一次貢獻者**：請另用 [CLA 確認 issue 模板](https://github.com/fanchanyu/ouvoca/issues/new?template=cla-acknowledgement.yml)
 開一個 issue 留紀錄。
 
 ---
@@ -157,7 +157,7 @@ negotiated terms — please contact:
 
 關於本 CLA 的問題（含需個別協商條款的公司 CLA）請聯絡：
 
-- GitHub Issue: https://github.com/fanchanyu/erpilot/issues (label `legal/cla`)
+- GitHub Issue: https://github.com/fanchanyu/ouvoca/issues (label `legal/cla`)
 - Email: *(to be filled in by maintainer)*
 
 ---

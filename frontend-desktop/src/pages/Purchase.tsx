@@ -281,7 +281,7 @@ export default function Purchase() {
             </tbody>
           </table>
           <div className="text-xs text-gray-500 italic mb-4">
-            ※ 完整品項明細請至 erpilot 系統查詢，或開啟對話請 AI 列出。
+            ※ 完整品項明細請至 Ouvoca 系統查詢，或開啟對話請 AI 列出。
           </div>
           <DocFooter note="請確認規格、數量、價格後簽回。" />
         </PrintableDocument>

@@ -1,7 +1,7 @@
 # 🏛️ House Rules — Complete User Guide
 
 > A beginner-friendly guide: AI manages your company's "house rules"
-> For erpilot v3.25+
+> For Ouvoca v3.25+
 > Reading time: 15 min
 
 ---
@@ -24,7 +24,7 @@ Traditional approach: **rules live in employees' heads**. Problems:
 - 😢 People sneak around when boss is away
 - 😢 Hard to find accountability after incidents
 
-**erpilot's "House Rules" put rules into the system**:
+**Ouvoca's "House Rules" put rules into the system**:
 - ✅ Employees follow rules — error rate drops 80%
 - ✅ Boss sleeps soundly (system auto-blocks violations)
 - ✅ No retraining when staff changes (rules live in system)
@@ -33,7 +33,7 @@ Traditional approach: **rules live in employees' heads**. Problems:
 
 ---
 
-## 🆚 How competitors do it (and why erpilot is different)
+## 🆚 How competitors do it (and why Ouvoca is different)
 
 | ERP | How to set rules | Drawback |
 |---|---|---|
@@ -41,11 +41,11 @@ Traditional approach: **rules live in employees' heads**. Problems:
 | **鼎新** | Hidden config screens | Rigid conditions; can't handle edge cases |
 | **NetSuite** | Write JavaScript (SuiteScript) | Beginners can't do it |
 | **Odoo** | Python expressions | Dangerous + requires coding |
-| **erpilot** ✨ | **👇 Choose any of 3** | **Anyone can edit, instant effect** |
+| **Ouvoca** ✨ | **👇 Choose any of 3** | **Anyone can edit, instant effect** |
 
 ---
 
-## 🚀 3 Ways to Set House Rules in erpilot
+## 🚀 3 Ways to Set House Rules in Ouvoca
 
 ### Method A: Click in the UI (easiest)
 
@@ -74,7 +74,7 @@ Traditional approach: **rules live in employees' heads**. Problems:
 
 6. Save → **Instantly effective** (no restart, no deploy)
 
-### Method B: Talk to AI (natural language — erpilot's signature)
+### Method B: Talk to AI (natural language — Ouvoca's signature)
 
 Don't want to fill forms? **Just talk**:
 
@@ -101,7 +101,7 @@ Don't want to fill forms? **Just talk**:
 4. Click **[✓ Confirm]** → Rule goes live
 5. Next time a salesperson creates an SO with >5% discount → auto-routed to approval
 
-> 🚀 **This is erpilot's most powerful feature**: describe needs in plain words, AI translates to system rules.
+> 🚀 **This is Ouvoca's most powerful feature**: describe needs in plain words, AI translates to system rules.
 > No SQL, no JavaScript, no Python required.
 
 ### Method C: API / Plugin (for engineers)
@@ -186,7 +186,7 @@ When blocked, UI shows "🔓 Manager Override" button. The role-holder must clic
 
 ## 📦 Default House Rules (installed automatically)
 
-Out-of-the-box, erpilot ships with 3 common rules:
+Out-of-the-box, Ouvoca ships with 3 common rules:
 
 ```
 🔴 WO release requires "Recipe"
@@ -217,7 +217,7 @@ Don't want these? **Just toggle `is_active=false` in UI**. **No code change, no 
 
 ### Scenario: Create a high-value PO
 
-1. **9:00** Buyer opens erpilot "Purchase" page
+1. **9:00** Buyer opens Ouvoca "Purchase" page
 2. Clicks "➕ Quick Create"
 3. Fills: Supplier = ChangJiang / Part = M6 Bolt / Qty = 1000 / Price = 150
 4. Saves → System calculates total = NT$150,000
@@ -290,7 +290,7 @@ Every override writes audit log; review periodically. You can add stricter rules
 - E.g., "max 5 overrides per month per manager"
 
 ### Q6: Will rules block system background tasks?
-No. erpilot only runs House Rules on **user-initiated** actions. System cron / cleanup / migration don't trigger.
+No. Ouvoca only runs House Rules on **user-initiated** actions. System cron / cleanup / migration don't trigger.
 
 ### Q7: I can't read English trigger names (po.create / so.confirm)...
 i18n translations coming. Current list has Chinese descriptions. When using AI to author rules, **just talk in plain language**; AI translates trigger names.
@@ -358,11 +358,11 @@ register_condition("my_custom", my_custom)
 
 ---
 
-## 🎯 Why this is strategically important for erpilot
+## 🎯 Why this is strategically important for Ouvoca
 
 > **"Hardcoded rule = customer must edit code = it's not SaaS"**
 
-Previously erpilot hardcoded "WO release needs BOM" — as rigid as SAP/鼎新.
+Previously Ouvoca hardcoded "WO release needs BOM" — as rigid as SAP/鼎新.
 From v3.25 onward, with **PolicyEngine**:
 
 - ✅ Users toggle rules in UI → **0 deploy / 0 consultant fee**
@@ -371,7 +371,7 @@ From v3.25 onward, with **PolicyEngine**:
 - ✅ Audit log → **ISO/GMP/FDA compliant**
 - ✅ Manager override → **flexibility + paper trail**
 
-**This is erpilot's real competitive advantage vs SAP/鼎新** —
+**This is Ouvoca's real competitive advantage vs SAP/鼎新** —
 something they can't do, we do: **end users customize their own business rules**.
 
 ---
@@ -384,4 +384,4 @@ something they can't do, we do: **end users customize their own business rules**
 
 ---
 
-*v3.25 (2026-05-18) · erpilot original design · World's first AI-conversational ERP rule engine*
+*v3.25 (2026-05-18) · Ouvoca original design · World's first AI-conversational ERP rule engine*

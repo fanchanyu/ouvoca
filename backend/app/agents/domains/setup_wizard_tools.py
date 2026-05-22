@@ -1,7 +1,7 @@
 """安裝精靈 LLM tools (v3.37) — Day 0/1 全面補完電腦小白卡關點
 
 修以下硬傷：
-  D0-4：set_company_info_with_confirm — PDF 不再印「erpilot 範例公司」
+  D0-4：set_company_info_with_confirm — PDF 不再印「Ouvoca 範例公司」
   D0-2：change_my_password_with_confirm — 強制改預設 admin/admin123
   D2-2：list_available_roles — 角色中文化（不再天書）
   D2-4：show_import_excel_guide — 一步一步引導匯入 Excel
@@ -11,7 +11,7 @@
 LEGAL（累積適用 v3.25.10 → v3.36 §6）
 ══════════════════════════════════════════════════════════════════
 本模組之 hard-write tools 影響 Tenant 主檔 / User 密碼 / 角色配置。
-這些是高敏感操作，erpilot 已強制 ConfirmCard + audit log。
+這些是高敏感操作，Ouvoca 已強制 ConfirmCard + audit log。
 """
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # Commercial Licensing / 商業授權
 
-erpilot 採 **三軌授權（tri-license）**：
+Ouvoca 採 **三軌授權（tri-license）**：
 
 | 軌道 | 條款 | 適用對象 | 費用 |
 |---|---|---|---|
@@ -8,16 +8,16 @@ erpilot 採 **三軌授權（tri-license）**：
 | 🌱 **小小企業軌** | Small Business License | **≤ 20 concurrent users** 的單一公司，非 ISV / SaaS / SI | **完全免費**（含閉源 connector）|
 | 🔵 **商業軌** | 個別協商 | > 20 concurrent users、ISV / OEM、SaaS provider、大企業 | 個別報價 |
 
-> 🌱 **「20 以內全免費」戰略**：對齊 erpilot 的承諾「**讓中小和小小企業可以快速上手**」。
+> 🌱 **「20 以內全免費」戰略**：對齊 Ouvoca 的承諾「**讓中小和小小企業可以快速上手**」。
 > Taiwan SMB 有海量 1-20 人廠，我們把整套（含鼎新/正航/SAP connector）給你白用，
-> 等你長到 21 人並且離不開 erpilot，再聊商業合約。
+> 等你長到 21 人並且離不開 Ouvoca，再聊商業合約。
 
 ---
 
 ## 🤔 我需要哪一軌？決策樹
 
 ```
-你打算把 erpilot...
+你打算把 Ouvoca...
 
 ├─ 純自家公司內部用，不對外發行？
 │    │
@@ -56,7 +56,7 @@ erpilot 採 **三軌授權（tri-license）**：
 
 ## 🌱 小小企業軌（Small Business License）
 
-**目標**：讓 Taiwan 1-20 人廠 / 新創 / 工作室**完全免費**用 erpilot，
+**目標**：讓 Taiwan 1-20 人廠 / 新創 / 工作室**完全免費**用 Ouvoca，
 **含閉源 connector**（鼎新 / 正航 / SAP / Oracle），無 AGPL source 揭露義務。
 
 ### 適格條件（**全部**都要成立）
@@ -86,7 +86,7 @@ erpilot 採 **三軌授權（tri-license）**：
 | 多公司 / 多租戶 hosting | 🔵 商業軌 |
 | 嵌入自家產品轉售（ISV/OEM）| 🔵 商業軌 |
 | SLA 技術支援（4 / 8 / 24h 應答）| 🔵 商業軌 |
-| 移除「Powered by erpilot Community」標示 | 🔵 商業軌 |
+| 移除「Powered by Ouvoca Community」標示 | 🔵 商業軌 |
 | 智財侵權賠償條款（IP indemnification）| 🔵 商業軌 |
 | 早期 access（新功能比社群早拿）| 🔵 商業軌 |
 | 客製化 schema mapping 顧問 | 🔵 商業軌（或自助）|
@@ -100,7 +100,7 @@ erpilot 採 **三軌授權（tri-license）**：
 
 **Honor system**（榮譽制）+ 技術 hook：
 
-- erpilot 內建 [Analytics dashboard](./README.md#try-the-event-stream) 會記錄 peak concurrent users
+- Ouvoca 內建 [Analytics dashboard](./README.md#try-the-event-stream) 會記錄 peak concurrent users
 - 突破 20 時自動跳出 toast：「您的同時在線使用者已達 X 人，請確認授權軌」
 - 沒有 hard gate（不會強制 disable 功能）—— 我們相信小廠老闆
 - 維護者保留**抽查權**（極端情況下要求看 analytics record）
@@ -122,7 +122,7 @@ erpilot 採 **三軌授權（tri-license）**：
 - 🎓 **導入顧問**：2 週上線 + 員工訓練 + 客製 schema mapping
 - 🔐 **私有部署協助**：on-premise / 客戶 VPC / 多廠 MESH 規模化
 - 🆕 **早期 access**：新功能比社群早 1-2 個 release 拿到
-- 🏷️ **品牌權**：可移除 "Powered by erpilot Community" 標示
+- 🏷️ **品牌權**：可移除 "Powered by Ouvoca Community" 標示
 
 **C. 智財保護**
 - 智慧財產侵權賠償條款（IP indemnification）
@@ -132,7 +132,7 @@ erpilot 採 **三軌授權（tri-license）**：
 > 小小企業軌**免費含**，AGPL 軌也可用（但要按 AGPL 揭露你自己的改動），
 > 商業軌包含在合約裡。
 >
-> ⚠️ **附註**：上述 connector 屬「**erpilot 技術元件**」，**不含**原 ERP（例如 Workflow / ChengHang / SAP B1 等廠商之產品）的使用授權；各廠商之授權合約規定可能不同，請依貴司與該廠商之合約為準。建議客戶於啟用 connector 前先和原 ERP 廠商書面確認授權範圍。erpilot **不參與、不代理**客戶與第三方 ERP 廠商間之合約 / 授權事務；於適用法律所允許之最大範圍內不承擔相關責任。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。
+> ⚠️ **附註**：上述 connector 屬「**Ouvoca 技術元件**」，**不含**原 ERP（例如 Workflow / ChengHang / SAP B1 等廠商之產品）的使用授權；各廠商之授權合約規定可能不同，請依貴司與該廠商之合約為準。建議客戶於啟用 connector 前先和原 ERP 廠商書面確認授權範圍。Ouvoca **不參與、不代理**客戶與第三方 ERP 廠商間之合約 / 授權事務；於適用法律所允許之最大範圍內不承擔相關責任。詳見 [`docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./docs/EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [EN](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md)。
 
 ---
 
@@ -150,14 +150,14 @@ erpilot 採 **三軌授權（tri-license）**：
 
 包含：技術支援 SLA、閉源整合權、IP indemnification。
 
-**OEM 條款**：若你拿 erpilot 包成自家產品，請在產品 about 頁 / 文件
-明顯處標示 "Powered by erpilot"。
+**OEM 條款**：若你拿 Ouvoca 包成自家產品，請在產品 about 頁 / 文件
+明顯處標示 "Powered by Ouvoca"。
 
 ---
 
 ## 📨 如何申請
 
-請開一個 [Commercial License Inquiry issue](https://github.com/fanchanyu/erpilot/issues/new?template=commercial-license-inquiry.yml)，
+請開一個 [Commercial License Inquiry issue](https://github.com/fanchanyu/ouvoca/issues/new?template=commercial-license-inquiry.yml)，
 填完表單，維護者會在 5 個工作天內聯絡你。
 
 或寄信至：*(email 待填)*
@@ -187,7 +187,7 @@ erpilot 採 **三軌授權（tri-license）**：
 
 不是為了「強迫客戶付錢」，而是因為 AGPL-3.0 是**最強的 copyleft 防護**：
 
-- ✅ 防大廠（Amazon / Google / Microsoft）把 erpilot 拿去包 SaaS 服務閉源轉賣，
+- ✅ 防大廠（Amazon / Google / Microsoft）把 Ouvoca 拿去包 SaaS 服務閉源轉賣，
   把社群價值收割掉
 - ✅ 對「自己用」「研究」「不擔心 source disclosure 的部署」**完全免費**
 - ✅ 給「真的有商業需求 + 不能 disclose source」的客戶一個合法管道

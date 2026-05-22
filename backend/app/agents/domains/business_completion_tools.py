@@ -16,11 +16,11 @@ LEGAL / 法律聲明（雙語累積適用 v3.25.10 → v3.33）
   • 審批決策 — 影響契約效力、責任歸屬
   • 退貨入庫 — 影響庫存帳與供應商/客戶關係
 
-所有 hard-write 必走 ConfirmCard。**erpilot 之輸出不構成稅務 / 財務 /
+所有 hard-write 必走 ConfirmCard。**Ouvoca 之輸出不構成稅務 / 財務 /
 法律意見**，對外財報請依適用會計準則 + CPA + 稅務顧問覆核。
 
 This module contains high-compliance operations: invoicing, payments,
-approvals, returns. All hard-writes use ConfirmCard. erpilot output
+approvals, returns. All hard-writes use ConfirmCard. Ouvoca output
 does NOT constitute tax / financial / legal advice. For external
 filings, use CPA + tax advisor review per applicable standards.
 Cumulative applicability with v3.25.10 → v3.33 §6 disclaimers.
@@ -984,8 +984,8 @@ if "tax" not in _AGENT_REGISTRY:
     register_agent(
         "tax", "TaxAgent",
         system_prompt=(
-            "你是 erpilot 之**稅務助手**。職責：開發票、查稅、驗統編、月度稅務概況。"
-            "所有發票操作必走 ConfirmCard。**erpilot 之輸出不構成稅務建議**，"
+            "你是 Ouvoca 之**稅務助手**。職責：開發票、查稅、驗統編、月度稅務概況。"
+            "所有發票操作必走 ConfirmCard。**Ouvoca 之輸出不構成稅務建議**，"
             "對外申報請依 CPA + 稅務顧問。"
         ),
         tool_names=[
@@ -999,7 +999,7 @@ if "approval" not in _AGENT_REGISTRY:
     register_agent(
         "approval", "ApprovalAgent",
         system_prompt=(
-            "你是 erpilot 之**審批助手**。職責：列待我審、批准、拒絕（必填原因）。"
+            "你是 Ouvoca 之**審批助手**。職責：列待我審、批准、拒絕（必填原因）。"
             "所有決策必走 ConfirmCard。"
         ),
         tool_names=[

@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================
-REM  erpilot - Stop dev environment (Windows)
+REM  Ouvoca - Stop dev environment (Windows)
 REM ============================================================
 REM  Kills processes listening on :8000 (backend) and :5173 (frontend)
 REM  Targets by port - won't kill unrelated Python/Node processes.
@@ -9,7 +9,7 @@ setlocal enabledelayedexpansion
 
 echo.
 echo ================================================================
-echo   Stopping erpilot dev environment
+echo   Stopping Ouvoca dev environment
 echo ================================================================
 echo.
 
@@ -30,14 +30,14 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":5173.*LISTENING"') do (
 )
 
 REM ---- Close console windows we labelled ----
-taskkill /F /FI "WINDOWTITLE eq erpilot-backend*"  >nul 2>nul
-taskkill /F /FI "WINDOWTITLE eq erpilot-frontend*" >nul 2>nul
+taskkill /F /FI "WINDOWTITLE eq ouvoca-backend*"  >nul 2>nul
+taskkill /F /FI "WINDOWTITLE eq ouvoca-frontend*" >nul 2>nul
 
 echo.
 if !KILLED! gtr 0 (
     echo   [DONE] %KILLED% process(es) stopped.
 ) else (
-    echo   [INFO] No erpilot dev process found running.
+    echo   [INFO] No Ouvoca dev process found running.
 )
 echo.
 endlocal

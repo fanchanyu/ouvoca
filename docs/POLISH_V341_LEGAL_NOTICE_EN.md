@@ -37,7 +37,7 @@ Outbound Email with PDF may carry legal meaning of "**offer**", "**acceptance**"
 - 🔴 **Quotation**: may be "invitation to treat"; if customer misreads as "offer" and accepts → contract formation dispute
 - 🔴 **Sales Order**: may be "acceptance"; customer can claim price/spec/delivery date is fixed
 - 🔴 **Delivery Note**: title-transfer evidence; misdirected = account chaos
-- 🔴 **Invoice-related**: must comply with Uniform Invoice Regulations; erpilot's PDF is **not** a uniform invoice
+- 🔴 **Invoice-related**: must comply with Uniform Invoice Regulations; Ouvoca's PDF is **not** a uniform invoice
 
 ### 1.3 Wrong Recipient Risk
 
@@ -64,13 +64,13 @@ Before adopting, must:
 - ✅ **Configure SPF / DKIM / DMARC** for deliverability + anti-spoof
 - ✅ Enable **send audit log** (who / when / to whom / what)
 
-### 1.6 erpilot Responsibility Boundary
+### 1.6 Ouvoca Responsibility Boundary
 
 To the maximum extent permitted by applicable law:
-- erpilot **provides** the sending tool, does **not** verify PDF content correctness
-- erpilot does **not** verify recipient authenticity
-- erpilot does **not** auto-recall emails
-- erpilot is **not liable** for **any** contract dispute, PII leak, business loss from wrong recipient / wrong content
+- Ouvoca **provides** the sending tool, does **not** verify PDF content correctness
+- Ouvoca does **not** verify recipient authenticity
+- Ouvoca does **not** auto-recall emails
+- Ouvoca is **not liable** for **any** contract dispute, PII leak, business loss from wrong recipient / wrong content
 
 ### 1.7 Dry-run when SMTP unset
 
@@ -111,9 +111,9 @@ Profitability data is:
 - Does not include opportunity cost (capacity tied up by low-margin customers)
 - Customer's **formal financial analysis** should use more complete methods via CPA
 
-### 2.5 erpilot Disclaimer
+### 2.5 Ouvoca Disclaimer
 
-erpilot's profitability is a **heuristic analysis**; does **not** replace formal financial analysis. erpilot is **not liable** for **any** loss from pricing decisions / customer selection based on this analysis.
+Ouvoca's profitability is a **heuristic analysis**; does **not** replace formal financial analysis. Ouvoca is **not liable** for **any** loss from pricing decisions / customer selection based on this analysis.
 
 ---
 
@@ -214,19 +214,19 @@ erpilot's profitability is a **heuristic analysis**; does **not** replace formal
 To the maximum extent permitted by applicable law:
 
 **1. Email PDF**
-erpilot does **not** verify PDF content, recipient authenticity, or contract effect of sending. erpilot is **not liable** for **any** contract dispute, PII leak, business loss, customer confusion, or competitor leak from sending.
+Ouvoca does **not** verify PDF content, recipient authenticity, or contract effect of sending. Ouvoca is **not liable** for **any** contract dispute, PII leak, business loss, customer confusion, or competitor leak from sending.
 
 **2. Customer Profitability**
-erpilot's profitability is a **heuristic analysis** (standard_cost-based), does **not** replace formal financial / CPA analysis. erpilot is **not liable** for **any** loss from pricing decisions / customer selection / business strategy based on this analysis.
+Ouvoca's profitability is a **heuristic analysis** (standard_cost-based), does **not** replace formal financial / CPA analysis. Ouvoca is **not liable** for **any** loss from pricing decisions / customer selection / business strategy based on this analysis.
 
 **3. Order Lifecycle**
-erpilot does **not** guarantee timeline completeness; **not liable** for PII / trade secret disputes from timeline leakage.
+Ouvoca does **not** guarantee timeline completeness; **not liable** for PII / trade secret disputes from timeline leakage.
 
 **4. Data Health Check**
-erpilot's check is **heuristic detection**, does **not** replace formal IT audit. erpilot is **not liable** for loss from undetected data quality issues.
+Ouvoca's check is **heuristic detection**, does **not** replace formal IT audit. Ouvoca is **not liable** for loss from undetected data quality issues.
 
 **5. Chat Feedback**
-erpilot does **not** supervise customer's use of feedback; **not liable** for labor disputes from using feedback for HR appraisal.
+Ouvoca does **not** supervise customer's use of feedback; **not liable** for labor disputes from using feedback for HR appraisal.
 
 **6. FAQ**
 Answers are **functional reference**, do **not** replace formal contract / SLA / technical support. **Price** per **official quotation**.
@@ -271,12 +271,12 @@ Answers are **functional reference**, do **not** replace formal contract / SLA /
 | 🇯🇵 Japan | APPI | Customer data purpose **change** requires notification |
 | 🇸🇬 SG | PDPA | DNC list restricts marketing emails |
 
-⚠️ **erpilot's SMTP sending does not** auto-add unsubscribe link / company address — customer must **self-comply** with the above.
+⚠️ **Ouvoca's SMTP sending does not** auto-add unsubscribe link / company address — customer must **self-comply** with the above.
 
 ---
 
 **Version**: v3.41 (2026-05-22)
-**Author**: erpilot Legal Team (internal)
+**Author**: Ouvoca Legal Team (internal)
 **Corresponds to code**:
 - `backend/app/agents/domains/polish_v341_tools.py` (5 LLM tools + email helper)
 - `backend/app/api/chat_feedback.py` (P7 feedback endpoint)

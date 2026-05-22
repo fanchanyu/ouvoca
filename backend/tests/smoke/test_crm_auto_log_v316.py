@@ -1,5 +1,5 @@
 """
-Smoke: Auto-CRM logging (Sprint J v3.16 — erpilot 原創 UX)
+Smoke: Auto-CRM logging (Sprint J v3.16 — Ouvoca 原創 UX)
 
 驗收：訂單成立 / Lead 轉換 / 商機階段變化 → 自動產 CrmEvent 進客戶 timeline
 （不需業務手動加 activity log）

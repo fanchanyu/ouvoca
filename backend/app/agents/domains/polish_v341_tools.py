@@ -429,13 +429,13 @@ async def _email_pdf_to_customer_with_confirm(
             pdf_bytes = await generate_so_pdf(db, entity.id, doc_type="sales_order")
             filename = f"so-{doc_no}.pdf"
 
-        subject = f"[erpilot] {title_zh} {doc_no}"
+        subject = f"[Ouvoca] {title_zh} {doc_no}"
         body = (
             f"您好，\n\n"
             f"附上{title_zh} {doc_no}，請查收。\n"
             + (f"\n{note}\n" if note else "")
             + f"\n敬請見覆。\n\n"
-            f"--\nerpilot ERP 系統自動寄送"
+            f"--\nOuvoca ERP 系統自動寄送"
         )
         result = _send_email_with_attachment(
             final_email, subject, body, pdf_bytes, filename
@@ -467,9 +467,9 @@ async def _email_pdf_to_customer_with_confirm(
 
 _FAQ = [
     {
-        "q": "erpilot 多少錢", "keywords": ["費用", "價格", "多少錢", "報價", "錢"],
+        "q": "Ouvoca 多少錢", "keywords": ["費用", "價格", "多少錢", "報價", "錢"],
         "a": (
-            "💰 **erpilot 定價**：\n"
+            "💰 **Ouvoca 定價**：\n"
             "  • 30-50 人廠：30 萬 / 年\n"
             "  • 50-100 人廠：50 萬 / 年\n"
             "  • LLM API 費用客戶自付（DeepSeek 每月約 $5-20 USD）\n"
@@ -549,7 +549,7 @@ _FAQ = [
     risk_tier=RiskTier.READ,
     description=(
         "常見問題 FAQ。新員工 Day 1 上手會問的問題。"
-        "範例：「erpilot 多少錢」「斷網能用嗎」「怎麼設定 API key」「升級到新版」。"
+        "範例：「Ouvoca 多少錢」「斷網能用嗎」「怎麼設定 API key」「升級到新版」。"
     ),
     slots=[
         Slot("question", "string", required=False, description="問題；不填則列全部"),
@@ -560,7 +560,7 @@ async def _ask_faq(db, user, question: str = ""):
     question = (question or "").lower().strip()
     if not question:
         # 列全部
-        lines = ["❓ **erpilot 常見問題**：", ""]
+        lines = ["❓ **Ouvoca 常見問題**：", ""]
         for i, f in enumerate(_FAQ, 1):
             lines.append(f"  {i}. {f['q']}")
         lines.append("")

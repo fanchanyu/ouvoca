@@ -1,12 +1,12 @@
 # Multi-Echelon Time-Phased MRP-II Algorithm Design
 
-> **Nature of this document**: Algorithmic **methodology paper** describing the MRP-II engine in erpilot (v3.25.10), the classical operations research methods adopted, complexity analysis, implementation choices, and validation strategy. Written in academic paper style.
+> **Nature of this document**: Algorithmic **methodology paper** describing the MRP-II engine in Ouvoca (v3.25.10), the classical operations research methods adopted, complexity analysis, implementation choices, and validation strategy. Written in academic paper style.
 
 ---
 
 ## Abstract
 
-erpilot v3.25.10 implements an industry-standard **MRP-II (Manufacturing Resource Planning II)** algorithm, integrating Orlicky's (1975) Low-Level Code (LLC) sorting, Vollmann et al.'s (2005) time-phased net-requirement calculation, and five lot-sizing policies (including Wagner & Whitin's 1958 optimal dynamic-programming algorithm). This design corrects two algorithmic-correctness defects in v3.25.9: (i) absence of LLC sorting causing double-counting of common parts; (ii) absence of lead-time offset causing plans to always be late. We describe the methodology, complexity $O(|V| \cdot T^2)$, and validation via Wagner-Whitin's original 1958 numerical example and Silver-Meal's 1973 heuristic 30% upper bound.
+Ouvoca v3.25.10 implements an industry-standard **MRP-II (Manufacturing Resource Planning II)** algorithm, integrating Orlicky's (1975) Low-Level Code (LLC) sorting, Vollmann et al.'s (2005) time-phased net-requirement calculation, and five lot-sizing policies (including Wagner & Whitin's 1958 optimal dynamic-programming algorithm). This design corrects two algorithmic-correctness defects in v3.25.9: (i) absence of LLC sorting causing double-counting of common parts; (ii) absence of lead-time offset causing plans to always be late. We describe the methodology, complexity $O(|V| \cdot T^2)$, and validation via Wagner-Whitin's original 1958 numerical example and Silver-Meal's 1973 heuristic 30% upper bound.
 
 **Keywords**: MRP-II, Low-Level Code, Wagner-Whitin, lot sizing, multi-echelon BOM, operations research
 
@@ -16,7 +16,7 @@ erpilot v3.25.10 implements an industry-standard **MRP-II (Manufacturing Resourc
 
 Material Requirements Planning (MRP) is the core module of manufacturing ERP, deriving from the Master Production Schedule (MPS) the **when** and **how much to order** of each material at every BOM level. Orlicky (1975) established the methodology while at IBM; subsequent evolution incorporated capacity and cost dimensions as MRP-II.
 
-erpilot's MRP prior to v3.25.10 had known defects:
+Ouvoca's MRP prior to v3.25.10 had known defects:
 
 1. **Single-level explosion**: only one BOM level expanded; 2+ level sub-assembly structures could not be aggregated correctly. v3.25.9 fixed this with recursive explosion.
 2. **No LLC sorting**: when a part appears at multiple levels (e.g., a screw used both directly in product A and in A's sub-assembly), un-sorted netting may double-count on-hand or safety stock, violating Orlicky's (1975, §4) correctness principle.
@@ -174,7 +174,7 @@ backend/app/services/mrp_advanced.py
 
 1. **LLC bottom-up vs top-down**: chose BFS from roots, because in real BOMs the root set is usually much smaller than leaves.
 2. **Persistence**: only persist MrpItems with non-zero gross or planned receipts (typical sparse rate ~70%).
-3. **Sub-assembly detection**: reuse erpilot's existing convention `Part.part_no == Product.product_no`, avoiding a new join table.
+3. **Sub-assembly detection**: reuse Ouvoca's existing convention `Part.part_no == Product.product_no`, avoiding a new join table.
 4. **Cost rollup shares LLC**: both require topological traversal.
 
 ---
@@ -217,7 +217,7 @@ backend/app/services/mrp_advanced.py
 
 | Topic | Why not | Future direction |
 |---|---|---|
-| **Stochastic demand / safety stock optimization** | erpilot is deterministic MRP; stochastic version needs (Q, r) policy or multi-echelon stochastic | Clark & Scarf (1960) multi-echelon optimal; Graves & Willems (2000) safety stock placement |
+| **Stochastic demand / safety stock optimization** | Ouvoca is deterministic MRP; stochastic version needs (Q, r) policy or multi-echelon stochastic | Clark & Scarf (1960) multi-echelon optimal; Graves & Willems (2000) safety stock placement |
 | **Capacity constraints (CRP)** | This version does not constrain work-center capacity; real-world CRP is a subsequent pass | Capacitated Lot-Sizing Problem (CLSP) — NP-hard, needs MIP solver |
 | **Alternate parts** | Requires BOMGraph extension to substitution graph | Sprint X: substitution graph + cost-ranked matching |
 | **Operations routing** | This version is item-level only, no operations or work-center | Sprint Y: Operation precedence DAG + Pinedo scheduling |
@@ -261,13 +261,13 @@ backend/app/services/mrp_advanced.py
 >
 >    The above assumptions often do not hold strictly in practice. If your scenario deviates significantly from these assumptions, algorithm output may differ materially from best practice.
 >
-> 4. **Disclaimer clause**: **to the maximum extent permitted by applicable law**, erpilot assumes no responsibility for the following:
+> 4. **Disclaimer clause**: **to the maximum extent permitted by applicable law**, Ouvoca assumes no responsibility for the following:
 >    - Business consequences arising from acting on this algorithm's output: **over-purchasing, line stoppage from shortage, inventory impairment**
 >    - **Planning inaccuracy** due to deviation between real-world and algorithm assumptions
 >    - **Erroneous plans** due to incorrect input data (BOM, inventory, lead time, etc.)
 >    - **Contractual disputes** with third parties (suppliers, customers) acting on this plan
 >
-> 5. **Neutrality of academic citation**: this document's citation of Wagner-Whitin, Silver-Meal, etc., **does not represent any warranty by erpilot or the original authors' institutions** for any use case. For academic precision, readers should consult the original papers directly.
+> 5. **Neutrality of academic citation**: this document's citation of Wagner-Whitin, Silver-Meal, etc., **does not represent any warranty by Ouvoca or the original authors' institutions** for any use case. For academic precision, readers should consult the original papers directly.
 >
 > ### Recommended practice
 >
@@ -313,6 +313,6 @@ backend/app/services/mrp_advanced.py
 ---
 
 **Last updated**: 2026-05-20 (v3.25.10)
-**Authors**: erpilot engineering team (with IE/OR academic methodology citations)
+**Authors**: Ouvoca engineering team (with IE/OR academic methodology citations)
 **Version**: 1.0
 **Chinese version**: [`MRP_ALGORITHM_DESIGN_ZH.md`](./MRP_ALGORITHM_DESIGN_ZH.md)

@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================
-REM  erpilot - One-click dev environment startup (Windows)
+REM  Ouvoca - One-click dev environment startup (Windows)
 REM ============================================================
 REM  Launches:
 REM    1. Backend  (uvicorn :8000)  in a new console window
@@ -14,7 +14,7 @@ cd /d "%~dp0"
 
 echo.
 echo ================================================================
-echo   erpilot dev environment - one-click startup
+echo   Ouvoca dev environment - one-click startup
 echo ================================================================
 echo.
 
@@ -44,7 +44,7 @@ if not exist backend\.env (
         echo   [TIP] You should set a real JWT_SECRET in backend\.env later:
         echo           python -c "import secrets; print(secrets.token_hex(32))"
     ) else (
-        echo   [ERROR] backend\.env.example missing - this is not a valid erpilot repo
+        echo   [ERROR] backend\.env.example missing - this is not a valid Ouvoca repo
         pause
         exit /b 1
     )
@@ -100,8 +100,8 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":5173.*LISTENING"') do (
 REM ---- Step 3: Start backend ----
 echo.
 echo [3/5] Starting backend (uvicorn :8000)...
-start "erpilot-backend" /MIN cmd /k "cd /d %CD%\backend && set PYTHONIOENCODING=utf-8 && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info"
-echo   [OK] Window opened: erpilot-backend
+start "ouvoca-backend" /MIN cmd /k "cd /d %CD%\backend && set PYTHONIOENCODING=utf-8 && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info"
+echo   [OK] Window opened: ouvoca-backend
 
 REM ---- Step 4: Wait for backend healthy then start frontend ----
 echo.
@@ -111,7 +111,7 @@ set RETRIES=30
 set /a RETRIES-=1
 if !RETRIES! lss 0 (
     echo   [ERROR] Backend did not become healthy in 30s
-    echo           Check the erpilot-backend window for errors.
+    echo           Check the ouvoca-backend window for errors.
     pause
     exit /b 1
 )
@@ -121,8 +121,8 @@ if errorlevel 1 (
     goto WAIT
 )
 echo   [OK] Backend healthy
-start "erpilot-frontend" /MIN cmd /k "cd /d %CD%\frontend-desktop && npm run dev"
-echo   [OK] Window opened: erpilot-frontend
+start "ouvoca-frontend" /MIN cmd /k "cd /d %CD%\frontend-desktop && npm run dev"
+echo   [OK] Window opened: ouvoca-frontend
 
 REM ---- Step 5: Wait for frontend and open browser ----
 echo.
@@ -144,7 +144,7 @@ echo   [OK] Frontend ready
 :OPEN
 echo.
 echo ================================================================
-echo   erpilot is running!
+echo   Ouvoca is running!
 echo.
 echo     Desktop UI:  http://localhost:5173
 echo     Backend API: http://localhost:8000

@@ -1,9 +1,9 @@
 /**
  * AskAiFloat — 右下角浮球：每頁的「AI 現場教練」（Sprint J v3.16）
  *
- * erpilot 原創 UX 哲學：
+ * Ouvoca 原創 UX 哲學：
  *   傳統 ERP: 「每欄位掛 ? help bubble」「漂亮 onboarding tour」「FAQ 翻 5 層」
- *   erpilot: 「不知道怎麼用？問 AI 就會」← 把 AI 變成現場教練
+ *   Ouvoca: 「不知道怎麼用？問 AI 就會」← 把 AI 變成現場教練
  *
  * 設計：
  *  - 右下角浮 💡 球（脈衝動畫吸引注意）
@@ -12,7 +12,7 @@
  *  - 送出 → 呼叫 chat API → 顯示回答
  *  - 沒 LLM key → 顯示 AiSetupGuide 引導申請
  *
- * 為什麼這比 onboarding tour / EmptyState 更 erpilot 風：
+ * 為什麼這比 onboarding tour / EmptyState 更 Ouvoca 風：
  *  - tour: 第一次看完就不會再幫你
  *  - help bubble: 預先寫死的文字，沒辦法回答你真正的問題
  *  - **AskAI**: 隨時都在、上下文相關、能回答任何問題、學的越多越聰明

@@ -1,7 +1,7 @@
 """電腦小白友善 LLM tools 補完 (v3.35)
 
 回答客戶第一天上手就會問的問題：
-  「我是誰？」「erpilot 好嗎？」「我能對 AI 講什麼？」
+  「我是誰？」「Ouvoca 好嗎？」「我能對 AI 講什麼？」
   「我做過什麼？」「上週問過什麼？」「客戶 X 全部資料」
   「給阿玲採購權限」「拿掉阿明的會計權限」
 
@@ -13,7 +13,7 @@ LEGAL（累積適用 v3.25.10 → v3.34.1 §6）
   • 拿掉角色 = 該員工立即失去存取
   • 重大角色變更應額外有書面審批 + 對應 HR/法務記錄
 
-於適用法律所允許之最大範圍內，erpilot 對誤授權所衍生之資料外洩 /
+於適用法律所允許之最大範圍內，Ouvoca 對誤授權所衍生之資料外洩 /
 契約爭議 / 違規操作不承擔責任。
 """
 from __future__ import annotations
@@ -101,7 +101,7 @@ async def _whoami(db, user):
 
 
 # ════════════════════════════════════════════════════════════════════
-# 2. system_health — 「erpilot 怎麼樣了？」
+# 2. system_health — 「Ouvoca 怎麼樣了？」
 # ════════════════════════════════════════════════════════════════════
 
 @register_tool(
@@ -109,8 +109,8 @@ async def _whoami(db, user):
     domain="system",
     risk_tier=RiskTier.READ,
     description=(
-        "查詢 erpilot 系統健康狀態（DB / LLM / 服務）。"
-        "範例：「erpilot 好嗎？」「系統正常嗎？」"
+        "查詢 Ouvoca 系統健康狀態（DB / LLM / 服務）。"
+        "範例：「Ouvoca 好嗎？」「系統正常嗎？」"
     ),
     slots=[],
     required_permission="system.health.read",
@@ -148,7 +148,7 @@ async def _system_health(db, user):
         pass
 
     lines = [
-        "🩺 **erpilot 系統健康檢查**",
+        "🩺 **Ouvoca 系統健康檢查**",
         "",
         db_msg,
         llm_msg,
@@ -175,8 +175,8 @@ async def _system_health(db, user):
     domain="system",
     risk_tier=RiskTier.READ,
     description=(
-        "📚 列出我能對 erpilot 講的話 / 能做的事（top 20）。"
-        "範例：「我能做什麼？」「erpilot 會做什麼？」「教我用法」"
+        "📚 列出我能對 Ouvoca 講的話 / 能做的事（top 20）。"
+        "範例：「我能做什麼？」「Ouvoca 會做什麼？」「教我用法」"
     ),
     slots=[
         Slot("category", "string", required=False,
@@ -245,7 +245,7 @@ async def _list_what_can_i_do(db, user, category: str = None):
     else:
         examples = examples_by_cat
 
-    lines = ["💡 **erpilot 能做的事**（你可以對 AI 講以下話）：\n"]
+    lines = ["💡 **Ouvoca 能做的事**（你可以對 AI 講以下話）：\n"]
     for cat, items in examples.items():
         if not items:
             continue
@@ -605,7 +605,7 @@ if "system" not in _AGENT_REGISTRY:
     register_agent(
         "system", "SystemAgent",
         system_prompt=(
-            "你是 erpilot 之**系統助手**。職責：whoami / 健康檢查 / 「我能做什麼」/ "
+            "你是 Ouvoca 之**系統助手**。職責：whoami / 健康檢查 / 「我能做什麼」/ "
             "個人操作歷史 / 對話歷史搜尋。回答簡潔有 emoji，主動引導使用者用其他 tool。"
         ),
         tool_names=[
@@ -619,7 +619,7 @@ if "permission" not in _AGENT_REGISTRY:
     register_agent(
         "permission", "PermissionAgent",
         system_prompt=(
-            "你是 erpilot 之**權限管理助手**。職責：授予 / 撤銷角色。"
+            "你是 Ouvoca 之**權限管理助手**。職責：授予 / 撤銷角色。"
             "**重大角色變更必走 ConfirmCard**。建議使用者填撤銷 / 授權原因以供日後追溯。"
         ),
         tool_names=["grant_role_with_confirm", "revoke_role_with_confirm"],

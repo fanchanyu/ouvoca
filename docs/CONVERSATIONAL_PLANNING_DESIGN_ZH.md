@@ -1,6 +1,6 @@
 # 對話式規劃顧問設計（Conversational Planning Agent）— v3.30
 
-> **本檔性質**：跨**LLM / 自然語言 / IE-OR / UX** 之方法論文件，描述 erpilot v3.30 之 **PlanningAgent** —— 將 v3.25.9 → v3.29 之**所有 IE/OR 演算法包裝為 LLM 可呼叫工具**，讓 SMB 老闆**用一句話**就能使用世界級規劃方法。
+> **本檔性質**：跨**LLM / 自然語言 / IE-OR / UX** 之方法論文件，描述 Ouvoca v3.30 之 **PlanningAgent** —— 將 v3.25.9 → v3.29 之**所有 IE/OR 演算法包裝為 LLM 可呼叫工具**，讓 SMB 老闆**用一句話**就能使用世界級規劃方法。
 
 > 📘 **前置文件**：v3.25.9 → v3.29 全 sprint 之 design docs（演算法基礎）
 
@@ -8,7 +8,7 @@
 
 ## 摘要（Abstract）
 
-erpilot 過去 5 個 sprint（v3.25.9 → v3.29）完成 BOM 多階、MRP-II、CLSP、TOC 三部曲、需求預測等**作業研究等級之 IE/OR 演算法**，引用 50+ 篇學術文獻。然而**這些演算法皆為 Python service**，僅工程師可呼叫 — 違反 erpilot 北極星「**自然語言取代教育訓練**」之核心承諾。v3.30 補完最後一哩路：將 10 個關鍵演算法包裝為 `@register_tool` decorator 註冊之 LLM tools，讓老闆能對 AI 說：
+Ouvoca 過去 5 個 sprint（v3.25.9 → v3.29）完成 BOM 多階、MRP-II、CLSP、TOC 三部曲、需求預測等**作業研究等級之 IE/OR 演算法**，引用 50+ 篇學術文獻。然而**這些演算法皆為 Python service**，僅工程師可呼叫 — 違反 Ouvoca 北極星「**自然語言取代教育訓練**」之核心承諾。v3.30 補完最後一哩路：將 10 個關鍵演算法包裝為 `@register_tool` decorator 註冊之 LLM tools，讓老闆能對 AI 說：
 
 > 「我們的瓶頸在哪？」「這張單該不該接？」「下個月該備多少 M6 螺絲？」「為什麼下週要這麼忙？」「今天我該注意什麼？」
 
@@ -33,7 +33,7 @@ erpilot 過去 5 個 sprint（v3.25.9 → v3.29）完成 BOM 多階、MRP-II、C
 | v3.28 | TA + DBR + Order Acceptance | ❌ Python service only |
 | v3.29 | 5-method auto-selection + MASE | ❌ Python service only |
 
-**所有黑色 ❌ 意味**：SMB 老闆**無法對 AI 講話**用上這些功能。**這正是 erpilot v3.0 戰略軸轉所反對的「介面 vs 對話 → 對話」原則之嚴重違反**。
+**所有黑色 ❌ 意味**：SMB 老闆**無法對 AI 講話**用上這些功能。**這正是 Ouvoca v3.0 戰略軸轉所反對的「介面 vs 對話 → 對話」原則之嚴重違反**。
 
 ### 1.2 北極星偏離量化
 
@@ -43,9 +43,9 @@ erpilot 過去 5 個 sprint（v3.25.9 → v3.29）完成 BOM 多階、MRP-II、C
 
 但 v3.25.9-v3.29 之新功能：
 
-- 老闆問「我們的瓶頸在哪？」→ ❌ erpilot 不會答
-- 老闆問「下個月該備多少 M6？」→ ❌ erpilot 不會答
-- 老闆問「這張單該不該接？」→ ❌ erpilot 不會答
+- 老闆問「我們的瓶頸在哪？」→ ❌ Ouvoca 不會答
+- 老闆問「下個月該備多少 M6？」→ ❌ Ouvoca 不會答
+- 老闆問「這張單該不該接？」→ ❌ Ouvoca 不會答
 
 **40 個 ❌ vs 0 個 ✅**。這不是工程問題，是**戰略偏離**。
 
@@ -111,7 +111,7 @@ async def _<impl>(db, user, <args>) -> Dict[str, Any]:
 
 ### 2.3 ConfirmCard 整合（Hard-write）
 
-依 erpilot v3.0 戰略軸轉之第 4 問：「**這是 hard-write 嗎？有 ConfirmCard 嗎？**」
+依 Ouvoca v3.0 戰略軸轉之第 4 問：「**這是 hard-write 嗎？有 ConfirmCard 嗎？**」
 
 v3.30 唯一 hard-write 為 `commit_forecast_to_mps_with_confirm`：
 
@@ -151,7 +151,7 @@ Priority 99 (☀️): 平靜日 fallback
 ### 2.5 PlanningAgent 主提示詞
 
 ```
-你是 erpilot 的規劃顧問 AI。職責：
+你是 Ouvoca 的規劃顧問 AI。職責：
 1. 用一句話幫老闆解決「該不該接這張單」等決策
 2. 把 IE/OR 演算法之黑盒輸出翻譯成老闆能懂的人話
 3. 主動指出資料異常 / regime change（提醒覆核）
@@ -301,7 +301,7 @@ backend/app/agents/domains/planning_llm_tools.py   (~700 行)
 >
 > ### 6. 不擔保條款
 >
-> 於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），erpilot 對下列事項不承擔責任：
+> 於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），Ouvoca 對下列事項不承擔責任：
 >
 > - 因 LLM 抽錯 slot 而誤發採購單 / 訂單之**後果**（已由 ConfirmCard 緩釋，但人為按錯仍可能）
 > - 因 LLM 翻譯失準導致**錯誤業務判斷**
@@ -319,7 +319,7 @@ backend/app/agents/domains/planning_llm_tools.py   (~700 行)
 >
 > ### 8. 文化提醒：LLM 不取代專業
 >
-> erpilot 的承諾是「**自然語言取代教育訓練**」，**不是**「**自然語言取代專業判斷**」。AI 可幫老闆**快速操作**、**找資料**、**做粗略計算**；但**最終決策**仍應由：
+> Ouvoca 的承諾是「**自然語言取代教育訓練**」，**不是**「**自然語言取代專業判斷**」。AI 可幫老闆**快速操作**、**找資料**、**做粗略計算**；但**最終決策**仍應由：
 >
 > - 業務 / 採購 / 倉管 / 廠長 — 依其專業
 > - 主管 / 財務 / 法務 — 依其權限
@@ -349,7 +349,7 @@ backend/app/agents/domains/planning_llm_tools.py   (~700 行)
 
 [9] **Yao, S., et al.** (2022). ReAct: Synergizing reasoning and acting in language models. *ICLR 2023*. — LLM agent reasoning + action 循環
 
-[10] **erpilot CONVERSATIONAL_ERP_DESIGN** (2026, internal). 6-layer architecture + 7 design principles + 4-phase roadmap. — 本系統之北極星
+[10] **Ouvoca CONVERSATIONAL_ERP_DESIGN** (2026, internal). 6-layer architecture + 7 design principles + 4-phase roadmap. — 本系統之北極星
 
 [11-50] v3.25.9 → v3.29 全部 5 篇 design doc 之 references **累積適用**
 
@@ -360,13 +360,13 @@ backend/app/agents/domains/planning_llm_tools.py   (~700 行)
 | 版本 | 日期 | 變更 |
 |---|---|---|
 | v3.25.9 - v3.29 | 2026-05-20 | 演算法基礎（IE/OR / TA / Forecasting）|
-| **v3.30** | **2026-05-20** | **本版本**：把 v3.25.9-v3.29 所有演算法**包成 LLM tools**，補完 erpilot 北極星 |
+| **v3.30** | **2026-05-20** | **本版本**：把 v3.25.9-v3.29 所有演算法**包成 LLM tools**，補完 Ouvoca 北極星 |
 | 將來 v3.31+ | TBD | TTS 語音輸出 / Whisper STT / multi-tool chaining / vector memory |
 | 將來 v3.32+ | TBD | OCR 報價單 / Email 解析 / 手機拍盤點 |
 
 ---
 
 **最後更新**：2026-05-20（v3.30）
-**作者**：erpilot 工程團隊（含 NLU / XAI / IE-OR 跨域學術方法論引用）
+**作者**：Ouvoca 工程團隊（含 NLU / XAI / IE-OR 跨域學術方法論引用）
 **版本**：1.0
 **English version**：[`CONVERSATIONAL_PLANNING_DESIGN_EN.md`](./CONVERSATIONAL_PLANNING_DESIGN_EN.md)

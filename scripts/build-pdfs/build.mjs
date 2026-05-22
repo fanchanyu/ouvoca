@@ -97,12 +97,12 @@ const DOCS_TO_BUILD = [
   { src: 'HOW_TO_GET_LLM_API_KEY_ZH.md', out: '19_LLM_API_Key申請指南_中文.pdf',          title: 'LLM API Key 申請指南（小白版）' },
   { src: 'HOW_TO_GET_LLM_API_KEY_EN.md', out: '19_How_to_Get_LLM_API_Key_EN.pdf',       title: 'How to Get an LLM API Key (Beginner-Friendly)' },
 
-  // === 20 v3.25 家規 (House Rules) 完整使用指南 — erpilot 招牌差異化 ===
+  // === 20 v3.25 家規 (House Rules) 完整使用指南 — Ouvoca 招牌差異化 ===
   { src: 'HOUSE_RULES_GUIDE_ZH.md',     out: '20_家規完整使用指南_中文.pdf',              title: '🏛️ 家規 (House Rules) 完整使用指南' },
   { src: 'HOUSE_RULES_GUIDE_EN.md',     out: '20_House_Rules_Guide_EN.pdf',              title: '🏛️ House Rules — Complete User Guide' },
 
   // === 21 v3.20 LICENSE 簡介 ===
-  { src: 'COMMERCIAL_LICENSING_FAQ_ZH.md', out: '21_商業授權FAQ_中文.pdf',                 title: 'erpilot 商業授權 FAQ（含小小企業免費條款）' },
+  { src: 'COMMERCIAL_LICENSING_FAQ_ZH.md', out: '21_商業授權FAQ_中文.pdf',                 title: 'Ouvoca 商業授權 FAQ（含小小企業免費條款）' },
 
   // === 22 v3.25.5 第三方 ERP 授權合規提醒（接舊系統前建議閱讀；非法律意見）===
   { src: 'EXTERNAL_DB_LICENSING_NOTICE_ZH.md', out: '22_第三方ERP授權合規通知_中文.pdf',     title: '⚠️ 第三方 ERP 授權合規提醒（接舊系統前建議閱讀）' },
@@ -167,6 +167,10 @@ const DOCS_TO_BUILD = [
   // === 37 v3.42 第六輪小白卡關修補法律聲明（雙語 — 帳號管理最敏感）===
   { src: 'POLISH_V342_LEGAL_NOTICE_ZH.md', out: '37_第六輪卡關修補法律聲明_中文.pdf',       title: '⚖️ 第六輪小白卡關修補法律聲明（v3.42 — 使用者帳號 / 全域搜尋 / AI 限額 / 工作天）' },
   { src: 'POLISH_V342_LEGAL_NOTICE_EN.md', out: '37_Polish_V342_Legal_EN.pdf',              title: '⚖️ Sixth-Round Beginner-Fix Legal Notice (v3.42)' },
+
+  // === 38 重命名公告（雙語）— erpilot → Ouvoca 法律合規 + 道歉 ===
+  { src: 'RENAME_NOTICE_ZH.md', out: '38_重命名公告_中文.pdf',                               title: '📋 專案重命名公告：erpilot → Ouvoca（法律合規 + 道歉聲明）' },
+  { src: 'RENAME_NOTICE_EN.md', out: '38_Rename_Notice_EN.pdf',                              title: '📋 Project Rename Notice: erpilot → Ouvoca (Legal Compliance + Apology)' },
 ]
 
 // ───────────── Mermaid 預處理 ─────────────

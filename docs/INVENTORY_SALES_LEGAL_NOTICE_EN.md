@@ -62,7 +62,7 @@ PO becomes a **contract with supplier** once approved/sent:
 ### 3.2 Receiving Goods Compliance
 - **receive_purchase_order** triggers AP booking
 - Quantity/quality acceptance **is warehouse staff's authority** — AI does not replace
-- Shortages/damages should follow supplier contract (erpilot does NOT auto-deduct)
+- Shortages/damages should follow supplier contract (Ouvoca does NOT auto-deduct)
 
 ---
 
@@ -80,7 +80,7 @@ This system's design:
 - Supervisor: review variances + apply adjustments
 - CPA: adjust books based on count results
 
-**erpilot's ConfirmCard does NOT replace CPA review**. For external financial reports, follow applicable accounting standards + CPA review.
+**Ouvoca's ConfirmCard does NOT replace CPA review**. For external financial reports, follow applicable accounting standards + CPA review.
 
 ### 4.3 Variance Reason Classification
 `variance_reason` categorization is **for internal analysis only**, does NOT constitute:
@@ -128,7 +128,7 @@ Read tools' `summary` is LLM-translated, may:
 
 ## 7. Disclaimer Clause
 
-To the maximum extent permitted by applicable law, erpilot assumes **no liability** for:
+To the maximum extent permitted by applicable law, Ouvoca assumes **no liability** for:
 
 1. Contractual / financial / tax consequences from LLM slot extraction errors causing wrong PO/SO/StockCount
 2. Wrong business judgments from LLM translation inaccuracy
@@ -159,7 +159,7 @@ This version overlays v3.25.10 → v3.32. **All §6 disclaimers in predecessor d
 
 ## 9. Cultural Reminder: LLM Does NOT Replace Professionals
 
-erpilot's promise: **"natural language replaces training"**, **NOT** **"natural language replaces professional judgment."**
+Ouvoca's promise: **"natural language replaces training"**, **NOT** **"natural language replaces professional judgment."**
 
 | AI Can | Professional Judgment Still Required |
 |---|---|

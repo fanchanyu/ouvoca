@@ -95,7 +95,7 @@ if !portbusy! equ 1 (
     echo   小提示：常見佔用者
     echo     - Skype 可能佔 80/443
     echo     - 其他 dev server 占 5173 / 8080
-    echo     - 之前的 erpilot 沒關乾淨 → 跑 'docker compose down' 先
+    echo     - 之前的 Ouvoca 沒關乾淨 → 跑 'docker compose down' 先
     echo.
     pause
     exit /b 1
@@ -202,10 +202,10 @@ echo     登入後請立即在 Chat 講「改密碼」更換預設密碼
 echo     After login, immediately say "change password" in Chat
 echo.
 echo   *** Windows 開機自啟（v3.39 K8）/ Auto-start on boot ***
-echo     erpilot 由 Docker 跑；Docker Desktop 需要先啟動。
+echo     Ouvoca 由 Docker 跑；Docker Desktop 需要先啟動。
 echo     開啟 Docker 設定 ^> General ^> 勾「Start Docker Desktop when you log in」
 echo     Open Docker Settings ^> General ^> check "Start Docker Desktop when you log in"
-echo     erpilot 容器設了 restart: unless-stopped 會自動隨 Docker 啟動。
+echo     Ouvoca 容器設了 restart: unless-stopped 會自動隨 Docker 啟動。
 echo.
 echo   提示 / Tip:
 echo     - 編輯 backend\.env 填入 LLM_API_KEY 啟用 AI 助手

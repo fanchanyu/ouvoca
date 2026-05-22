@@ -14,7 +14,7 @@ For full Chinese rationale and details see [EXTERNAL_DB_INTEGRATION_DESIGN_ZH.md
 >
 > **Before enabling a connector, we recommend the customer**: ① Confirm authorization scope in writing with the incumbent ERP vendor ② Purchase any necessary integration licenses ③ Retain relevant documentation.
 >
-> The connector erpilot provides is a technical component; **erpilot does not participate in or represent the customer in** any contracts, licensing, or legal matters with third-party ERP vendors. **To the maximum extent permitted by applicable law**, erpilot does not assume responsibility for consequences arising from a customer enabling a connection without obtaining appropriate authorization.
+> The connector Ouvoca provides is a technical component; **Ouvoca does not participate in or represent the customer in** any contracts, licensing, or legal matters with third-party ERP vendors. **To the maximum extent permitted by applicable law**, Ouvoca does not assume responsibility for consequences arising from a customer enabling a connection without obtaining appropriate authorization.
 >
 > 📖 **Full compliance reminder (recommended reading)**: [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) / [中文](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)
 >

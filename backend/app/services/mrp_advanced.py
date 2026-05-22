@@ -69,7 +69,7 @@ operations research algorithms cited in published academic literature.
   • The algorithms herein (Wagner-Whitin, Silver-Meal, EOQ) are PUBLIC
     DOMAIN as foundational OR knowledge; cited references are for
     attribution and reproducibility, not for any licensing claim.
-  • erpilot makes no warranty regarding **fitness for any particular
+  • Ouvoca makes no warranty regarding **fitness for any particular
     manufacturing scenario**. Production deployments should validate
     against the customer's known-answer cases.
   • See docs/MRP_ALGORITHM_DESIGN_ZH.md §6 for full design rationale,
@@ -300,7 +300,7 @@ class BOMGraph:
     edges: dict[parent_item_id → list of (child_item_id, qty_per, scrap_rate)]
 
     Note: For sub-assemblies, we use the convention `Product.product_no ==
-    Part.part_no` (already used elsewhere in erpilot) to link a Part to its
+    Part.part_no` (already used elsewhere in Ouvoca) to link a Part to its
     own BOM as a Product.
     """
     # All items participating in BOM (both products and parts referenced)

@@ -1,6 +1,6 @@
 # Throughput Accounting + DBR Scheduling + 訂單接受決策設計（v3.28）
 
-> **本檔性質**：跨**作業研究 / 管理會計 / ERP / AI** 四域之方法論文件，描述 erpilot v3.28 之 **Throughput Accounting (TA)** + **Drum-Buffer-Rope (DBR) 排程** + **訂單接受決策（Order Acceptance）** 三模組。本版本完成 Goldratt (1984) TOC 三部曲：v3.27 已 IDENTIFY 瓶頸 → v3.28 EXPLOIT (DBR) + SUBORDINATE (TA)。
+> **本檔性質**：跨**作業研究 / 管理會計 / ERP / AI** 四域之方法論文件，描述 Ouvoca v3.28 之 **Throughput Accounting (TA)** + **Drum-Buffer-Rope (DBR) 排程** + **訂單接受決策（Order Acceptance）** 三模組。本版本完成 Goldratt (1984) TOC 三部曲：v3.27 已 IDENTIFY 瓶頸 → v3.28 EXPLOIT (DBR) + SUBORDINATE (TA)。
 
 > 📘 前置文件：[`MRP_ALGORITHM_DESIGN_ZH.md`](./MRP_ALGORITHM_DESIGN_ZH.md)（v3.25.10）／[`MRP_CAPACITY_AWARE_DESIGN_ZH.md`](./MRP_CAPACITY_AWARE_DESIGN_ZH.md)（v3.26）／[`PLANNING_EXPLAINABILITY_DESIGN_ZH.md`](./PLANNING_EXPLAINABILITY_DESIGN_ZH.md)（v3.27）
 
@@ -8,7 +8,7 @@
 
 ## 摘要（Abstract）
 
-本文敘述 erpilot v3.28 完成 Goldratt (1984) Theory of Constraints 三部曲之後兩步：(i) **Throughput Accounting (TA)** [Goldratt 1992; Corbett 1998] — 取代傳統成本會計之 product-mix 決策框架；(ii) **Drum-Buffer-Rope (DBR) 排程** [Schragenheim & Dettmer 2000] — 以瓶頸資源（CCR）作為產線節拍器；(iii) **訂單接受決策（Order Acceptance Decision）** — Goldratt 1990 §6 之 "highest T/CCR-min first" 規則之實作。我們進一步證明此規則在**單一 binding constraint 下為最佳**（continuous knapsack relaxation argument），並以 21 個結構不變量測試驗證之，含 4 個 Goldratt 教科書經典例。SMB 老闆每日提問「**這張單該不該接？**」可直接由本模組之 `evaluate_order_acceptance()` 在 ~10 ms 內回答。
+本文敘述 Ouvoca v3.28 完成 Goldratt (1984) Theory of Constraints 三部曲之後兩步：(i) **Throughput Accounting (TA)** [Goldratt 1992; Corbett 1998] — 取代傳統成本會計之 product-mix 決策框架；(ii) **Drum-Buffer-Rope (DBR) 排程** [Schragenheim & Dettmer 2000] — 以瓶頸資源（CCR）作為產線節拍器；(iii) **訂單接受決策（Order Acceptance Decision）** — Goldratt 1990 §6 之 "highest T/CCR-min first" 規則之實作。我們進一步證明此規則在**單一 binding constraint 下為最佳**（continuous knapsack relaxation argument），並以 21 個結構不變量測試驗證之，含 4 個 Goldratt 教科書經典例。SMB 老闆每日提問「**這張單該不該接？**」可直接由本模組之 `evaluate_order_acceptance()` 在 ~10 ms 內回答。
 
 **關鍵字**：Throughput Accounting、DBR、訂單接受、product mix、TOC、瓶頸計價
 
@@ -37,7 +37,7 @@
 
 ### 1.2 TOC 三部曲整合
 
-| 步驟 | 來源 | erpilot 對應 |
+| 步驟 | 來源 | Ouvoca 對應 |
 |---|---|---|
 | **IDENTIFY** constraint | Goldratt 1984 | v3.27 `identify_bottlenecks` |
 | **EXPLOIT** constraint | Goldratt 1990 | v3.28 DBR + 排序 |
@@ -111,7 +111,7 @@ $$
 - $3\times$：典型最佳，buffer 占用之 WIP 成本可接受
 - $5\times+$：過保護，WIP 膨脹
 
-**Hopp & Spearman 1996 *Factory Physics* §10** 證明：throughput 由 bottleneck 決定；非瓶頸工序之 buffer 為純 waste。erpilot 之 DBR 模組僅在瓶頸前放 buffer，非瓶頸工序 buffer = 0。
+**Hopp & Spearman 1996 *Factory Physics* §10** 證明：throughput 由 bottleneck 決定；非瓶頸工序之 buffer 為純 waste。Ouvoca 之 DBR 模組僅在瓶頸前放 buffer，非瓶頸工序 buffer = 0。
 
 ### 2.4 模組 4：Pricing Curve（敏感度延伸）
 
@@ -295,7 +295,7 @@ backend/app/services/throughput_accounting.py  (~450 行)
 >
 > ### 6. 不擔保條款
 >
-> 於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），erpilot 對下列事項不承擔責任：
+> 於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），Ouvoca 對下列事項不承擔責任：
 >
 > - 因採用本模組建議所衍生之**錯誤接 / 拒單**所造成之收入損失或客戶關係損害
 > - 因 TVC / OE 誤判所造成之**財報不實**法律後果
@@ -363,7 +363,7 @@ backend/app/services/throughput_accounting.py  (~450 行)
 ---
 
 **最後更新**：2026-05-20（v3.28）
-**作者**：erpilot 工程團隊（含 IE/OR/管理會計/AI 跨域學術方法論引用）
+**作者**：Ouvoca 工程團隊（含 IE/OR/管理會計/AI 跨域學術方法論引用）
 **版本**：1.0
 **前置文件**：v3.25.10 / v3.26 / v3.27 之 design docs
 **English version**：[`THROUGHPUT_ACCOUNTING_DESIGN_EN.md`](./THROUGHPUT_ACCOUNTING_DESIGN_EN.md)

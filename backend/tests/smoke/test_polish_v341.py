@@ -214,7 +214,7 @@ async def test_p6_faq_price(seeded_client):
     from app.database import AsyncSessionLocal
     from app.agents.domains.polish_v341_tools import _ask_faq
     async with AsyncSessionLocal() as db:
-        r = await _ask_faq(db, None, question="erpilot 多少錢")
+        r = await _ask_faq(db, None, question="Ouvoca 多少錢")
     assert r["raw"]["matched"] is True
     assert "30 萬" in r["summary"] or "50 萬" in r["summary"]
 

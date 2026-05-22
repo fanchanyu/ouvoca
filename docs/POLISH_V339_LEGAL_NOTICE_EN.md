@@ -27,7 +27,7 @@ v3.39 covers:
 
 - Customer-uploaded LOGO must be **owned by the company**
 - Using **third-party LOGOs** (brand marks, designer work without license) may violate Copyright Act §91
-- erpilot does **not** verify LOGO copyright ownership
+- Ouvoca does **not** verify LOGO copyright ownership
 
 ### 1.2 Display Limits
 
@@ -66,10 +66,10 @@ Before delete, confirm:
 - PDPA: customer PII used during contract performance **must not be arbitrarily deleted**
 - For "right to be forgotten" (GDPR-equivalent) — use **anonymization** instead of delete
 
-### 2.4 erpilot Responsibility
+### 2.4 Ouvoca Responsibility
 
-- erpilot pre-checks **business associations** and blocks dangerous deletes
-- erpilot does **not** check **legal retention periods** or **contractual obligations**
+- Ouvoca pre-checks **business associations** and blocks dangerous deletes
+- Ouvoca does **not** check **legal retention periods** or **contractual obligations**
 - Customer must self-verify **legal permission** before executing
 
 ---
@@ -136,7 +136,7 @@ Before delete, confirm:
 ### 6.3 Customer Responsibility
 
 - If 3 retries still fail, **LLM response quality may degrade** → review question clarity
-- Multiple failures may reflect **model bias** or **training gap** → customer can report to erpilot
+- Multiple failures may reflect **model bias** or **training gap** → customer can report to Ouvoca
 
 ---
 
@@ -153,7 +153,7 @@ When Login can't reach backend, show:
 
 - Guidance is **a general checklist**
 - Customer's **specific environment** (corp firewall / VPN / proxy) requires IT
-- erpilot does **not** remotely diagnose customer's network issues
+- Ouvoca does **not** remotely diagnose customer's network issues
 
 ---
 
@@ -162,14 +162,14 @@ When Login can't reach backend, show:
 ### 8.1 Configuration
 
 `docker-compose.yml` adds `restart: unless-stopped` to all services:
-- erpilot containers auto-start when Docker starts
+- Ouvoca containers auto-start when Docker starts
 - Containers auto-restart on crash (unless explicitly `docker compose stop`)
 
 ### 8.2 Companion Requirement
 
 - Customer must **enable Docker Desktop "Start when log in"**
-- erpilot does **not** register as a Windows Service (to avoid conflict with Docker Desktop)
-- After OS reboot: launch Docker Desktop → erpilot auto-follows
+- Ouvoca does **not** register as a Windows Service (to avoid conflict with Docker Desktop)
+- After OS reboot: launch Docker Desktop → Ouvoca auto-follows
 
 ### 8.3 Risk
 
@@ -183,28 +183,28 @@ When Login can't reach backend, show:
 To the maximum extent permitted by applicable law:
 
 **1. LOGO Upload**
-erpilot does **not** verify the **copyright ownership** of uploaded LOGOs; customer must **self-verify** legal use rights; erpilot is **not liable** for copyright infringement disputes.
+Ouvoca does **not** verify the **copyright ownership** of uploaded LOGOs; customer must **self-verify** legal use rights; Ouvoca is **not liable** for copyright infringement disputes.
 
 **2. Delete Trio**
-erpilot pre-checks business associations; customer must **self-verify** statutory retention, contractual obligations, GDPR / PDPA compliance; erpilot is **not liable** for irreversible data loss, contract disputes, or audit failures.
+Ouvoca pre-checks business associations; customer must **self-verify** statutory retention, contractual obligations, GDPR / PDPA compliance; Ouvoca is **not liable** for irreversible data loss, contract disputes, or audit failures.
 
 **3. Batch Print**
-ZIP contains complete trade secrets; customer must safeguard; erpilot is **not liable** for ZIP leakage disputes.
+ZIP contains complete trade secrets; customer must safeguard; Ouvoca is **not liable** for ZIP leakage disputes.
 
 **4. Pagination**
 Pagination does **not** replace formal data-export compliance flow; customer must monitor abnormal downloads at SSO / Gateway layer.
 
 **5. Daily Digest**
-Manual trigger is a **convenience**; automated **scheduling, sending, recipient control** is customer-configured; erpilot is **not liable** for mis-send / miss / wrong recipient.
+Manual trigger is a **convenience**; automated **scheduling, sending, recipient control** is customer-configured; Ouvoca is **not liable** for mis-send / miss / wrong recipient.
 
 **6. Slot-filling 3-Strike**
 3-retry is a **heuristic suggestion**; does **not** replace full conversation-quality review; customer should adjust based on real UX.
 
 **7. Backend Offline Guidance**
-General checklist only; erpilot is **not** responsible for resolving customer's network / firewall / VPN issues.
+General checklist only; Ouvoca is **not** responsible for resolving customer's network / firewall / VPN issues.
 
 **8. Docker Auto-Start**
-Via `restart: unless-stopped`; customer must **co-configure** Docker Desktop auto-start; erpilot does **not** register as Windows Service.
+Via `restart: unless-stopped`; customer must **co-configure** Docker Desktop auto-start; Ouvoca does **not** register as Windows Service.
 
 ---
 
@@ -226,7 +226,7 @@ Via `restart: unless-stopped`; customer must **co-configure** Docker Desktop aut
 
 ### 10.4 Auto-Start
 - [ ] Docker Desktop "Start when log in" enabled
-- [ ] Tested "reboot → erpilot auto-available" flow
+- [ ] Tested "reboot → Ouvoca auto-available" flow
 
 ### 10.5 Cumulative with Existing Checklists
 - [ ] Completed **all** v3.25.10 → v3.38 checklists
@@ -234,7 +234,7 @@ Via `restart: unless-stopped`; customer must **co-configure** Docker Desktop aut
 ---
 
 **Version**: v3.39 (2026-05-21)
-**Author**: erpilot Legal Team (internal)
+**Author**: Ouvoca Legal Team (internal)
 **Corresponds to code**:
 - `backend/app/agents/domains/polish_v339_tools.py` (7 LLM tools)
 - `backend/app/services/print_service.py` (LOGO rendering)

@@ -1,6 +1,6 @@
 # AI-Augmented Demand Forecasting Engine Design (v3.29)
 
-> **Nature of this document**: Cross-domain methodology paper spanning **Time-Series Analysis / Machine Learning / ERP / AI**, describing erpilot v3.29's demand forecasting engine. This release closes the upstream gap in the v3.25.10–v3.28 planning chain by replacing **customer-manual MPS entry** with **automatic forecasts from historical sales + LLM augmentation**.
+> **Nature of this document**: Cross-domain methodology paper spanning **Time-Series Analysis / Machine Learning / ERP / AI**, describing Ouvoca v3.29's demand forecasting engine. This release closes the upstream gap in the v3.25.10–v3.28 planning chain by replacing **customer-manual MPS entry** with **automatic forecasts from historical sales + LLM augmentation**.
 
 > 📘 Prerequisites: [`MRP_ALGORITHM_DESIGN_EN.md`](./MRP_ALGORITHM_DESIGN_EN.md) (v3.25.10) / [`THROUGHPUT_ACCOUNTING_DESIGN_EN.md`](./THROUGHPUT_ACCOUNTING_DESIGN_EN.md) (v3.28)
 
@@ -8,7 +8,7 @@
 
 ## Abstract
 
-erpilot's v3.25.10 → v3.28 planning chain assumed **MPS is entered manually by the customer**, undermining the objectivity of the entire IE/OR chain. This paper describes v3.29's demand forecasting engine, integrating **Croston's (1972)** classical intermittent demand algorithm, the **Brown (1959) SES / Holt (1957) / Winters (1960)** exponential smoothing family, and **Hyndman & Koehler's (2006) MASE** metric for automatic best-method selection. We also introduce **Chatfield's (1989)** regime change detection as an LLM-augmentation hook — when recent residuals exceed ±2σ, the system prompts customers to apply business judgment. **Makridakis et al. (2018, 2020) M4/M5** competitions demonstrate that classical methods remain competitive with — sometimes beat — deep learning on most series, so this release excludes scipy/statsmodels/torch dependencies, **implementing 5 methods in pure Python**. 30 structural-invariant tests pass, including Hyndman-Koehler 2006's classic property MASE < 1 ⟺ beats naive baseline.
+Ouvoca's v3.25.10 → v3.28 planning chain assumed **MPS is entered manually by the customer**, undermining the objectivity of the entire IE/OR chain. This paper describes v3.29's demand forecasting engine, integrating **Croston's (1972)** classical intermittent demand algorithm, the **Brown (1959) SES / Holt (1957) / Winters (1960)** exponential smoothing family, and **Hyndman & Koehler's (2006) MASE** metric for automatic best-method selection. We also introduce **Chatfield's (1989)** regime change detection as an LLM-augmentation hook — when recent residuals exceed ±2σ, the system prompts customers to apply business judgment. **Makridakis et al. (2018, 2020) M4/M5** competitions demonstrate that classical methods remain competitive with — sometimes beat — deep learning on most series, so this release excludes scipy/statsmodels/torch dependencies, **implementing 5 methods in pure Python**. 30 structural-invariant tests pass, including Hyndman-Koehler 2006's classic property MASE < 1 ⟺ beats naive baseline.
 
 **Keywords**: Demand forecasting, Croston, Holt-Winters, MASE, intermittent demand, regime change, LLM augmentation
 
@@ -23,7 +23,7 @@ The 4 sprints v3.25.10 → v3.28 completed MRP-II, CLSP, and the TOC trilogy. Bu
 - SMB owners **lack data-analysis capability**
 - Sales history **exists, but customers don't know how to use it**
 - Most parts have **intermittent demand** (zero for many weeks, then a spike) — intuitive entry is unreliable
-- v3.27 explainability: "Why do we need so many M6 bolts next week?" always traces back to MPS — **which the customer filled in, so erpilot can't ask 'are your numbers right?'**
+- v3.27 explainability: "Why do we need so many M6 bolts next week?" always traces back to MPS — **which the customer filled in, so Ouvoca can't ask 'are your numbers right?'**
 
 ### 1.2 Why Not Deep Learning Directly
 
@@ -189,7 +189,7 @@ backend/app/services/demand_forecasting.py    (~600 lines, pure Python)
 >
 > ### 5. Disclaimer Clause
 >
-> **To the maximum extent permitted by applicable law**, erpilot assumes no liability for:
+> **To the maximum extent permitted by applicable law**, Ouvoca assumes no liability for:
 >
 > - **Over-purchasing / line stoppage** losses from acting on these forecasts
 > - **Customer delivery defaults / penalties** from forecast inaccuracy
@@ -260,6 +260,6 @@ backend/app/services/demand_forecasting.py    (~600 lines, pure Python)
 ---
 
 **Last updated**: 2026-05-20 (v3.29)
-**Authors**: erpilot engineering team (with TS analysis / ML / ERP / AI cross-domain academic methodology)
+**Authors**: Ouvoca engineering team (with TS analysis / ML / ERP / AI cross-domain academic methodology)
 **Version**: 1.0
 **Chinese version**: [`DEMAND_FORECASTING_DESIGN_ZH.md`](./DEMAND_FORECASTING_DESIGN_ZH.md)

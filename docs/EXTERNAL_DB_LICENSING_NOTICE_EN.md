@@ -10,11 +10,11 @@
 
 | Item | Detail |
 |---|---|
-| **Intended audience** | Customer **IT lead / purchasing decision-maker** planning to enable erpilot's "external DB connector / Schema Mapping AI / cross-DB query" features |
+| **Intended audience** | Customer **IT lead / purchasing decision-maker** planning to enable Ouvoca's "external DB connector / Schema Mapping AI / cross-DB query" features |
 | **Compliance consideration** | Some commercial ERP license agreements may include specific terms or restrictions regarding **connections via shared or service accounts** to the DB or API |
 | **If appropriate authorization is not obtained** | Depending on the customer's contract with the ERP vendor, this may lead to contractual handling (e.g., service adjustments, retroactive license fees, dispute resolution) |
 | **Recommended customer preparation** | ① Confirm authorization scope with the incumbent ERP vendor ② Purchase any necessary integration licenses ③ Retain relevant documentation |
-| **erpilot's role** | We provide the connector as a technical component; we **do not participate in or represent the customer in** any contracts, licensing, or legal matters between the customer and the third-party ERP vendor |
+| **Ouvoca's role** | We provide the connector as a technical component; we **do not participate in or represent the customer in** any contracts, licensing, or legal matters between the customer and the third-party ERP vendor |
 | **Bottom line** | **Technical "ability to connect" and legal "compliance with licensing" may be separate questions.** We recommend confirming authorization scope before enabling a connector. |
 
 ---
@@ -55,7 +55,7 @@ Software compliance audits may be triggered or surface through channels includin
 
 We recommend confirming the following items in **writing** with your incumbent ERP vendor / reseller (adjust to your actual usage scenario):
 
-> **Our company plans to have a third-party system (erpilot) read this ERP's database or API via a shared / service account, with usage scope including [SELECT / partial UPDATE / Schema Mapping, etc.]. Please confirm whether this usage falls within our current authorization scope; if not, please advise how to address it.**
+> **Our company plans to have a third-party system (Ouvoca) read this ERP's database or API via a shared / service account, with usage scope including [SELECT / partial UPDATE / Schema Mapping, etc.]. Please confirm whether this usage falls within our current authorization scope; if not, please advise how to address it.**
 
 Acceptable written forms (per your legal department's policy):
 - Official reply letter from the incumbent ERP vendor
@@ -77,22 +77,22 @@ Based on the vendor's reply, the following add-ons may be required (**whether th
 | API License | REST API / SOAP mode |
 | Read-Replica License | Read-only replica / reporting DB |
 
-> 💡 The connector erpilot provides is a **technical component** and **does not include** any third-party ERP license fees. Actual license fees follow your quote or contract with that vendor.
+> 💡 The connector Ouvoca provides is a **technical component** and **does not include** any third-party ERP license fees. Actual license fees follow your quote or contract with that vendor.
 
 ### 2.3 ✅ Step 3 — Retain Relevant Documentation
 
 We recommend retaining the following documents per your company's document-management policy:
 - The incumbent ERP vendor's authorization confirmation
 - Add-on license contracts / invoices
-- Internal sign-off records for erpilot connector activation
+- Internal sign-off records for Ouvoca connector activation
 
 > 💡 Proper document management supports future compliance review or dispute resolution.
 
 ---
 
-## 3. erpilot's Role and Scope of Responsibility
+## 3. Ouvoca's Role and Scope of Responsibility
 
-### 3.1 ✅ What erpilot Provides
+### 3.1 ✅ What Ouvoca Provides
 
 | Item | Description |
 |---|---|
@@ -102,7 +102,7 @@ We recommend retaining the following documents per your company's document-manag
 | **Technical documentation** | [External DB Integration Design](./EXTERNAL_DB_INTEGRATION_DESIGN_EN.md) |
 | **Technical support** | Connector code bug fixes / mapping model improvements |
 
-### 3.2 ❌ What erpilot Does NOT Provide
+### 3.2 ❌ What Ouvoca Does NOT Provide
 
 | Item | Description |
 |---|---|
@@ -113,7 +113,7 @@ We recommend retaining the following documents per your company's document-manag
 
 ### 3.3 Scope of Liability Statement
 
-> **To the maximum extent permitted by applicable law, erpilot does not assume responsibility for the following:**
+> **To the maximum extent permitted by applicable law, Ouvoca does not assume responsibility for the following:**
 > - Contractual handling arising from the customer enabling a connection without obtaining appropriate authorization per this reminder (including but not limited to service adjustments, retroactive license fees, contract disputes)
 > - Fees or losses arising from a third-party ERP vendor's licensing determinations, compliance audits, or contract enforcement
 > - Changes in third-party ERP vendors' licensing policies
@@ -124,7 +124,7 @@ We recommend the customer complete the following internal procedures before acti
 
 1. Complete the authorization confirmation, required procurement, and document retention described in §2
 2. Obtain written internal sign-off from IT / Legal / Procurement leads
-3. When activating the connector in erpilot, the system records the activation time, operator, and corresponding external data source in the **audit log** for the customer's future internal review
+3. When activating the connector in Ouvoca, the system records the activation time, operator, and corresponding external data source in the **audit log** for the customer's future internal review
 
 > 💡 The act of activating a connector indicates that the customer has independently evaluated and assumed the relevant compliance responsibilities.
 
@@ -135,13 +135,13 @@ We recommend the customer complete the following internal procedures before acti
 ### Q1: We're a small company (30 employees). Do we still need to be aware of this?
 **A**: Compliance responsibility is not directly tied to company size. We recommend handling per your contract with the incumbent ERP vendor. If in doubt, please contact the vendor or your legal counsel.
 
-### Q2: We only use erpilot to READ (SELECT), never to write back. Do we still need to confirm authorization?
+### Q2: We only use Ouvoca to READ (SELECT), never to write back. Do we still need to confirm authorization?
 **A**: We recommend confirming with the vendor regardless. Many license agreements' applicable scope includes "access" behavior, not only "writes." Specific application depends on contract terms.
 
-### Q3: Can we have an IT staff member's personal account used by erpilot?
+### Q3: Can we have an IT staff member's personal account used by Ouvoca?
 **A**: This is technically possible, but **we recommend careful evaluation**:
 - Some license agreements may have provisions regarding "scope of personal-account use"—please refer to contract terms
-- erpilot will lose connectivity when that employee leaves
+- Ouvoca will lose connectivity when that employee leaves
 - Personal accounts typically have broader privileges; from a security best-practices standpoint, we recommend a "least-privilege service account"
 - We recommend confirming with your legal team / incumbent ERP vendor whether this falls within the authorized scope
 
@@ -155,8 +155,8 @@ We recommend the customer complete the following internal procedures before acti
 3. Proactively communicate with the incumbent ERP vendor and follow their guidance
 4. Consult legal counsel where appropriate
 
-### Q6: Can erpilot help us communicate with the incumbent ERP vendor about licensing?
-**A**: erpilot does not participate in communications between the customer and third-party ERP vendors. We recommend the customer's IT / Legal / Procurement lead contact the incumbent vendor or reseller directly (they are most familiar with the licensing terms).
+### Q6: Can Ouvoca help us communicate with the incumbent ERP vendor about licensing?
+**A**: Ouvoca does not participate in communications between the customer and third-party ERP vendors. We recommend the customer's IT / Legal / Procurement lead contact the incumbent vendor or reseller directly (they are most familiar with the licensing terms).
 
 ### Q7: We use an open-source / trial edition of the ERP. Does this still apply?
 **A**: Open-source licenses (AGPL / GPL, etc.) typically have fewer restrictions on third-party system access, but **commercial / trial editions** vary by version. Please refer to the **official license documentation** for the edition you are using.
@@ -166,18 +166,18 @@ We recommend the customer complete the following internal procedures before acti
 
 ---
 
-## 5. Guidance for erpilot Consultants / Resellers
+## 5. Guidance for Ouvoca Consultants / Resellers
 
-When introducing erpilot's "external DB connector" feature, we recommend:
+When introducing Ouvoca's "external DB connector" feature, we recommend:
 
 ✅ **Suitable content to present**:
-- The technical capabilities of erpilot's Schema Mapping AI
+- The technical capabilities of Ouvoca's Schema Mapping AI
 - The data source types the connector supports (sqlite / csv / SQL Server / REST API, etc.)
 - The conversational ERP experience for cross-source query and migration
 
 ✅ **Recommended companion statements**:
 - "**The connector is a technical component; before enabling, we recommend that your company first confirm the authorization scope in writing with the incumbent ERP vendor**"
-- "erpilot does not participate in contracts / licensing matters between your company and third-party ERP vendors"
+- "Ouvoca does not participate in contracts / licensing matters between your company and third-party ERP vendors"
 - "Specific authorization determinations should be based on your contract with the incumbent ERP vendor"
 - "**Detailed compliance reminder**: see [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)"
 
@@ -195,7 +195,7 @@ When introducing erpilot's "external DB connector" feature, we recommend:
 | **Technical design (how to connect)** | [`EXTERNAL_DB_INTEGRATION_DESIGN_EN.md`](./EXTERNAL_DB_INTEGRATION_DESIGN_EN.md) |
 | **User manual** | [`USER_MANUAL_EN.md`](./USER_MANUAL_EN.md) |
 | **Sales killer moments** | [`SALES_KILLER_MOMENTS_EN.md`](./SALES_KILLER_MOMENTS_EN.md) |
-| **erpilot tri-license model** | [`COMMERCIAL_LICENSING_FAQ_ZH.md`](./COMMERCIAL_LICENSING_FAQ_ZH.md) (ZH-only) |
+| **Ouvoca tri-license model** | [`COMMERCIAL_LICENSING_FAQ_ZH.md`](./COMMERCIAL_LICENSING_FAQ_ZH.md) (ZH-only) |
 | **Chinese version** | [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md) |
 
 ---

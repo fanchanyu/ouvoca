@@ -27,7 +27,7 @@
 **By end of Day 5, this script must be demonstrable to the owner**:
 
 ```
-[Open erpilot desktop UI, login as admin]
+[Open Ouvoca desktop UI, login as admin]
 [Click "AI Assistant" on left sidebar]
 
 User types: "Order 1000 M6 bolts from ZhongGang for me"
@@ -367,7 +367,7 @@ AI proactively asks when slots are missing. Users **don't need to say everything
 LLM prompt template:
 
 ```
-You are erpilot's purchase assistant. User wants to create a PO but is missing info:
+You are Ouvoca's purchase assistant. User wants to create a PO but is missing info:
 - Missing: {missing_slots}
 - Known: {filled_slots}
 
@@ -410,7 +410,7 @@ No explanations or "please tell me" boilerplate.
 0:00 [Open browser, http://localhost:5173]
 0:03 [Login admin / admin123]
 0:05 [Click AI Assistant]
-0:08 Voice: "erpilot doesn't need training — boss just speaks."
+0:08 Voice: "Ouvoca doesn't need training — boss just speaks."
 0:12 [Type: Create PO to ZhongGang]
 0:15 [AI: "What part number?"]
 0:17 [Type: 1000 M6]
@@ -424,7 +424,7 @@ No explanations or "please tell me" boilerplate.
 0:45 [Type: undo last action]
 0:48 [AI: ✅ Reverted]
 0:52 [Switch to browser /purchase/orders, PO indeed gone]
-0:58 Voice: "Natural language ERP. 2-hour training. erpilot."
+0:58 Voice: "Natural language ERP. 2-hour training. Ouvoca."
 1:00 [Logo + Tagline]
 ```
 

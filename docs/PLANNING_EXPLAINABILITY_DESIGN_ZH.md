@@ -1,6 +1,6 @@
 # 可解釋規劃與 TOC 瓶頸分析設計（Explainable Planning + TOC Bottleneck）— v3.27
 
-> **本檔性質**：跨**作業研究 / 演算法 / ERP / 可解釋 AI** 四域之方法論文件，描述 erpilot v3.27 之**規劃可解釋性（Explainable Planning）**引擎與 **Goldratt (1984) Theory of Constraints (TOC)** 瓶頸分析模組之設計、實作與驗證。
+> **本檔性質**：跨**作業研究 / 演算法 / ERP / 可解釋 AI** 四域之方法論文件，描述 Ouvoca v3.27 之**規劃可解釋性（Explainable Planning）**引擎與 **Goldratt (1984) Theory of Constraints (TOC)** 瓶頸分析模組之設計、實作與驗證。
 
 > 📘 前置文件：[`MRP_ALGORITHM_DESIGN_ZH.md`](./MRP_ALGORITHM_DESIGN_ZH.md)（v3.25.10）／[`MRP_CAPACITY_AWARE_DESIGN_ZH.md`](./MRP_CAPACITY_AWARE_DESIGN_ZH.md)（v3.26）
 
@@ -8,7 +8,7 @@
 
 ## 摘要（Abstract）
 
-erpilot v3.25.10 與 v3.26 完成的 MRP-II 與 CLSP 啟發法雖具有作業研究嚴謹度，但仍是**黑盒**輸出 —— 客戶無法回答「**為什麼**下週要拉這麼多 M6 螺絲？」此類根本問題。本文敘述 v3.27 之三重支柱：(i) **資料來源圖（Provenance Graph）** [Cheney, Chiticariu & Tan 2009] — 對任一 planned order 追溯其上游因果鏈；(ii) **TOC 五步聚焦法**[Goldratt 1984, 1990] — 從 v3.26 之 CRP 載荷自動識別瓶頸並提供處置選項；(iii) **OAT 敏感度分析** [Saltelli et al. 2008] — 計算 +20% capacity 之邊際效益。我們論證此三模組形成 IE/Algo/ERP/AI 四域交集之**研究級貢獻**，並以 12 個結構不變量測試（含 Schragenheim-Ronen 1990 之 0.85 排隊論閾值）驗證之。
+Ouvoca v3.25.10 與 v3.26 完成的 MRP-II 與 CLSP 啟發法雖具有作業研究嚴謹度，但仍是**黑盒**輸出 —— 客戶無法回答「**為什麼**下週要拉這麼多 M6 螺絲？」此類根本問題。本文敘述 v3.27 之三重支柱：(i) **資料來源圖（Provenance Graph）** [Cheney, Chiticariu & Tan 2009] — 對任一 planned order 追溯其上游因果鏈；(ii) **TOC 五步聚焦法**[Goldratt 1984, 1990] — 從 v3.26 之 CRP 載荷自動識別瓶頸並提供處置選項；(iii) **OAT 敏感度分析** [Saltelli et al. 2008] — 計算 +20% capacity 之邊際效益。我們論證此三模組形成 IE/Algo/ERP/AI 四域交集之**研究級貢獻**，並以 12 個結構不變量測試（含 Schragenheim-Ronen 1990 之 0.85 排隊論閾值）驗證之。
 
 **關鍵字**：可解釋 AI、Theory of Constraints、資料來源、敏感度分析、ERP
 
@@ -125,7 +125,7 @@ $$
 
 當 $\rho \to 1$ (utilization)，$W_q \to \infty$。實務經驗（Schragenheim & Ronen 1990）發現 $\rho > 0.85$ 時 $W_q$ 急遽上升，因此將 0.85 設為 **bottleneck-warning threshold**。
 
-**erpilot 實作**：
+**Ouvoca 實作**：
 
 ```
 identify_bottlenecks_from_loads(loads, work_centers):
@@ -300,7 +300,7 @@ backend/app/services/plan_explanation.py     (~500 行)
 >    - **TOC**：0.85 閾值源自 G/G/1 queue 假設；多 server / batch / priority 情境可能不同
 >    - **OAT**：不抓 factor 間交互作用 [Saltelli 2008]
 >
-> 6. **不擔保條款**：於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），erpilot 對下列事項不承擔責任：
+> 6. **不擔保條款**：於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），Ouvoca 對下列事項不承擔責任：
 >    - 因採用本模組解釋而對 supplier / customer / employee 之**錯誤指控**
 >    - 因 TOC bottleneck mis-identification 所造成之**capacity 投資失誤**
 >    - 因 counterfactual 與實際偏離所造成之**規劃失準**
@@ -363,6 +363,6 @@ backend/app/services/plan_explanation.py     (~500 行)
 ---
 
 **最後更新**：2026-05-20（v3.27）
-**作者**：erpilot 工程團隊（含 IE/OR/AI 跨域學術方法論引用）
+**作者**：Ouvoca 工程團隊（含 IE/OR/AI 跨域學術方法論引用）
 **版本**：1.0
 **English version**：[`PLANNING_EXPLAINABILITY_DESIGN_EN.md`](./PLANNING_EXPLAINABILITY_DESIGN_EN.md)

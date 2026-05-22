@@ -9,7 +9,7 @@ Without this layer, all five prior sprints (BOM multilevel, MRP-II,
 Capacity-aware CLSP, Explainability + TOC, Throughput Accounting,
 Demand Forecasting) are invisible to non-technical users — they live
 only in Python services that engineers must call programmatically.
-This violates erpilot's North-Star promise:
+This violates Ouvoca's North-Star promise:
 
     "Natural language replaces training. The owner just talks to it."
 
@@ -63,7 +63,7 @@ Customers MUST understand:
     / v3.29 §6 disclaimers. The aggregation does NOT reduce risk;
     customers should verify each surfaced item.
 
-To the maximum extent permitted by applicable law, erpilot assumes
+To the maximum extent permitted by applicable law, Ouvoca assumes
 no liability for misinterpretation, hallucination, or decisions made
 based on LLM-rendered planning recommendations. See
 docs/CONVERSATIONAL_PLANNING_DESIGN_ZH.md §6 for full disclaimer.
@@ -800,7 +800,7 @@ async def _daily_briefing_tool(db, user) -> Dict[str, Any]:
 
     items.sort(key=lambda x: x["priority"])
 
-    lines = ["🌅 **erpilot 每日簡報**\n"]
+    lines = ["🌅 **Ouvoca 每日簡報**\n"]
     for it in items[:5]:
         lines.append(f"{it['icon']} **{it['category']}**：{it['text']}")
     lines.append("")
@@ -825,7 +825,7 @@ from app.agents.engine import register_agent
 register_agent(
     "planning", "PlanningAgent",
     system_prompt=(
-        "你是 erpilot 的 **規劃顧問 AI**。職責：\n"
+        "你是 Ouvoca 的 **規劃顧問 AI**。職責：\n"
         "1. 用一句話幫老闆解決「該不該接這張單」「下個月該備多少」「瓶頸在哪」等決策\n"
         "2. 把 IE/OR 演算法之黑盒輸出翻譯成老闆能懂的人話\n"
         "3. 主動指出資料異常 / regime change（提醒覆核）\n"

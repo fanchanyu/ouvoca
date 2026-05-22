@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""erpilot · 自然語言對話 demo（read-only 版）
+"""Ouvoca · 自然語言對話 demo（read-only 版）
 
 跑一輪 12 個典型問題，把 AI 回應存成 Markdown，給：
   • 銷售：showcase 客戶看現有能力
@@ -88,7 +88,7 @@ async def main():
     out_file = out_dir / f"ai_conversation_{datetime.now().strftime('%Y%m%d_%H%M')}.md"
 
     lines = [
-        f"# erpilot AI 對話 demo · {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        f"# Ouvoca AI 對話 demo · {datetime.now().strftime('%Y-%m-%d %H:%M')}",
         "",
         f"- Session: `{SESSION_ID}`",
         f"- Backend: `{BASE_URL}`",

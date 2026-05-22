@@ -1,13 +1,13 @@
 """PolicyRule — 「家規 (House Rules)」資料化引擎（Sprint S v3.25）。
 
-**erpilot 原創詞**：對手叫 "Business Rule / Workflow / Authorization"，
+**Ouvoca 原創詞**：對手叫 "Business Rule / Workflow / Authorization"，
 我們叫「家規」— 每家公司有自己的家規，AI 可以幫你加新家規。
 
 對標：
   - SAP B1 Authorization（要顧問改 code）
   - 鼎新業務規則（條件死板）
   - NetSuite SuiteScript / Odoo Server Action（要會寫程式）
-  - erpilot：規則資料化 + LLM 對話建規則 + ConfirmCard 確認
+  - Ouvoca：規則資料化 + LLM 對話建規則 + ConfirmCard 確認
 
 設計重點：
   - 規則存 DB（PolicyRule table），不是寫死 code

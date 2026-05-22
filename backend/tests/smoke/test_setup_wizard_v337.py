@@ -87,7 +87,7 @@ async def test_set_company_info_returns_confirm_card(seeded_client):
 
 @pytest.mark.asyncio
 async def test_resolve_company_returns_fallback(seeded_client):
-    """無 Tenant 時 fallback 到 erpilot 範例公司。"""
+    """無 Tenant 時 fallback 到 Ouvoca 範例公司。"""
     from app.database import AsyncSessionLocal
     from app.services.print_service import _resolve_company
     async with AsyncSessionLocal() as db:

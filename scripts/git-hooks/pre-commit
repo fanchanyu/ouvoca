@@ -1,6 +1,6 @@
 #!/bin/sh
 # ============================================================
-#  erpilot · pre-commit hook
+#  Ouvoca · pre-commit hook
 #  防止 API key / token / private key 被誤推
 # ============================================================
 #  跳過：commit 時加 --no-verify（**不建議**，會繞過所有檢查）

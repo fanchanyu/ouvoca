@@ -37,7 +37,7 @@ LEGAL / 法律聲明
     應人工覆核
   • PO/SO add/remove item：影響供應商 / 客戶契約承諾
 
-於適用法律所允許之最大範圍內 (TMEPL)，erpilot 對採用本 tool 之
+於適用法律所允許之最大範圍內 (TMEPL)，Ouvoca 對採用本 tool 之
 結果不承擔責任。累積適用 v3.25.10 → v3.32 §6 全部法律聲明。
 詳見 docs/INVENTORY_SALES_LEGAL_NOTICE_ZH.md / EN.md。
 
@@ -45,7 +45,7 @@ This module's hard-writes all follow ConfirmCard convention.
 Special risks: cloning a quotation creates a new version (not a copy);
 sending quotation email = external commitment; cancellation is
 irreversible (must create new replacement). To the maximum extent
-permitted by applicable law, erpilot assumes no liability for results
+permitted by applicable law, Ouvoca assumes no liability for results
 of using these tools. Cumulative applicability with v3.25.10 → v3.32
 §6 disclaimers. See docs/INVENTORY_SALES_LEGAL_NOTICE_EN.md for full
 notice.

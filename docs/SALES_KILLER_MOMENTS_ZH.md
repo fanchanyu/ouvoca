@@ -113,7 +113,7 @@ AI（找最近 90 秒內由阿玲建的 PO）：
 
 ### Moment 6 — 跨 DB Federated Query
 
-> ⚠️ **demo 時建議同步說明**：「此功能需連線至貴司現有 ERP，**建議先和原 ERP 廠商書面確認授權範圍**；具體授權條款請依貴司與該廠商之合約為準，必要時可購買必要之整合授權。erpilot 不參與此類合約事務。詳見 [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。」
+> ⚠️ **demo 時建議同步說明**：「此功能需連線至貴司現有 ERP，**建議先和原 ERP 廠商書面確認授權範圍**；具體授權條款請依貴司與該廠商之合約為準，必要時可購買必要之整合授權。Ouvoca 不參與此類合約事務。詳見 [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。」
 
 ```
 王董：「我們鼎新的 5 月份訂單金額多少?」
@@ -240,7 +240,7 @@ AI：preview_email_digest → 出當下摘要
 
 ---
 
-> ⚠️ **業務 / 顧問建議閱讀**：上述對「直連現有 ERP（如 Workflow / ChengHang / SAP B1）」之描述為**技術可行性介紹**；具體授權判定應依貴司客戶與該 ERP 廠商之合約條款為準。詳細合規提醒、建議客戶準備之步驟、erpilot 角色界線，見 [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。**請以介紹技術能力為主，授權合規事項建議客戶向原 ERP 廠商確認，不對第三方廠商之政策或行為做斷言式陳述。**
+> ⚠️ **業務 / 顧問建議閱讀**：上述對「直連現有 ERP（如 Workflow / ChengHang / SAP B1）」之描述為**技術可行性介紹**；具體授權判定應依貴司客戶與該 ERP 廠商之合約條款為準。詳細合規提醒、建議客戶準備之步驟、Ouvoca 角色界線，見 [`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md)。**請以介紹技術能力為主，授權合規事項建議客戶向原 ERP 廠商確認，不對第三方廠商之政策或行為做斷言式陳述。**
 >
 > **要試用嗎? 我們週四下午過去 demo 30 分鐘給你看。**
 

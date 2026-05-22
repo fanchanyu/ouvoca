@@ -1,6 +1,6 @@
 # Capacity-Aware MRP — Capacitated Lot-Sizing with Dixon-Silver Heuristic (v3.26)
 
-> **Nature of this document**: Algorithmic **methodology paper** describing erpilot's v3.26 **Capacity-Aware MRP** module, which overlays Dixon-Silver (1981) capacity-feasibility heuristic on top of v3.25.10's uncapacitated MRP-II to satisfy work-center capacity constraints. Written in academic paper style.
+> **Nature of this document**: Algorithmic **methodology paper** describing Ouvoca's v3.26 **Capacity-Aware MRP** module, which overlays Dixon-Silver (1981) capacity-feasibility heuristic on top of v3.25.10's uncapacitated MRP-II to satisfy work-center capacity constraints. Written in academic paper style.
 
 > 📘 Prerequisite: [`MRP_ALGORITHM_DESIGN_EN.md`](./MRP_ALGORITHM_DESIGN_EN.md) (v3.25.10 uncapacitated MRP-II foundation)
 
@@ -8,7 +8,7 @@
 
 ## Abstract
 
-This paper describes erpilot v3.26's **Capacity-Aware MRP**, extending v3.25.10's uncapacitated MRP-II to the **Multi-Work-Center Capacitated Lot-Sizing Problem (CLSP)**. Since CLSP is NP-hard [Florian, Lenstra & Rinnooy Kan 1980, *Mgmt Sci* 26], we adopt the **Dixon-Silver (1981) feasibility heuristic**: starting from Wagner-Whitin (1958) uncapacitated optima, when any work-center exceeds capacity in some period, production is shifted earlier to exploit slack capacity in prior periods, accounting for incurred holding-cost penalty. We simultaneously introduce **Karmarkar (1987)** setup/run-time decomposition, **Vollmann et al. (2005) Ch. 7** CRP load profile, and add new **Routing / RoutingStep data models** as the source of the resource-consumption matrix $a_{ik}$. Implementation validated via 8 structural-invariant tests and 1 ORM integration test, all 9/9 passing.
+This paper describes Ouvoca v3.26's **Capacity-Aware MRP**, extending v3.25.10's uncapacitated MRP-II to the **Multi-Work-Center Capacitated Lot-Sizing Problem (CLSP)**. Since CLSP is NP-hard [Florian, Lenstra & Rinnooy Kan 1980, *Mgmt Sci* 26], we adopt the **Dixon-Silver (1981) feasibility heuristic**: starting from Wagner-Whitin (1958) uncapacitated optima, when any work-center exceeds capacity in some period, production is shifted earlier to exploit slack capacity in prior periods, accounting for incurred holding-cost penalty. We simultaneously introduce **Karmarkar (1987)** setup/run-time decomposition, **Vollmann et al. (2005) Ch. 7** CRP load profile, and add new **Routing / RoutingStep data models** as the source of the resource-consumption matrix $a_{ik}$. Implementation validated via 8 structural-invariant tests and 1 ORM integration test, all 9/9 passing.
 
 **Keywords**: CLSP, Dixon-Silver heuristic, capacity planning, Routing, bottleneck, operations research
 
@@ -250,9 +250,9 @@ See [`MRP_CAPACITY_AWARE_DESIGN_ZH.md`](./MRP_CAPACITY_AWARE_DESIGN_ZH.md) §3 f
 > 4. **Handling infeasible_periods**:
 >    - When the algorithm reports non-empty `infeasible_periods`, it means "current capacity setting cannot satisfy MPS demand"
 >    - **Customer decides** the resolution: (a) add capacity (OT / 3rd shift), (b) delay delivery, (c) outsource, (d) reduce MPS demand
->    - erpilot is not responsible for handling infeasibility outcomes
+>    - Ouvoca is not responsible for handling infeasibility outcomes
 >
-> 5. **Disclaimer**: **to the maximum extent permitted by applicable law**, erpilot assumes no responsibility for:
+> 5. **Disclaimer**: **to the maximum extent permitted by applicable law**, Ouvoca assumes no responsibility for:
 >    - **Machine overload, operator burnout, quality degradation** arising from acting on this algorithm's suggestions
 >    - **Planning inaccuracy** from actual capacity deviation from configured values
 >    - **Erroneous scheduling** from incorrect Routing / WorkCenter input data
@@ -299,7 +299,7 @@ Key references:
 ---
 
 **Last updated**: 2026-05-20 (v3.26)
-**Authors**: erpilot engineering team (with IE/OR academic methodology citations)
+**Authors**: Ouvoca engineering team (with IE/OR academic methodology citations)
 **Version**: 1.0
 **Prerequisite**: [`MRP_ALGORITHM_DESIGN_EN.md`](./MRP_ALGORITHM_DESIGN_EN.md) (v3.25.10 uncapacitated MRP-II foundation)
 **Chinese version**: [`MRP_CAPACITY_AWARE_DESIGN_ZH.md`](./MRP_CAPACITY_AWARE_DESIGN_ZH.md)

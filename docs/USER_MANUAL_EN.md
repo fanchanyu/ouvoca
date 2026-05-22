@@ -1,6 +1,6 @@
 # LLM-ERP User Manual (English)
 
-> **Version**: v3.23 Conversational ERP (erpilot)
+> **Version**: v3.23 Conversational ERP (Ouvoca)
 > **Audience**: First-time ERP users — Owner, Sales, Plant Manager, Purchaser, Warehouse
 > **Reading time**: ~30 minutes to get productive; refer to §11 Troubleshooting when stuck
 > **Languages**: System supports 🇹🇼 繁體中文 and 🇺🇸 English with instant switching
@@ -27,20 +27,20 @@
 > - 📖 **Recipe Editor**: renamed from "BOM" — visual editor — **unblocks WO release**
 > - 📜 **Inventory Transaction History**: new tab on Inventory page; every inbound/outbound logged
 
-> 🏛️ **v3.25 new feature: "House Rules"** — erpilot's signature differentiator
-> - **Not copying SAP/鼎新/Odoo's hardcoded rules** — erpilot data-fies rules: UI toggle / AI authoring / plugin extension
+> 🏛️ **v3.25 new feature: "House Rules"** — Ouvoca's signature differentiator
+> - **Not copying SAP/鼎新/Odoo's hardcoded rules** — Ouvoca data-fies rules: UI toggle / AI authoring / plugin extension
 > - 3 default rules: WO release needs Recipe / PO > NT$100k needs manager / PO must have ≥1 item
 > - Author by chat: "SO discount > 5% needs manager" → ConfirmCard → instant
 > - Manager override + full audit log
 > - **Full guide**: [`docs/HOUSE_RULES_GUIDE_EN.md`](./HOUSE_RULES_GUIDE_EN.md) 🇺🇸 / [`HOUSE_RULES_GUIDE_ZH.md`](./HOUSE_RULES_GUIDE_ZH.md) 🇹🇼
 
-> 🎨 **v3.24 erpilot's original vocabulary (don't copy competitors — memorable for beginners)**
+> 🎨 **v3.24 Ouvoca's original vocabulary (don't copy competitors — memorable for beginners)**
 > - 🌱 **Sprout** = renamed from "Lead" (seed grows into customer)
 > - 🎯 **Chase** = renamed from "Opportunity" (deals salespeople chase daily)
 > - 📖 **Recipe** = renamed from "BOM" (like cooking recipe — what parts the product is made of)
 > - 👤 **Customer Full View** = renamed from "Customer 360"
 >
-> Bilingual mapping: see `src/i18n/locales/{zh-TW,en}.ts` under `erpilotTerms`
+> Bilingual mapping: see `src/i18n/locales/{zh-TW,en}.ts` under `ouvocaTerms`
 
 ---
 
@@ -135,7 +135,7 @@ You'll see the login screen:
 ┌─────────────────────────────────────────┐
 │                                  🇹🇼 🇺🇸 │
 │                                          │
-│            erpilot Conversational ERP    │
+│            Ouvoca Conversational ERP    │
 │                                          │
 │         ┌──────────────────────┐         │
 │         │ Username              │         │
@@ -257,10 +257,10 @@ This is the **most important v3.x feature**. Click **💬 AI Assistant** in the 
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│  💬 erpilot AI Assistant                         ✕  │
+│  💬 Ouvoca AI Assistant                         ✕  │
 ├──────────────────────────────────────────────────────┤
 │                                                       │
-│  AI: Hi! I'm the erpilot assistant. Try saying:       │
+│  AI: Hi! I'm the Ouvoca assistant. Try saying:       │
 │      "List today's in-progress work orders"           │
 │      "Order 100 M6 bolts from Chang Jiang Precision"  │
 │      "Change SO-2025-0042 due date to 6/10"           │
@@ -356,7 +356,7 @@ The top shows **Weighted Pipeline NT$ X** = sum of (amount × probability%).
 - **Activity timeline** — auto-populated when you place orders, convert leads, advance opportunities.
   Click **📝 Add Activity** for manual notes (calls / complaints / etc.).
 
-### 3.7 💡 AskAI Floating Button ✨ NEW in v3.16 (erpilot original)
+### 3.7 💡 AskAI Floating Button ✨ NEW in v3.16 (Ouvoca original)
 
 **Purple 💡 button** in the bottom-right corner of every page (except AI Assistant itself).
 
@@ -875,7 +875,7 @@ LLM-ERP ships under three licensing tracks — **picking the right one can save 
 | 🌱 **Small Business** | 50–100-person factory, ≤ 20 concurrent users | **Completely free** | **Includes closed-source connectors** (Digiwin / Chain Sea integrations) <sup>※</sup> |
 | 🔵 **Commercial** | > 20 concurrent users, ISVs, SaaS providers | Negotiated | Removes AGPL clauses |
 
-> ⚠️ <sup>※</sup> **Recommended reading**: The connector is a **technical connectivity component**. If you connect erpilot to an **existing commercial ERP** (e.g., products from vendors such as Digiwin / Chain Sea / SAP B1 / Vitals), each vendor's license agreement may treat "shared / service account connections" differently; the specifics depend on your contract with that vendor. We recommend first confirming the authorization scope in writing with the incumbent ERP vendor and purchasing any required add-on licenses where applicable. erpilot **does not participate in or represent the customer in** any contracts or licensing matters with the incumbent ERP vendor; to the maximum extent permitted by applicable law, erpilot assumes no responsibility for consequences arising from a customer enabling a connection without obtaining appropriate authorization. See [`docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md).
+> ⚠️ <sup>※</sup> **Recommended reading**: The connector is a **technical connectivity component**. If you connect Ouvoca to an **existing commercial ERP** (e.g., products from vendors such as Digiwin / Chain Sea / SAP B1 / Vitals), each vendor's license agreement may treat "shared / service account connections" differently; the specifics depend on your contract with that vendor. We recommend first confirming the authorization scope in writing with the incumbent ERP vendor and purchasing any required add-on licenses where applicable. Ouvoca **does not participate in or represent the customer in** any contracts or licensing matters with the incumbent ERP vendor; to the maximum extent permitted by applicable law, Ouvoca assumes no responsibility for consequences arising from a customer enabling a connection without obtaining appropriate authorization. See [`docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md).
 
 ### How to apply for Small Business?
 

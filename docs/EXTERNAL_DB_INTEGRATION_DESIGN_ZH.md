@@ -12,7 +12,7 @@
 >
 > **建議客戶於啟用 connector 前**：① 與原 ERP 廠商書面確認授權範圍 ② 視需要購買必要之整合授權 ③ 留存相關文件。
 >
-> erpilot 提供 connector 為技術元件；**erpilot 不參與、不代理**客戶與第三方 ERP 廠商間之合約 / 授權 / 法律事務。**於適用法律所允許之最大範圍內**，erpilot 對客戶未取得適當授權即啟用連線所衍生之後果不承擔責任。
+> Ouvoca 提供 connector 為技術元件；**Ouvoca 不參與、不代理**客戶與第三方 ERP 廠商間之合約 / 授權 / 法律事務。**於適用法律所允許之最大範圍內**，Ouvoca 對客戶未取得適當授權即啟用連線所衍生之後果不承擔責任。
 >
 > 📖 **完整合規提醒（建議閱讀）**：[`EXTERNAL_DB_LICENSING_NOTICE_ZH.md`](./EXTERNAL_DB_LICENSING_NOTICE_ZH.md) / [English](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)
 >

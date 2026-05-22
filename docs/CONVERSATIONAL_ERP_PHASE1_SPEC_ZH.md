@@ -26,7 +26,7 @@
 **5 天結束時必須能 demo 給老闆看的劇本**：
 
 ```
-[打開 erpilot 桌機 UI，登入 admin]
+[打開 Ouvoca 桌機 UI，登入 admin]
 [點左側「AI 助手」]
 
 User type:「幫我訂 1000 個 M6 給中鋼」
@@ -366,7 +366,7 @@ async def create_purchase_order(
 LLM prompt template：
 
 ```
-你是 erpilot 採購助手。使用者要建 PO，但缺少必要資訊：
+你是 Ouvoca 採購助手。使用者要建 PO，但缺少必要資訊：
 - 缺：{missing_slots}
 - 已知：{filled_slots}
 
@@ -409,7 +409,7 @@ LLM prompt template：
 0:00 [桌機開瀏覽器、輸入 http://localhost:5173]
 0:03 [登入 admin / admin123]
 0:05 [點左側 AI 助手]
-0:08 旁白：「erpilot 不需教育訓練 —— 老闆只要講話。」
+0:08 旁白：「Ouvoca 不需教育訓練 —— 老闆只要講話。」
 0:12 [鍵入：給中鋼下 PO]
 0:15 [AI 回：「要訂什麼料號？」]
 0:17 [鍵入：M6 1000 個]
@@ -423,7 +423,7 @@ LLM prompt template：
 0:45 [鍵入：取消剛才那筆]
 0:48 [AI 回：✅ 已撤銷]
 0:52 [切到瀏覽器 /purchase/orders，PO 真的不見]
-0:58 旁白：「自然語言操作 ERP。教育訓練 2 小時上手。erpilot。」
+0:58 旁白：「自然語言操作 ERP。教育訓練 2 小時上手。Ouvoca。」
 1:00 [Logo + Tagline]
 ```
 

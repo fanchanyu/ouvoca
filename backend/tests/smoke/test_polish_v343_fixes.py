@@ -53,7 +53,7 @@ def test_p0_3_dashboard_uses_first_seen_flag():
     db_tsx = (ROOT / "frontend-desktop" / "src" / "pages" / "Dashboard.tsx").read_text(
         encoding="utf-8", errors="ignore"
     )
-    assert "erpilot_first_seen" in db_tsx, "Dashboard.tsx 缺 first_seen 邏輯"
+    assert "ouvoca_first_seen" in db_tsx, "Dashboard.tsx 缺 first_seen 邏輯"
 
 
 # ════════════════════════════════════════════════════════════════════

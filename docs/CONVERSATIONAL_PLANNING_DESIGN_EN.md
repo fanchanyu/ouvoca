@@ -1,6 +1,6 @@
 # Conversational Planning Agent Design — v3.30
 
-> **Nature of this document**: Cross-domain methodology paper spanning **LLM / NLU / IE-OR / UX**, describing erpilot v3.30's **PlanningAgent** — wrapping **all** v3.25.9 → v3.29 IE/OR algorithms as **LLM-callable tools** so SMB owners can use world-class planning methods **just by talking**.
+> **Nature of this document**: Cross-domain methodology paper spanning **LLM / NLU / IE-OR / UX**, describing Ouvoca v3.30's **PlanningAgent** — wrapping **all** v3.25.9 → v3.29 IE/OR algorithms as **LLM-callable tools** so SMB owners can use world-class planning methods **just by talking**.
 
 > 📘 Prerequisites: design docs of all sprints v3.25.9 → v3.29 (algorithm foundation)
 
@@ -8,7 +8,7 @@
 
 ## Abstract
 
-The past 5 sprints (v3.25.9 → v3.29) completed **operations-research-grade IE/OR algorithms** — BOM multi-level, MRP-II, CLSP, TOC trilogy, demand forecasting — citing 50+ academic papers. However, **these algorithms exist only as Python services** callable by engineers, violating erpilot's North Star promise: *"natural language replaces training."* v3.30 closes this last-mile gap by wrapping 10 critical algorithms as `@register_tool`-registered LLM tools, enabling owners to say:
+The past 5 sprints (v3.25.9 → v3.29) completed **operations-research-grade IE/OR algorithms** — BOM multi-level, MRP-II, CLSP, TOC trilogy, demand forecasting — citing 50+ academic papers. However, **these algorithms exist only as Python services** callable by engineers, violating Ouvoca's North Star promise: *"natural language replaces training."* v3.30 closes this last-mile gap by wrapping 10 critical algorithms as `@register_tool`-registered LLM tools, enabling owners to say:
 
 > "Where's our bottleneck?" / "Should we take this order?" / "How many M6 bolts do we need next month?" / "Why is next week so busy?" / "What should I watch today?"
 
@@ -33,7 +33,7 @@ Plus the **Daily Briefing** killer feature aggregates **all upstream analysis** 
 | v3.28 | TA + DBR + Order Acceptance | ❌ Python service only |
 | v3.29 | 5-method auto-selection + MASE | ❌ Python service only |
 
-**Every ❌ means**: SMB owners **cannot ask the AI** to use these features — directly violating erpilot's v3.0 strategic pivot's principle "**UI vs conversation → conversation.**"
+**Every ❌ means**: SMB owners **cannot ask the AI** to use these features — directly violating Ouvoca's v3.0 strategic pivot's principle "**UI vs conversation → conversation.**"
 
 ### 1.2 Core Thesis
 
@@ -243,7 +243,7 @@ Integrated into `app/agents/tools.py` as side-effect import.
 >
 > ### 6. Disclaimer Clause
 >
-> **To the maximum extent permitted by applicable law**, erpilot assumes no liability for:
+> **To the maximum extent permitted by applicable law**, Ouvoca assumes no liability for:
 >
 > - **Consequences** of wrongly issued POs/orders due to LLM slot extraction errors (mitigated by ConfirmCard, but human button-press still possible)
 > - **Wrong business judgments** influenced by LLM translation inaccuracy
@@ -261,7 +261,7 @@ Integrated into `app/agents/tools.py` as side-effect import.
 >
 > ### 8. Cultural Reminder: LLM Doesn't Replace Professionals
 >
-> erpilot's promise is "**natural language replaces training**" — **not** "**natural language replaces professional judgment**." AI can help owners **operate quickly**, **find data**, and **do rough calculations**; but **final decisions** still rest with:
+> Ouvoca's promise is "**natural language replaces training**" — **not** "**natural language replaces professional judgment**." AI can help owners **operate quickly**, **find data**, and **do rough calculations**; but **final decisions** still rest with:
 >
 > - Sales / Procurement / Warehouse / Plant Manager — per their expertise
 > - Supervisor / Finance / Legal — per their authority
@@ -291,7 +291,7 @@ Integrated into `app/agents/tools.py` as side-effect import.
 
 [9] **Yao, S., et al.** (2022). ReAct: Synergizing reasoning and acting in language models. *ICLR 2023*.
 
-[10] **erpilot CONVERSATIONAL_ERP_DESIGN** (2026, internal). 6-layer architecture + 7 design principles + 4-phase roadmap.
+[10] **Ouvoca CONVERSATIONAL_ERP_DESIGN** (2026, internal). 6-layer architecture + 7 design principles + 4-phase roadmap.
 
 [11-50] All references from v3.25.9 → v3.29 design docs **apply cumulatively**.
 
@@ -302,13 +302,13 @@ Integrated into `app/agents/tools.py` as side-effect import.
 | Version | Date | Change |
 |---|---|---|
 | v3.25.9 - v3.29 | 2026-05-20 | Algorithm foundation (IE/OR / TA / Forecasting) |
-| **v3.30** | **2026-05-20** | **This release**: wrap all v3.25.9-v3.29 algorithms as **LLM tools**, fulfilling erpilot's North Star |
+| **v3.30** | **2026-05-20** | **This release**: wrap all v3.25.9-v3.29 algorithms as **LLM tools**, fulfilling Ouvoca's North Star |
 | Future v3.31+ | TBD | TTS / Whisper / multi-tool chaining / vector memory |
 | Future v3.32+ | TBD | OCR quotes / email parsing / mobile photo inventory |
 
 ---
 
 **Last updated**: 2026-05-20 (v3.30)
-**Authors**: erpilot engineering team (with NLU / XAI / IE-OR cross-domain academic methodology)
+**Authors**: Ouvoca engineering team (with NLU / XAI / IE-OR cross-domain academic methodology)
 **Version**: 1.0
 **Chinese version**: [`CONVERSATIONAL_PLANNING_DESIGN_ZH.md`](./CONVERSATIONAL_PLANNING_DESIGN_ZH.md)

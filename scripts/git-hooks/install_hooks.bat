@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================
-REM  erpilot - 安裝 git hooks (Windows)
+REM  Ouvoca - 安裝 git hooks (Windows)
 REM ============================================================
 setlocal
 set "REPO_ROOT=%~dp0..\.."
@@ -11,7 +11,7 @@ if not exist ".git" (
     exit /b 1
 )
 
-echo [INFO] 安裝 erpilot git hooks...
+echo [INFO] 安裝 Ouvoca git hooks...
 
 copy /Y "scripts\git-hooks\pre-commit" ".git\hooks\pre-commit" >nul
 if errorlevel 1 ( echo [ERROR] copy pre-commit fail & exit /b 1 )

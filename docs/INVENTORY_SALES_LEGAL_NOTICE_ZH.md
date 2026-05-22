@@ -62,7 +62,7 @@ PO 經 approved / sent 後為**對供應商之契約**：
 ### 3.2 收貨入帳之合規責任
 - **receive_purchase_order** 觸發應付帳款入帳
 - 收貨數量 / 品質判定**屬倉管職權**，AI 不替代
-- 短缺 / 損壞應依與供應商之合約處理（不由 erpilot 自動扣款）
+- 短缺 / 損壞應依與供應商之合約處理（不由 Ouvoca 自動扣款）
 
 ---
 
@@ -80,7 +80,7 @@ PO 經 approved / sent 後為**對供應商之契約**：
 - 主管：覆核差異 + 套用調整
 - 會計師：依盤點結果調整帳目
 
-**erpilot 之 ConfirmCard 不取代會計師覆核**。對外財報請依適用會計準則 + CPA 審視。
+**Ouvoca 之 ConfirmCard 不取代會計師覆核**。對外財報請依適用會計準則 + CPA 審視。
 
 ### 4.3 盤點原因分類
 `variance_reason` 之分類僅供內部分析，**不構成**：
@@ -128,7 +128,7 @@ read tools 之 `summary` 為 LLM 翻譯，可能：
 
 ## 7. 不擔保條款
 
-於適用法律所允許之最大範圍內（**to the maximum extent permitted by applicable law**），erpilot 對下列事項不承擔責任：
+於適用法律所允許之最大範圍內（**to the maximum extent permitted by applicable law**），Ouvoca 對下列事項不承擔責任：
 
 1. 因 LLM 抽 slot 錯誤誤發 PO/SO/盤點所衍生之契約 / 財務 / 稅務後果
 2. 因 LLM 翻譯失準導致之錯誤業務判斷
@@ -159,7 +159,7 @@ read tools 之 `summary` 為 LLM 翻譯，可能：
 
 ## 9. 文化提醒：LLM 不取代專業
 
-erpilot 之承諾：**「自然語言取代教育訓練」**，**不是**「**自然語言取代專業判斷**」。
+Ouvoca 之承諾：**「自然語言取代教育訓練」**，**不是**「**自然語言取代專業判斷**」。
 
 | AI 可以 | 仍需專業判斷 |
 |---|---|

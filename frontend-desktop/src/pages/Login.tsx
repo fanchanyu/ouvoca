@@ -20,7 +20,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   // 記住 username 但**不**記密碼
   useEffect(() => {
-    const savedUser = localStorage.getItem('erpilot_last_username')
+    const savedUser = localStorage.getItem('ouvoca_last_username')
     if (savedUser) setUsername(savedUser)
   }, [])
   const [loading, setLoading] = useState(false)
@@ -47,7 +47,7 @@ export default function Login() {
         employee_id: res.user.employee_id, is_superuser: res.user.is_superuser,
       })
       // 記住 username 方便下次預填（不存密碼）
-      try { localStorage.setItem('erpilot_last_username', username) } catch { /* ignore */ }
+      try { localStorage.setItem('ouvoca_last_username', username) } catch { /* ignore */ }
       // v3.37 D0-2：若還在用預設密碼，提示一定要改
       if (password === 'admin123') {
         toast.info('⚠️ 您正使用預設密碼，請立即在 Chat 講「改密碼」更換')

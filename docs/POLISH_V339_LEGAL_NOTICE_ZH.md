@@ -27,7 +27,7 @@ v3.39 涉及：
 
 - 客戶上傳之 LOGO 應為**公司擁有著作權**之圖檔
 - 使用**他人 LOGO**（含品牌標誌、設計師作品未經授權）可能違反《著作權法》§91
-- erpilot **不**驗證 LOGO 之著作權歸屬
+- Ouvoca **不**驗證 LOGO 之著作權歸屬
 
 ### 1.2 顯示限制
 
@@ -66,10 +66,10 @@ v3.39 涉及：
 - 個資法：客戶之個資若用於合約履行期間，**不可任意刪除**
 - 若需「忘記權」（GDPR-equivalent）— 應使用「匿名化」而非刪除
 
-### 2.4 erpilot 之責任
+### 2.4 Ouvoca 之責任
 
-- erpilot 已預檢查**業務關聯**並阻擋刪除
-- erpilot **不**檢查**法定保存期**或**契約義務**
+- Ouvoca 已預檢查**業務關聯**並阻擋刪除
+- Ouvoca **不**檢查**法定保存期**或**契約義務**
 - 客戶須自行確認**法律允許刪除**後再執行
 
 ---
@@ -136,7 +136,7 @@ v3.39 涉及：
 ### 6.3 客戶責任
 
 - 若連續 3 次仍失敗，**LLM 之回答品質可能下降** → 應**自行檢查問句清晰度**
-- 多次失敗可能反映**模型偏差**或**訓練資料缺口** → 客戶可向 erpilot 回報
+- 多次失敗可能反映**模型偏差**或**訓練資料缺口** → 客戶可向 Ouvoca 回報
 
 ---
 
@@ -153,7 +153,7 @@ Login 頁面連不到後端時，顯示：
 
 - 指引**僅為一般檢查清單**
 - 客戶之**特定環境**（公司防火牆、VPN、proxy）需 IT 配合
-- erpilot **不**遠端診斷客戶之網路問題
+- Ouvoca **不**遠端診斷客戶之網路問題
 
 ---
 
@@ -162,14 +162,14 @@ Login 頁面連不到後端時，顯示：
 ### 8.1 配置
 
 `docker-compose.yml` 各服務加 `restart: unless-stopped`：
-- Docker 啟動時自動拉起 erpilot 容器
+- Docker 啟動時自動拉起 Ouvoca 容器
 - 即使容器 crash 也會自動重啟（除非使用者明確 `docker compose stop`）
 
 ### 8.2 配套要求
 
 - 客戶須於 **Docker Desktop 設定**勾「Start when log in」
-- erpilot **不**註冊 Windows Service（避免與 Docker Desktop 衝突）
-- 老闆關機重開後：先開 Docker Desktop → erpilot 自動跟上
+- Ouvoca **不**註冊 Windows Service（避免與 Docker Desktop 衝突）
+- 老闆關機重開後：先開 Docker Desktop → Ouvoca 自動跟上
 
 ### 8.3 風險
 
@@ -183,28 +183,28 @@ Login 頁面連不到後端時，顯示：
 於適用法律所允許之最大範圍內：
 
 **1. LOGO 上傳**
-erpilot **不**驗證客戶上傳之 LOGO 之**著作權歸屬**；客戶須**自行確認**有合法使用權；因 LOGO 侵權所衍生之爭議 erpilot **不承擔責任**。
+Ouvoca **不**驗證客戶上傳之 LOGO 之**著作權歸屬**；客戶須**自行確認**有合法使用權；因 LOGO 侵權所衍生之爭議 Ouvoca **不承擔責任**。
 
 **2. 刪除三件套**
-erpilot 已預檢查業務關聯；客戶須**自行確認**法定保存期、契約義務、GDPR 等個資法規之適用；erpilot 對因刪除導致**無法回溯**之資料、合約爭議、法定查核失敗**不承擔責任**。
+Ouvoca 已預檢查業務關聯；客戶須**自行確認**法定保存期、契約義務、GDPR 等個資法規之適用；Ouvoca 對因刪除導致**無法回溯**之資料、合約爭議、法定查核失敗**不承擔責任**。
 
 **3. 批次列印**
-ZIP 含完整商業機密；客戶須妥善保管；erpilot 對 ZIP 外流之衍生爭議**不承擔責任**。
+ZIP 含完整商業機密；客戶須妥善保管；Ouvoca 對 ZIP 外流之衍生爭議**不承擔責任**。
 
 **4. 分頁**
 分頁工具不**取代**正式資料匯出之合規流程；客戶須於企業 SSO / Gateway 層自行監控異常下載。
 
 **5. Daily Digest**
-手動觸發為**便利性功能**；自動排程之**設定、寄送、收件人控管**由客戶自行配置；erpilot 對誤寄、漏寄、寄錯人**不承擔責任**。
+手動觸發為**便利性功能**；自動排程之**設定、寄送、收件人控管**由客戶自行配置；Ouvoca 對誤寄、漏寄、寄錯人**不承擔責任**。
 
 **6. Slot-filling 3 次 Fallback**
 連續 3 次失敗為**啟發式建議**；不**取代**完整對話品質檢視；客戶應依據實際 UX 結果調整。
 
 **7. 後端離線指引**
-僅為一般檢查清單；erpilot **不**負責客戶之網路 / 防火牆 / VPN 問題之解決。
+僅為一般檢查清單；Ouvoca **不**負責客戶之網路 / 防火牆 / VPN 問題之解決。
 
 **8. Docker 自啟**
-依 docker-compose 之 `restart: unless-stopped` 機制；客戶須**配合**設定 Docker Desktop 開機自啟；erpilot **不**註冊 Windows Service。
+依 docker-compose 之 `restart: unless-stopped` 機制；客戶須**配合**設定 Docker Desktop 開機自啟；Ouvoca **不**註冊 Windows Service。
 
 ---
 
@@ -226,7 +226,7 @@ ZIP 含完整商業機密；客戶須妥善保管；erpilot 對 ZIP 外流之衍
 
 ### 10.4 開機自啟
 - [ ] Docker Desktop 已勾「Start when log in」
-- [ ] 已測試「電腦重開機 → erpilot 自動可用」流程
+- [ ] 已測試「電腦重開機 → Ouvoca 自動可用」流程
 
 ### 10.5 與既有 checklist 累積
 - [ ] 已完成 v3.25.10 → v3.38 之**全部** checklist
@@ -234,7 +234,7 @@ ZIP 含完整商業機密；客戶須妥善保管；erpilot 對 ZIP 外流之衍
 ---
 
 **版本**：v3.39（2026-05-21）
-**作者**：erpilot 法務團隊（內部）
+**作者**：Ouvoca 法務團隊（內部）
 **對應程式**：
 - `backend/app/agents/domains/polish_v339_tools.py`（7 LLM tools）
 - `backend/app/services/print_service.py`（LOGO 渲染）

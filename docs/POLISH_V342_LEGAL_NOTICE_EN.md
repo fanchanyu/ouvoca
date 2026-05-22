@@ -62,9 +62,9 @@
 - Customer **must inform employee**: **change password immediately on first login**
 - Owner **should not** transmit plaintext password via LINE / Email → use **secure channel**
 
-### 1.5 erpilot Disclaimer
+### 1.5 Ouvoca Disclaimer
 
-erpilot is **not liable** for security incidents caused by **untimely deactivation**, system lockout from **accidental superuser creation**, or leaks from **improper password transmission**, to the maximum extent permitted by applicable law.
+Ouvoca is **not liable** for security incidents caused by **untimely deactivation**, system lockout from **accidental superuser creation**, or leaks from **improper password transmission**, to the maximum extent permitted by applicable law.
 
 ---
 
@@ -152,9 +152,9 @@ AI_DAILY_LIMIT_PER_USER=500   # default 200
 - For **training**: **redact** customer / employee real names
 - For **HR evaluation**: **prior notice** to employees (labor law)
 
-### 4.4 erpilot Disclaimer
+### 4.4 Ouvoca Disclaimer
 
-erpilot is **not liable** for transcript **leak / misuse / use for illegal purposes**.
+Ouvoca is **not liable** for transcript **leak / misuse / use for illegal purposes**.
 
 ---
 
@@ -218,9 +218,9 @@ erpilot is **not liable** for transcript **leak / misuse / use for illegal purpo
 - Wrong delivery date → customer / supplier dispute
 - Customer should **manually verify** important dates
 
-### 7.4 erpilot Disclaimer
+### 7.4 Ouvoca Disclaimer
 
-Business day calculation is a **heuristic helper**; erpilot is **not liable** for **contract breach, penalties, customer complaints** from wrong delivery dates.
+Business day calculation is a **heuristic helper**; Ouvoca is **not liable** for **contract breach, penalties, customer complaints** from wrong delivery dates.
 
 ---
 
@@ -249,25 +249,25 @@ Business day calculation is a **heuristic helper**; erpilot is **not liable** fo
 To the maximum extent permitted by applicable law:
 
 **1. User Account Management (R1)**
-erpilot is **not liable** for security incidents from **untimely deactivation, accidental superuser, improper password transmission**, contract disputes, labor disputes.
+Ouvoca is **not liable** for security incidents from **untimely deactivation, accidental superuser, improper password transmission**, contract disputes, labor disputes.
 
 **2. Attachments (R3)**
-erpilot is **not liable** for attachment **copyright compliance, PII protection, competitor info handling**.
+Ouvoca is **not liable** for attachment **copyright compliance, PII protection, competitor info handling**.
 
 **3. AI Daily Limit (R4)**
-erpilot's limit is **heuristic protection**, does **not** replace formal SLA; **not liable** for business delays from **improper limit settings**.
+Ouvoca's limit is **heuristic protection**, does **not** replace formal SLA; **not liable** for business delays from **improper limit settings**.
 
 **4. Transcript Export (R6)**
-erpilot is **not liable** for transcript **leak, misuse, HR evaluation use** disputes.
+Ouvoca is **not liable** for transcript **leak, misuse, HR evaluation use** disputes.
 
 **5. Timezone (R7)**
-erpilot's timezone setting is **display convenience**; **not liable** for **cross-timezone transaction misjudgment** losses.
+Ouvoca's timezone setting is **display convenience**; **not liable** for **cross-timezone transaction misjudgment** losses.
 
 **6. Global Search (R2)**
-erpilot's search is **heuristic index**; for **low-privilege staff getting sensitive info**, customer must strengthen RBAC themselves.
+Ouvoca's search is **heuristic index**; for **low-privilege staff getting sensitive info**, customer must strengthen RBAC themselves.
 
 **7. Business Days (R5)**
-erpilot's calculation includes only **2026 Taiwan holidays**; **not liable** for **cross-year / company custom holidays** miscalculations.
+Ouvoca's calculation includes only **2026 Taiwan holidays**; **not liable** for **cross-year / company custom holidays** miscalculations.
 
 ---
 
@@ -312,7 +312,7 @@ erpilot's calculation includes only **2026 Taiwan holidays**; **not liable** for
 ---
 
 **Version**: v3.42 (2026-05-22)
-**Author**: erpilot Legal Team (internal)
+**Author**: Ouvoca Legal Team (internal)
 **Corresponds to code**:
 - `backend/app/agents/domains/polish_v342_tools.py` (7 LLM tools + helper)
 - `backend/app/core/ai_rate_limit.py` (R4 middleware)

@@ -54,9 +54,9 @@ During freeze, may cause:
 - During freeze, **audit log still records** all LLM conversations + rejected operations
 - Unfreezing does **not automatically replay** rejected operations — employees must re-do
 
-### 1.5 erpilot Disclaimer
+### 1.5 Ouvoca Disclaimer
 
-To the maximum extent permitted by applicable law, erpilot is **not liable** for **any loss** (business loss, customer churn, penalties, tax fines, labor disputes) arising from hard-write freeze.
+To the maximum extent permitted by applicable law, Ouvoca is **not liable** for **any loss** (business loss, customer churn, penalties, tax fines, labor disputes) arising from hard-write freeze.
 
 ---
 
@@ -88,9 +88,9 @@ The legal effect of deletion is **not** changed by undo:
 - Multi-worker deployment does **not share** (v3.x roadmap: Redis sharing)
 - Customer should **not rely** on undo as replacement for proper backup
 
-### 2.5 erpilot Disclaimer
+### 2.5 Ouvoca Disclaimer
 
-erpilot is **not liable** for **data unrecoverable** due to undo failure (backend restart / code reuse / expiration).
+Ouvoca is **not liable** for **data unrecoverable** due to undo failure (backend restart / code reuse / expiration).
 
 ---
 
@@ -116,9 +116,9 @@ erpilot is **not liable** for **data unrecoverable** due to undo failure (backen
 - Audit records **must not** be used for **personal attack** or **discrimination**
 - Audit retention should match **personnel data retention**
 
-### 3.4 erpilot Disclaimer
+### 3.4 Ouvoca Disclaimer
 
-erpilot is **not liable** for **labor disputes, privacy lawsuits, PDPA complaints** due to misuse of audit search.
+Ouvoca is **not liable** for **labor disputes, privacy lawsuits, PDPA complaints** due to misuse of audit search.
 
 ---
 
@@ -141,9 +141,9 @@ AR aging data is:
 - Externally mentioning customer overdue **may constitute defamation** (must have written evidence)
 - Collection actions must follow **debt collection guidelines** (industry-analogously applicable even for non-financial institutions)
 
-### 4.4 erpilot Disclaimer
+### 4.4 Ouvoca Disclaimer
 
-erpilot is **not liable** for **defamation, PDPA, customer complaints** due to AR aging data **leak, misuse, improper collection**.
+Ouvoca is **not liable** for **defamation, PDPA, customer complaints** due to AR aging data **leak, misuse, improper collection**.
 
 ---
 
@@ -177,9 +177,9 @@ erpilot is **not liable** for **defamation, PDPA, customer complaints** due to A
 - If customer is in Taiwan timezone, "today" near UTC midnight may differ by 1 day — **watch cross-day boundary**
 - Religion / national holiday relative descriptions ("Mid-Autumn Festival", "before Chinese New Year") not supported — v3.x roadmap
 
-### 6.3 erpilot Disclaimer
+### 6.3 Ouvoca Disclaimer
 
-erpilot is **not liable** for **report errors, miscalculated delivery dates** due to date parsing errors; customer should **manually verify** important date calculations.
+Ouvoca is **not liable** for **report errors, miscalculated delivery dates** due to date parsing errors; customer should **manually verify** important date calculations.
 
 ---
 
@@ -208,22 +208,22 @@ erpilot is **not liable** for **report errors, miscalculated delivery dates** du
 To the maximum extent permitted by applicable law:
 
 **1. Freeze hard-write**
-Freeze is an execution tool for **customer's internal decision**; erpilot is **not liable** for **any** loss (business loss, breach, tax fines, labor disputes) caused by freezing.
+Freeze is an execution tool for **customer's internal decision**; Ouvoca is **not liable** for **any** loss (business loss, breach, tax fines, labor disputes) caused by freezing.
 
 **2. Delete Undo**
-Undo is a **convenience feature**; erpilot is **not liable** for **statutory retention, PDPA rights, contractual obligation** disputes from undo failure, misuse, or malicious use.
+Undo is a **convenience feature**; Ouvoca is **not liable** for **statutory retention, PDPA rights, contractual obligation** disputes from undo failure, misuse, or malicious use.
 
 **3. Cross-user Audit**
-Search is an **internal control tool**; erpilot is **not liable** for **labor disputes, PDPA complaints, employee discrimination** claims from misuse.
+Search is an **internal control tool**; Ouvoca is **not liable** for **labor disputes, PDPA complaints, employee discrimination** claims from misuse.
 
 **4. AR Aging**
-Query is a **convenience feature**; erpilot is **not liable** for **defamation, PDPA, customer complaints** from data leak, misuse, improper collection.
+Query is a **convenience feature**; Ouvoca is **not liable** for **defamation, PDPA, customer complaints** from data leak, misuse, improper collection.
 
 **5. Order Compare**
-Comparison is an **internal analysis tool**; erpilot is **not liable** for **Fair Trade Act, Trade Secrets** disputes from leaked results.
+Comparison is an **internal analysis tool**; Ouvoca is **not liable** for **Fair Trade Act, Trade Secrets** disputes from leaked results.
 
 **6. Relative Date**
-Parsing is a **heuristic helper**; erpilot is **not liable** for **business decision errors** from date calculation errors.
+Parsing is a **heuristic helper**; Ouvoca is **not liable** for **business decision errors** from date calculation errors.
 
 ---
 
@@ -265,12 +265,12 @@ If customer's business spans **multiple markets**:
 | 🇯🇵 Japan | APPI | Cross-border transfer (e.g., customer data) requires extra consent |
 | 🇸🇬 SG | PDPA | DNC list restricts collection calls |
 
-**erpilot does not** automatically handle cross-border compliance; customer must **self-consult** local legal counsel.
+**Ouvoca does not** automatically handle cross-border compliance; customer must **self-consult** local legal counsel.
 
 ---
 
 **Version**: v3.40 (2026-05-21)
-**Author**: erpilot Legal Team (internal)
+**Author**: Ouvoca Legal Team (internal)
 **Corresponds to code**:
 - `backend/app/agents/domains/polish_v340_tools.py` (5 LLM tools + helper)
 - `backend/app/agents/domains/polish_tools.py` (push_undo + delete restoration)

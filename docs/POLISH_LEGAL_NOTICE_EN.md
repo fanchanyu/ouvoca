@@ -43,7 +43,7 @@ These functions, if misused, may cause:
 
 - For unlocked-screen mis-confirmations, **audit log records the logged-in account as the operator**
 - Employees should acknowledge in their labor contract: **no password sharing, no session lending**
-- For employee negligence (unlocked screen) causing mis-operation, erpilot is **not liable**; customer may pursue per company policy
+- For employee negligence (unlocked screen) causing mis-operation, Ouvoca is **not liable**; customer may pursue per company policy
 
 ---
 
@@ -75,7 +75,7 @@ These functions, if misused, may cause:
 
 - SQLite only; PostgreSQL customers must use `pg_dump` via IT
 - Stored at `./backups/erp-{timestamp}-{note}.db`
-- Path configurable via `ERPILOT_BACKUP_DIR` env var
+- Path configurable via `OUVOCA_BACKUP_DIR` env var
 
 ### 3.2 Backup Contents
 
@@ -92,12 +92,12 @@ The backup is a **full SQLite DB copy**, including:
 - **Retain ≥ 5 years** (Business Accounting Act §38)
 - **Do not** leak: no public cloud upload, no email attachment
 
-### 3.4 erpilot Responsibility Boundary
+### 3.4 Ouvoca Responsibility Boundary
 
-- erpilot provides the **interface** to trigger backup
-- erpilot does **not** auto-schedule backups (v3.x roadmap)
-- erpilot does **not** auto-offsite backup
-- erpilot does **not** verify backup integrity — customer must `sqlite3 file.db .schema` to confirm
+- Ouvoca provides the **interface** to trigger backup
+- Ouvoca does **not** auto-schedule backups (v3.x roadmap)
+- Ouvoca does **not** auto-offsite backup
+- Ouvoca does **not** verify backup integrity — customer must `sqlite3 file.db .schema` to confirm
 
 ---
 
@@ -106,11 +106,11 @@ The backup is a **full SQLite DB copy**, including:
 ### 4.1 Data Source
 
 - `query_ai_cost_today` / `query_ai_cost_this_month` read `DecisionLog.cost_usd`
-- Written by erpilot's `governance.py` tracker after each LLM call
+- Written by Ouvoca's `governance.py` tracker after each LLM call
 
 ### 4.2 Limits
 
-- erpilot internal log **may differ from cloud vendor billing** (model upgrades, bugs, missed entries)
+- Ouvoca internal log **may differ from cloud vendor billing** (model upgrades, bugs, missed entries)
 - Customer's **official financial reconciliation** should use **cloud API vendor invoice / console**
 - TWD conversion uses approximate rate (1 USD ≈ 31.5 TWD), **reference only**
 
@@ -174,19 +174,19 @@ New global handlers for `ValueError` / `KeyError`:
 To the maximum extent permitted by applicable law:
 
 **1. TTL Extension**
-Changing TTL from 5 to 30 min is a **functional adjustment**; customer must reinforce seat-lock / auto-logout policy; erpilot is **not liable** for mis-confirmations caused by extended TTL.
+Changing TTL from 5 to 30 min is a **functional adjustment**; customer must reinforce seat-lock / auto-logout policy; Ouvoca is **not liable** for mis-confirmations caused by extended TTL.
 
 **2. Undo**
-`undo_last_admin_change` is a **convenience feature**; does **not** replace formal version history / audit rollback; expires after 90 sec; erpilot is **not liable** if customer relies on undo and neglects careful operation.
+`undo_last_admin_change` is a **convenience feature**; does **not** replace formal version history / audit rollback; expires after 90 sec; Ouvoca is **not liable** if customer relies on undo and neglects careful operation.
 
 **3. Backup**
-Backup is a **customer-initiated action**; erpilot provides the tool but is **not** responsible for the storage, encryption, leakage, or corruption of backup files; customer must comply with PDPA, Trade Secrets Act, Business Accounting Act.
+Backup is a **customer-initiated action**; Ouvoca provides the tool but is **not** responsible for the storage, encryption, leakage, or corruption of backup files; customer must comply with PDPA, Trade Secrets Act, Business Accounting Act.
 
 **4. AI Cost**
 `query_ai_cost_*` is **internal estimation**; does **not** replace cloud vendor billing; customer should use **vendor official invoice** for month-end reconciliation.
 
 **5. Disambiguation**
-The candidate list is **search results only**; erpilot does **not** guarantee that customers in the database are "legal, existing, valid" business entities; customer must verify counterparty identity.
+The candidate list is **search results only**; Ouvoca does **not** guarantee that customers in the database are "legal, existing, valid" business entities; customer must verify counterparty identity.
 
 **6. Cancel Button / Mobile Responsive**
 Frontend abort does **not** guarantee backend LLM stops; mobile-usable does **not** equal supporting all business scenarios; customer must evaluate fit.
@@ -195,7 +195,7 @@ Frontend abort does **not** guarantee backend LLM stops; mobile-usable does **no
 
 ## 9. Pre-Adoption Checklist (v3.38 reinforced)
 
-Before adopting erpilot v3.38, please confirm:
+Before adopting Ouvoca v3.38, please confirm:
 
 ### 9.1 Employee Training (Important)
 - [ ] Inform employees of **30-min TTL**: lock screen when leaving seat
@@ -210,7 +210,7 @@ Before adopting erpilot v3.38, please confirm:
 - [ ] Provided 30-min v3.38 new-feature training to employees
 
 ### 9.3 Technical Configuration
-- [ ] `ERPILOT_BACKUP_DIR` env var set to host storage (not docker volume cleared by `docker compose down`)
+- [ ] `OUVOCA_BACKUP_DIR` env var set to host storage (not docker volume cleared by `docker compose down`)
 - [ ] Tested complete "backup → simulated restore" flow
 - [ ] Confirmed SQLite → PostgreSQL upgrade path (production recommends PG)
 
@@ -220,7 +220,7 @@ Before adopting erpilot v3.38, please confirm:
 ---
 
 **Version**: v3.38 (2026-05-21)
-**Author**: erpilot Legal Team (internal)
+**Author**: Ouvoca Legal Team (internal)
 **Corresponds to code**:
 - `backend/app/agents/confirm_card.py` (TTL → 30 min)
 - `backend/app/agents/domains/polish_tools.py` (6 LLM tools)

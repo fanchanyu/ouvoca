@@ -2,7 +2,7 @@
 
 電腦小白 Day 7：
   「印 QUO-001 PDF」「客戶清單 Excel 給會計小姐」
-  「erpilot 設定到那？」「載入示範資料」
+  「Ouvoca 設定到那？」「載入示範資料」
 """
 from __future__ import annotations
 

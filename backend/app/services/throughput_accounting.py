@@ -54,7 +54,7 @@ TA framework**, which is a managerial accounting philosophy, NOT a
 financial-reporting standard. For external financial reports, customers
 must use proper cost accounting per applicable accounting standards.
 
-To the maximum extent permitted by applicable law, erpilot assumes no
+To the maximum extent permitted by applicable law, Ouvoca assumes no
 liability for pricing decisions, tax filings, or financial reporting
 based on this module's output. See
 docs/THROUGHPUT_ACCOUNTING_DESIGN_ZH.md §6 for full disclaimer.

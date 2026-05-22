@@ -1,7 +1,7 @@
 # 🏛️ 家規 (House Rules) 完整使用指南
 
 > 給電腦小白看的版本：你公司的「規矩」AI 幫你管
-> 適用 erpilot v3.25+
+> 適用 Ouvoca v3.25+
 > 預計閱讀時間：15 分鐘上手
 
 ---
@@ -24,7 +24,7 @@
 - 😢 老闆不在大家偷偷放行
 - 😢 出事後找不到誰負責
 
-**erpilot 的「家規」把規矩寫進系統**，這樣：
+**Ouvoca 的「家規」把規矩寫進系統**，這樣：
 - ✅ 員工照規矩走，犯錯機率降低 80%
 - ✅ 老闆睡得著（系統自動擋住違規）
 - ✅ 換人不用重訓（規矩在系統裡）
@@ -33,7 +33,7 @@
 
 ---
 
-## 🆚 對手是怎麼做的？為什麼 erpilot 不一樣
+## 🆚 對手是怎麼做的？為什麼 Ouvoca 不一樣
 
 | ERP | 怎麼設家規 | 缺點 |
 |---|---|---|
@@ -41,15 +41,15 @@
 | **鼎新** | 設定畫面找半天 | 條件死板，特殊情境不支援 |
 | **NetSuite** | 寫 JavaScript (SuiteScript) | 小白做不到 |
 | **Odoo** | Python 表達式 | 危險 + 要會寫 |
-| **erpilot** ✨ | **👇 3 種任選** | **任何人都能改、立刻生效** |
+| **Ouvoca** ✨ | **👇 3 種任選** | **任何人都能改、立刻生效** |
 
 ---
 
-## 🚀 erpilot 設家規的 3 種方式
+## 🚀 Ouvoca 設家規的 3 種方式
 
 ### 方式 A：UI 點一點（**最簡單，給小白**）
 
-1. 登入 erpilot
+1. 登入 Ouvoca
 2. 點左側「✅ 審批」（v3.25 起家規與審批共用此頁）
 3. 切「⚙️ 規則設定」tab
 4. 點「➕ 新增規矩」
@@ -74,7 +74,7 @@
 
 6. 儲存 → **立即生效**（不用重啟、不用 deploy）
 
-### 方式 B：對 AI 講話（自然語言，**erpilot 招牌**）
+### 方式 B：對 AI 講話（自然語言，**Ouvoca 招牌**）
 
 不會用表單？**用講的就好**：
 
@@ -101,7 +101,7 @@
 4. 按 **[✓ 確認]** → 規則立即上線
 5. 業務下次建超 5% 折扣的 SO → 自動進審批
 
-> 🚀 **這就是 erpilot 對話式 ERP 最 powerful 的地方**：用人話描述需求，AI 翻成系統規則。
+> 🚀 **這就是 Ouvoca 對話式 ERP 最 powerful 的地方**：用人話描述需求，AI 翻成系統規則。
 > 不會 SQL / 不會 JavaScript / 不會 Python 都能做。
 
 ### 方式 C：API / Plugin（**給工程師客製化**）
@@ -137,7 +137,7 @@ register_condition("credit_check", check_credit_limit)
 
 ### 1️⃣ 觸發點 (Trigger)
 
-「**什麼動作會觸發這條規矩？**」erpilot 內建 16+ 個觸發點：
+「**什麼動作會觸發這條規矩？**」Ouvoca 內建 16+ 個觸發點：
 
 | 類別 | 觸發點 | 何時觸發 |
 |---|---|---|
@@ -187,7 +187,7 @@ register_condition("credit_check", check_credit_limit)
 
 ## 📦 預設家規（裝完系統自動有）
 
-erpilot 開箱就送你 3 條最常用的：
+Ouvoca 開箱就送你 3 條最常用的：
 
 ```
 🔴 WO 釋放需有「做法 (Recipe)」
@@ -218,7 +218,7 @@ erpilot 開箱就送你 3 條最常用的：
 
 ### 場景：建一張高額採購單
 
-1. **9:00** 阿玲打開 erpilot「採購」頁
+1. **9:00** 阿玲打開 Ouvoca「採購」頁
 2. 點「➕ 快速建單」
 3. 填：供應商 = 長江廠 / 料件 = M6 螺絲 / 數量 = 1000 / 單價 = 150
 4. 儲存 → 系統算總額 = NT$ 150,000
@@ -291,7 +291,7 @@ ISO 9001 / GMP / 食安 / FDA 等合規場景需要這個 trail。
 - 例：覆寫額度上限（一個月最多 5 次）
 
 ### Q6: 規矩會不會擋住系統自己的後台流程？
-不會。erpilot 設計上**只有 user-initiated 動作會跑家規**，系統 cron / cleanup / migration 不觸發。
+不會。Ouvoca 設計上**只有 user-initiated 動作會跑家規**，系統 cron / cleanup / migration 不觸發。
 
 ### Q7: 我看不懂英文 trigger 名（po.create / so.confirm）...
 未來會加 i18n 翻譯。目前列表有中文描述。AI 助手對話建規矩時，你**只要講人話**，AI 會幫你翻 trigger 名。
@@ -368,11 +368,11 @@ register_condition("my_custom", my_custom)
 
 ---
 
-## 🎯 為什麼這對 erpilot 戰略很重要
+## 🎯 為什麼這對 Ouvoca 戰略很重要
 
 > **「Hardcode rule = 逼客戶改 code = 不是真 SaaS」**
 
-之前 erpilot 寫死「WO release 需 BOM」就跟 SAP / 鼎新一樣硬。
+之前 Ouvoca 寫死「WO release 需 BOM」就跟 SAP / 鼎新一樣硬。
 v3.25 起改為 **PolicyEngine** 後：
 
 - ✅ 客戶在 UI 開關規矩 → **0 deploy / 0 顧問費**
@@ -381,9 +381,9 @@ v3.25 起改為 **PolicyEngine** 後：
 - ✅ Audit log → **ISO/GMP/FDA 合規**
 - ✅ 主管覆寫 → **彈性 + 留證**
 
-**這是 erpilot 真正能打贏鼎新/SAP 的關鍵差異化**——
-他們做不到的「使用者自己改規矩」，erpilot 做到了。
+**這是 Ouvoca 真正能打贏鼎新/SAP 的關鍵差異化**——
+他們做不到的「使用者自己改規矩」，Ouvoca 做到了。
 
 ---
 
-*v3.25 (2026-05-18) · erpilot 原創設計 · 全球首見 AI 對話式 ERP rule engine*
+*v3.25 (2026-05-18) · Ouvoca 原創設計 · 全球首見 AI 對話式 ERP rule engine*

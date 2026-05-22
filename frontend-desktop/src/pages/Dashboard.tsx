@@ -41,7 +41,7 @@ export default function Dashboard() {
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus | null>(null)
   const [wizardOpen, setWizardOpen] = useState(false)
   const [wizardDismissed, setWizardDismissed] = useState<boolean>(
-    () => localStorage.getItem('erpilot_wizard_dismissed') === '1'
+    () => localStorage.getItem('ouvoca_wizard_dismissed') === '1'
   )
 
   const load = useCallback(async () => {
@@ -73,25 +73,25 @@ export default function Dashboard() {
   // v3.37 D0-3 / v3.43 P0-3：載入時檢查是否首次登入
   //
   // 修補：install.bat 會自動 seed → DB 不會空 → 舊條件「empty=true」永遠不成立 → wizard 死碼
-  // 改用 localStorage `erpilot_first_seen` 旗號：使用者每個瀏覽器只看一次
+  // 改用 localStorage `ouvoca_first_seen` 旗號：使用者每個瀏覽器只看一次
   // 若想再看，可手動清 localStorage 或開無痕模式
   useEffect(() => {
     if (wizardDismissed) return
-    const firstSeen = localStorage.getItem('erpilot_first_seen')
+    const firstSeen = localStorage.getItem('ouvoca_first_seen')
     apiOnboardingStatus().then(s => {
       setOnboardingStatus(s)
       // 首次（localStorage 沒紀錄）→ 跳；或 DB 完全空（極少情況）→ 也跳
       const dbEmpty = s.total_customers === 0 && s.total_suppliers === 0 && s.total_parts === 0
       if (!firstSeen || dbEmpty) {
         setWizardOpen(true)
-        try { localStorage.setItem('erpilot_first_seen', new Date().toISOString()) } catch { /* ignore */ }
+        try { localStorage.setItem('ouvoca_first_seen', new Date().toISOString()) } catch { /* ignore */ }
       }
     }).catch(() => { /* 無權限就略過 */ })
   }, [wizardDismissed])
 
   const closeWizard = useCallback(() => {
     setWizardOpen(false)
-    try { localStorage.setItem('erpilot_wizard_dismissed', '1') } catch { /* ignore */ }
+    try { localStorage.setItem('ouvoca_wizard_dismissed', '1') } catch { /* ignore */ }
     setWizardDismissed(true)
   }, [])
 

@@ -71,7 +71,7 @@ Vollmann et al. 2005) for capacity-aware production planning.
     of actual work-center availability. Customers must maintain
     accurate WorkCenter.capacity_per_day and account for downtime,
     maintenance, and operator absence.
-  • To the maximum extent permitted by applicable law, erpilot
+  • To the maximum extent permitted by applicable law, Ouvoca
     assumes no liability for consequences arising from acting on
     this algorithm's output. See docs/MRP_CAPACITY_AWARE_DESIGN_ZH.md
     §6 for full disclaimer.

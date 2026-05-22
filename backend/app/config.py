@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # --- app ---
-    APP_NAME: str = "LLM-ERP"
+    APP_NAME: str = "Ouvoca"
     APP_VERSION: str = "2.0.0"
     DEBUG: bool = False
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"

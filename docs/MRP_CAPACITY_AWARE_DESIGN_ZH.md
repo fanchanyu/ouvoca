@@ -1,6 +1,6 @@
 # 產能感知 MRP — Capacitated Lot-Sizing with Dixon-Silver Heuristic（v3.26）
 
-> **本檔性質**：演算法**方法論文件**，描述 erpilot 於 v3.26 加入之**產能感知 MRP**（Capacity-Aware MRP），即在 v3.25.10 之無產能限制 MRP-II 之上，疊加 Dixon-Silver (1981) 之**可行性啟發法**以滿足工作中心產能限制。寫作風格採學術論文章節格式。
+> **本檔性質**：演算法**方法論文件**，描述 Ouvoca 於 v3.26 加入之**產能感知 MRP**（Capacity-Aware MRP），即在 v3.25.10 之無產能限制 MRP-II 之上，疊加 Dixon-Silver (1981) 之**可行性啟發法**以滿足工作中心產能限制。寫作風格採學術論文章節格式。
 
 > 📘 前置文件：[`MRP_ALGORITHM_DESIGN_ZH.md`](./MRP_ALGORITHM_DESIGN_ZH.md)（v3.25.10 無產能限制 MRP-II 基礎）
 
@@ -8,7 +8,7 @@
 
 ## 摘要（Abstract）
 
-本文敘述 erpilot v3.26 之**產能感知 MRP** 模組，將 v3.25.10 之無產能 MRP-II 延伸至**多工作中心產能限制下之批量決策問題**（Multi-Work-Center Capacitated Lot-Sizing Problem, CLSP）。由於 CLSP 為 NP-hard [Florian, Lenstra & Rinnooy Kan 1980, *Mgmt Sci* 26]，本實作採用 **Dixon-Silver (1981) 可行性啟發法**：以 Wagner-Whitin (1958) 之無產能最佳解為起點，當任一 work-center 於某時段超載時，將生產向前推移以利用較早時段之閒置產能，並計算遞延產生之持有成本懲罰。我們同步引入 **Karmarkar (1987)** 之 setup/run time 分解、**Vollmann et al. (2005) Ch. 7** 之 CRP 載荷剖面，以及新增 **Routing / RoutingStep 資料模型**作為「資源消耗矩陣 $a_{ik}$」之資料來源。實作以 8 個結構不變量測試與 1 個 ORM 整合測試驗證，共 9/9 通過。
+本文敘述 Ouvoca v3.26 之**產能感知 MRP** 模組，將 v3.25.10 之無產能 MRP-II 延伸至**多工作中心產能限制下之批量決策問題**（Multi-Work-Center Capacitated Lot-Sizing Problem, CLSP）。由於 CLSP 為 NP-hard [Florian, Lenstra & Rinnooy Kan 1980, *Mgmt Sci* 26]，本實作採用 **Dixon-Silver (1981) 可行性啟發法**：以 Wagner-Whitin (1958) 之無產能最佳解為起點，當任一 work-center 於某時段超載時，將生產向前推移以利用較早時段之閒置產能，並計算遞延產生之持有成本懲罰。我們同步引入 **Karmarkar (1987)** 之 setup/run time 分解、**Vollmann et al. (2005) Ch. 7** 之 CRP 載荷剖面，以及新增 **Routing / RoutingStep 資料模型**作為「資源消耗矩陣 $a_{ik}$」之資料來源。實作以 8 個結構不變量測試與 1 個 ORM 整合測試驗證，共 9/9 通過。
 
 **關鍵字**：CLSP、Dixon-Silver 啟發法、產能規劃、Routing、bottleneck、作業研究
 
@@ -296,9 +296,9 @@ v3.25.10 run_mrp_advanced  ─┐
 > 4. **infeasible_periods 之處理責任**：
 >    - 當演算法回報 `infeasible_periods` 非空時，代表「以現有 capacity 設定無法滿足 MPS 需求」
 >    - **客戶應自行決定**處理方式：(a) 增加 capacity（加班 / 第三班）、(b) 延後交期、(c) 外包、(d) 減少 MPS 需求
->    - erpilot 不對 infeasibility 之處理結果負責
+>    - Ouvoca 不對 infeasibility 之處理結果負責
 >
-> 5. **不擔保條款**：於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），erpilot 對於下列事項不承擔責任：
+> 5. **不擔保條款**：於適用法律所允許之最大範圍內（to the maximum extent permitted by applicable law），Ouvoca 對於下列事項不承擔責任：
 >    - 因採用本演算法建議所衍生之**機台超載、operator 過勞、品質下降**等業務後果
 >    - 因實際 capacity 偏離設定值所造成之**規劃失準**
 >    - 因 Routing / WorkCenter 等輸入資料不正確所造成之**錯誤排程**
@@ -360,7 +360,7 @@ v3.25.10 run_mrp_advanced  ─┐
 ---
 
 **最後更新**：2026-05-20（v3.26）
-**作者**：erpilot 工程團隊（含 IE/OR 學術方法論引用）
+**作者**：Ouvoca 工程團隊（含 IE/OR 學術方法論引用）
 **版本**：1.0
 **前置文件**：[`MRP_ALGORITHM_DESIGN_ZH.md`](./MRP_ALGORITHM_DESIGN_ZH.md)（v3.25.10 無產能 MRP-II 基礎）
 **English version**：[`MRP_CAPACITY_AWARE_DESIGN_EN.md`](./MRP_CAPACITY_AWARE_DESIGN_EN.md)

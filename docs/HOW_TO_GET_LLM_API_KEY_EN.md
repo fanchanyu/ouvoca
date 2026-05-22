@@ -1,6 +1,6 @@
-# How to Get an LLM API Key and Use It with erpilot (Complete Guide)
+# How to Get an LLM API Key and Use It with Ouvoca (Complete Guide)
 
-> Applies to erpilot v3.14+
+> Applies to Ouvoca v3.14+
 > Target audience: non-technical users
 > Estimated time: 5–10 minutes
 
@@ -8,11 +8,11 @@
 
 ## 1. Why Do I Need an API Key?
 
-erpilot's "AI Conversational CRUD" feature (query/add/edit/delete by talking) is powered by a **Large Language Model (LLM)**. LLMs run in the cloud — to call one, you must first **sign up for an account and apply for an API Key** (like a key).
+Ouvoca's "AI Conversational CRUD" feature (query/add/edit/delete by talking) is powered by a **Large Language Model (LLM)**. LLMs run in the cloud — to call one, you must first **sign up for an account and apply for an API Key** (like a key).
 
 ### What If I Don't Have an API Key?
 
-erpilot is **designed to work without one**:
+Ouvoca is **designed to work without one**:
 
 | Feature | API Key Required? |
 |---|---|
@@ -23,7 +23,7 @@ erpilot is **designed to work without one**:
 | War-room real-time dashboard | ❌ No |
 | **AI Assistant chat (CRUD)** | ✅ **Yes** |
 
-In other words: **You can use erpilot as a traditional ERP without applying**, but you lose the "talk to it" headline feature.
+In other words: **You can use Ouvoca as a traditional ERP without applying**, but you lose the "talk to it" headline feature.
 
 ---
 
@@ -60,7 +60,7 @@ If you're worried about a Chinese company storing your data → pick OpenAI or C
 
 1. After login, click **"API Keys"** in left sidebar
 2. Click blue **"Create new API Key"** button (top right)
-3. Name the key (e.g., `erpilot-2026`), click Create
+3. Name the key (e.g., `ouvoca-2026`), click Create
 4. **Copy the `sk-xxxxxxxxxxxxxxxxxxxxxxxx` shown immediately** (shown only once!)
 
 > ⚠️ Forgot to copy → delete and create a new one. **Don't try to find it in the page.**
@@ -78,11 +78,11 @@ To continue using:
 
 ---
 
-## 4. Give the Key to erpilot (3 Methods)
+## 4. Give the Key to Ouvoca (3 Methods)
 
 ### Method A: Settings Page (recommended, easiest)
 
-1. Login to erpilot (http://localhost:5173)
+1. Login to Ouvoca (http://localhost:5173)
 2. Click **"⚙️ Settings"** in left sidebar
 3. In the top "🤖 AI Assistant Settings" section:
    - **Provider** → pick "DeepSeek" from dropdown
@@ -152,11 +152,11 @@ Click "Test Connection" and see:
 
 ### Cause
 
-Windows' CA cert store hasn't updated with DeepSeek's root certificate. Common issue with Windows + DeepSeek combo — not an erpilot bug.
+Windows' CA cert store hasn't updated with DeepSeek's root certificate. Common issue with Windows + DeepSeek combo — not an Ouvoca bug.
 
 ### Fix (fastest)
 
-In erpilot Settings, **uncheck "Verify SSL certificate"** → retry test.
+In Ouvoca Settings, **uncheck "Verify SSL certificate"** → retry test.
 This just makes Python skip SSL verification — doesn't affect your security (key is still sent over TLS-encrypted connection).
 
 Cleaner fix: upgrade Python `certifi` package — not necessary for non-developers.
@@ -169,19 +169,19 @@ Cleaner fix: upgrade Python `certifi` package — not necessary for non-develope
 
 1. Sign up: https://platform.openai.com/signup (credit card required)
 2. Get Key: left **API Keys** → **Create new secret key** (shown once)
-3. In erpilot Settings: pick OpenAI, paste key, save
+3. In Ouvoca Settings: pick OpenAI, paste key, save
 
 ### Anthropic Claude
 
 1. Sign up: https://console.anthropic.com/
 2. Go to **Workbench → Settings → API Keys → Create Key**
-3. In erpilot Settings: pick Anthropic, paste key, save
+3. In Ouvoca Settings: pick Anthropic, paste key, save
 
 ### Ollama (local offline)
 
 1. Download: https://ollama.com/download → install
 2. Terminal: `ollama pull llama3.2` (~2GB model)
-3. In erpilot Settings: pick Ollama, leave key empty, save
+3. In Ouvoca Settings: pick Ollama, leave key empty, save
 4. Confirm `ollama serve` is running locally
 
 ---
@@ -195,7 +195,7 @@ Cleaner fix: upgrade Python `certifi` package — not necessary for non-develope
 - Rotate keys regularly (every 3-6 months)
 - If you suspect a leak → revoke at provider + create new
 
-### ✅ How erpilot Handles Your Key
+### ✅ How Ouvoca Handles Your Key
 
 - Stored in `backend/.env` on your local machine (plaintext file)
 - **Never** uploaded to any server
@@ -221,7 +221,7 @@ To keep data fully on-premise → **use Ollama offline mode** (Method D).
 | Sales rep uses 10× daily | 1500/month | NT$30 | NT$450 |
 | Whole 20-person company heavy use | 20000/month | NT$400 | NT$6,000 |
 
-> 💡 **erpilot is token-efficient**: each chat usually < 2000 tokens.
+> 💡 **Ouvoca is token-efficient**: each chat usually < 2000 tokens.
 
 ---
 

@@ -1,11 +1,11 @@
-"""Auto CrmEvent logger（Sprint J v3.16）— erpilot 原創設計。
+"""Auto CrmEvent logger（Sprint J v3.16）— Ouvoca 原創設計。
 
 對標傳統 CRM（Salesforce / HubSpot）「業務手動記 activity」的痛點：
   - 業務忙起來就忘了記
   - 記了也常常 1-2 句敷衍
   - 結果 Customer 360 timeline 空白 = 主管 / 後手交接時資訊斷層
 
-erpilot 原創解：**業務動作自動產生 CrmEvent**，不需手動：
+Ouvoca 原創解：**業務動作自動產生 CrmEvent**，不需手動：
   - SO 成立 / 確認 / 出貨 / 取消 → 自動 log
   - PO 成立 → 自動 log（給對應的「主要客戶」如果有）
   - Lead 轉客戶 → 自動 log「轉換時間 / 來源」

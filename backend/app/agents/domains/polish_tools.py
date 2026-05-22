@@ -10,7 +10,7 @@
 LEGAL（累積適用 v3.25.10 → v3.37 §6）
 ══════════════════════════════════════════════════════════════════
 本模組之 backup tools 涉及 DB 完整複製；undo 涉及 admin 操作回溯。
-這些是高敏感操作，erpilot 已強制 ConfirmCard + audit log。
+這些是高敏感操作，Ouvoca 已強制 ConfirmCard + audit log。
 備份檔本身為 SQL dump / SQLite copy，包含**完整客戶資料**。
 客戶須依個資法、營業秘密法妥善保管備份檔，不得外流。
 """
@@ -126,7 +126,7 @@ async def _query_ai_cost_this_month(db, user):
 # N4: 備份 / 還原 — 老闆每天問「備份了嗎？」
 # ════════════════════════════════════════════════════════════════════
 
-BACKUP_DIR = Path(os.environ.get("ERPILOT_BACKUP_DIR", "./backups"))
+BACKUP_DIR = Path(os.environ.get("OUVOCA_BACKUP_DIR", "./backups"))
 
 
 def _ensure_backup_dir() -> Path:

@@ -1,4 +1,4 @@
-name: llm-erp
+name: ouvoca
 
 # ═══════════════════════════════════════════════════════════════════════
 # Dev compose — Port binding policy
@@ -16,7 +16,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: llm-erp-backend
+    container_name: ouvoca-backend
     ports:
       - "127.0.0.1:8000:8000"  # loopback only — 同辦公網路他人連不到
     environment:
@@ -40,7 +40,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
-    restart: unless-stopped  # v3.39 K8：Docker 開機後自動拉起 erpilot
+    restart: unless-stopped  # v3.39 K8：Docker 開機後自動拉起 Ouvoca
     # Uncomment when DATABASE_DRIVER=postgresql:
     # depends_on:
     #   postgres:
@@ -51,7 +51,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: llm-erp-factory-a
+    container_name: ouvoca-factory-a
     command: ["python", "factory_node.py"]
     ports: ["127.0.0.1:8001:8001"]
     environment:
@@ -68,7 +68,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: llm-erp-factory-b
+    container_name: ouvoca-factory-b
     command: ["python", "factory_node.py"]
     ports: ["127.0.0.1:8002:8002"]
     environment:
@@ -86,7 +86,7 @@ services:
     build:
       context: ./frontend-desktop
       dockerfile: Dockerfile
-    container_name: llm-erp-frontend
+    container_name: ouvoca-frontend
     ports: ["127.0.0.1:5173:80"]
     depends_on:
       backend:
@@ -104,7 +104,7 @@ services:
     build:
       context: ./war-room
       dockerfile: Dockerfile
-    container_name: llm-erp-warroom
+    container_name: ouvoca-warroom
     ports: ["127.0.0.1:8080:80"]
     depends_on:
       backend:
@@ -114,7 +114,7 @@ services:
   # ─── Optional: PostgreSQL (uncomment for prod-style local dev) ───────
   # postgres:
   #   image: postgres:16-alpine
-  #   container_name: llm-erp-postgres
+  #   container_name: ouvoca-postgres
   #   environment:
   #     POSTGRES_USER: erp
   #     POSTGRES_PASSWORD: erp

@@ -50,7 +50,7 @@ LLM-augmented adjustments (when enabled in future) carry additional
 risk: language models may **hallucinate** or **over-fit** to recent
 patterns. Always cross-verify against the raw time-series.
 
-To the maximum extent permitted by applicable law, erpilot assumes
+To the maximum extent permitted by applicable law, Ouvoca assumes
 no liability for procurement, production, or staffing decisions based
 on these forecasts. See docs/DEMAND_FORECASTING_DESIGN_ZH.md §6.
 

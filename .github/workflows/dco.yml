@@ -81,7 +81,7 @@ jobs:
               '本 PR 有 commit 缺少 `Signed-off-by:` trailer，或 trailer email 和 author email 不一致。',
               '',
               '### 為什麼？',
-              'erpilot 用 **DCO-style CLA**：每個 commit 必須帶 `Signed-off-by:` 等同你同意 [CLA.md](../blob/main/CLA.md) 條款。',
+              'Ouvoca 用 **DCO-style CLA**：每個 commit 必須帶 `Signed-off-by:` 等同你同意 [CLA.md](../blob/main/CLA.md) 條款。',
               '這讓專案能維持 **AGPL-3.0 + 商業授權雙軌制** ([LICENSE-COMMERCIAL.md](../blob/main/LICENSE-COMMERCIAL.md))。',
               '',
               '### 怎麼修？',

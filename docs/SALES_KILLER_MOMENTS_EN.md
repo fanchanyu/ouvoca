@@ -75,7 +75,7 @@ Procurement (30s after order): "cancel my last order"
 
 ### Moment 6 — Cross-DB federated query
 
-> ⚠️ **Recommended companion statement during demo**: "This feature requires connecting to your incumbent ERP. **We recommend first confirming the authorization scope in writing with your ERP vendor**; specific licensing terms depend on your contract with that vendor, and add-on licenses may be needed. erpilot does not participate in such contractual matters. See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)."
+> ⚠️ **Recommended companion statement during demo**: "This feature requires connecting to your incumbent ERP. **We recommend first confirming the authorization scope in writing with your ERP vendor**; specific licensing terms depend on your contract with that vendor, and add-on licenses may be needed. Ouvoca does not participate in such contractual matters. See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md)."
 
 ```
 Boss: "What's our Dingxin order amount for May?"
@@ -163,7 +163,7 @@ Boss: "Send daily digest to wang@example.com at 7am"
 
 ---
 
-> ⚠️ **Recommended reading for sales / consultants**: The above descriptions of "direct connection to incumbent ERPs (such as Workflow / ChengHang / SAP B1)" describe **technical feasibility**; specific authorization determinations should be based on the customer's contract with the relevant ERP vendor. See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) for the compliance reminder, the recommended customer preparation steps, and erpilot's scope of role. **We recommend focusing on technical capability and advising the customer to confirm licensing with the incumbent ERP vendor; please do not make definitive statements about any third-party vendor's policies or audit practices.**
+> ⚠️ **Recommended reading for sales / consultants**: The above descriptions of "direct connection to incumbent ERPs (such as Workflow / ChengHang / SAP B1)" describe **technical feasibility**; specific authorization determinations should be based on the customer's contract with the relevant ERP vendor. See [`EXTERNAL_DB_LICENSING_NOTICE_EN.md`](./EXTERNAL_DB_LICENSING_NOTICE_EN.md) for the compliance reminder, the recommended customer preparation steps, and Ouvoca's scope of role. **We recommend focusing on technical capability and advising the customer to confirm licensing with the incumbent ERP vendor; please do not make definitive statements about any third-party vendor's policies or audit practices.**
 >
 > **Want a trial? We can demo 30 min this Thursday afternoon.**
 

@@ -1,6 +1,6 @@
-# 如何申請 LLM API Key 並讓 erpilot 用上（完整教學）
+# 如何申請 LLM API Key 並讓 Ouvoca 用上（完整教學）
 
-> 適用 erpilot v3.14+
+> 適用 Ouvoca v3.14+
 > 目標讀者：電腦小白也能照著做
 > 預計時間：5-10 分鐘
 
@@ -8,12 +8,12 @@
 
 ## 一、為什麼需要 API Key？
 
-erpilot 的「AI 對話式 CRUD」功能（查/增/改/刪都用講的）背後是 **大型語言模型（LLM）**。
+Ouvoca 的「AI 對話式 CRUD」功能（查/增/改/刪都用講的）背後是 **大型語言模型（LLM）**。
 LLM 跑在雲端，要呼叫它必須先**註冊一個帳號、申請一把 API Key**（像鑰匙）。
 
 ### 沒有 API Key 怎麼辦？
 
-erpilot **設計上沒有 Key 也能用**：
+Ouvoca **設計上沒有 Key 也能用**：
 
 | 功能 | 需要 API Key 嗎？ |
 |---|---|
@@ -24,7 +24,7 @@ erpilot **設計上沒有 Key 也能用**：
 | War-room 即時儀表板 | ❌ 不需要 |
 | **AI 助手對話（CRUD）** | ✅ **需要** |
 
-換句話說：**沒申請也能用 erpilot 當傳統 ERP**，只是少了「用講的」這個賣點。
+換句話說：**沒申請也能用 Ouvoca 當傳統 ERP**，只是少了「用講的」這個賣點。
 
 ---
 
@@ -43,7 +43,7 @@ erpilot **設計上沒有 Key 也能用**：
 1. 價格比 OpenAI 便宜 **百倍**
 2. 中文理解最強（同樣的台灣中文，DeepSeek 比 GPT 答得好）
 3. 用 OpenAI 相容 API 格式，將來換 provider 一行字搞定
-4. 一般小工廠跑一個月 erpilot 對話費 **NT$10-100**，幾乎免費
+4. 一般小工廠跑一個月 Ouvoca 對話費 **NT$10-100**，幾乎免費
 
 如果你怕中國公司收你資料 → 選 OpenAI 或 Claude（資料留美國）。
 
@@ -61,7 +61,7 @@ erpilot **設計上沒有 Key 也能用**：
 
 1. 登入後，左側選單點 **「API Keys」**
 2. 右上角點藍色按鈕 **「Create new API Key」**
-3. 給這把 key 一個名字（例：`erpilot-2026`），按 Create
+3. 給這把 key 一個名字（例：`ouvoca-2026`），按 Create
 4. **跳出來的 `sk-xxxxxxxxxxxxxxxxxxxxxxxx` 立刻複製**（這串只會顯示一次！）
 
 > ⚠️ 沒複製到 → 點刪掉重新建一把，**不要嘗試在頁面找回**。
@@ -79,11 +79,11 @@ DeepSeek 註冊送的免費額度有限（約 NT$15 可打 200 次對話）。
 
 ---
 
-## 四、把 Key 餵給 erpilot（3 種方法）
+## 四、把 Key 餵給 Ouvoca（3 種方法）
 
 ### 方法 A：用 Settings 頁設定（推薦，最簡單）
 
-1. 登入 erpilot（http://localhost:5173）
+1. 登入 Ouvoca（http://localhost:5173）
 2. 左側 sidebar 點 **「⚙️ 設定」**
 3. 在最上面「🤖 AI 助手設定」區塊：
    - **選 Provider** → 下拉選「DeepSeek」
@@ -153,11 +153,11 @@ $env:LLM_API_KEY = "sk-你的key"
 
 ### 原因
 
-Windows 的 CA 證書庫沒更新到 DeepSeek 的根憑證。這是 Windows + DeepSeek 的常見組合問題，不是 erpilot 的 bug。
+Windows 的 CA 證書庫沒更新到 DeepSeek 的根憑證。這是 Windows + DeepSeek 的常見組合問題，不是 Ouvoca 的 bug。
 
 ### 解法（最快）
 
-在 erpilot Settings 頁，**取消勾選「驗證 SSL 證書」** → 重試測試。
+在 Ouvoca Settings 頁，**取消勾選「驗證 SSL 證書」** → 重試測試。
 這只是讓 Python 跳過 SSL 驗證、不影響你的安全性（key 還是 TLS 加密傳輸）。
 
 更乾淨的解法：升級 Python `certifi` 套件 — 但對電腦小白不必要。
@@ -170,19 +170,19 @@ Windows 的 CA 證書庫沒更新到 DeepSeek 的根憑證。這是 Windows + De
 
 1. 註冊：https://platform.openai.com/signup（需信用卡）
 2. 拿 Key：左側 **API Keys** → **Create new secret key**（一樣只顯示一次）
-3. 在 erpilot 設定頁：Provider 選 OpenAI、貼 key、儲存
+3. 在 Ouvoca 設定頁：Provider 選 OpenAI、貼 key、儲存
 
 ### Anthropic Claude
 
 1. 註冊：https://console.anthropic.com/
 2. 進 **Workbench → Settings → API Keys → Create Key**
-3. 在 erpilot 設定頁：Provider 選 Anthropic、貼 key、儲存
+3. 在 Ouvoca 設定頁：Provider 選 Anthropic、貼 key、儲存
 
 ### Ollama（本機離線）
 
 1. 下載：https://ollama.com/download → 雙擊安裝
 2. 終端機跑：`ollama pull llama3.2`（下載 model ~2GB）
-3. 在 erpilot 設定頁：Provider 選 Ollama、key 留空、儲存
+3. 在 Ouvoca 設定頁：Provider 選 Ollama、key 留空、儲存
 4. 確認本機 `ollama serve` 在跑
 
 ---
@@ -196,7 +196,7 @@ Windows 的 CA 證書庫沒更新到 DeepSeek 的根憑證。這是 Windows + De
 - 定期到 provider 後台**輪換 key**（每 3-6 個月）
 - 萬一懷疑外洩 → 立刻去 provider 後台**撤銷** + **建新的**
 
-### ✅ erpilot 對你的 key 怎麼處理
+### ✅ Ouvoca 對你的 key 怎麼處理
 
 - 存在你電腦本機 `backend/.env`（明文，但是本機檔案）
 - **永遠不會**上傳到任何 server
@@ -222,7 +222,7 @@ Windows 的 CA 證書庫沒更新到 DeepSeek 的根憑證。這是 Windows + De
 | 業務每天用 10 次 | 1500 次/月 | NT$30 | NT$450 |
 | 全公司 20 人重度使用 | 20000 次/月 | NT$400 | NT$6,000 |
 
-> 💡 **erpilot 設計很省 token**：每次對話多半 < 2000 token，大量短對話。
+> 💡 **Ouvoca 設計很省 token**：每次對話多半 < 2000 token，大量短對話。
 
 ---
 

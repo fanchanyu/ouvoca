@@ -268,7 +268,7 @@ export default function Layout() {
         {/* v3.15 第一次登入引導（自動 localStorage 記住 dismiss） */}
         {token && <OnboardingTour />}
 
-        {/* v3.16 右下角 AI 浮球：每頁的「現場教練」(erpilot 原創 UX) */}
+        {/* v3.16 右下角 AI 浮球：每頁的「現場教練」(Ouvoca 原創 UX) */}
         {token && location.pathname !== '/chat' && <AskAiFloat />}
 
         {/* v3.21 Cmd+K 全系統搜尋（任何頁面按 Ctrl+K / Cmd+K 開啟） */}

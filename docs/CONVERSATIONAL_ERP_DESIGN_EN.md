@@ -1,7 +1,7 @@
 # Conversational ERP Architecture (English)
 
 > **AI Replaces Training + Full CRUD via Natural Language**
-> erpilot's core differentiation — this document = North Star
+> Ouvoca's core differentiation — this document = North Star
 
 **Version**: v1.0 (2026-05-15) · **Status**: Final pre-Phase-1 launch
 
@@ -27,11 +27,11 @@
 > **They say what they want; AI translates language into system actions.**
 > **Training = teaching how to talk to the AI, not how to use the ERP UI.**
 
-This inverts the entire software-design tradition — from "design UI for operators" to "design the system for conversation". SAP / Odoo / Workday cannot do this. This is what makes erpilot truly differentiated.
+This inverts the entire software-design tradition — from "design UI for operators" to "design the system for conversation". SAP / Odoo / Workday cannot do this. This is what makes Ouvoca truly differentiated.
 
 ### 1.1 Customer-Felt Difference
 
-| Traditional ERP | erpilot Conversational |
+| Traditional ERP | Ouvoca Conversational |
 |---|---|
 | 1-3 months employee training | **2 hours to proficiency** — knowing how to talk to AI is enough |
 | Find feature = remember menu N levels deep | "I want to do X" — AI takes you (or just does it) |

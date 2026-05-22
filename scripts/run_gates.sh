@@ -108,10 +108,10 @@ echo
 echo -e "${B}[Gate 3 · 文件閘 / Doc Gate]${N}"
 
 if [ -d scripts/build-pdfs/node_modules ]; then
-  run_check "PDF builder dry-run (產 72 份)" \
+  run_check "PDF builder dry-run (產 74 份)" \
     "cd scripts/build-pdfs && node build.mjs"
-  # 72 PDFs: 70 base + v3.42 POLISH_V342_LEGAL_NOTICE (ZH+EN, 帳號管理最敏感)
-  EXPECTED=72
+  # 74 PDFs: 72 base + v3.44 RENAME_NOTICE (ZH+EN, erpilot → Ouvoca 法律合規)
+  EXPECTED=74
   ACTUAL=$(ls docs/pdf/*.pdf 2>/dev/null | wc -l)
   if [ "$ACTUAL" -ge "$EXPECTED" ]; then
     printf "  ${B}▶${N} %-50s ${G}✓${N} (%d/%d files)\n" "PDF count check" "$ACTUAL" "$EXPECTED"

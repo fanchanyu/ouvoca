@@ -1,5 +1,5 @@
 name: 商業授權諮詢 / Commercial License Inquiry
-description: 申請 erpilot 商業授權（免於 AGPL-3.0 義務 + 加值服務）
+description: 申請 Ouvoca 商業授權（免於 AGPL-3.0 義務 + 加值服務）
 title: "[Commercial License] "
 labels: ["legal/commercial-license"]
 assignees:
@@ -8,9 +8,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        感謝你對 erpilot 商業授權感興趣。請填以下資訊，維護者會在 **5 個工作天內**聯絡你。
+        感謝你對 Ouvoca 商業授權感興趣。請填以下資訊，維護者會在 **5 個工作天內**聯絡你。
 
-        **不知道自己需不需要商業授權？** 先看 [LICENSE-COMMERCIAL.md 的決策樹](https://github.com/fanchanyu/erpilot/blob/main/LICENSE-COMMERCIAL.md#-我需要商業授權嗎決策樹)。
+        **不知道自己需不需要商業授權？** 先看 [LICENSE-COMMERCIAL.md 的決策樹](https://github.com/fanchanyu/ouvoca/blob/main/LICENSE-COMMERCIAL.md#-我需要商業授權嗎決策樹)。
 
         > ⚠️ 這個 issue **是 public 的**。不想 public 揭露公司資訊？請改寄 email 至 *(email 待填)*。
 
@@ -63,7 +63,7 @@ body:
       label: 公司規模（員工數）
       options:
         - "< 50 人（小型）"
-        - "50 - 100 人（erpilot 主力客群）"
+        - "50 - 100 人（Ouvoca 主力客群）"
         - "100 - 500 人（中型）"
         - "500 - 1000 人（大型）"
         - "> 1000 人（企業 / 集團）"
@@ -98,9 +98,9 @@ body:
     id: use-case
     attributes:
       label: 使用情境補充說明
-      description: 越具體越好。例如「想把 erpilot 包成『某某產業 ERP』賣給 N 個客戶」、「想串現有的鼎新 Workflow ERP」
+      description: 越具體越好。例如「想把 Ouvoca 包成『某某產業 ERP』賣給 N 個客戶」、「想串現有的鼎新 Workflow ERP」
       placeholder: |
-        我們是 XX 廠，目前用 Excel 管庫存 + 鼎新 Workflow 開發票，想用 erpilot 做生產 + 倉儲一體化，
+        我們是 XX 廠，目前用 Excel 管庫存 + 鼎新 Workflow 開發票，想用 Ouvoca 做生產 + 倉儲一體化，
         員工 60 人實際 30 人會用。希望保留我們自寫的鼎新串接邏輯不公開。
     validations:
       required: true
@@ -166,7 +166,7 @@ body:
     attributes:
       label: 確認
       options:
-        - label: 我已閱讀 [LICENSE-COMMERCIAL.md](https://github.com/fanchanyu/erpilot/blob/main/LICENSE-COMMERCIAL.md) 並了解定價結構
+        - label: 我已閱讀 [LICENSE-COMMERCIAL.md](https://github.com/fanchanyu/ouvoca/blob/main/LICENSE-COMMERCIAL.md) 並了解定價結構
           required: true
         - label: 我了解這個 issue 是 public 的；機密資訊我會等維護者私下聯絡後再揭露
           required: true

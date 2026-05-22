@@ -9,7 +9,7 @@
 
 ## ⚠️ Important: Tax / Financial Reporting is High-Compliance Sensitive Domain
 
-erpilot v3.34's new LLM tools involve:
+Ouvoca v3.34's new LLM tools involve:
 - **eInvoice issuance / voiding** (affects business tax filing)
 - **Payment / receipt recording** (affects cash flow, financial reporting)
 - **AR / AP queries** (decision basis)
@@ -33,15 +33,15 @@ Errors in these operations **may trigger**:
 |---|---|
 | Tax ID error | **Must** use `validate_tax_id_tool` to verify before issuance; incorrect B2B invoice cannot be deducted by buyer |
 | Amount error | Erroneous amounts are included in current filing; corrections require credit note |
-| Upload to revenue authority | erpilot does **NOT** directly upload; customer must integrate cloud-invoice platform / tracking-code management API |
-| Tracking code allocation | erpilot does **NOT** manage tracking codes; follow your company's revenue-authority allocation rules |
+| Upload to revenue authority | Ouvoca does **NOT** directly upload; customer must integrate cloud-invoice platform / tracking-code management API |
+| Tracking code allocation | Ouvoca does **NOT** manage tracking codes; follow your company's revenue-authority allocation rules |
 
 ### 1.2 void_einvoice_with_confirm
 
 | Risk | Customer Responsibility |
 |---|---|
 | **24-hour limit** | Voiding possible within 24 hours of issuance; **after that, use credit note workflow** |
-| Cloud notification | Voiding must be reported to revenue authority / cloud invoice platform; erpilot's ConfirmCard **only marks internal status** |
+| Cloud notification | Voiding must be reported to revenue authority / cloud invoice platform; Ouvoca's ConfirmCard **only marks internal status** |
 | Already-deducted scenario | If buyer has filed for deduction, voiding may cause complex reconciliation; coordinate with buyer beforehand |
 
 ### 1.3 validate_tax_id_tool
@@ -73,16 +73,16 @@ Errors in these operations **may trigger**:
 | Followup | Must be posted by accountant via `post_journal_entry_with_confirm` to take effect |
 
 **Critical warnings**:
-- erpilot's JE is **draft**; **not posted = no financial-statement impact**
+- Ouvoca's JE is **draft**; **not posted = no financial-statement impact**
 - After posting, **locked**; requires reversal voucher to undo
 - For major amounts (e.g., > 5% of annual revenue), use **maker-checker**
-- Reconciliation with supplier statements is separate; erpilot does NOT replace reconciliation
+- Reconciliation with supplier statements is separate; Ouvoca does NOT replace reconciliation
 
 ### 2.2 Record Customer Receipt
 
 | Risk | Customer Responsibility |
 |---|---|
-| Receipt date vs invoice date | erpilot uses creation timestamp; **tax recognition timing may differ** |
+| Receipt date vs invoice date | Ouvoca uses creation timestamp; **tax recognition timing may differ** |
 | Partial receipts | No "installment receipt" model; manually handle half-payments |
 | Refunds | No one-click LLM refund; use JE reversal + bank operations |
 
@@ -106,7 +106,7 @@ Errors in these operations **may trigger**:
 `approve_request_with_confirm`'s **legal significance**:
 - Approver's `employee_id` written to ApprovalStep, **forming audit trail**
 - If approval later deemed **negligent** (e.g., approving over-budget purchase), liability rests with that employee / supervisor
-- erpilot's audit log can serve as **internal audit basis**, but **external legal litigation** still requires formal documentation
+- Ouvoca's audit log can serve as **internal audit basis**, but **external legal litigation** still requires formal documentation
 
 ### 3.2 Reject Requires Reason
 
@@ -161,7 +161,7 @@ But do **NOT constitute**:
 
 ## 6. Disclaimer Clause
 
-**To the maximum extent permitted by applicable law**, erpilot assumes **no liability** for:
+**To the maximum extent permitted by applicable law**, Ouvoca assumes **no liability** for:
 
 ### Tax
 1. **Tax penalties** from LLM mis-extracting SO number / tax ID causing wrong invoice issuance
@@ -210,14 +210,14 @@ This version overlays v3.25.10 → v3.33. **All predecessors' §6 disclaimers ap
 
 ### Tax
 - **Mandatory** `validate_tax_id_tool` before issuing invoices
-- By 5th of each month, have **CPA / bookkeeping firm** reconcile erpilot estimates against actual Form 401
+- By 5th of each month, have **CPA / bookkeeping firm** reconcile Ouvoca estimates against actual Form 401
 - Major invoices (e.g., > NT$1M) use **dual-issuance + supervisor review**
-- Cloud invoice upload integrated by IT (erpilot's mock does NOT replace)
+- Cloud invoice upload integrated by IT (Ouvoca's mock does NOT replace)
 
 ### Accounting
 - Major payments / receipts (e.g., > 5% of annual revenue) **must** use maker-checker (creator ≠ poster)
 - Month-end / quarter-end / year-end **mandatory** CPA reconciliation
-- External financial reports follow **GAAP / IFRS** standards; erpilot's internal analysis NOT a substitute
+- External financial reports follow **GAAP / IFRS** standards; Ouvoca's internal analysis NOT a substitute
 
 ### Approval
 - Approve / reject **legal evidence strength** limited; major decisions retain written + signature
@@ -231,7 +231,7 @@ This version overlays v3.25.10 → v3.33. **All predecessors' §6 disclaimers ap
 
 ## 9. Cultural Reminder: LLM Does NOT Replace Professionals
 
-erpilot's promise: **"natural language replaces training"**, **NOT** **"replaces CPA / tax advisor / legal counsel."**
+Ouvoca's promise: **"natural language replaces training"**, **NOT** **"replaces CPA / tax advisor / legal counsel."**
 
 | AI Can | Professional Judgment Still Required |
 |---|---|

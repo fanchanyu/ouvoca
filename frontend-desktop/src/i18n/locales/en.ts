@@ -22,7 +22,7 @@ export const en = {
     group: { overview: 'Overview', operations: 'Operations', system: 'System' },
   },
   login: {
-    title: 'LLM-ERP',
+    title: 'Ouvoca',
     subtitle: 'AI-Native Enterprise Resource Planning',
     username: 'Username',
     password: 'Password',
@@ -204,8 +204,8 @@ export const en = {
       system: '⚙️ System', ai: '🤖 AI', mesh: '🌐 MESH',
     },
   },
-  // erpilot original vocabulary (v3.24 — coined for beginners, not copied from competitors)
-  erpilotTerms: {
+  // Ouvoca original vocabulary (v3.24 — coined for beginners, not copied from competitors)
+  ouvocaTerms: {
     sprout: 'Sprout',         // Lead → Sprout: a seed that grows into a customer
     sproutHint: 'A prospect from trade show / ads / referral — like a seed, water daily and it grows into a customer',
     chase: 'Chase',           // Opportunity → Chase: what salespeople chase daily

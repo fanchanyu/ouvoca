@@ -1,6 +1,6 @@
 # Throughput Accounting + DBR Scheduling + Order Acceptance Design (v3.28)
 
-> **Nature of this document**: Cross-domain methodology paper spanning **Operations Research / Managerial Accounting / ERP / AI**, describing erpilot v3.28's **Throughput Accounting (TA)** + **Drum-Buffer-Rope (DBR) Scheduling** + **Order Acceptance Decision** modules. This release completes Goldratt's (1984) TOC trilogy: v3.27 IDENTIFIED bottleneck → v3.28 EXPLOITS (DBR) + SUBORDINATES (TA).
+> **Nature of this document**: Cross-domain methodology paper spanning **Operations Research / Managerial Accounting / ERP / AI**, describing Ouvoca v3.28's **Throughput Accounting (TA)** + **Drum-Buffer-Rope (DBR) Scheduling** + **Order Acceptance Decision** modules. This release completes Goldratt's (1984) TOC trilogy: v3.27 IDENTIFIED bottleneck → v3.28 EXPLOITS (DBR) + SUBORDINATES (TA).
 
 > 📘 Prerequisites: [`MRP_ALGORITHM_DESIGN_EN.md`](./MRP_ALGORITHM_DESIGN_EN.md) (v3.25.10) / [`MRP_CAPACITY_AWARE_DESIGN_EN.md`](./MRP_CAPACITY_AWARE_DESIGN_EN.md) (v3.26) / [`PLANNING_EXPLAINABILITY_DESIGN_EN.md`](./PLANNING_EXPLAINABILITY_DESIGN_EN.md) (v3.27)
 
@@ -8,7 +8,7 @@
 
 ## Abstract
 
-This paper describes erpilot v3.28's completion of Goldratt's (1984) Theory of Constraints trilogy's latter two steps: (i) **Throughput Accounting (TA)** [Goldratt 1992; Corbett 1998] — replacing traditional cost accounting for product-mix decisions; (ii) **Drum-Buffer-Rope (DBR) Scheduling** [Schragenheim & Dettmer 2000] — using bottleneck (CCR) as the production pacemaker; (iii) **Order Acceptance Decision** — implementing Goldratt 1990 §6's "highest T/CCR-min first" rule. We further prove this rule is **optimal under a single binding constraint** (continuous knapsack relaxation argument) and validate with 21 structural-invariant tests including 4 canonical Goldratt textbook cases. SMB owners' daily question "**Should we take this order?**" can be answered by `evaluate_order_acceptance()` in ~10 ms.
+This paper describes Ouvoca v3.28's completion of Goldratt's (1984) Theory of Constraints trilogy's latter two steps: (i) **Throughput Accounting (TA)** [Goldratt 1992; Corbett 1998] — replacing traditional cost accounting for product-mix decisions; (ii) **Drum-Buffer-Rope (DBR) Scheduling** [Schragenheim & Dettmer 2000] — using bottleneck (CCR) as the production pacemaker; (iii) **Order Acceptance Decision** — implementing Goldratt 1990 §6's "highest T/CCR-min first" rule. We further prove this rule is **optimal under a single binding constraint** (continuous knapsack relaxation argument) and validate with 21 structural-invariant tests including 4 canonical Goldratt textbook cases. SMB owners' daily question "**Should we take this order?**" can be answered by `evaluate_order_acceptance()` in ~10 ms.
 
 **Keywords**: Throughput Accounting, DBR, order acceptance, product mix, TOC, bottleneck pricing
 
@@ -37,7 +37,7 @@ The accept-vs-reject difference = $45 × orders × 12 months = **substantial rea
 
 ### 1.2 TOC Trilogy Integration
 
-| Step | Source | erpilot Module |
+| Step | Source | Ouvoca Module |
 |---|---|---|
 | **IDENTIFY** constraint | Goldratt 1984 | v3.27 `identify_bottlenecks` |
 | **EXPLOIT** constraint | Goldratt 1990 | v3.28 DBR + ranking |
@@ -111,7 +111,7 @@ Otherwise:             ACCEPT
 - $3\times$: typical optimum, acceptable WIP cost
 - $5\times+$: over-protection, WIP bloat
 
-**Hopp & Spearman 1996 *Factory Physics* §10**: throughput is determined by bottleneck only; buffers at non-bottleneck stations are pure waste. erpilot's DBR module places buffer only before bottleneck.
+**Hopp & Spearman 1996 *Factory Physics* §10**: throughput is determined by bottleneck only; buffers at non-bottleneck stations are pure waste. Ouvoca's DBR module places buffer only before bottleneck.
 
 ### 2.4 Module 4: Pricing Curve (Sensitivity Extension)
 
@@ -237,7 +237,7 @@ See [`THROUGHPUT_ACCOUNTING_DESIGN_ZH.md`](./THROUGHPUT_ACCOUNTING_DESIGN_ZH.md)
 >
 > ### 6. Disclaimer Clause
 >
-> **To the maximum extent permitted by applicable law**, erpilot assumes no liability for:
+> **To the maximum extent permitted by applicable law**, Ouvoca assumes no liability for:
 >
 > - **Revenue losses or customer-relationship damage** from wrong accept/reject based on this module's recommendation
 > - **Financial misstatement** consequences from TVC/OE misclassification
@@ -303,7 +303,7 @@ See [`THROUGHPUT_ACCOUNTING_DESIGN_ZH.md`](./THROUGHPUT_ACCOUNTING_DESIGN_ZH.md)
 ---
 
 **Last updated**: 2026-05-20 (v3.28)
-**Authors**: erpilot engineering team (with IE/OR/Managerial Accounting/AI cross-domain academic methodology)
+**Authors**: Ouvoca engineering team (with IE/OR/Managerial Accounting/AI cross-domain academic methodology)
 **Version**: 1.0
 **Prerequisites**: v3.25.10 / v3.26 / v3.27 design docs
 **Chinese version**: [`THROUGHPUT_ACCOUNTING_DESIGN_ZH.md`](./THROUGHPUT_ACCOUNTING_DESIGN_ZH.md)

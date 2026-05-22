@@ -14,7 +14,7 @@ LEGAL（累積適用 v3.25.10 → v3.35 §6）
 ══════════════════════════════════════════════════════════════════
 本模組之 PDF / CSV / Excel 輸出僅為作業參考。
 正式對外（報價、合約、發票、出貨單）仍應由經授權之人員簽核後寄發。
-於適用法律所允許之最大範圍內，erpilot 對因匯出資料外洩、
+於適用法律所允許之最大範圍內，Ouvoca 對因匯出資料外洩、
 PDF 內容錯誤、匯出後第三方處理所衍生之爭議不承擔責任。
 """
 from __future__ import annotations
@@ -373,7 +373,7 @@ async def _export_purchase_orders(db, user, fmt: str = "xlsx"):
     risk_tier=RiskTier.READ,
     description=(
         "查詢目前設定到那裡了：各模組筆數、缺什麼基礎資料、Day 1-7 進度。"
-        "範例：「erpilot 設定到那？」「我還缺什麼？」「進度如何？」"
+        "範例：「Ouvoca 設定到那？」「我還缺什麼？」「進度如何？」"
     ),
     slots=[],
     required_permission="user.profile.read",
