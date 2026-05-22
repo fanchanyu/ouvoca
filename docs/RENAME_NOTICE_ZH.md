@@ -138,7 +138,7 @@ Ouvoca 之**核心定位**：「**對話式 AI-Native ERP for SMB Manufacturers*
 ---
 
 **重命名生效日期**：2026-05-22
-**對應 commit**：（rename commit hash — 此 commit 訊息會留紀錄）
+**對應 commit**：`f8be4068230a66b0c2008669c079de12e0c135cf`
 **新倉庫**：https://github.com/fanchanyu/ouvoca
 **新主品牌**：Ouvoca
 **新 Tagline**：「**Ouvoca — Conversational AI-Native ERP for SMB Manufacturers**」/「對話式 AI-Native ERP，給 50-100 人小型製造業」

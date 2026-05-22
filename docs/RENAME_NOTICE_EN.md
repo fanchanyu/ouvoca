@@ -134,7 +134,7 @@ If this notice is the first you've heard of this project — being "**ERPilot LL
 ---
 
 **Rename Effective Date**: 2026-05-22
-**Corresponding Commit**: (rename commit hash — to be recorded in this commit's message)
+**Corresponding Commit**: `f8be4068230a66b0c2008669c079de12e0c135cf`
 **New Repository**: https://github.com/fanchanyu/ouvoca
 **New Primary Brand**: Ouvoca
 **New Tagline**: "**Ouvoca — Conversational AI-Native ERP for SMB Manufacturers**" / 「對話式 AI-Native ERP，給 50-100 人小型製造業」
