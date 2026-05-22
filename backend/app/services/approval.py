@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Optional
 
 from sqlalchemy import select
@@ -168,7 +168,7 @@ async def _record_step(
         approver_username=user.get("username"),
         action=action,
         comment=comment,
-        decided_at=datetime.utcnow(),
+        decided_at=datetime.now(UTC).replace(tzinfo=None),
     )
     db.add(step)
     return step
@@ -193,7 +193,7 @@ async def approve(
     else:
         req.current_stage += 1
 
-    req.updated_at = datetime.utcnow()
+    req.updated_at = datetime.now(UTC).replace(tzinfo=None)
     await db.commit()
     await db.refresh(req, attribute_names=["steps"])
 
@@ -229,7 +229,7 @@ async def reject(
 
     await _record_step(db, req, "rejected", user, comment.strip())
     req.status = "rejected"
-    req.updated_at = datetime.utcnow()
+    req.updated_at = datetime.now(UTC).replace(tzinfo=None)
     await db.commit()
     await db.refresh(req, attribute_names=["steps"])
 

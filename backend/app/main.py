@@ -80,13 +80,21 @@ async def lifespan(app: FastAPI):
     install_approval_hooks()
 
     # v3.25：家規 (House Rules) — 灌預設規則（idempotent，含「WO 釋放需有做法」）
+    # v3.46：Glossary DB 載入（Phase 2 G-201，重啟後同義詞不丟失）
     from app.services.policy_engine import install_default_rules
     from app.database import AsyncSessionLocal
+    from app.agents.glossary import db_load_glossary
     async with AsyncSessionLocal() as _db:
         try:
             await install_default_rules(_db, tenant_id="HQ")
         except Exception as exc:
             log.warning("install_default_rules failed: %s", exc)
+        try:
+            n = await db_load_glossary(_db)
+            if n:
+                log.info("Glossary: loaded %d term(s) from DB", n)
+        except Exception as exc:
+            log.warning("db_load_glossary failed (first boot?): %s", exc)
 
     # ConfirmCard pending dict 背景 GC（v3.7）：
     # 防止過期 card 的 executor closure 持續持有 db session 而 OOM。

@@ -8,7 +8,7 @@ from __future__ import annotations
 from app.agents.engine import register_agent
 from app.agents.glossary import (
     GlossaryEntry, list_glossary, register_term, resolve_term,
-    seed_default_glossary,
+    seed_default_glossary, db_register_term,
 )
 from app.agents.registry import register_tool, RiskTier, Slot
 
@@ -108,13 +108,20 @@ async def _list_glossary(db, user, canonical_type: str = None, keyword: str = No
     required_permission="ai.agent.use",
 )
 async def _register_term(db, user, term, canonical_type, canonical_id, canonical_label: str = ""):
-    e = register_term(GlossaryEntry(
-        term=term, canonical_type=canonical_type,
-        canonical_id=canonical_id, canonical_label=canonical_label or canonical_id,
-    ))
+    # v3.46：同步寫入 DB（Phase 2 G-201 持久化），重啟後不丟失
+    employee_id = (user or {}).get("employee_id")
+    e = await db_register_term(
+        db,
+        GlossaryEntry(
+            term=term, canonical_type=canonical_type,
+            canonical_id=canonical_id, canonical_label=canonical_label or canonical_id,
+        ),
+        created_by=employee_id,
+    )
     return {
         "registered": True, "term": e.term, "canonical_type": e.canonical_type,
         "canonical_id": e.canonical_id, "canonical_label": e.canonical_label,
+        "persisted": True,  # v3.46：明確告知使用者已持久化
     }
 
 

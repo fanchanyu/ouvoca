@@ -1,12 +1,13 @@
-"""Glossary — 同義詞 / 別名 / 簡稱對映表（v3.3 對話智能）。
+"""Glossary — 同義詞 / 別名 / 簡稱對映表（v3.3 對話智能；v3.46 Phase 2 G-201 DB 持久化）。
 
 設計目的：
   使用者說「螺絲」、「鋼釘」、「M6」、「長江」、「中華」時，
   AI 能對到 LLM-ERP 內部的標準 part_no / customer_code / supplier_code。
 
-當前實作（PoC）：
-  in-memory dict，啟動時可由 seed_glossary 初始化。
-  Phase 2 收尾改 DB 表 + 加密管理頁。
+v3.46 升級：
+  - GlossaryItem DB table 持久化（重啟不丟失）
+  - 啟動時 db_load_glossary() 從 DB 載入到 in-memory dict（熱路徑零 DB 查詢）
+  - register_glossary_term tool 同步寫入 DB + 更新 in-memory
 
 設計：see docs/CONVERSATIONAL_ERP_DESIGN_ZH.md §5 原則 #4 + ROADMAP Phase 2 G-201。
 """
@@ -14,6 +15,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @dataclass
@@ -95,6 +99,64 @@ def list_glossary(
 
 def clear_glossary() -> None:
     _GLOSSARY.clear()
+
+
+# ─── DB 持久化函數（v3.46 Phase 2 G-201）────────────────────────────────────
+
+async def db_register_term(
+    db: AsyncSession,
+    entry: GlossaryEntry,
+    created_by: Optional[str] = None,
+) -> GlossaryEntry:
+    """同時寫入 DB 並更新 in-memory。重啟後 db_load_glossary() 會恢復。"""
+    from app.models.glossary import GlossaryItem
+    # upsert：term + canonical_type 相同就覆蓋
+    existing = (await db.execute(
+        select(GlossaryItem).where(
+            GlossaryItem.term == entry.term.lower().strip(),
+            GlossaryItem.canonical_type == entry.canonical_type,
+        )
+    )).scalar_one_or_none()
+
+    if existing:
+        existing.canonical_id = entry.canonical_id
+        existing.canonical_label = entry.canonical_label or entry.canonical_id
+        existing.confidence = entry.confidence
+        existing.notes = entry.notes
+    else:
+        db.add(GlossaryItem(
+            term=entry.term.lower().strip(),
+            canonical_type=entry.canonical_type,
+            canonical_id=entry.canonical_id,
+            canonical_label=entry.canonical_label or entry.canonical_id,
+            confidence=entry.confidence,
+            language=entry.language,
+            notes=entry.notes,
+            created_by=created_by,
+        ))
+    await db.commit()
+    # 同步更新 in-memory
+    register_term(entry)
+    return entry
+
+
+async def db_load_glossary(db: AsyncSession) -> int:
+    """從 DB 載入所有 glossary 到 in-memory（app 啟動時呼叫）。回傳載入數量。"""
+    from app.models.glossary import GlossaryItem
+    items = list((await db.execute(select(GlossaryItem))).scalars().all())
+    count = 0
+    for row in items:
+        register_term(GlossaryEntry(
+            term=row.term,
+            canonical_type=row.canonical_type,
+            canonical_id=row.canonical_id,
+            canonical_label=row.canonical_label or "",
+            confidence=row.confidence or 1.0,
+            language=row.language or "zh-TW",
+            notes=row.notes or "",
+        ))
+        count += 1
+    return count
 
 
 def seed_default_glossary() -> None:

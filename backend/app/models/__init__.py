@@ -60,3 +60,4 @@ from app.models.quotation import Quotation, QuotationItem
 from app.models.stock_count import StockCount, StockCountItem
 
 __all__ = ["Base"]
+from app.models.glossary import GlossaryItem  # v3.46

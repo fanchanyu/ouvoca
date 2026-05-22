@@ -42,6 +42,7 @@ KNOWN_GAPS = {
     "supplier_plus": "v3.9 補（同上）",
     "ai_governance": "v3.9 補（DecisionLog/ConversationLog 跨租戶分析有需求）",
     "organization": "保留討論：員工/部門可能屬公司而非租戶層級",
+    "glossary": "v3.46 Phase 2 G-201：同義詞表全公司共用，不需 tenant 隔離（單廠部署）；多租戶擴充時再加 created_by tenant 過濾",
 }
 
 

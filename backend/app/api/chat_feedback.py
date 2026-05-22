@@ -56,7 +56,7 @@ async def submit_chat_feedback(
             "score": req.score,
             "comment": req.comment[:500] if req.comment else "",
         },
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC).replace(tzinfo=None),
     )
     db.add(entry)
     await db.commit()
