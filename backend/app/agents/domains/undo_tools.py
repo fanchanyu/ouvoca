@@ -8,7 +8,7 @@
 
 當前實作（PoC）：
   - 只支援 PurchaseOrder（demo moment 1 對應）
-  - Phase 2 擴充 SalesOrder / WorkOrder / 通用 audit-based undo
+  - Phase 2 擴充 SalesOrder / ProductionOrder / 通用 audit-based undo
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from app.agents.confirm_card import make_card, stash_card
 from app.agents.registry import register_tool, RiskTier, Slot
 from app.models.purchase import PurchaseOrder
 from app.models.crm_sales import SalesOrder
-from app.models.production import WorkOrder
+from app.models.production import ProductionOrder
 
 
 UNDO_WINDOW_SECONDS = 90
@@ -217,13 +217,13 @@ async def _undo_last_wo(db, user):
 
     cutoff = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=UNDO_WINDOW_SECONDS)
     wo = (await db.execute(
-        select(WorkOrder)
+        select(ProductionOrder)
         .where(
-            WorkOrder.created_by == employee_id,
-            WorkOrder.created_at >= cutoff,
-            WorkOrder.status != "cancelled",
+            ProductionOrder.created_by == employee_id,
+            ProductionOrder.created_at >= cutoff,
+            ProductionOrder.status != "cancelled",
         )
-        .order_by(WorkOrder.created_at.desc())
+        .order_by(ProductionOrder.created_at.desc())
         .limit(1)
     )).scalar_one_or_none()
 
@@ -259,7 +259,7 @@ async def _undo_last_wo(db, user):
 
     async def execute():
         wo_fresh = (await db.execute(
-            select(WorkOrder).where(WorkOrder.id == wo.id)
+            select(ProductionOrder).where(ProductionOrder.id == wo.id)
         )).scalar_one()
         if wo_fresh.status == "cancelled":
             return {"status": "already_cancelled", "wo_no": wo_fresh.wo_no,

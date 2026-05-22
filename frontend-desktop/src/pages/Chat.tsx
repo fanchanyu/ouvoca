@@ -568,6 +568,14 @@ export default function Chat() {
         )}
       </div>
 
+      {/* v3.45：槽位填充提示 banner — 小白看得見 AI 在問什麼 */}
+      {slotAsk && (
+        <div className="flex items-center gap-2 px-3 py-2 mb-1 bg-amber-100 border border-amber-400 rounded-lg text-amber-800 text-sm font-medium">
+          <span>⚠️</span>
+          <span>AI 需要更多資訊，請在下方輸入框回答</span>
+        </div>
+      )}
+
       {/* Input bar — v3.38 N5 手機友善：間距變小、按鈕變方形 icon-only on mobile */}
       <div className="flex gap-1.5 sm:gap-2 items-end">
         <textarea

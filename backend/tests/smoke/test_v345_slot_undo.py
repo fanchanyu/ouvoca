@@ -58,6 +58,7 @@ def test_chat_tsx_has_slot_ux():
     assert "amber" in src, "Chat.tsx 缺 amber (slot-filling 高亮色)"
     assert "slot_ask" in src, "Chat.tsx 缺 slot_ask 使用"
     assert "setSlotAsk(null)" in src, "Chat.tsx 缺清除 slotAsk 邏輯"
+    assert "AI 需要更多資訊" in src, "Chat.tsx 缺槽位填充可見 banner"
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -82,4 +83,5 @@ def test_undo_tools_registers_all_agents():
 def test_undo_tools_imports_models():
     src = (ROOT / "backend/app/agents/domains/undo_tools.py").read_text(encoding="utf-8")
     assert "from app.models.crm_sales import SalesOrder" in src
-    assert "from app.models.production import WorkOrder" in src
+    # production model class is ProductionOrder (not WorkOrder)
+    assert "from app.models.production import ProductionOrder" in src
