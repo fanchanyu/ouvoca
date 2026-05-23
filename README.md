@@ -195,6 +195,17 @@ Ouvoca 的設計決策按以下優先順序排（衝突時上位永遠贏）：
 下載大小：Python ~26MB + Node ~30MB + 套件 ~500MB（首次） ≒ **約 750MB 磁碟**，全部在本資料夾內。
 網路速度：10 Mbps 約 **10 分鐘** 內裝完。
 
+> ⚠️ **防毒軟體可能誤判** Python silent installer，請暫時停用或將本資料夾加入白名單。
+> ⚠️ **Antivirus may flag** the silent Python installer — temporarily disable or whitelist this folder.
+
+#### 📚 重要法律 / 排錯文件 / Important Docs
+
+| 想知道 | 看這份 |
+|--------|--------|
+| `install_easy` 會下載什麼？合法嗎？ | [`docs/THIRD_PARTY_DOWNLOADS_ZH.md`](./docs/THIRD_PARTY_DOWNLOADS_ZH.md) / [EN](./docs/THIRD_PARTY_DOWNLOADS_EN.md) |
+| 裝失敗了，錯誤怎麼解？ | [`docs/INSTALL_TROUBLESHOOTING_ZH.md`](./docs/INSTALL_TROUBLESHOOTING_ZH.md) / [EN](./docs/INSTALL_TROUBLESHOOTING_EN.md) |
+| 離線環境怎麼裝？ | [THIRD_PARTY_DOWNLOADS §4](./docs/THIRD_PARTY_DOWNLOADS_ZH.md#4-離線安裝不想連網下載) |
+
 ---
 
 ### 🛠 進階：Docker 模式（給有 IT 背景的人）

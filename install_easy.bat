@@ -41,6 +41,23 @@ echo.
 echo   ============================================================
 echo.
 
+REM ─── 法律揭露：告知將從哪下載什麼 / Disclosure ───
+echo   ============================================================
+echo     即將下載 / About to download (~500 MB total):
+echo   ============================================================
+echo     - Python 3.11.9      (~26 MB)  from python.org   PSF License
+echo     - Node.js 20.11.1    (~30 MB)  from nodejs.org   MIT License
+echo     - PyPI packages      (~200 MB) from pypi.org     mostly MIT/Apache
+echo     - npm packages       (~250 MB) from npmjs.org    mostly MIT/Apache
+echo.
+echo     Ouvoca 不重新散布上述軟體 — 您的電腦直接從原廠下載。
+echo     Ouvoca does NOT redistribute these — your PC downloads from origins.
+echo     詳見 / Details:  docs\THIRD_PARTY_DOWNLOADS_ZH.md
+echo.
+echo     不繼續請按 Ctrl+C / Press Ctrl+C to abort
+echo   ============================================================
+timeout /t 5 /nobreak >nul
+
 REM ─── Sanity check: curl + tar (built into Windows 10 1803+) ───
 where curl >nul 2>&1
 if errorlevel 1 (

@@ -25,6 +25,17 @@ echo "  ============================================================"
 echo "    Ouvoca AI ERP - Easy Installer (Mac / Linux)"
 echo "  ============================================================"
 echo ""
+echo "  即將安裝 / About to install (~500 MB total):"
+echo "    - Python 3.11+   (you install via brew/apt)"
+echo "    - Node.js 20+    (you install via brew/apt)"
+echo "    - PyPI packages  (~200 MB from pypi.org, mostly MIT/Apache)"
+echo "    - npm packages   (~250 MB from npmjs.org, mostly MIT/Apache)"
+echo ""
+echo "  Ouvoca 不重新散布上述軟體 / Ouvoca does NOT redistribute these."
+echo "  詳見 / Details:  docs/THIRD_PARTY_DOWNLOADS_EN.md"
+echo "  問題排解 / Troubleshooting:  docs/INSTALL_TROUBLESHOOTING_EN.md"
+echo ""
+sleep 3
 
 # Detect OS
 OS="$(uname -s)"
