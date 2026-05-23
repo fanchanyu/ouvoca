@@ -321,6 +321,54 @@
 
 ---
 
+## SOP-7.5：可上線優先檢查（v3.49 凍結 — 范展裕）
+
+> **核心原則**：能上線才是王道。用戶裝不起來，所有功能 = 0。
+> 任何 PR 必須過這份檢查單，否則 reviewer 可以直接打回。
+
+### 觸發場景
+
+任何 commit 包含以下狀況時必跑：
+- ✅ 修改 `requirements.txt` / `package.json`（加任何新依賴）
+- ✅ 修改 `install.bat` / `install.sh` / `install_easy.bat` / `install_easy.sh`
+- ✅ 修改 `Dockerfile` / `docker-compose.yml`
+- ✅ 新增需要外部 service 的功能（Redis / Kafka / Elasticsearch...）
+- ✅ 新增需要 native 編譯的 Python 套件（C extension）
+
+### 檢查單（每項必過）
+
+1. **「電腦小白裝得起來嗎？」**
+   - 雙擊 `install_easy.bat` 仍可成功完成 5/5 steps？
+   - 不需要先裝任何東西？（Python / Node 由腳本自動下載）
+   - 不需要管理員權限？
+
+2. **「依賴有自動安裝路徑嗎？」**
+   - 若加了 Redis：是否有 in-memory fallback，或 install_easy 是否自動跑 Redis container？
+   - 若加了 C extension 套件：Windows / Mac 都有預編譯 wheel？
+
+3. **「卸載一樣簡單嗎？」**
+   - 卸載仍是「刪資料夾即可」？
+   - 沒有殘留全域配置 / 系統服務 / scheduled task？
+
+4. **「README / install 文件同步更新了嗎？」**
+   - 新增的依賴在 README 安裝段有提及？
+   - 失敗時的錯誤訊息夠清楚（中文 + 具體解法）？
+
+### 違反案例（不可接受）
+
+- ❌ 加了 PostgreSQL 連線但沒留 SQLite fallback → 客戶必須自己裝 PostgreSQL
+- ❌ 加了 numpy 但 Windows 沒預編譯 wheel → 客戶要裝 Visual Studio Build Tools
+- ❌ 加了 systemd service → 客戶要懂 Linux service 管理
+- ❌ 改了 install.bat 但沒測試「全新 Windows 環境」（沒有 Python / Node / Docker）
+
+### 通過範例（v3.49）
+
+- ✅ install_easy.bat 自動下載 Python 3.11.9 silent installer → 用戶零操作
+- ✅ install_easy.bat 自動下載 Node.js 20 zip → 用戶零操作
+- ✅ tools/ 目錄全在專案內 → 卸載 = 刪資料夾
+
+---
+
 ## SOP-8：與使用者溝通的原則
 
 1. **語言**：一律繁體中文，技術名詞可保留英文（如 MPS / MRP / API）

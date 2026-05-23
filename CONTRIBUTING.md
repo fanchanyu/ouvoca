@@ -16,6 +16,16 @@
 （見 [`docs/ARCHITECTURE_DECISIONS.md`](./docs/ARCHITECTURE_DECISIONS.md)），
 所以提案時請順便講「這對 Ouvoca 對話式 ERP 核心承諾有什麼貢獻」（自然語言操作 / ConfirmCard / 90秒 Undo）。
 
+> 🚀 **可上線優先 (Deployability First) — v3.49 凍結原則**
+>
+> 任何 PR 必須通過「電腦小白裝得起來嗎？」測試：
+> - ❌ 不能引入新的「先安裝 X」步驟（除非自動下載 + silent install）
+> - ❌ 不能讓 `install_easy.bat` / `install_easy.sh` 失效
+> - ❌ 不能讓「雙擊 .bat 就裝完」這個承諾破功
+> - ✅ 如果你的功能必須加依賴，請同時更新 `install_easy.bat` 自動處理
+>
+> **理由**：100 個功能 × 0 客戶上線 = 0 價值。詳見 [README §設計優先順序](./README.md#-設計優先順序--design-priorities)。
+
 ### Step 2 · Fork + 開 branch + 寫程式
 
 ```bash
