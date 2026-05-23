@@ -144,6 +144,37 @@
 🇹🇼 **不需要 IT 背景、不需要懂程式**。會雙擊滑鼠 + 開瀏覽器就會裝。
 🇺🇸 **No IT skills required.** If you can double-click and open a browser, you can install this.
 
+---
+
+### 🌟 推薦：**電腦小白模式**（不需 Docker、不需先裝 Python）
+
+**只要會雙擊就會裝**。腳本會自動下載所需的 Python 和 Node.js。
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                                                                │
+│    Step 1️⃣ 下載 ZIP                                            │
+│    Step 2️⃣ 雙擊 install_easy.bat（Win）or install_easy.sh (Mac) │
+│    Step 3️⃣ 等 10-20 分鐘 → 自動開瀏覽器 → 登入 admin/admin123 │
+│                                                                │
+│    完全不需安裝 Docker、Python、Node。腳本自動下載至 tools\    │
+│    刪除整個資料夾即完全解除安裝。                              │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+```
+
+**首次安裝**：雙擊 `install_easy.bat`（Windows）或執行 `bash install_easy.sh`（Mac/Linux）
+**後續啟動**：雙擊 `start.bat` 或 `bash start.sh`
+
+下載大小：Python ~26MB + Node ~30MB + 套件 ~500MB（首次） ≒ **約 750MB 磁碟**，全部在本資料夾內。
+網路速度：10 Mbps 約 **10 分鐘** 內裝完。
+
+---
+
+### 🛠 進階：Docker 模式（給有 IT 背景的人）
+
+如果你已經會用 Docker，這條路 image 更穩定、隔離性更好：
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │                                                                │

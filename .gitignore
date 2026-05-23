@@ -200,3 +200,15 @@ scripts/build-pdfs/.tmp/
 *.dmg
 *.exe
 *.msi
+
+# ─── install_easy.bat 下載的工具（不可推）─────────────────
+# 內含 Python embedded (~250MB) + Node embedded (~70MB)
+# 重新安裝會自動下載；提交會讓 repo 暴漲
+tools/
+
+# install_easy 產生的執行期檔案
+.backend.pid
+.frontend.pid
+logs-backend.txt
+logs-frontend.txt
+backend/.seeded
