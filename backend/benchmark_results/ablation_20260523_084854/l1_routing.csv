@@ -1,0 +1,11 @@
+case_id,intent_forced,tools_called,expected_tools,expected_match,elapsed_sec,strict_pass,error
+T01,general,list_below_safety,list_below_safety,True,3.35,True,
+T02,general,query_inventory,query_inventory,True,3.0,True,
+T03,general,list_below_safety,list_below_safety;list_parts,True,3.49,True,
+T04,general,list_products_tool;get_bom;query_inventory;list_products_tool;list_parts;list_parts;list_parts;list_parts;list_parts,list_products_tool;get_bom;query_inventory,True,8.77,False,max rounds reached
+T05,general,preview_email_digest;list_below_safety;query_work_order;list_inspections;list_non_conformances,list_below_safety;query_work_order,True,6.13,True,
+T06,general,list_customers;list_products_tool,query_sales_order;list_customers,True,3.89,True,
+T07,general,list_parts;list_parts;query_inventory,query_inventory;list_below_safety,True,6.31,True,
+T08,general,list_below_safety;list_parts;list_warehouse_zones;list_cycle_counts;list_products_tool;get_bom;get_bom;query_inventory;query_inventory;query_inventory;query_inventory;query_inventory;query_inventory;query_inventory;query_inventory;query_inventory,,True,8.12,False,max rounds reached
+T09,general,query_supplier,query_supplier,True,3.49,True,
+T10,general,list_non_conformances,list_non_conformances;list_inspections,True,3.18,True,

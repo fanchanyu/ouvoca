@@ -18,6 +18,9 @@ INTENT_KEYWORDS: dict[str, list[tuple[str, int]]] = {
         ("庫存", 5), ("庫存查詢", 8), ("還有多少", 5), ("剩多少", 6),
         ("零件", 3), ("庫存量", 6), ("料號", 4), ("庫存不足", 5),
         ("inventory", 5), ("stock", 5), ("物料", 4),
+        # v3.49 routing fix: shortfall phrasing routed here (was misrouted to warehouse)
+        ("缺什麼料", 8), ("缺什麼", 6), ("缺料", 7), ("缺貨", 6),
+        ("短缺", 5), ("不夠", 4),
     ],
     "purchase": [
         ("採購", 6), ("採購單", 8), ("供應商", 5), ("請購", 6),
@@ -28,6 +31,9 @@ INTENT_KEYWORDS: dict[str, list[tuple[str, int]]] = {
         ("生產", 6), ("工單", 7), ("派工", 6), ("工序", 6),
         ("機台", 4), ("完工", 5), ("產量", 5),
         ("production", 5), ("work order", 5),
+        # v3.49 routing fix: capacity-feasibility phrasing routed here (was misrouted to crm)
+        ("可以做", 6), ("能做", 5), ("能不能做", 7), ("可以生產", 7),
+        ("做嗎", 5), ("產能", 5), ("生產能力", 6), ("BOM", 5),
     ],
     "mps_mrp": [
         ("MPS", 7), ("MRP", 7), ("需求規劃", 6), ("物料需求", 6),

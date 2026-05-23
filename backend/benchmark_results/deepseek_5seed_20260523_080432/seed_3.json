@@ -1,0 +1,210 @@
+{
+  "seed": 3,
+  "cases": [
+    {
+      "case_id": "T01",
+      "seed": 3,
+      "intent": "inventory",
+      "elapsed_sec": 3.69,
+      "tool_count": 1,
+      "tools_called": [
+        "list_below_safety"
+      ],
+      "expected_tools": [
+        "list_below_safety"
+      ],
+      "expected_match": true,
+      "reply_chars": 289,
+      "reply_preview": "以下是目前 **庫存低於安全庫存** 的零件清單：\n\n| 料號 | 零件名稱 | 當前庫存 | 安全庫存 | 短缺量 |\n|------|---------|---------|---------|-------|\n| M6-BOLT-20 | M6 不銹鋼螺絲 20mm | **300** | **1,000** | **-700** |\n\n### 建議行動\n- **M6-BOLT-20** 目前庫存僅 300，低於安全庫存 1,000，短缺 700 件，建議立即安排進料補貨。\n- 若需調整安全庫存設定，可告知我進行修改。\n- 如需查看所有零件庫存概況，也可進一步查詢。",
+      "strict_pass": true,
+      "loose_pass": true,
+      "error": null
+    },
+    {
+      "case_id": "T02",
+      "seed": 3,
+      "intent": "inventory",
+      "elapsed_sec": 4.297,
+      "tool_count": 1,
+      "tools_called": [
+        "query_inventory"
+      ],
+      "expected_tools": [
+        "query_inventory"
+      ],
+      "expected_match": true,
+      "reply_chars": 388,
+      "reply_preview": "以下是 **M6-BOLT-20（M6 不銹鋼螺絲 20mm）** 的庫存狀態：\n\n| 項目 | 數值 |\n|------|------|\n| 現有庫存 | **300 pcs** |\n| 可用庫存 | **300 pcs** |\n| 已分配量 | 0 pcs |\n| 安全庫存 | 1,000 pcs |\n| 交貨天數 | 7 天 |\n| **庫存狀態** | ⚠️ **低於安全庫存** |\n\n目前庫存 **300 pcs**，低於安全庫存 **1,000 pcs**，短缺 **700 pcs**。建議您考慮以下行動：\n\n1. **安排進料** — 可為此料件新增一筆進貨交易補足庫存。\n2. ",
+      "strict_pass": true,
+      "loose_pass": true,
+      "error": null
+    },
+    {
+      "case_id": "T03",
+      "seed": 3,
+      "intent": "inventory",
+      "elapsed_sec": 4.097,
+      "tool_count": 1,
+      "tools_called": [
+        "list_below_safety"
+      ],
+      "expected_tools": [
+        "list_below_safety",
+        "list_parts"
+      ],
+      "expected_match": true,
+      "reply_chars": 315,
+      "reply_preview": "目前庫存低於安全水位的零件如下：\n\n| 料號 | 名稱 | 現有庫存 | 安全庫存 | 短缺量 |\n|------|------|---------|---------|-------|\n| M6-BOLT-20 | M6 不銹鋼螺絲 20mm | **300** | 1,000 | **短缺 700** |\n\n目前僅 **M6-BOLT-20** 低於安全庫存，短缺 **700 pcs**，建議您盡快安排進料補貨。\n\n若需要進一步操作，例如：\n- **調整安全庫存** → 可告知我新的安全庫存值\n- **新增進料單** → 可告知我入庫數量\n- **查看所有零件庫存** → 可切換至庫存總覽",
+      "strict_pass": true,
+      "loose_pass": true,
+      "error": null
+    },
+    {
+      "case_id": "T04",
+      "seed": 3,
+      "intent": "production",
+      "elapsed_sec": 9.628,
+      "tool_count": 5,
+      "tools_called": [
+        "list_products_tool",
+        "get_bom",
+        "query_work_order",
+        "query_work_order",
+        "query_work_order"
+      ],
+      "expected_tools": [
+        "list_products_tool",
+        "get_bom",
+        "query_inventory"
+      ],
+      "expected_match": true,
+      "reply_chars": 721,
+      "reply_preview": "好的，我來幫您分析 **變速齒輪組 A (PRD-GEAR-A)** 的狀況。\n\n---\n\n## 🔍 檢查結果\n\n### 1️⃣ BOM（用料結構）— ⚠️ **有問題！**\n我查詢了 **變速齒輪組 A** 的 BOM 結構，結果是 **空的**（沒有任何料件）。\n\n> 這表示目前該產品**還沒有建立用料清單（BOM）**，無法知道生產一組需要哪些零件、各用多少數量。\n\n### 2️⃣ 現有工單 — ✅ 無進行中工單\n目前沒有任何 **草稿 / 已釋放 / 進行中** 的工單，產能上沒有被其他訂單佔用。\n\n---\n\n## ✅ 要接這張單，建議先檢查以下事項：\n\n| 檢查項目 | 狀態 | 說",
+      "strict_pass": true,
+      "loose_pass": true,
+      "error": null
+    },
+    {
+      "case_id": "T05",
+      "seed": 3,
+      "intent": "general",
+      "elapsed_sec": 4.711,
+      "tool_count": 1,
+      "tools_called": [
+        "preview_email_digest"
+      ],
+      "expected_tools": [
+        "list_below_safety",
+        "query_work_order"
+      ],
+      "expected_match": false,
+      "reply_chars": 430,
+      "reply_preview": "以下是今天（2026-05-23）工廠營運摘要：\n\n---\n\n### ⚠️ 關鍵警示（1 項）\n| 項目 | 現況 |\n|------|------|\n| **M6-BOLT-20**（M6 不銹鋼螺絲 20mm） | 庫存 **300 個**，低於安全庫存 **1,000 個**，短缺 **700 個** ⚠️ |\n\n### 📅 今日事件\n- 無新事件。\n\n### 📊 KPI 快照\n| 指標 | 數值 |\n|-----|------|\n| 近 30 日出貨 | **0 筆**，金額 $0 |\n| 進行中採購單 | **0 張** |\n| 進行中工單 | **0 張** |\n\n---\n\n**簡",
+      "strict_pass": false,
+      "loose_pass": false,
+      "error": null
+    },
+    {
+      "case_id": "T06",
+      "seed": 3,
+      "intent": "crm",
+      "elapsed_sec": 5.124,
+      "tool_count": 3,
+      "tools_called": [
+        "list_customers",
+        "query_customer_360",
+        "query_customer_360"
+      ],
+      "expected_tools": [
+        "query_sales_order",
+        "list_customers"
+      ],
+      "expected_match": true,
+      "reply_chars": 191,
+      "reply_preview": "看起來系統中這兩家 A 級客戶（鴻海科技集團、台積電精密）目前都沒有銷售訂單（SO）紀錄，因此查不到 **PRD-GEAR-A** 這個產品的歷史單價。\n\n請問您是指：\n1. **其他客戶**（非 A 級客戶）有交易過 PRD-GEAR-A？\n2. 或者您想查詢的是 **潛在客戶 / 商機** 中是否有報價過 PRD-GEAR-A 的單價？\n\n請提供更多線索，我來幫您進一步查詢！",
+      "strict_pass": true,
+      "loose_pass": true,
+      "error": null
+    },
+    {
+      "case_id": "T07",
+      "seed": 3,
+      "intent": "inventory",
+      "elapsed_sec": 3.884,
+      "tool_count": 1,
+      "tools_called": [
+        "query_inventory"
+      ],
+      "expected_tools": [
+        "query_inventory",
+        "list_below_safety"
+      ],
+      "expected_match": true,
+      "reply_chars": 359,
+      "reply_preview": "以下是 **M6 不銹鋼螺絲 20mm (M6-BOLT-20)** 的庫存狀態：\n\n| 項目 | 數值 |\n|------|------|\n| **現有庫存** | **300 pcs** |\n| 可用庫存 | 300 pcs |\n| 已分配量 | 0 pcs |\n| **安全庫存** | **1,000 pcs** |\n| 交貨天數 | 7 天 |\n| **狀態** | ⚠️ **低於安全庫存** |\n\n目前庫存 **300 pcs**，低於安全庫存 **1,000 pcs**，短缺 **700 pcs**。建議您：\n\n1. **立即安排進料** — 可輸入 `進料 M6-BOLT-20 ",
+      "strict_pass": true,
+      "loose_pass": true,
+      "error": null
+    },
+    {
+      "case_id": "T08",
+      "seed": 3,
+      "intent": "inventory",
+      "elapsed_sec": 10.958,
+      "tool_count": 2,
+      "tools_called": [
+        "list_below_safety",
+        "list_parts"
+      ],
+      "expected_tools": [],
+      "expected_match": true,
+      "reply_chars": 1315,
+      "reply_preview": "以下是我根據目前庫存數據，為您整理的 **庫存周轉改善建議**：\n\n---\n\n## 📊 當前庫存概況\n\n| 類別 | 料件數 | 概況 |\n|------|--------|------|\n| 原料 (raw_material) | 3 項 | M6 螺絲已低於安全庫存 |\n| 半成品 (semi_finished) | 1 項 | 主控板 V2（單價高） |\n| 零件 (component) | 2 項 | 鋁殼、軸承 |\n| 耗材 (consumable) | 3 項 | LED、USB 線、O 型環 |\n| 包材 (packaging) | 1 項 | 紙箱 |\n\n---\n\n## 🚨 優",
+      "strict_pass": true,
+      "loose_pass": true,
+      "error": null
+    },
+    {
+      "case_id": "T09",
+      "seed": 3,
+      "intent": "purchase",
+      "elapsed_sec": 3.788,
+      "tool_count": 1,
+      "tools_called": [
+        "query_supplier"
+      ],
+      "expected_tools": [
+        "query_supplier"
+      ],
+      "expected_match": true,
+      "reply_chars": 393,
+      "reply_preview": "以下是我們系統中目前登記的 **4 家供應商**：\n\n| 編號 | 供應商名稱 | 等級 | 前置天數 | 啟用狀態 |\n|:---:|:----------|:---:|:--------:|:--------:|\n| SUP-001 | **大華精密工業** | T1 ⭐ | 7 天 | ✅ 已核准 |\n| SUP-002 | **建興五金** | T2 | 5 天 | ✅ 已核准 |\n| SUP-003 | **達美電子** | T1 ⭐ | 10 天 | ✅ 已核准 |\n| SUP-004 | **新光包材** | T3 | 3 天 | ❌ 未核准 |\n\n**補充說明：**\n- **T",
+      "strict_pass": true,
+      "loose_pass": true,
+      "error": null
+    },
+    {
+      "case_id": "T10",
+      "seed": 3,
+      "intent": "quality",
+      "elapsed_sec": 7.58,
+      "tool_count": 4,
+      "tools_called": [
+        "list_non_conformances",
+        "list_inspections",
+        "list_capa",
+        "query_open_ncrs"
+      ],
+      "expected_tools": [
+        "list_non_conformances",
+        "list_inspections"
+      ],
+      "expected_match": true,
+      "reply_chars": 314,
+      "reply_preview": "目前系統中查無任何資料，以下是彙整結果：\n\n---\n\n### 📋 品質狀況總覽\n\n| 項目 | 數量 |\n|------|:----:|\n| **檢驗單** | 0 筆 |\n| **不良品記錄 (NCR)** | 0 筆 |\n| **矯正預防措施 (CAPA)** | 0 筆 |\n| **未結案 NCR** | 0 筆 |\n\n### ✅ 結論\n\n目前系統中**沒有任何不良品記錄**，也沒有進行中的檢驗單或 CAPA，品質狀況顯示為 **乾淨無異常**。\n\n如果您需要：\n- **建立新的檢驗單** 進行品檢作業\n- **查詢特定時間範圍** 的歷史資料\n- **模擬測試資料** 來練習操作流程\n",
+      "strict_pass": true,
+      "loose_pass": true,
+      "error": null
+    }
+  ]
+}

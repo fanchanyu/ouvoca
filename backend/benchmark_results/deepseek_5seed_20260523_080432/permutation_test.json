@@ -1,0 +1,13 @@
+{
+  "test": "permutation, two-sided, mean of indicator (post - pre)",
+  "post_n": 50,
+  "pre_n": 10,
+  "result": {
+    "observed_diff": 0.14,
+    "p_value": 0.1899,
+    "n_a": 50,
+    "n_b": 10,
+    "n_resamples": 10000
+  },
+  "note": "Pre is a single run; the test is exploratory."
+}

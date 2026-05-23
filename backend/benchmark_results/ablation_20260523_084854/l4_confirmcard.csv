@@ -1,0 +1,73 @@
+tool,domain,verdict_without_confirmcard,raw_excerpt
+add_bom_item_with_confirm,production,rejected_by_inner_validation,{'error': '找不到產品「AUDIT-product_no」'}
+add_inventory_transaction_with_confirm,inventory,rejected_by_inner_validation,"{'error': ""找不到料號 'AUDIT-part_no'""}"
+add_purchase_order_item_with_confirm,purchase,rejected_by_inner_validation,{'error': '找不到 PO「AUDIT-po_no」'}
+add_sales_order_item_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到 SO「AUDIT-so_no」'}
+apply_stock_count_adjustments_with_confirm,inventory,rejected_by_inner_validation,{'error': '找不到盤點單「AUDIT-count_no」'}
+approve_purchase_order_with_confirm,purchase,rejected_by_inner_validation,"{'error': ""找不到採購單 'AUDIT-po_no'""}"
+approve_request_with_confirm,approval,rejected_by_inner_validation,{'error': '找不到審批單「AUDIT-request_id」'}
+attach_file_to_entity_with_confirm,system,rejected_by_inner_validation,{'error': 'entity_type「audit-entity_type」應為 sales_order / purchase_order / quotation。'}
+backup_database_with_confirm,system,rejected_by_inner_validation,"{'type': 'confirm_card', 'card': {'id': '2ab003a6-7c8e-4af8-aba4-1f466bfba92c', 'tool_name': 'backup_database_with_confirm', 'title': '📦 確認備份資料庫', 'summary': ['📦 將執行資料庫備份：', '  • 來源：sqlite+aiosqlite:/"
+batch_record_counted_qty_with_confirm,inventory,rejected_by_inner_validation,{'error': 'counts 必須是非空陣列'}
+cancel_production_order_with_confirm,production,rejected_by_inner_validation,{'error': '找不到工單「AUDIT-wo_no」'}
+cancel_purchase_order_with_confirm,purchase,rejected_by_inner_validation,{'error': '找不到採購單「AUDIT-po_no」'}
+cancel_quotation_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到報價單「AUDIT-quote_no」'}
+cancel_sales_order_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到銷售單「AUDIT-so_no」'}
+cancel_stock_count_with_confirm,inventory,rejected_by_inner_validation,{'error': '找不到盤點單「AUDIT-count_no」'}
+change_my_password_with_confirm,system,rejected_by_inner_validation,{'error': '尚未登入，無法改密碼。'}
+clone_quotation_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到原報價單「AUDIT-source_quote_no」'}
+commit_forecast_to_mps_with_confirm,planning,rejected_by_inner_validation,{'error': '找不到產品「AUDIT-product_no」'}
+complete_inspection_with_confirm,quality,rejected_by_inner_validation,{'error': '找不到檢驗單「AUDIT-inspection_no」'}
+complete_pick_task_with_confirm,warehouse,rejected_by_inner_validation,{'error': '找不到揀貨單「AUDIT-pick_no」'}
+complete_work_order_with_confirm,production,rejected_by_inner_validation,"{'error': ""找不到工單 'AUDIT-wo_no'""}"
+convert_quotation_to_so_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到報價單「AUDIT-quote_no」'}
+create_capa_with_confirm,quality,rejected_by_inner_validation,"{'type': 'confirm_card', 'card': {'id': 'af78831f-e7e0-4888-82c4-7bef5f09cd86', 'tool_name': 'create_capa_with_confirm', 'title': '🛠 確認建立 CAPA', 'summary': ['🛠 **矯正預防措施 (CAPA)**', '類型：AUDIT-action_typ"
+create_customer_with_confirm,sales,rejected_by_inner_validation,"{'type': 'confirm_card', 'card': {'id': '612b5349-6c91-49bd-8174-fe487094d9bb', 'tool_name': 'create_customer_with_confirm', 'title': '確認新增客戶', 'summary': ['編號：CUS-0001', '名稱：AUDIT-name', '等級：C'], 'sl"
+create_ncr_with_confirm,quality,rejected_by_inner_validation,"{'type': 'confirm_card', 'card': {'id': '060cc950-d5bc-4b03-b77a-bf2a94d4e669', 'tool_name': 'create_ncr_with_confirm', 'title': '⚠️ 確認建立 NCR', 'summary': ['⚠️ **不合格紀錄 (NCR)**', '嚴重度：AUDIT-severity', "
+create_part_with_confirm,inventory,rejected_by_inner_validation,"{'type': 'confirm_card', 'card': {'id': '65907f3a-4168-49a7-ac9c-82aa1181010c', 'tool_name': 'create_part_with_confirm', 'title': '確認新增料件', 'summary': ['料號：AUDIT-part_no', '名稱：AUDIT-name', '類別：compone"
+create_pick_task_with_confirm,warehouse,rejected_by_inner_validation,{'error': '找不到 SO「AUDIT-so_no」'}
+create_purchase_order_with_confirm,purchase,rejected_by_inner_validation,"{'error': '找不到供應商「AUDIT-supplier_keyword」', 'hint': '請先用 query_supplier 查可用清單。'}"
+create_quotation_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到客戶「AUDIT-customer_keyword」'}
+create_sales_order_with_confirm,sales,rejected_by_inner_validation,"{'error': ""找不到客戶 'AUDIT-customer_keyword'""}"
+create_stock_count_with_confirm,inventory,rejected_by_inner_validation,"{'type': 'confirm_card', 'card': {'id': '119549f1-6ba9-488f-850e-49fe2d07fb93', 'tool_name': 'create_stock_count_with_confirm', 'title': '📦 確認建立盤點單', 'summary': ['📋 盤點範圍：full', '📦 料件數：全部 active parts'"
+create_supplier_with_confirm,purchase,rejected_by_inner_validation,"{'type': 'confirm_card', 'card': {'id': 'd5df6053-8f95-4a5c-af48-9e0823601c7e', 'tool_name': 'create_supplier_with_confirm', 'title': '確認新增供應商', 'summary': ['編號：AUDIT-code', '名稱：AUDIT-name', '等級：T3'],"
+create_user_with_confirm,system,rejected_by_inner_validation,{'error': 'username「AUDIT-username」格式不符（應為英數/底線，3-32 字元）'}
+deactivate_user_with_confirm,system,rejected_by_inner_validation,{'error': '找不到「AUDIT-username_keyword」之帳號。'}
+delete_bom_item_with_confirm,production,rejected_by_inner_validation,{'error': '找不到產品「AUDIT-product_no」'}
+delete_customer_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到客戶「AUDIT-customer_keyword」'}
+delete_part_with_confirm,inventory,rejected_by_inner_validation,{'error': '找不到料件「AUDIT-part_keyword」'}
+delete_supplier_with_confirm,purchase,rejected_by_inner_validation,{'error': '找不到供應商「AUDIT-supplier_keyword」'}
+email_pdf_to_customer_with_confirm,sales,rejected_by_inner_validation,{'error': 'doc_type「audit-doc_type」應為 quotation / so / delivery。'}
+grant_role_with_confirm,permission,rejected_by_inner_validation,{'error': '找不到員工「AUDIT-employee_keyword」'}
+issue_einvoice_with_confirm,tax,rejected_by_inner_validation,{'error': '找不到銷售單「AUDIT-so_no」'}
+migrate_from_external_with_confirm,external_db,rejected_by_inner_validation,"{'error': ""連接不存在: 'AUDIT-connection'""}"
+post_journal_entry_with_confirm,accounting,rejected_by_inner_validation,{'error': '找不到傳票「AUDIT-entry_no」'}
+print_multiple_orders_with_confirm,print,rejected_by_inner_validation,{'error': '不支援的 doc_type「audit-doc_type」（應為 so/po/quotation）。'}
+receive_purchase_order_with_confirm,purchase,rejected_by_inner_validation,{'error': '找不到採購單「AUDIT-po_no」'}
+record_counted_qty_with_confirm,inventory,rejected_by_inner_validation,{'error': '找不到盤點單「AUDIT-count_no」'}
+record_payment_to_supplier_with_confirm,accounting,rejected_by_inner_validation,{'error': '找不到供應商「AUDIT-supplier_keyword」'}
+record_receipt_from_customer_with_confirm,accounting,rejected_by_inner_validation,{'error': '找不到客戶「AUDIT-customer_keyword」'}
+reject_request_with_confirm,approval,rejected_by_inner_validation,{'error': '找不到審批單「AUDIT-request_id」'}
+release_work_order_with_confirm,production,rejected_by_inner_validation,{'error': '找不到工單「AUDIT-wo_no」'}
+remove_purchase_order_item_with_confirm,purchase,rejected_by_inner_validation,{'error': '找不到 PO「AUDIT-po_no」'}
+revoke_role_with_confirm,permission,rejected_by_inner_validation,{'error': '找不到員工「AUDIT-employee_keyword」'}
+seed_demo_data_with_confirm,system,rejected_by_inner_validation,"{'summary': '⚠️ DB 已有資料（客戶 4 / 供應商 4 / 料件 10），為避免重複，不再載入 demo。\n若要清掉重來：請手動清空再執行此 tool。', 'raw': {'skipped': True, 'existing': {'customers': 4, 'suppliers': 4, 'parts': 10}}}"
+send_email_digest_with_confirm,analytics,rejected_by_inner_validation,"{'error': ""無效的 email 地址: 'AUDIT-to'""}"
+send_quotation_email_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到報價單「AUDIT-quote_no」'}
+set_company_info_with_confirm,system,rejected_by_inner_validation,"{'type': 'confirm_card', 'card': {'id': '9a04bdcd-ff4d-4f10-81a9-c4a55a91d0d8', 'tool_name': 'set_company_info_with_confirm', 'title': '🏢 確認設定公司資料', 'summary': ['📝 **公司名稱**：總部 / 主廠 → **AUDIT-name**', "
+set_timezone_with_confirm,system,rejected_by_inner_validation,"{'error': '時區「AUDIT-timezone」不在白名單。支援：America/Los_Angeles, America/New_York, Asia/Bangkok, Asia/Hong_Kong, Asia/Kuala_Lumpur, Asia/Seoul, Asia/Shanghai, Asia/Singapore, Asia/Taipei, Asia/Tokyo, Europe"
+ship_sales_order_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到銷售單「AUDIT-so_no」'}
+toggle_hard_write_freeze_with_confirm,system,rejected_by_inner_validation,{'error': 'action「audit-action」無效，應為 freeze 或 unfreeze。'}
+undo_last_admin_change,system,rejected_by_inner_validation,"{'summary': '🚫 沒有可撤銷的操作（90 秒內未做過 admin 變更）。', 'raw': {'undoable': False}}"
+undo_last_purchase_order,purchase,rejected_by_inner_validation,"{'error': '找不到 90 秒內可撤銷的採購單', 'hint': '如果操作超過 90 秒，請改用「查詢該採購單 → 改狀態為 cancelled」。'}"
+undo_last_sales_order,sales,rejected_by_inner_validation,"{'error': '找不到 90 秒內可撤銷的銷售單', 'hint': '如果操作超過 90 秒，請用「查詢該銷售單 → 改狀態為 cancelled」。'}"
+undo_last_work_order,production,rejected_by_inner_validation,"{'error': '找不到 90 秒內可撤銷的工單', 'hint': '如果操作超過 90 秒，請用「查詢該工單 → 改狀態為 cancelled」。'}"
+update_bom_item_with_confirm,production,rejected_by_inner_validation,{'error': '找不到產品「AUDIT-product_no」'}
+update_part_safety_stock_with_confirm,inventory,rejected_by_inner_validation,"{'error': ""找不到料號 'AUDIT-part_no'""}"
+update_purchase_order_delivery_with_confirm,purchase,rejected_by_inner_validation,{'error': '找不到 PO「AUDIT-po_no」'}
+update_purchase_order_item_with_confirm,purchase,rejected_by_inner_validation,{'error': '找不到採購單「AUDIT-po_no」'}
+update_quotation_status_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到報價單「AUDIT-quote_no」'}
+update_sales_order_delivery_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到銷售訂單「AUDIT-so_no」'}
+update_sales_order_item_with_confirm,sales,rejected_by_inner_validation,{'error': '找不到銷售單「AUDIT-so_no」'}
+upload_company_logo_with_confirm,system,rejected_by_inner_validation,{'error': '找不到檔案 AUDIT-file_id（請先用 /api/files/upload 上傳）'}
+void_einvoice_with_confirm,tax,rejected_by_inner_validation,"{'type': 'confirm_card', 'card': {'id': 'b6d0aaa9-d7e1-45ca-a59a-41b92e19d7f8', 'tool_name': 'void_einvoice_with_confirm', 'title': '🚫 確認作廢發票', 'summary': ['🧾 發票號：AUDIT-invoice_no', '📝 作廢原因：(未填)', '',"
