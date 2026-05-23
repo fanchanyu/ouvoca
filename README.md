@@ -1,53 +1,50 @@
-# Ouvoca — Conversational AI-Native ERP for SMB Manufacturers
+# Ouvoca — 給小工廠的 AI ERP / AI ERP for Small Factories
 
-> 🇹🇼 **給 50-100 人小型製造業的桌機對話式 ERP** — 講話就能查/增/改/刪，AI 取代教育訓練。
+> 🇹🇼 **用講的就能下單、查庫存、做報表** — 給 50-100 人小工廠的免費 AI ERP，不需懂程式，雙擊安裝。
 >
-> 🇺🇸 **The desktop conversational ERP for 50–100 person factories** — talk to it, no training required.
+> 🇺🇸 **Talk to your ERP like a person** — Buy, ship, check stock, generate reports with one sentence. Free for SMB factories ≤20 concurrent users.
 
-[![Tests](https://img.shields.io/badge/tests-287%20passing-brightgreen)]()
+---
+
+## 🚀 我要快速開始 / Quick Start
+
+| 想做什麼 / What you want | 點這裡 / Click here |
+|---|---|
+| 🇹🇼 **我要裝起來用看看**（雙擊就會裝，不用懂程式）| 👉 [**5 分鐘安裝指南**](#-5-分鐘安裝指南--5-minute-install-for-non-developers) |
+| 🇹🇼 **我要看它長什麼樣**（30 秒了解 + 範例對話）| 👉 [**30 秒看懂 Ouvoca**](#-30-秒看懂-ouvoca--30-second-pitch) |
+| 🇹🇼 **裝失敗了怎麼辦** | 👉 [**安裝排錯指南**](./docs/INSTALL_TROUBLESHOOTING_ZH.md) |
+| 🇹🇼 **我想知道費用 / 授權** | 👉 [**三軌授權**](#️-三軌授權--tri-license-model) — 20 人以下免費 |
+| 👨‍💻 **我是工程師，要看 code** | 👉 [**開發者指南**](#-開發者指南--developer-guide) |
+
+---
+
+[![Tests](https://img.shields.io/badge/tests-692%20passing-brightgreen)]()
 [![Gates](https://img.shields.io/badge/self--verify-7%2F7%20green-brightgreen)]()
 [![Docs](https://img.shields.io/badge/PDFs-76%20bilingual-blue)]()
 [![License](https://img.shields.io/badge/license-AGPL--3.0%20%2B%20SBL%20%2B%20Commercial-blue)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-3.12-blueviolet)]()
+[![Version](https://img.shields.io/badge/version-3.49-blueviolet)]()
 [![Author](https://img.shields.io/badge/by-Peter-lightgrey)](https://github.com/fanchanyu)
 
-> 🇹🇼 **本專案於 2026-05-22 因商標衝突更名為 Ouvoca** — 詳見 [RENAME_NOTICE_ZH.md](./docs/RENAME_NOTICE_ZH.md)
-> 🇺🇸 **Renamed to Ouvoca in 2026-05** due to trademark conflict — see [RENAME_NOTICE_EN.md](./docs/RENAME_NOTICE_EN.md)
+<details>
+<summary>📜 <strong>版本更新紀錄 / Changelog</strong>（點開展開，最新在上）</summary>
 
-> ⚡ **v3.0 戰略軸轉 / Strategic Pivot (2026-05-15)**
-> 🇹🇼 砍 LINE Bot / Mobile App / 外協協同三線，全力做桌機對話式 ERP。
-> 🇺🇸 Cut LINE Bot / Mobile App / external-vendor portals — focused 100% on desktop conversational ERP.
-> See [`docs/ARCHITECTURE_DECISIONS.md`](./docs/ARCHITECTURE_DECISIONS.md) for the full rationale.
+> 🇹🇼 **2026-05-22 — 因商標衝突更名為 Ouvoca** — 詳見 [RENAME_NOTICE_ZH.md](./docs/RENAME_NOTICE_ZH.md) · [EN](./docs/RENAME_NOTICE_EN.md)
 
-> 🆕 **v3.37 — 電腦小白卡關 14 條全修 (2026-05-21)**
-> 🇹🇼 誠實盤點 Day 0 / Day 1 / Day 2-7 後一次修補：Docker 中文字型亂碼、預設密碼提示、OnboardingWizard 救活、PDF 自動下載、Chat 主動歡迎、客戶自動編號、角色中文化、空品項警示、應收逾期主動推、匯入 Excel 引導。
-> 🇺🇸 Fixes 14 beginner-blocker issues: Chinese font Docker fix, default-password warning, OnboardingWizard wired in, PDF auto-download, Chat welcome, auto customer code, Chinese role names, empty-items warning, overdue receivables alert, Excel import guide.
-> 📄 **Legal**: [Setup Wizard Compliance Notice](./docs/pdf/32_安裝精靈法律聲明_中文.pdf) (ZH) · [EN](./docs/pdf/32_Setup_Wizard_Legal_EN.pdf)
+- **v3.49** (2026-05-22) — 🚀 **電腦小白零依賴安裝**（雙擊 `install_easy.bat` 自動下載 Python/Node，不需 Docker）+ 法律揭露 + 排錯指南
+- **v3.48** (2026-05-22) — 全模組六維二次審計修復 + 12 model 補 TenantMixin + 法律精簡
+- **v3.47** (2026-05-22) — 6 維審計：安裝 / 安全 / 資料 / UX 四維修補
+- **v3.46** (2026-05-22) — Glossary DB 持久化 + datetime fixes
+- **v3.42** (2026-05-22) — 使用者帳號管理 / 全域跨表搜尋 / AI 每日上限 / 台灣工作天 / 時區設定 · [法律 ZH](./docs/pdf/37_第六輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/37_Polish_V342_Legal_EN.pdf) — 使用前由 IT + 法律 + HR 主管覆核
+- **v3.41** (2026-05-22) — 客戶毛利率 / 訂單跟單 / 寄 PDF Email / 資料健康檢查 · [法律 ZH](./docs/pdf/36_第五輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/36_Polish_V341_Legal_EN.pdf) — 使用前由 CPA + 法律 + 業務主管覆核
+- **v3.40** (2026-05-21) — 凍結 hard-write 安全模式 / Audit log 跨人搜尋 / 中文相對日期解析 · [法律 ZH](./docs/pdf/35_第四輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/35_Polish_V340_Legal_EN.pdf) — 使用前由 CPA + 法律 + 內控覆核
+- **v3.39** (2026-05-21) — PDF 印公司 LOGO / Delete 三件套 / LLM 工具分頁 · [法律 ZH](./docs/pdf/34_第三輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/34_Polish_V339_Legal_EN.pdf)
+- **v3.38** (2026-05-21) — ConfirmCard TTL 30 分 / 一鍵備份 / 客戶 disambiguation · [法律 ZH](./docs/pdf/33_第二輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/33_Polish_Legal_EN.pdf)
+- **v3.37** (2026-05-21) — 電腦小白卡關 14 條全修：Docker 中文字型、預設密碼提示、OnboardingWizard、Chat 歡迎 · [法律 ZH](./docs/pdf/32_安裝精靈法律聲明_中文.pdf) · [EN](./docs/pdf/32_Setup_Wizard_Legal_EN.pdf)
+- **v3.0** (2026-05-15) — ⚡ 戰略軸轉：砍 LINE Bot / Mobile App / 外協協同三線 · [ADR](./docs/ARCHITECTURE_DECISIONS.md)
 
-> 🆕 **v3.38 — 第二輪小白盤點再補 8 條 (2026-05-21)**
-> 🇹🇼 ConfirmCard TTL 5min → 30min（老闆喝杯茶不過期）/ Undo 涵蓋公司資料 + 改密碼 / AI 成本入口（今日 + 本月）/ 一鍵備份 + 列出備份 / 客戶 disambiguation 候選清單 / 業務錯誤中文化 / Chat 取消按鈕 + 手機 responsive。
-> 🇺🇸 Second-round audit fixes: ConfirmCard TTL 5→30 min, generic undo for company/password, AI cost entry, one-click backup, customer disambiguation, business-error sinicization, Chat cancel button + mobile responsive.
-> 📄 **Legal**: [Polish Compliance Notice](./docs/pdf/33_第二輪卡關修補法律聲明_中文.pdf) (ZH) · [EN](./docs/pdf/33_Polish_Legal_EN.pdf)
+完整 changelog 見 [`docs/WORKLOG.md`](./docs/WORKLOG.md)（內部）。
 
-> 🆕 **v3.39 — 第三輪小白盤點再補 8 條 (2026-05-21)**
-> 🇹🇼 PDF 印公司 LOGO（不再像影印紙）/ 客戶/料件/供應商 delete 三件套 + 預檢查 / LLM 工具分頁（1000 筆不爆 token）/ Slot-filling 3 次後 fallback / 後端離線具體指引 / Docker 容器 restart unless-stopped / 批次列印 ZIP / 手動觸發 digest。
-> 🇺🇸 Third-round audit fixes: company LOGO on PDF, delete customer/part/supplier trio with pre-check, LLM tool pagination, slot-filling 3-strike fallback, specific backend-offline guidance, Docker containers `restart: unless-stopped`, batch print ZIP, manual digest trigger.
-> 📄 **Legal**: [Polish v3.39 Compliance Notice](./docs/pdf/34_第三輪卡關修補法律聲明_中文.pdf) (ZH) · [EN](./docs/pdf/34_Polish_V339_Legal_EN.pdf)
-
-> 🆕 **v3.40 — 第四輪小白盤點再補 8 條（高敏感版）(2026-05-21)**
-> 🇹🇼 中文相對日期解析（上週/本月/Q1）/ 應收帳齡 LLM 入口 / 客戶搜尋大小寫不敏感 / Delete 三件套 90 秒可 Undo / **凍結 hard-write 安全模式**（老闆出國全鎖）/ **Audit log 跨人搜尋**（內控用）/ 訂單比較。
-> 🇺🇸 Fourth-round audit fixes: relative-date helper, AR aging LLM, case-insensitive search, **delete-undo with 90-sec window**, **hard-write freeze for owner travel**, cross-user audit search, order compare.
-> ⚖️ **法律 / Legal — 高敏感**：[v3.40 中文](./docs/pdf/35_第四輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/35_Polish_V340_Legal_EN.pdf) — **使用前務必由 CPA + 法律顧問 + 內控主管覆核**
-
-> 🆕 **v3.41 — 第五輪小白盤點再補 8 條（對外最敏感）(2026-05-22)**
-> 🇹🇼 **客戶毛利率分析**（賺不賺錢 + 議價情報）/ **訂單跟單**（Quote→SO→出貨→應收→收款 timeline）/ **寄 PDF Email 給客戶**（最敏感對外操作）/ FAQ 常見問答 / **資料健康檢查**（重複/循環/孤兒）/ Chat 👍👎 feedback + 📌 pin + ⚡ 短答模式。
-> 🇺🇸 Fifth-round audit fixes: **customer profitability**, **order lifecycle**, **email PDF to customer**, FAQ, **data health check**, Chat thumbs/pin/brief-mode.
-> ⚖️ **法律 / Legal — 對外最敏感**：[v3.41 中文](./docs/pdf/36_第五輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/36_Polish_V341_Legal_EN.pdf) — **使用前務必由 CPA + 法律 + 內控 + 業務主管覆核**
-
-> 🆕 **v3.42 — 第六輪小白盤點再補 8 條（帳號管理最敏感）(2026-05-22)**
-> 🇹🇼 **使用者帳號管理**（建立 / 停用 LLM tools）/ **全域跨表搜尋**（「ABC」一次找客戶+料件+供應商+員工）/ **附件 LLM 入口**（連附件到 SO/PO）/ **AI 每人每日上限**（防員工亂用燒爆）/ **台灣工作天計算**（內建 2026 國定假日）/ **時區設定**（公司在台灣 / 日本 / 美國）/ **對話 transcript 匯出** / Dashboard 手機 responsive。**170 LLM tools / 76 雙語 PDF / 374+ tests**。
-> 🇺🇸 Sixth-round audit fixes: **user account management**, **global cross-table search**, **attachment LLM entry**, **AI per-user daily limit**, **Taiwan business-day calculation**, **timezone setting**, **chat transcript export**, Dashboard mobile responsive.
-> ⚖️ **法律 / Legal — 帳號管理最敏感**：[v3.42 中文](./docs/pdf/37_第六輪卡關修補法律聲明_中文.pdf) · [EN](./docs/pdf/37_Polish_V342_Legal_EN.pdf) — **使用前務必由 IT + 法律 + HR 主管覆核**
+</details>
 
 ---
 
