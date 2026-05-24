@@ -32,6 +32,16 @@
 > 🇹🇼 **不講工程術語，只說「你能用到什麼」**。每條修復都按「你會看到什麼差別」描述。
 > 🇺🇸 **No tech jargon — only what you'll notice as a user.**
 
+### 🆕 v3.52（2026-05-24）— 一鍵更新（資料自動備份）
+
+| 修了什麼 | 你會看到的差別 |
+|---|---|
+| 🆙 **一鍵更新到新版** | 雙擊 `update.bat` → 自動備份你的資料 → 下載新程式碼 → 升級資料庫 → 重啟，全程不用懂 git |
+| 💾 **更新前先備份** | 你的 `erp.db` + `.env` + `uploads/` 自動複製到 `backups/YYYYMMDD_HHMMSS/` |
+| 🔄 **跨安裝方式相容** | 不論你用 git clone 還是 zip 下載安裝，腳本自動偵測用對應方法（git pull 或重新下 zip） |
+| 🔧 **DB 結構自動升級** | 新版有新欄位/新表？`alembic upgrade head` 自動跑，你不用懂 SQL |
+| ⏮ **壞了可還原** | 備份資料夾內附 README 寫怎麼還原，3 步驟可回到昨天的狀態 |
+
 ### 🆕 v3.51（2026-05-24）— 完整解除安裝路徑
 
 | 修了什麼 | 你會看到的差別 |
@@ -239,6 +249,7 @@ Ouvoca 的設計決策按以下優先順序排（衝突時上位永遠贏）：
 
 **首次安裝**：雙擊 `install_easy.bat`（Windows）或執行 `bash install_easy.sh`（Mac/Linux）
 **後續啟動**：雙擊 `start.bat` 或 `bash start.sh`
+**🆙 更新到新版**：雙擊 `update.bat`（自動備份你的資料 → 拉新版 → 升級 DB → 重啟）
 **完全移除**：雙擊 `uninstall_easy.bat`（會清 Windows 註冊表，不留殘留）
 
 下載大小：Python ~26MB + Node ~30MB + 套件 ~500MB（首次） ≒ **約 750MB 磁碟**，全部在本資料夾內。

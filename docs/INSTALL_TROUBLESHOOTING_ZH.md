@@ -166,6 +166,52 @@ Taiwan SMB 常見方案：請在地 IT 廠商代裝（500-2000 NT$/次）。
 
 ---
 
+## 🆙 我昨天裝的，今天有新版怎麼辦？/ Upgrade
+
+> **不要重裝**！重裝會把你的 ERP 資料清掉。**用 `update.bat`** 才能保留資料。
+
+### 正常情境（90% 適用）
+
+1. **關閉 Ouvoca**（關掉那兩個 cmd 視窗）
+2. **雙擊 `update.bat`** — 會自動跑 6 步：
+   - Step 1: 停止服務（埠口 8000 / 5173）
+   - Step 2: **備份你的資料** 到 `backups\YYYYMMDD_HHMMSS\`（erp.db / .env / uploads）
+   - Step 3: 從 GitHub 下載新版（自動偵測 git pull 或下載 zip）
+   - Step 4: 更新 pip + npm 套件（如果有新依賴）
+   - Step 5: 跑 `alembic upgrade head`（如果有資料庫結構變動）
+   - Step 6: 重啟服務，自動開瀏覽器
+3. **完成！** 你的所有 ERP 資料完全保留
+
+### 萬一新版有 bug 想還原昨天版本
+
+1. 關閉 Ouvoca
+2. 開 `backups\YYYYMMDD_HHMMSS\` 找最新的備份
+3. 把備份內的 `erp.db` 複製回 `backend\`
+4. 把備份內的 `.env` 複製回 `backend\`
+5. 把備份內的 `uploads\` 複製回 `backend\uploads\`
+6. 雙擊 `start.bat`
+
+> 💡 每個備份資料夾內都有 `README.txt` 寫具體還原步驟。
+
+### update 失敗的常見原因
+
+| 錯誤 | 解法 |
+|------|------|
+| `git pull 失敗 — 有衝突` | 你改過 code，建議：建新資料夾重裝 + 從備份還原資料 |
+| `下載失敗` | 網路問題 — 用瀏覽器測 https://github.com/fanchanyu/ouvoca/archive/refs/heads/main.zip 能不能下 |
+| `pip install 失敗` | 防火牆擋 pypi.org — 同 [pip install failed](#pip-install-failed--後端套件安裝失敗) |
+| `alembic upgrade 失敗` | 通常無害（SQLite 會自動建表）— 重新跑 `start.bat` 看能不能進系統 |
+
+### 我不想自動更新，想自己控制
+
+不跑 `update.bat` 即可。Ouvoca 永遠不會自動更新自己。
+
+要手動檢查有沒有新版：
+- 進 https://github.com/fanchanyu/ouvoca/releases
+- 看最新版本號 vs 你的版本（畫面右下角 / 後端 `/api/health` 都有）
+
+---
+
 ## 🗑 完全移除 Ouvoca / Uninstall
 
 > ⚠️ **不要只刪資料夾**！`install_easy.bat` 跑的 Python silent installer 會在

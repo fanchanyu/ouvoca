@@ -164,6 +164,50 @@ We respond within 48 hours.
 
 ---
 
+## 🆙 I installed yesterday, there's a new version today
+
+> **Do NOT reinstall** — that wipes your ERP data. Use `update.bat` to preserve data.
+
+### Normal flow (90% of cases)
+
+1. **Close Ouvoca** (close the two cmd windows)
+2. **Double-click `update.bat`** — 6 automated steps:
+   - Stop services (ports 8000 / 5173)
+   - **Back up your data** to `backups/YYYYMMDD_HHMMSS/` (erp.db / .env / uploads)
+   - Download latest code (auto-detects git pull vs zip download)
+   - Update pip + npm packages (if new deps)
+   - Run `alembic upgrade head` (if schema changed)
+   - Restart, open browser
+3. Done — all your ERP data preserved
+
+### Rollback if the new version is buggy
+
+1. Close Ouvoca
+2. Open `backups/YYYYMMDD_HHMMSS/` (most recent)
+3. Copy `erp.db` back to `backend/`
+4. Copy `.env` back to `backend/`
+5. Copy `uploads/` back to `backend/uploads/`
+6. Run `start.bat`
+
+> 💡 Each backup folder contains a `README.txt` with specific restore steps.
+
+### Common update failures
+
+| Error | Fix |
+|------|-----|
+| `git pull failed — conflict` | You modified code. Recommended: fresh folder + reinstall + restore from backup |
+| `Download failed` | Network issue — test https://github.com/fanchanyu/ouvoca/archive/refs/heads/main.zip in browser |
+| `pip install failed` | Firewall blocks pypi.org — see [pip install failed](#pip-install-failed-backend-dependencies) |
+| `alembic upgrade failed` | Usually harmless (SQLite auto-creates tables) — try `start.bat` to see if app works |
+
+### Manual update check
+
+Ouvoca never auto-updates. To check for new versions manually:
+- Visit https://github.com/fanchanyu/ouvoca/releases
+- Compare against your version (bottom-right of app / `/api/health`)
+
+---
+
 ## 🗑 Complete Uninstall
 
 > ⚠️ **Don't just delete the folder!** The silent Python installer run by

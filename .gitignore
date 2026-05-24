@@ -212,3 +212,6 @@ tools/
 logs-backend.txt
 logs-frontend.txt
 backend/.seeded
+
+# update.bat 產生的備份目錄（含使用者業務資料，絕對不可推）
+backups/
