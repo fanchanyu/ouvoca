@@ -11,6 +11,7 @@ import {
   apiListTaxIdCountries,
   type EInvoiceLineItem,
 } from '../lib/api'
+import { useAuthStore } from '../store/auth'
 import PrintableDocument, { DocHeader, DocFooter } from '../components/PrintableDocument'
 
 const BLANK_ITEM = (): EInvoiceLineItem => ({ description: '', qty: 1, unit_price: 0 })
@@ -124,19 +125,64 @@ function IssueSection() {
       {err && <div className="bg-red-50 text-red-700 px-3 py-2 rounded mb-3 text-sm">{err}</div>}
       {issued && (
         <div className="bg-emerald-50 border border-emerald-200 rounded p-3 mb-3 text-sm">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <div>
               <div className="font-semibold text-emerald-900">✅ 發票 {issued.invoice_no} 已開立</div>
               {issued.tracking_no && <div className="text-xs mt-1">tracking_no: <span className="font-mono">{issued.tracking_no}</span></div>}
             </div>
             {printSnapshot && (
-              <button
-                onClick={() => {
-                  // 重新打開列印視窗
-                  setPrintSnapshot({ ...printSnapshot })  // re-trigger
-                }}
-                className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700"
-              >🖨 列印發票</button>
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    // v3.50: 呼叫後端 PDF 端點，含完整品項明細（取代摘要式 HTML）
+                    const token = useAuthStore.getState().token
+                    const payload = {
+                      invoice_no: printSnapshot.invoice_no,
+                      invoice_date: new Date().toISOString().slice(0, 10),
+                      seller_tax_id: printSnapshot.seller_tax_id,
+                      seller_name: printSnapshot.seller_name,
+                      buyer_tax_id: printSnapshot.buyer_tax_id,
+                      buyer_name: printSnapshot.buyer_name,
+                      items: printSnapshot.items.map(it => ({
+                        description: it.description,
+                        qty: it.qty,
+                        unit_price: it.unit_price,
+                        amount: it.qty * it.unit_price,
+                      })),
+                      total: printSnapshot.sales_amount,
+                      tax: printSnapshot.tax,
+                      grand_total: printSnapshot.total,
+                      tracking_no: issued.tracking_no || '',
+                    }
+                    const res = await fetch('/api/print/einvoice', {
+                      method: 'POST',
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(payload),
+                    })
+                    if (!res.ok) { alert('PDF 產生失敗，請稍候再試'); return }
+                    const blob = await res.blob()
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `einvoice_${printSnapshot.invoice_no}.pdf`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  }}
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                  title="下載完整明細 PDF（推薦）"
+                >📥 下載 PDF 發票</button>
+                <button
+                  onClick={() => {
+                    // 開啟瀏覽器列印視窗（HTML 摘要版）
+                    setPrintSnapshot({ ...printSnapshot })  // re-trigger
+                  }}
+                  className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700"
+                  title="瀏覽器列印（HTML）"
+                >🖨 瀏覽器列印</button>
+              </div>
             )}
           </div>
         </div>

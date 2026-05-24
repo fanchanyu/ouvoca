@@ -65,7 +65,7 @@ async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
 async def register(
     data: UserCreate,
     db: AsyncSession = Depends(get_db),
-    user: UserContext = Depends(require_permission("organization.user.read")),
+    user: UserContext = Depends(require_permission("organization.user.create")),
 ):
     existing = await db.execute(select(User).where(User.username == data.username))
     if existing.scalar_one_or_none():

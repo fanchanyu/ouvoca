@@ -195,7 +195,7 @@ HQ asks "Total M6 across all factories?" →
 
 | Layer | Tech |
 |---|---|
-| Web | FastAPI (Python 3.12+) async |
+| Web | FastAPI (Python 3.11, locked >=3.11,<3.13) async |
 | ORM | SQLAlchemy 2.0 async |
 | Database | PostgreSQL 15+ / SQLite (sufficient for SMB) |
 | Migration | Alembic |

@@ -9,6 +9,7 @@
 所有 endpoint 走 RBAC，需要 `accounting.tax_report` 權限。
 """
 from __future__ import annotations
+import logging
 from datetime import datetime, timedelta, UTC
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -22,6 +23,8 @@ from app.integrations.einvoice_tw import (
     EInvoice, InvoiceLineItem, validate_tax_id,
     validate_invoice_no, calc_tax, default_provider,
 )
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/tax/tw", tags=["Taiwan Tax"])
 
@@ -248,6 +251,12 @@ async def issue_einvoice(
         raise HTTPException(400, detail={
             "code": "einvoice_invalid", "errors": result["errors"],
         })
+    # v3.50: 寫 audit log（不上 ORM 表，純 logger，方便日後查證 / 重印）
+    log.info(
+        "E-invoice issued: invoice_no=%s seller=%s buyer=%s amount=%.2f tracking_no=%s",
+        req.invoice_no, req.seller_tax_id, req.buyer_tax_id or "(個人)",
+        float(total), result.get("tracking_no", ""),
+    )
     return result
 
 

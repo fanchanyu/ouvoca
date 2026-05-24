@@ -13,6 +13,23 @@ import EntityFormModal, { type FieldDef } from '../components/EntityFormModal'
 import PrintableDocument, { DocHeader, DocFooter } from '../components/PrintableDocument'
 import ProcessChain, { deriveO2CSteps } from '../components/ProcessChain'
 import NotesEditor from '../components/NotesEditor'
+import { useAuthStore } from '../store/auth'
+
+// v3.50: 用後端 reportlab 端點下載 PDF（含完整品項，取代摘要式 HTML）
+async function downloadServerPdf(path: string, filename: string) {
+  const token = useAuthStore.getState().token
+  const res = await fetch(path, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+  if (!res.ok) { alert('PDF 產生失敗'); return }
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 const CUSTOMER_FIELDS: FieldDef[] = [
   { name: 'name', label: '名稱', type: 'text', required: true },
@@ -142,13 +159,21 @@ export default function Sales() {
                       <button onClick={() => setNotesSO(so)}
                         className="px-2 py-1 text-xs text-amber-700 hover:bg-amber-50 rounded"
                         title="編輯備註">📝</button>
+                      <button onClick={() => downloadServerPdf(`/api/print/so/${so.id}.pdf`, `SO_${so.so_no}.pdf`)}
+                        className="px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded"
+                        title="下載銷售單完整 PDF（含品項）">📥 PDF</button>
                       <button onClick={() => setPrintSO(so)}
                         className="px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 rounded"
-                        title="列印銷售單 PDF">🖨</button>
+                        title="瀏覽器列印（HTML 摘要）">🖨</button>
                       {['shipped', 'delivered', 'closed'].includes(so.status) && (
-                        <button onClick={() => setShipNoteSO(so)}
-                          className="px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-50 rounded"
-                          title="列印出貨單（跟貨走）">📋</button>
+                        <>
+                          <button onClick={() => downloadServerPdf(`/api/print/delivery/${so.id}.pdf`, `Delivery_${so.so_no}.pdf`)}
+                            className="px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded"
+                            title="下載出貨單完整 PDF（含品項）">📥 出貨</button>
+                          <button onClick={() => setShipNoteSO(so)}
+                            className="px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-50 rounded"
+                            title="瀏覽器列印出貨單（HTML 摘要）">📋</button>
+                        </>
                       )}
                       {so.status === 'draft' && (
                         <button onClick={() => confirmSO(so)}

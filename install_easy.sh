@@ -46,14 +46,15 @@ case "$OS" in
 esac
 
 # ─── Step 1: Python ──────────────────────────────────────────
-echo "[Step 1/5] Python 3.11+"
+echo "[Step 1/5] Python 3.11 (locked >=3.11,<3.13)"
 echo "--------------------------------------------------------------"
 PY_BIN=""
-for cand in python3.12 python3.11 python3 python; do
+for cand in python3.11 python3.12 python3 python; do
     if command -v "$cand" >/dev/null 2>&1; then
         ver=$("$cand" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || echo "0.0")
         major=${ver%%.*}; minor=${ver##*.}
-        if [ "$major" -ge 3 ] && [ "$minor" -ge 11 ]; then
+        # Accept 3.11 or 3.12 (>=3.11,<3.13); prefer 3.11 via candidate order
+        if [ "$major" -eq 3 ] && [ "$minor" -ge 11 ] && [ "$minor" -lt 13 ]; then
             PY_BIN="$cand"
             ok "Python $ver found: $(command -v "$cand")"
             break

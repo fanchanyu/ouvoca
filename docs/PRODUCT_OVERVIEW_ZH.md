@@ -196,7 +196,7 @@ HQ 問「全廠 M6 庫存？」 →
 
 | 層 | 技術 |
 |---|---|
-| Web Framework | FastAPI (Python 3.12+) async |
+| Web Framework | FastAPI (Python 3.11，鎖定 >=3.11,<3.13) async |
 | ORM | SQLAlchemy 2.0 async |
 | Database | PostgreSQL 15+ / SQLite（小廠夠用） |
 | Migration | Alembic |

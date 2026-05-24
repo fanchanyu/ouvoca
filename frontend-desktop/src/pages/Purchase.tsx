@@ -13,6 +13,23 @@ import EntityFormModal, { type FieldDef } from '../components/EntityFormModal'
 import PrintableDocument, { DocHeader, DocFooter } from '../components/PrintableDocument'
 import ProcessChain, { deriveP2PSteps } from '../components/ProcessChain'
 import NotesEditor from '../components/NotesEditor'
+import { useAuthStore } from '../store/auth'
+
+// v3.50: 用後端 reportlab 端點下載完整明細 PDF（取代摘要式 HTML 列印）
+async function downloadPoPdf(poId: string, poNo: string) {
+  const token = useAuthStore.getState().token
+  const res = await fetch(`/api/print/po/${poId}.pdf`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+  if (!res.ok) { alert('PDF 產生失敗'); return }
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `PO_${poNo || poId}.pdf`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 const SUPPLIER_FIELDS: FieldDef[] = [
   { name: 'name', label: '名稱', type: 'text', required: true },
@@ -155,9 +172,12 @@ export default function Purchase() {
                         <button onClick={() => setNotesPO(po)}
                           className="px-2 py-1 text-xs text-amber-700 hover:bg-amber-50 rounded"
                           title="編輯備註">📝</button>
+                        <button onClick={() => downloadPoPdf(po.id, po.po_no)}
+                          className="px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded"
+                          title="下載完整明細 PDF（含品項）">📥 PDF</button>
                         <button onClick={() => setPrintPO(po)}
                           className="px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 rounded"
-                          title="列印 PDF（給供應商）">🖨</button>
+                          title="瀏覽器列印（HTML 摘要）">🖨</button>
                         {po.status === 'draft' && (
                           <button onClick={() => approvePO(po)}
                             className="px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded"

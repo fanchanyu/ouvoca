@@ -163,8 +163,8 @@ if not exist "backend\venv" (
 
 echo   Installing backend packages ^(first time: 2-5 min^)...
 call backend\venv\Scripts\activate.bat
-python -m pip install --upgrade pip --quiet --disable-pip-version-check
-pip install -r backend\requirements.txt --quiet --disable-pip-version-check
+"backend\venv\Scripts\python.exe" -m pip install --upgrade pip --quiet --disable-pip-version-check
+"backend\venv\Scripts\python.exe" -m pip install -r backend\requirements.txt --quiet --disable-pip-version-check
 if errorlevel 1 (
     echo   X pip install failed
     echo   Common cause: anti-virus blocking. Try whitelisting this folder.
@@ -200,7 +200,7 @@ echo --------------------------------------------------------------
 if not exist "backend\.seeded" (
     pushd backend
     set PYTHONIOENCODING=utf-8
-    python -m scripts.seed
+    "venv\Scripts\python.exe" -m scripts.seed
     if errorlevel 1 (
         echo   WARN seed failed - DB may already exist
     ) else (

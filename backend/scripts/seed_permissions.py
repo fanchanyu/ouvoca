@@ -1,4 +1,9 @@
-"""Seed RBAC tables：95 個權限 + 10 個預設角色 + 1 個 HQ tenant。
+"""Seed RBAC tables：~115 個權限 + 10 個預設角色 + 1 個 HQ tenant。
+
+v3.50 (2026-05-24)：
+- UPSERT 取代 skip-if-exists（既有部署重新跑 seed 也會拿到新權限/描述）
+- 新增 EXTRA_PERMISSIONS 處理 2 段別名（accounting.tax_report, analytics.view, system.admin）
+- 補齊 ~20 個 require_permission() 用到但漏定義的權限碼
 
 Usage:
     python -m scripts.seed_permissions
@@ -72,6 +77,7 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("production", "work_center", "create", "建立工作中心", False, "medium"),
     ("production", "operation", "create", "建立工序", False, "medium"),
     ("production", "dispatch", "create", "建立派工", False, "medium"),
+    ("production", "work_order", "update", "修改工單", False, "medium"),
 
     # --- sales (11) ---
     ("sales", "customer", "read", "查看客戶", False, "low"),
@@ -85,6 +91,7 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("sales", "order", "confirm", "確認銷售訂單", False, "medium"),
     ("sales", "order", "ship", "出貨", False, "medium"),
     ("sales", "order", "export", "匯出銷售資料", False, "low"),
+    ("sales", "order", "update", "修改銷售訂單", False, "medium"),
 
     # --- quality (7) ---
     ("quality", "inspection", "read", "查看檢驗", False, "low"),
@@ -95,9 +102,11 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("quality", "nc", "list", "列出不良品", False, "low"),
     ("quality", "capa", "create", "建立 CAPA", False, "medium"),
 
-    # --- accounting (10) ---
+    # --- accounting (10 + 8 補) ---
     ("accounting", "account", "read", "查看科目", False, "low"),
     ("accounting", "account", "list", "列出科目", False, "low"),
+    ("accounting", "account", "create", "建立科目", False, "medium"),
+    ("accounting", "account", "update", "修改科目", False, "medium"),
     ("accounting", "journal", "read", "查看傳票", False, "medium"),
     ("accounting", "journal", "list", "列出傳票", False, "medium"),
     ("accounting", "journal", "create", "建立傳票", True, "high"),
@@ -105,14 +114,24 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("accounting", "journal", "export", "匯出傳票", True, "high"),
     ("accounting", "ar", "read", "查看應收", False, "medium"),
     ("accounting", "ar", "list", "列出應收", False, "medium"),
+    ("accounting", "ar", "create", "建立應收", False, "medium"),
     ("accounting", "month_close", "execute", "月結結帳", True, "critical"),
+    ("accounting", "tax_report", "read", "查看稅務報表", False, "medium"),
+    ("accounting", "einvoice", "read", "查看電子發票", False, "low"),
+    ("accounting", "einvoice", "issue", "開立電子發票", True, "high"),
+    ("accounting", "einvoice", "cancel", "作廢電子發票", True, "high"),
 
-    # --- warehouse (6) ---
+    # --- warehouse (6 + 6 補) ---
     ("warehouse", "zone", "read", "查看倉區", False, "low"),
     ("warehouse", "zone", "list", "列出倉區", False, "low"),
+    ("warehouse", "zone", "create", "建立倉區", False, "medium"),
+    ("warehouse", "zone", "update", "修改倉區", False, "medium"),
+    ("warehouse", "zone", "delete", "刪除倉區", True, "high"),
     ("warehouse", "bin", "read", "查看儲位", False, "low"),
     ("warehouse", "bin", "list", "列出儲位", False, "low"),
+    ("warehouse", "bin", "create", "建立儲位", False, "medium"),
     ("warehouse", "pick", "create", "建立揀貨", False, "medium"),
+    ("warehouse", "pick", "complete", "完成揀貨", False, "medium"),
     ("warehouse", "cycle_count", "create", "盤點", False, "medium"),
 
     # --- crm (5) ---
@@ -130,7 +149,7 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
 
     # --- outsource (v3.0 移除：外協 persona 砍掉) ---
 
-    # --- organization (8) ---
+    # --- organization (8 + 2 補) ---
     ("organization", "employee", "read", "查看員工", False, "low"),
     ("organization", "employee", "list", "列出員工", False, "low"),
     ("organization", "employee", "create", "建立員工", True, "high"),
@@ -140,8 +159,10 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("organization", "role", "create", "建立角色", True, "high"),
     ("organization", "role", "update", "修改角色", True, "high"),
     ("organization", "user", "read", "查看使用者帳號", True, "medium"),
+    ("organization", "user", "create", "建立使用者帳號", True, "high"),
+    ("organization", "user", "update", "修改使用者帳號", True, "high"),
 
-    # --- system (6) ---
+    # --- system (8 + 2 補) ---
     ("system", "config", "read", "查看系統設定", False, "medium"),
     ("system", "config", "update", "修改系統設定", True, "critical"),
     ("system", "tenant", "create", "建立租戶", True, "critical"),
@@ -150,15 +171,44 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("system", "permission", "list", "列出權限定義", False, "low"),
     ("system", "permission", "grant", "授權", True, "critical"),
     ("system", "permission", "revoke", "撤權", True, "critical"),
+    ("system", "admin", "all", "系統最高管理（全權）", True, "critical"),
 
     # --- ai (2) ---
     ("ai", "agent", "use", "使用 AI 助手", False, "low"),
     ("ai", "agent", "configure", "設定 AI 助手", True, "high"),
 
-    # --- mesh (3) ---
+    # --- mesh (3 + 3 補) ---
     ("mesh", "factory", "read", "查看廠別", False, "low"),
     ("mesh", "factory", "list", "列出廠別", False, "low"),
     ("mesh", "factory", "query", "跨廠查詢", False, "medium"),
+    ("mesh", "factory", "register", "註冊廠別節點", True, "high"),
+    ("mesh", "factory", "delete", "刪除廠別節點", True, "critical"),
+    ("mesh", "factory", "manage", "管理 MESH 廠別", True, "high"),
+
+    # --- analytics (4) ---
+    ("analytics", "view", "read", "查看分析儀表板", False, "low"),
+    ("analytics", "view", "all", "查看全部分析（跨部門）", False, "medium"),
+
+    # --- purchase 擴充：purchase.po.update（call-site 既有） ---
+    ("purchase", "po", "update", "修改採購單（po 別名）", False, "medium"),
+]
+
+
+# ------------------------------------------------------------
+# 額外權限：不符合 module.resource.action 3 段格式的舊呼叫點
+# （e.g. accounting.tax_report, analytics.view, system.admin 為 2 段）
+# 用 dict 顯式指定 code，避免破壞 call-sites。
+# ------------------------------------------------------------
+EXTRA_PERMISSIONS: list[dict] = [
+    {"code": "accounting.tax_report", "module": "accounting", "resource": "accounting.tax_report",
+     "action": "read", "name_zh": "稅務報表（2 段別名）",
+     "is_sensitive": False, "risk_level": "medium"},
+    {"code": "analytics.view", "module": "analytics", "resource": "analytics.view",
+     "action": "read", "name_zh": "分析儀表（2 段別名）",
+     "is_sensitive": False, "risk_level": "low"},
+    {"code": "system.admin", "module": "system", "resource": "system.admin",
+     "action": "manage", "name_zh": "系統管理（2 段別名）",
+     "is_sensitive": True, "risk_level": "critical"},
 ]
 
 
@@ -192,8 +242,16 @@ ROLES: list[dict] = [
             ("crm.*", "tenant"),
             ("organization.employee.read", "tenant"),
             ("organization.employee.list", "tenant"),
-            ("mesh.*", "all"), ("ai.agent.use", "tenant"),
+            ("organization.user.read", "tenant"),
+            ("organization.user.create", "tenant"),
+            ("organization.user.update", "tenant"),
+            ("mesh.factory.read", "all"),
+            ("mesh.factory.list", "all"),
+            ("mesh.factory.query", "all"),
+            ("ai.agent.use", "tenant"),
             ("ai.agent.configure", "tenant"),
+            ("analytics.view", "tenant"),
+            ("analytics.view.all", "tenant"),
             ("system.permission.read", "tenant"),
         ],
     },
@@ -299,10 +357,13 @@ ROLES: list[dict] = [
         "description": "會計：傳票、應收、月結",
         "permissions": [
             ("accounting.*", "tenant"),
+            ("accounting.tax_report", "tenant"),
             ("sales.order.read", "tenant"),
             ("sales.order.list", "tenant"),
             ("purchase.order.read", "tenant"),
             ("purchase.order.list", "tenant"),
+            ("analytics.view", "tenant"),
+            ("analytics.view.all", "tenant"),
             ("ai.agent.use", "tenant"),
         ],
     },
@@ -398,23 +459,66 @@ async def seed_permissions():
             await db.flush()
             print("✓ Tenant: HQ")
 
-        # --- 2. Permissions ---
-        existing_codes = {
-            row[0] for row in (await db.execute(select(PermissionDef.code))).all()
+        # --- 2. Permissions (UPSERT: insert new, update existing 描述/scope) ---
+        existing_rows = {
+            row.code: row for row in (
+                await db.execute(select(PermissionDef))
+            ).scalars().all()
         }
         created = 0
+        updated = 0
+
+        def _upsert(code: str, module: str, resource: str, action: str,
+                    name_zh: str, sensitive: bool, risk: str):
+            nonlocal created, updated
+            existing = existing_rows.get(code)
+            if existing is None:
+                db.add(PermissionDef(
+                    id=str(uuid.uuid4()), code=code, resource=resource,
+                    action=action, module=module, name_zh=name_zh,
+                    is_sensitive=sensitive, risk_level=risk, is_system=True,
+                ))
+                created += 1
+            else:
+                # 既有 → 同步 metadata（讓重新部署可拿到新描述/風險）
+                changed = False
+                if existing.name_zh != name_zh:
+                    existing.name_zh = name_zh
+                    changed = True
+                if existing.risk_level != risk:
+                    existing.risk_level = risk
+                    changed = True
+                if existing.is_sensitive != sensitive:
+                    existing.is_sensitive = sensitive
+                    changed = True
+                if existing.module != module:
+                    existing.module = module
+                    changed = True
+                if existing.resource != resource:
+                    existing.resource = resource
+                    changed = True
+                if existing.action != action:
+                    existing.action = action
+                    changed = True
+                if changed:
+                    updated += 1
+
+        # 主清單（3 段格式）
         for module, resource, action, name_zh, sensitive, risk in PERMISSIONS:
             code = f"{module}.{resource}.{action}"
-            if code in existing_codes:
-                continue
-            db.add(PermissionDef(
-                id=str(uuid.uuid4()), code=code, resource=f"{module}.{resource}",
-                action=action, module=module, name_zh=name_zh,
-                is_sensitive=sensitive, risk_level=risk, is_system=True,
-            ))
-            created += 1
+            _upsert(code, module, f"{module}.{resource}", action, name_zh, sensitive, risk)
+
+        # 補充清單（顯式 code，含 2 段別名）
+        for extra in EXTRA_PERMISSIONS:
+            _upsert(
+                extra["code"], extra["module"], extra["resource"],
+                extra["action"], extra["name_zh"],
+                extra["is_sensitive"], extra["risk_level"],
+            )
+
         await db.flush()
-        print(f"✓ Permissions: {created} new ({len(existing_codes)} existed)")
+        print(f"✓ Permissions: {created} new, {updated} updated "
+              f"({len(existing_rows)} pre-existing)")
 
         # All permissions for wildcard expansion
         all_perms = {
@@ -464,7 +568,8 @@ async def seed_permissions():
         await db.commit()
         print("\n✓ Permission seed completed.")
         print(f"  Tenants: HQ")
-        print(f"  Permissions: {len(PERMISSIONS)}")
+        print(f"  Permissions: {len(PERMISSIONS) + len(EXTRA_PERMISSIONS)} "
+              f"({len(PERMISSIONS)} main + {len(EXTRA_PERMISSIONS)} extras)")
         print(f"  Roles: {len(ROLES)}")
         print(f"  Row Filters: {len(ROW_FILTERS)}")
 

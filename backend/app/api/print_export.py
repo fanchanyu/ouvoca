@@ -20,8 +20,9 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,6 +30,7 @@ from app.core.deps import get_db
 from app.core.security import UserContext, require_permission
 from app.services.print_service import (
     generate_quotation_pdf, generate_po_pdf, generate_so_pdf,
+    generate_einvoice_pdf,
 )
 from app.services.export_service import (
     export_customers, export_parts, export_suppliers,
@@ -105,6 +107,25 @@ async def print_delivery_note(
     except ValueError as e:
         raise HTTPException(404, str(e))
     return _pdf_response(data, f"delivery-{so_id[:8]}.pdf")
+
+
+@print_router.post("/einvoice")
+async def print_einvoice(
+    invoice_data: dict[str, Any] = Body(...),
+    user: UserContext = Depends(require_permission("accounting.einvoice.read")),
+):
+    """電子發票 PDF 下載（v3.50）。
+
+    用 POST 收 in-memory snapshot — 因為 issue_einvoice 不會落 ORM。
+    invoice_data 預期欄位見 print_service.generate_einvoice_pdf。
+    """
+    try:
+        data = generate_einvoice_pdf(invoice_data)
+    except Exception as e:
+        raise HTTPException(400, f"PDF 產生失敗：{e}")
+    invoice_no = str(invoice_data.get("invoice_no") or "einvoice")
+    safe_no = "".join(c for c in invoice_no if c.isalnum() or c in "-_")[:32] or "einvoice"
+    return _pdf_response(data, f"einvoice_{safe_no}.pdf")
 
 
 # ════════════════════════════════════════════════════════════════════

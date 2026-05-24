@@ -12,6 +12,17 @@ REM ============================================================
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
+REM --- Prefer bundled tools (from install_easy.bat) ---
+if exist "tools\python\python.exe" (
+    set "PATH=%CD%\tools\python;%CD%\tools\python\Scripts;%PATH%"
+)
+if exist "tools\node\node.exe" (
+    set "PATH=%CD%\tools\node;%PATH%"
+)
+if exist "backend\venv\Scripts\activate.bat" (
+    set "PATH=%CD%\backend\venv\Scripts;%PATH%"
+)
+
 echo.
 echo ================================================================
 echo   Ouvoca dev environment - one-click startup
@@ -23,7 +34,10 @@ echo [1/5] Sanity checks...
 
 where python >nul 2>nul
 if errorlevel 1 (
-    echo   [ERROR] Python not on PATH. Install Python 3.12+ first.
+    echo   [ERROR] Python not on PATH.
+    echo           Recommended: double-click install_easy.bat to auto-install Python 3.11
+    echo           推薦 / Recommended: 雙擊 install_easy.bat 自動安裝 Python 3.11
+    echo           或自己裝 / Or install manually: Python 3.11 ^(not 3.12+^)
     pause
     exit /b 1
 )
@@ -31,7 +45,10 @@ echo   [OK] Python found
 
 where node >nul 2>nul
 if errorlevel 1 (
-    echo   [ERROR] Node.js not on PATH. Install Node 20 LTS first.
+    echo   [ERROR] Node.js not on PATH.
+    echo           Recommended: double-click install_easy.bat to auto-install Node 20
+    echo           推薦 / Recommended: 雙擊 install_easy.bat 自動安裝 Node 20
+    echo           或自己裝 / Or install manually: Node 20 LTS
     pause
     exit /b 1
 )

@@ -499,3 +499,163 @@ async def generate_so_pdf(
 
     doc.build(story)
     return buf.getvalue()
+
+
+# ════════════════════════════════════════════════════════════════════
+# E-Invoice PDF (v3.50)
+# ════════════════════════════════════════════════════════════════════
+
+def generate_einvoice_pdf(invoice_data: dict) -> bytes:
+    """產生電子發票 PDF（A4），回 bytes。
+
+    invoice_data 預期欄位：
+      invoice_no, invoice_date (optional), buyer_tax_id, buyer_name,
+      seller_tax_id, seller_name,
+      items: [{description, qty, unit_price, amount}],
+      total (含稅小計, optional), tax (5%, optional), grand_total (optional),
+      tracking_no (optional)
+
+    若 total / tax / grand_total 缺，自動由 items 重算。
+    無 DB 相依 — 完全在記憶體中產生（前端傳 snapshot 即可）。
+    """
+    s = _styles()
+    font = _try_register_chinese_font()
+
+    invoice_no = str(invoice_data.get("invoice_no") or "—")
+    invoice_date = str(
+        invoice_data.get("invoice_date")
+        or datetime.now().strftime("%Y-%m-%d")
+    )
+    buyer_tax_id = str(invoice_data.get("buyer_tax_id") or "")
+    buyer_name = str(invoice_data.get("buyer_name") or "個人 / 無")
+    seller_tax_id = str(invoice_data.get("seller_tax_id") or "")
+    seller_name = str(invoice_data.get("seller_name") or "示範公司")
+    tracking_no = str(invoice_data.get("tracking_no") or "")
+
+    items = invoice_data.get("items") or []
+
+    # 重算總計（若呼叫端沒給）
+    def _f(x, default=0.0):
+        try:
+            return float(x)
+        except (TypeError, ValueError):
+            return default
+
+    computed_total = 0.0
+    for it in items:
+        amt = it.get("amount")
+        if amt is None:
+            amt = _f(it.get("qty")) * _f(it.get("unit_price"))
+        computed_total += _f(amt)
+
+    grand_total = _f(invoice_data.get("grand_total"), computed_total)
+    if grand_total <= 0:
+        grand_total = computed_total
+    sales_amount = _f(invoice_data.get("total"), round(grand_total / 1.05))
+    tax = _f(invoice_data.get("tax"), round(grand_total - sales_amount))
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        leftMargin=2 * cm, rightMargin=2 * cm,
+        topMargin=1.5 * cm, bottomMargin=1.5 * cm,
+        title=f"電子發票 {invoice_no}",
+    )
+
+    story: list = []
+    # 賣方 header（直接用 seller_name，不查 DB — 純記憶體運作）
+    story.append(Paragraph(f"<b>{seller_name}</b>", s["title"]))
+    sub_parts = []
+    if seller_tax_id:
+        sub_parts.append(f"統編：{seller_tax_id}")
+    if sub_parts:
+        story.append(Paragraph(" · ".join(sub_parts), s["small"]))
+    story.append(Paragraph("Powered by Ouvoca", s["small"]))
+    story.append(Spacer(1, 0.4 * cm))
+
+    # 大標題
+    story.append(Paragraph("<b>電 子 發 票 / e-Invoice</b>", s["title"]))
+    story.append(Paragraph(f"Invoice No: {invoice_no}", s["small"]))
+    story.append(Paragraph(f"Date: {invoice_date}", s["small"]))
+    story.append(Spacer(1, 0.3 * cm))
+
+    # 買賣方資訊
+    info_data = [
+        ["賣方 / Seller:", seller_name],
+        ["賣方統編:", seller_tax_id or "—"],
+        ["買方 / Buyer:", buyer_name],
+        ["買方統編:", buyer_tax_id or "—（個人）"],
+    ]
+    if tracking_no:
+        info_data.append(["追蹤碼 / Tracking:", tracking_no])
+    t = Table(info_data, colWidths=[3.5 * cm, 12.5 * cm])
+    t.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), font),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("LINEBELOW", (0, -1), (-1, -1), 0.5, colors.grey),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
+    story.append(t)
+    story.append(Spacer(1, 0.5 * cm))
+
+    # 品項表（**完整明細，非摘要**）
+    header = ["#", "品名 / Description", "數量", "單價", "小計（含稅）"]
+    table_data = [header]
+    for i, it in enumerate(items, 1):
+        qty = _f(it.get("qty"))
+        unit_price = _f(it.get("unit_price"))
+        amt = it.get("amount")
+        if amt is None:
+            amt = qty * unit_price
+        table_data.append([
+            str(i),
+            str(it.get("description") or "")[:50],
+            f"{qty:g}",
+            f"${unit_price:,.0f}",
+            f"${_f(amt):,.0f}",
+        ])
+
+    # 三列總計
+    table_data.append(["", "", "", "未稅 Sales", f"${sales_amount:,.0f}"])
+    table_data.append(["", "", "", "稅額 Tax 5%", f"${tax:,.0f}"])
+    table_data.append(["", "", "", "**總計 Total**", f"**${grand_total:,.0f}**"])
+
+    items_table = Table(
+        table_data,
+        colWidths=[0.8 * cm, 8.5 * cm, 2 * cm, 2.5 * cm, 2.4 * cm],
+    )
+    items_table.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), font),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0ea5e9")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+        ("GRID", (0, 0), (-1, -4), 0.4, colors.grey),
+        ("BACKGROUND", (-2, -3), (-1, -1), colors.HexColor("#e0f2fe")),
+        ("ALIGN", (2, 1), (-1, -1), "RIGHT"),
+        ("FONTSIZE", (-2, -1), (-1, -1), 11),
+    ]))
+    story.append(items_table)
+    story.append(Spacer(1, 0.5 * cm))
+
+    # 8-char placeholder 條碼 / QR（之後可接真實 39 barcode lib）
+    short_code = invoice_no.replace("-", "")[-8:].upper().ljust(8, "0")
+    story.append(Paragraph(
+        f"<b>條碼 / Barcode (placeholder):</b> [ {short_code} ]",
+        s["body"]
+    ))
+    story.append(Paragraph(
+        f"<b>QR Code (placeholder):</b> {invoice_no}|{invoice_date}|{int(grand_total)}",
+        s["small"]
+    ))
+    story.append(Spacer(1, 0.5 * cm))
+
+    story.append(Paragraph(
+        "本電子發票依財政部 MIG 規範開立。如有問題請洽國稅局或開立公司。",
+        s["small"]
+    ))
+    story.append(Spacer(1, 1 * cm))
+    story.append(_signature_block(s))
+
+    doc.build(story)
+    return buf.getvalue()

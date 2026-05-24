@@ -171,6 +171,16 @@ Ouvoca 的設計決策按以下優先順序排（衝突時上位永遠贏）：
 
 ### 🌟 推薦：**電腦小白模式**（不需 Docker、不需先裝 Python）
 
+#### 📋 三種路徑的 Python / Node 版本對照
+
+| 路徑 | Python | Node | 你要做什麼 |
+|------|--------|------|-----------|
+| ✨ `install_easy.bat`（推薦） | **3.11.9（自動下載）** | **20.11.1（自動下載）** | 什麼都不用，雙擊即可 |
+| 🐳 `install.bat`（Docker） | 容器內 3.11-slim | 容器內 20-alpine | 先裝 Docker Desktop |
+| ⚙️ `start_dev.bat`（工程師） | 3.11.x（手動裝） | 20 LTS（手動裝）| 自己 venv + npm install |
+
+⚠️ **務必使用 Python 3.11**（不是 3.12 也不是 3.13）。requirements.txt 已用 `requires-python = ">=3.11,<3.13"` 鎖定。
+
 **只要會雙擊就會裝**。腳本會自動下載所需的 Python 和 Node.js。
 
 ```
@@ -530,6 +540,16 @@ docker compose exec backend alembic upgrade head  # 跑 DB migration（如果有
 
 </details>
 
+### Q14. 我電腦已有其他版本的 Python（3.12 / 3.13）/ 沒裝 Python，會衝突嗎？
+
+**完全不會。** `install_easy.bat` 會把 Python 3.11.9 安裝到專案內的 `tools\python\` 資料夾，**不修改你系統的 PATH、不污染你現有的 Python**。
+
+- 如果你系統有 Python 3.12 / 3.13 → 它們繼續存在，`install_easy` 用自己的 3.11
+- 如果你系統沒 Python → `install_easy` 直接下載 3.11.9 silent install 進 `tools\python\`
+- 卸載：刪除整個專案資料夾即可，沒有任何系統設定被改
+
+`start.bat` 啟動時會**優先**使用 `tools\python\` 的 Python，而不是系統的。
+
 ⚠️ **還沒解的問題？** 開 [GitHub Issue](https://github.com/fanchanyu/ouvoca/issues/new) 我們處理。
 
 ---
@@ -853,7 +873,7 @@ scripts\git-hooks\install_hooks.bat
 🇺🇸 On Windows, double-click `start_dev.bat`:
 
 ```
-[1/5] 檢查 Python 3.12+ / Node 20+              Verify Python 3.12+ / Node 20+
+[1/5] 檢查 Python 3.11 / Node 20+               Verify Python 3.11 / Node 20+
 [2/5] 自動 seed admin/admin123 + sample data    Auto-seed admin + sample data
 [3/5] 釋放占用的 :8000 / :5173 port            Free up ports :8000 / :5173
 [4/5] 等 backend healthcheck 綠燈              Wait for backend healthcheck
