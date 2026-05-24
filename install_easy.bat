@@ -226,6 +226,9 @@ echo.
 echo     下次啟動雙擊 start.bat 即可
 echo     Next launch: double-click start.bat
 echo.
+echo     若要解除安裝，雙擊 uninstall_easy.bat（含註冊表清理）
+echo     To uninstall: double-click uninstall_easy.bat (cleans registry too)
+echo.
 echo   ============================================================
 echo.
 choice /M "現在啟動嗎 / Launch now"

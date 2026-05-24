@@ -32,6 +32,15 @@
 > 🇹🇼 **不講工程術語，只說「你能用到什麼」**。每條修復都按「你會看到什麼差別」描述。
 > 🇺🇸 **No tech jargon — only what you'll notice as a user.**
 
+### 🆕 v3.51（2026-05-24）— 完整解除安裝路徑
+
+| 修了什麼 | 你會看到的差別 |
+|---|---|
+| 🗑 **真正能完整移除** | 雙擊 `uninstall_easy.bat` → 連 Windows 註冊表項都清乾淨（之前說「卸載=刪資料夾」是過度簡化，Python 會在「新增/移除程式」殘留） |
+| 🛡 **資料先問再刪** | 解除安裝會問兩次「也刪除 ERP 資料嗎？」— `erp.db` / `uploads/` / `.env` 預設保留，避免誤刪業務資料 |
+| 💾 **可選清快取** | 進階問項「也清全域 npm/pip cache 嗎？」— 釋放 ~500MB，但會影響其他 Node/Python 專案 |
+| 🆘 **漏刪救援** | 如果你已經直接刪資料夾才發現註冊表殘留，[排錯指南](./docs/INSTALL_TROUBLESHOOTING_ZH.md#我手動刪了資料夾才發現有-python-殘留怎麼辦) 有 PowerShell 一行清乾淨 |
+
 ### 🆕 v3.50（2026-05-24）— 嚴苛標準六大修復
 
 | 修了什麼 / What was fixed | 你會看到的差別 / What you'll notice |
@@ -230,6 +239,7 @@ Ouvoca 的設計決策按以下優先順序排（衝突時上位永遠贏）：
 
 **首次安裝**：雙擊 `install_easy.bat`（Windows）或執行 `bash install_easy.sh`（Mac/Linux）
 **後續啟動**：雙擊 `start.bat` 或 `bash start.sh`
+**完全移除**：雙擊 `uninstall_easy.bat`（會清 Windows 註冊表，不留殘留）
 
 下載大小：Python ~26MB + Node ~30MB + 套件 ~500MB（首次） ≒ **約 750MB 磁碟**，全部在本資料夾內。
 網路速度：10 Mbps 約 **10 分鐘** 內裝完。

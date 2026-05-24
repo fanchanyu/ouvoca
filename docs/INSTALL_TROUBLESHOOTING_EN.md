@@ -164,4 +164,53 @@ We respond within 48 hours.
 
 ---
 
-**Last updated**: v3.49 (2026-05-22)
+## 🗑 Complete Uninstall
+
+> ⚠️ **Don't just delete the folder!** The silent Python installer run by
+> `install_easy.bat` leaves "Python 3.11 (64-bit)" in **Windows registry**,
+> visible in "Add/Remove Programs". Deleting the folder won't clean this up.
+
+### Correct uninstall (Windows)
+
+**Double-click `uninstall_easy.bat`** — it will:
+
+| Step | Action |
+|------|--------|
+| 1 | Stop running backend (8000) + frontend (5173) |
+| 2 | Run Python installer in `/uninstall` mode → **cleans registry** |
+| 3 | Delete `tools\python` + `tools\node` + download cache |
+| 4 | Delete `backend\venv` + `frontend-desktop\node_modules` |
+| 5 | **ASK YOU**: delete your ERP data? (`erp.db` / `uploads/` / `.env`) |
+| Adv | **ASK YOU**: clear global npm/pip cache? (frees ~500MB, affects other projects) |
+
+After completion, you can safely delete the entire Ouvoca folder — **zero residue in Windows**.
+
+### Mac / Linux
+
+```bash
+bash uninstall_easy.sh
+```
+
+Note: On Mac/Linux, Python/Node were installed by you via `brew`/`apt`. The uninstall
+script **does NOT touch them** (other projects may use them). It only removes this
+project's `venv` + `node_modules`, then asks about your data.
+
+### I already deleted the folder and found Python residue
+
+Open PowerShell (admin) and run:
+```powershell
+reg delete "HKCU\Software\Python\PythonCore\3.11" /f
+Get-ChildItem "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall" |
+  Where-Object { $_.GetValue("DisplayName") -like "Python 3.11*" } |
+  Remove-Item -Recurse -Force
+```
+
+### I want to keep my data, just remove the software
+
+Run `uninstall_easy.bat` → answer **N** to "Delete your ERP data?" → all program
+files cleaned, `backend\erp.db` + `backend\uploads\` + `backend\.env` preserved.
+Re-running `install_easy.bat` later will automatically reuse your data.
+
+---
+
+**Last updated**: v3.51 (2026-05-24)

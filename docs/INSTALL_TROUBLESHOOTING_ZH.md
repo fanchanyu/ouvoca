@@ -166,4 +166,55 @@ Taiwan SMB 常見方案：請在地 IT 廠商代裝（500-2000 NT$/次）。
 
 ---
 
-**最後更新**：v3.49（2026-05-22）
+## 🗑 完全移除 Ouvoca / Uninstall
+
+> ⚠️ **不要只刪資料夾**！`install_easy.bat` 跑的 Python silent installer 會在
+> **Windows 註冊表**留下「Python 3.11 (64-bit)」項，出現在「新增/移除程式」清單。
+> 直接刪資料夾不會清掉這個。
+
+### 正確移除步驟（Windows）
+
+**雙擊 `uninstall_easy.bat`** — 會自動執行：
+
+| 步驟 | 動作 |
+|------|------|
+| 1️⃣ | 停止執行中的 backend (8000) + frontend (5173) |
+| 2️⃣ | 用 Python 原 installer 跑 `/uninstall` 模式 → **清乾淨註冊表** |
+| 3️⃣ | 刪 `tools\python` + `tools\node` + 下載暫存 |
+| 4️⃣ | 刪 `backend\venv` + `frontend-desktop\node_modules` |
+| 5️⃣ | **問你**：要刪你的 ERP 資料嗎？（`erp.db` / `uploads/` / `.env`）|
+| 進階 | **問你**：要清全域 npm/pip cache 嗎？（釋放 ~500MB，但會影響其他專案）|
+
+完成後，可放心刪除整個 Ouvoca 資料夾，**Windows 系統零殘留**。
+
+### Mac / Linux
+
+```bash
+bash uninstall_easy.sh
+```
+
+注意：Mac/Linux 路徑下 Python / Node 是你自己用 `brew` / `apt` 裝的，
+解除安裝腳本**不會動到它們**（因為其他專案可能在用）。
+只會清這個專案的 `venv` + `node_modules` + 問你要不要清資料。
+
+### 我手動刪了資料夾才發現有 Python 殘留怎麼辦？
+
+開 PowerShell（系統管理員）執行：
+```powershell
+# 移除 Python 註冊表項
+reg delete "HKCU\Software\Python\PythonCore\3.11" /f
+# 從「新增/移除程式」清單拿掉
+Get-ChildItem "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall" |
+  Where-Object { $_.GetValue("DisplayName") -like "Python 3.11*" } |
+  Remove-Item -Recurse -Force
+```
+
+### 我想保留資料但只移除程式怎麼辦？
+
+跑 `uninstall_easy.bat` → 在「也刪除你的 ERP 資料嗎」**選 N** → 程式部分清乾淨，
+`backend\erp.db` + `backend\uploads\` + `backend\.env` 全保留。
+之後想重裝，重新跑 `install_easy.bat` 會自動沿用你的資料。
+
+---
+
+**最後更新**：v3.51（2026-05-24）
