@@ -18,18 +18,50 @@
 
 ---
 
-[![Tests](https://img.shields.io/badge/tests-692%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-701%20passing-brightgreen)]()
 [![Gates](https://img.shields.io/badge/self--verify-7%2F7%20green-brightgreen)]()
 [![Docs](https://img.shields.io/badge/PDFs-76%20bilingual-blue)]()
 [![License](https://img.shields.io/badge/license-AGPL--3.0%20%2B%20SBL%20%2B%20Commercial-blue)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-3.49-blueviolet)]()
+[![Version](https://img.shields.io/badge/version-3.50-blueviolet)]()
 [![Author](https://img.shields.io/badge/by-Peter-lightgrey)](https://github.com/fanchanyu)
+
+---
+
+## 📢 最近修了什麼？（電腦小白版）/ What's Fixed Recently?
+
+> 🇹🇼 **不講工程術語，只說「你能用到什麼」**。每條修復都按「你會看到什麼差別」描述。
+> 🇺🇸 **No tech jargon — only what you'll notice as a user.**
+
+### 🆕 v3.50（2026-05-24）— 嚴苛標準六大修復
+
+| 修了什麼 / What was fixed | 你會看到的差別 / What you'll notice |
+|---|---|
+| 🐍 **Python 版本不再打架** | 你電腦不論已裝 Python 3.12 / 3.13 / 完全沒裝，安裝都不會衝突。`install_easy.bat` 用獨立的 3.11，**完全不污染你系統的 Python**。 |
+| 🔒 **裝錯版本會被擋下** | 以前 pip / npm 會默默裝壞，runtime 才炸。現在裝錯版本立刻紅燈，告訴你「用 install_easy.bat」。 |
+| 📄 **電子發票可下載完整 PDF** | 以前點「列印發票」只開瀏覽器列印視窗，現在多了「📥 下載 PDF 發票」按鈕，**伺服器產生完整 A4 PDF**（含品項表格 + 中文字型）。 |
+| 📋 **採購單 / 銷售單 / 出貨單 PDF 變完整** | 以前列印只印摘要寫「完整品項請至系統查詢」，現在每張單子加「📥 PDF」按鈕，**伺服器直接給你完整品項 + 簽核欄位 + 公司 LOGO** 的正式 PDF。 |
+| 👤 **管理員（admin）可以新增帳戶 / 角色** | 以前 admin 點「新增使用者」會收到 403 Forbidden，現在權限系統補了 22 個缺失的權限碼，**admin 真的能管帳號了**。 |
+| 🚨 **權限漏洞修補** | 內部找到一個 bug：建立使用者用的權限碼竟然是「讀使用者」（複製貼上錯誤）。已修正為「建立使用者」，**避免有人靠讀取權限偷建帳號**。 |
+
+### 🆕 v3.49（2026-05-22）— 電腦小白安裝路徑
+
+| 修了什麼 | 你會看到的差別 |
+|---|---|
+| 🚀 **不需 Docker、不需先裝任何東西** | 雙擊 `install_easy.bat` → 腳本自動下載 Python 3.11 + Node.js 20 到專案內 `tools\`，**全程無需管理員權限、不修改你系統**。 |
+| ⚖️ **下載前先告知 + 5 秒倒數** | 執行前畫面會顯示「即將下載 Python (PSF License) / Node (MIT License)」，給你 Ctrl+C 取消機會。 |
+| 🆘 **裝失敗有救援指引** | 開 [`docs/INSTALL_TROUBLESHOOTING_ZH.md`](./docs/INSTALL_TROUBLESHOOTING_ZH.md)，按「症狀」對「解法」，常見錯誤（防毒擋住、防火牆、埠口被占）一查就會。 |
+| 🗑️ **卸載 = 刪資料夾** | 整個 Ouvoca 都在這個資料夾內，不會在註冊表、系統服務、`Program Files` 留東西。 |
+
+[👉 詳細版本紀錄請點開下方 `📜 版本更新紀錄`](#-版本更新紀錄)
+
+---
 
 <details>
 <summary>📜 <strong>版本更新紀錄 / Changelog</strong>（點開展開，最新在上）</summary>
 
 > 🇹🇼 **2026-05-22 — 因商標衝突更名為 Ouvoca** — 詳見 [RENAME_NOTICE_ZH.md](./docs/RENAME_NOTICE_ZH.md) · [EN](./docs/RENAME_NOTICE_EN.md)
 
+- **v3.50** (2026-05-24) — 🛠 嚴苛標準三維修復：Python 版本全 codebase 鎖到 3.11 + PDF 雙系統合一（E-invoice/PO/SO/出貨單可下完整 PDF）+ RBAC 補 22 缺失權限碼 + 修一個權限升級 bug
 - **v3.49** (2026-05-22) — 🚀 **電腦小白零依賴安裝**（雙擊 `install_easy.bat` 自動下載 Python/Node，不需 Docker）+ 法律揭露 + 排錯指南
 - **v3.48** (2026-05-22) — 全模組六維二次審計修復 + 12 model 補 TenantMixin + 法律精簡
 - **v3.47** (2026-05-22) — 6 維審計：安裝 / 安全 / 資料 / UX 四維修補
