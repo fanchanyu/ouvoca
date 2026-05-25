@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, UTC
 from typing import List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, update as sql_update, case
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -84,6 +84,14 @@ ALL_VALID_TXN_TYPES = VALID_INBOUND | VALID_OUTBOUND | VALID_ALLOCATION
 
 
 async def add_inventory_transaction(db: AsyncSession, data: dict, user: Optional[dict] = None) -> InventoryTransaction:
+    """記一筆庫存異動 + 同步更新 Inventory 餘額（race-safe atomic UPDATE）。
+
+    重要：
+    - v3.53 改為以 SQL 算術 (Inventory.qty_on_hand + delta) 做原子更新，
+      取代舊的 Python read-modify-write（並行下會 lost update）。
+    - 本函式 **只 flush 不 commit**：交易邊界由呼叫端負責，以利多行操作
+      （如 PO 收貨、SO 出貨、WO 完工）整批原子化。
+    """
     part_id = data["part_id"]
     qty = float(data["qty"])
     txn_type = data["transaction_type"]
@@ -100,12 +108,15 @@ async def add_inventory_transaction(db: AsyncSession, data: dict, user: Optional
             transaction_type=txn_type,
         )
 
+    # 先讀一次（用於：① 存在性檢查 ② outbound 可用量檢查）。
+    # 注意：這個讀只用來檢查與 emit 事件用的快照值，真正的數量更新
+    #      由下方 atomic SQL UPDATE 完成 → 不會 lost update。
     inv_q = await db.execute(select(Inventory).where(Inventory.part_id == part_id))
     inv = inv_q.scalar_one_or_none()
     if not inv:
         raise NotFoundError(f"零件 {part_id} 沒有庫存記錄", part_id=part_id)
 
-    # Outbound: check available qty
+    # Outbound: check available qty（盡力檢查；最終仍由 DB 的並行寫入決定）
     if txn_type in VALID_OUTBOUND and inv.qty_available < qty:
         raise BusinessRuleError(
             "庫存不足",
@@ -119,26 +130,56 @@ async def add_inventory_transaction(db: AsyncSession, data: dict, user: Optional
     )
     db.add(txn)
 
+    now = datetime.now(UTC).replace(tzinfo=None)
+
+    # ---- Atomic SQL UPDATE（race-safe；取代 Python +=） ----
+    # qty_allocated 用 SQL case() 模擬 max(0, x-qty)，SQLite/PostgreSQL 皆通用。
     if txn_type in VALID_INBOUND:
-        inv.qty_on_hand += qty
+        new_allocated_expr = Inventory.qty_allocated
+        new_on_hand_expr = Inventory.qty_on_hand + qty
     elif txn_type in VALID_OUTBOUND:
-        inv.qty_on_hand -= qty
-        inv.qty_allocated = max(0.0, inv.qty_allocated - qty)
+        new_allocated_expr = case(
+            (Inventory.qty_allocated - qty < 0, 0.0),
+            else_=Inventory.qty_allocated - qty,
+        )
+        new_on_hand_expr = Inventory.qty_on_hand - qty
     elif txn_type == "allocate":
-        inv.qty_allocated += qty
+        new_allocated_expr = Inventory.qty_allocated + qty
+        new_on_hand_expr = Inventory.qty_on_hand
     elif txn_type == "deallocate":
-        inv.qty_allocated = max(0.0, inv.qty_allocated - qty)
-    inv.qty_available = inv.qty_on_hand - inv.qty_allocated
-    inv.updated_at = datetime.now(UTC).replace(tzinfo=None)
+        new_allocated_expr = case(
+            (Inventory.qty_allocated - qty < 0, 0.0),
+            else_=Inventory.qty_allocated - qty,
+        )
+        new_on_hand_expr = Inventory.qty_on_hand
+    else:  # pragma: no cover — 上方已驗 type
+        new_allocated_expr = Inventory.qty_allocated
+        new_on_hand_expr = Inventory.qty_on_hand
 
-    await db.commit()
-    await db.refresh(txn)
+    stmt = (
+        sql_update(Inventory)
+        .where(Inventory.part_id == part_id)
+        .values(
+            qty_on_hand=new_on_hand_expr,
+            qty_allocated=new_allocated_expr,
+            qty_available=new_on_hand_expr - new_allocated_expr,
+            updated_at=now,
+        )
+        .execution_options(synchronize_session=False)
+    )
+    await db.execute(stmt)
+    await db.flush()
+    # 把已被 SQL UPDATE 改動的 inv ORM 物件刷新成最新值
+    await db.refresh(inv)
 
+    # v3.53: include tenant_id so SSE can do per-tenant filtering
+    _tenant = getattr(inv, "tenant_id", None) or (user or {}).get("tenant_id")
     await EventBus.emit(DomainEvent(
         name="inventory.changed", domain="inventory",
         entity_type="InventoryTransaction", entity_id=txn.id,
         data={"part_id": part_id, "qty": qty, "type": txn_type,
-              "qty_on_hand": inv.qty_on_hand, "qty_available": inv.qty_available},
+              "qty_on_hand": inv.qty_on_hand, "qty_available": inv.qty_available,
+              "tenant_id": _tenant},
     ))
 
     # Check safety stock breach
@@ -148,7 +189,8 @@ async def add_inventory_transaction(db: AsyncSession, data: dict, user: Optional
             name="stock.below_safety", domain="inventory",
             entity_type="Part", entity_id=part_id,
             data={"part_no": part.part_no, "qty_available": inv.qty_available,
-                  "safety_stock": part.safety_stock},
+                  "safety_stock": part.safety_stock,
+                  "tenant_id": getattr(part, "tenant_id", None) or _tenant},
         ))
 
     return txn

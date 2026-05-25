@@ -600,6 +600,8 @@ async def _add_inventory_txn_with_confirm(
             "part_id": p.id, "transaction_type": transaction_type,
             "qty": float(qty), "remark": remark,
         }, user=user)
+        # v3.53：service 已改不自行 commit；ConfirmCard 執行端負責 commit
+        await db.commit()
         return {
             "txn_id": txn.id, "part_no": p.part_no,
             "transaction_type": transaction_type, "qty": qty,

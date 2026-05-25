@@ -49,10 +49,34 @@ async def event_stream(
 
     Sends initial backlog + a hello message, then live events as they fire.
     Clients should reconnect automatically on disconnect.
+
+    v3.53 tenant filter: only deliver events whose payload tenant_id matches
+    the caller's tenant. Events with no tenant_id (system events) pass through.
     """
     queue: asyncio.Queue[DomainEvent] = asyncio.Queue(maxsize=256)
+    user_tenant = (_user or {}).get("tenant_id")
+
+    def _event_tenant(e: DomainEvent) -> str | None:
+        """Pull tenant_id off a DomainEvent (lives in .data)."""
+        d = getattr(e, "data", None)
+        if isinstance(d, dict):
+            tid = d.get("tenant_id")
+            if tid is not None:
+                return str(tid)
+        return None
+
+    def _allowed(e: DomainEvent) -> bool:
+        """Tenant filter: pass system events (no tenant_id) and matching tenant.
+        Drop events that explicitly carry a different tenant_id.
+        """
+        evt_tenant = _event_tenant(e)
+        if user_tenant and evt_tenant and evt_tenant != user_tenant:
+            return False
+        return True
 
     async def on_event(event: DomainEvent):
+        if not _allowed(event):
+            return
         try:
             queue.put_nowait(event)
         except asyncio.QueueFull:
@@ -63,8 +87,10 @@ async def event_stream(
 
     async def generator() -> AsyncGenerator[dict, None]:
         try:
-            # Replay last 20 events as backlog
+            # Replay last 20 events as backlog (also tenant-filtered)
             for e in EventBus.get_history(limit=20):
+                if not _allowed(e):
+                    continue
                 yield {
                     "event": e.name,
                     "data": json.dumps({

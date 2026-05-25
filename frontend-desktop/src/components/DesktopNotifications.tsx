@@ -13,6 +13,7 @@
  * 整合方式：在 App.tsx 或 Layout 內放 <DesktopNotifications /> 元件即可。
  */
 import { useEffect, useRef, useState } from 'react'
+import { useAuthStore } from '../store/auth'
 
 interface SseEvent {
   event: string
@@ -142,8 +143,12 @@ export default function DesktopNotifications({
 
     // 3. 開 SSE
     // 注意：EventSource 不能帶 Authorization header（瀏覽器限制）
-    // 若需要 auth，要靠 cookie 或 query param token。Demo 階段 SSE 是 public。
-    const es = new EventSource('/api/events/stream')
+    // v3.53: 後端 SSE 已要求 auth + tenant 過濾，token 走 query param。
+    const token = useAuthStore.getState().token
+    const url = token
+      ? `/api/events/stream?access_token=${encodeURIComponent(token)}`
+      : '/api/events/stream'
+    const es = new EventSource(url)
 
     es.onopen = () => {
       setStatus('connected')

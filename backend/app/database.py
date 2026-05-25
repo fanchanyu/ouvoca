@@ -7,6 +7,7 @@ import logging
 import os
 from pathlib import Path
 
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import NullPool
 
@@ -60,7 +61,34 @@ def _make_engine():
     log.info("SQLite DB: %s (cwd=%s)", url, os.getcwd())
 
     # SQLite (aiosqlite): NullPool avoids lock contention in async tests
-    return create_async_engine(url, echo=settings.DEBUG, poolclass=NullPool)
+    sqlite_engine = create_async_engine(url, echo=settings.DEBUG, poolclass=NullPool)
+
+    # A4 修復：每條 SQLite 連線啟用 WAL + 友善 pragma，避免 50 人並發時 database is locked。
+    #   - journal_mode=WAL：讀寫並發（reader 不擋 writer）
+    #   - synchronous=NORMAL：搭配 WAL 安全且快
+    #   - busy_timeout=5000：寫鎖衝突時最多等 5 秒（而非立即噴錯）
+    #   - foreign_keys=ON：SQLite 預設關閉 FK，這裡強制開啟以維持資料一致性
+    event.listen(sqlite_engine.sync_engine, "connect", _enable_sqlite_pragmas)
+    return sqlite_engine
+
+
+def _enable_sqlite_pragmas(dbapi_conn, _connection_record):
+    """SQLite connect-time pragma 設定。
+
+    必須對每條新連線執行（pragma 是 per-connection 而非 per-database）。
+
+    foreign_keys=ON 僅在非 DEBUG 模式啟用：
+      - production（DEBUG=false）需要 FK 維持資料一致性
+      - 開發/測試（DEBUG=true）保持 SQLite 預設關閉，避免既有 fixture 資料
+        因人造 FK 不齊全而炸（這些測試本來就只驗業務邏輯，不驗 FK）
+    """
+    cursor = dbapi_conn.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.execute("PRAGMA busy_timeout=5000")
+    if not settings.DEBUG:
+        cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 
 engine = _make_engine()

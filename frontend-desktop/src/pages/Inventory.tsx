@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { apiListParts, apiCreatePart, apiListInventoryTxns, ApiError, type Part, type InventoryTransaction } from '../lib/api'
 import EmptyState from '../components/EmptyState'
+import { useAuthStore } from '../store/auth'
 
 export default function Inventory() {
   const [parts, setParts] = useState<Part[]>([])
@@ -23,7 +24,33 @@ export default function Inventory() {
     } finally { setLoading(false) }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+    // v3.53: subscribe to SSE so we auto-refresh when others change inventory
+    const token = useAuthStore.getState().token
+    const url = token
+      ? `/api/events/stream?access_token=${encodeURIComponent(token)}`
+      : '/api/events/stream'
+    const es = new EventSource(url)
+    const refetch = () => { void load() }
+    es.addEventListener('inventory.changed', refetch)
+    es.addEventListener('po.received', refetch)
+    es.addEventListener('so.shipped', refetch)
+    es.addEventListener('wo.completed', refetch)
+    es.addEventListener('part.created', refetch)
+    es.addEventListener('part.updated', refetch)
+    es.addEventListener('part.deleted', refetch)
+    return () => {
+      es.removeEventListener('inventory.changed', refetch)
+      es.removeEventListener('po.received', refetch)
+      es.removeEventListener('so.shipped', refetch)
+      es.removeEventListener('wo.completed', refetch)
+      es.removeEventListener('part.created', refetch)
+      es.removeEventListener('part.updated', refetch)
+      es.removeEventListener('part.deleted', refetch)
+      es.close()
+    }
+  }, [])
 
   async function submit() {
     if (!form.part_no.trim() || !form.name.trim()) {

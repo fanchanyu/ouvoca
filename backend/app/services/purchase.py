@@ -75,7 +75,8 @@ async def create_purchase_order(db: AsyncSession, data: dict, user: Optional[dic
     await EventBus.emit(DomainEvent(
         name="po.created", domain="purchase",
         entity_type="PurchaseOrder", entity_id=po.id,
-        data={"po_no": po.po_no, "supplier_id": po.supplier_id, "total": total},
+        data={"po_no": po.po_no, "supplier_id": po.supplier_id, "total": total,
+              "tenant_id": getattr(po, "tenant_id", None)},
     ))
     return po
 
@@ -111,7 +112,8 @@ async def approve_purchase_order(db: AsyncSession, po_id: str, user: dict) -> Pu
     await EventBus.emit(DomainEvent(
         name="po.approved", domain="purchase",
         entity_type="PurchaseOrder", entity_id=po.id,
-        data={"po_no": po.po_no, "approved_by": po.approved_by},
+        data={"po_no": po.po_no, "approved_by": po.approved_by,
+              "tenant_id": getattr(po, "tenant_id", None)},
     ))
     return po
 
@@ -160,7 +162,8 @@ async def receive_purchase_order(db: AsyncSession, po_id: str,
     await EventBus.emit(DomainEvent(
         name="po.received", domain="purchase",
         entity_type="PurchaseOrder", entity_id=po.id,
-        data={"po_no": po.po_no, "status": po.status},
+        data={"po_no": po.po_no, "status": po.status,
+              "tenant_id": getattr(po, "tenant_id", None)},
     ))
     return po
 
@@ -233,6 +236,7 @@ async def cancel_purchase_order(db: AsyncSession, po_id: str, user: dict, reason
     await EventBus.emit(DomainEvent(
         name="po.cancelled", domain="purchase",
         entity_type="PurchaseOrder", entity_id=po.id,
-        data={"po_no": po.po_no, "previous_status": old, "reason": reason},
+        data={"po_no": po.po_no, "previous_status": old, "reason": reason,
+              "tenant_id": getattr(po, "tenant_id", None)},
     ))
     return po

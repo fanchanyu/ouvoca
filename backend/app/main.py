@@ -48,16 +48,21 @@ async def lifespan(app: FastAPI):
                 "  CORS_ORIGINS=https://app.example.com,https://api.example.com"
             )
 
+        # C4 修復：production 用 SQLite = 多人並發災難（database is locked + 資料遺失）
+        # 升級為 FATAL，從啟動就擋下來，而不是只 log 一行 warning 沒人看到。
+        if settings.DATABASE_DRIVER == "sqlite":
+            fatal_errors.append(
+                "DATABASE_DRIVER=sqlite 不能用於 production（多人並發會丟資料 + database locked 錯誤）。\n"
+                "  改用 PostgreSQL：DATABASE_DRIVER=postgresql + DATABASE_URL_PROD=postgresql+asyncpg://...\n"
+                "  或為單人 demo 環境設 DEBUG=true"
+            )
+
         if fatal_errors:
             log.error("🚨 FATAL production config errors:")
             for i, e in enumerate(fatal_errors, 1):
                 log.error("  %d) %s", i, e)
             log.error("拒絕啟動以保護資料。如為本機演練：設 DEBUG=true。")
             raise SystemExit(1)
-
-        # 非致命的警告
-        if settings.DATABASE_DRIVER == "sqlite":
-            log.warning("⚠️  Using SQLite in non-debug mode. Consider PostgreSQL for multi-user.")
 
     # auto-create tables when running on SQLite dev or first prod boot
     from app.database import init_db, AsyncSessionLocal

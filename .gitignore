@@ -14,6 +14,9 @@
 # 寫 backend/uploads/* 不是 backend/uploads/ 才能讓 !.gitkeep 例外生效
 backend/uploads/*
 !backend/uploads/.gitkeep
+# v3.53: 部分 test 從根目錄起跑 → uploads/ 會建在 repo root（test 殘留）
+uploads/
+!uploads/.gitkeep
 *.pem
 *.key
 *.crt

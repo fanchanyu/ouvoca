@@ -60,7 +60,8 @@ async def create_sales_order(db: AsyncSession, data: dict, user: Optional[dict] 
     await EventBus.emit(DomainEvent(
         name="so.created", domain="sales",
         entity_type="SalesOrder", entity_id=so.id,
-        data={"so_no": so.so_no, "customer_id": so.customer_id, "total": total},
+        data={"so_no": so.so_no, "customer_id": so.customer_id, "total": total,
+              "tenant_id": getattr(so, "tenant_id", None)},
     ))
     return so
 
@@ -78,7 +79,8 @@ async def confirm_sales_order(db: AsyncSession, so_id: str, user: dict) -> Sales
     await EventBus.emit(DomainEvent(
         name="so.confirmed", domain="sales",
         entity_type="SalesOrder", entity_id=so.id,
-        data={"so_no": so.so_no, "customer_id": so.customer_id, "total": so.total_amount},
+        data={"so_no": so.so_no, "customer_id": so.customer_id, "total": so.total_amount,
+              "tenant_id": getattr(so, "tenant_id", None)},
     ))
     return so
 
@@ -139,6 +141,7 @@ async def ship_sales_order(db: AsyncSession, so_id: str, user: dict) -> SalesOrd
             "items": shipped_items,
             "total_amount": float(so.total_amount or 0),
             "customer_id": so.customer_id,
+            "tenant_id": getattr(so, "tenant_id", None),
         },
     ))
     return so
@@ -230,6 +233,7 @@ async def cancel_sales_order(db: AsyncSession, so_id: str, user: dict, reason: s
     await EventBus.emit(DomainEvent(
         name="so.cancelled", domain="sales",
         entity_type="SalesOrder", entity_id=so.id,
-        data={"so_no": so.so_no, "previous_status": old, "reason": reason},
+        data={"so_no": so.so_no, "previous_status": old, "reason": reason,
+              "tenant_id": getattr(so, "tenant_id", None)},
     ))
     return so

@@ -105,6 +105,9 @@ async def create_transaction(
     user: UserContext = Depends(require_permission("inventory.transaction.create")),
 ):
     txn = await svc.add_inventory_transaction(db, data.model_dump(), user=user.raw_user)
+    # v3.53：add_inventory_transaction 不再自行 commit（避免在多行操作中切斷原子性），
+    # 由 API 端在 success 路徑 commit 一次。
+    await db.commit()
     result = await db.execute(
         select(InventoryTransaction)
         .options(joinedload(InventoryTransaction.part))

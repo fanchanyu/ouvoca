@@ -69,6 +69,26 @@ export default function Purchase() {
 
   useEffect(() => { load() }, [filterStatus])
 
+  // v3.53: SSE auto-refresh so other users' actions update this screen live
+  useEffect(() => {
+    const token = useAuthStore.getState().token
+    const url = token
+      ? `/api/events/stream?access_token=${encodeURIComponent(token)}`
+      : '/api/events/stream'
+    const es = new EventSource(url)
+    const refetch = () => { void load() }
+    const events = [
+      'po.created', 'po.approved', 'po.received', 'po.cancelled',
+      'supplier.updated', 'supplier.deleted',
+    ]
+    for (const name of events) es.addEventListener(name, refetch)
+    return () => {
+      for (const name of events) es.removeEventListener(name, refetch)
+      es.close()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const cancelPO = async (po: PurchaseOrder) => {
     const reason = prompt(`取消採購單 ${po.po_no}\n\n請輸入取消原因：`)
     if (reason === null) return

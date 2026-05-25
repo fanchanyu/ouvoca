@@ -73,6 +73,25 @@ export default function Sales() {
 
   useEffect(() => { void load() }, [])
 
+  // v3.53: SSE auto-refresh so other users' actions update this screen live
+  useEffect(() => {
+    const token = useAuthStore.getState().token
+    const url = token
+      ? `/api/events/stream?access_token=${encodeURIComponent(token)}`
+      : '/api/events/stream'
+    const es = new EventSource(url)
+    const refetch = () => { void load() }
+    const events = [
+      'so.created', 'so.confirmed', 'so.shipped', 'so.invoiced', 'so.cancelled',
+      'customer.updated', 'customer.deleted',
+    ]
+    for (const name of events) es.addEventListener(name, refetch)
+    return () => {
+      for (const name of events) es.removeEventListener(name, refetch)
+      es.close()
+    }
+  }, [])
+
   const SO_STATUS: Record<string,string> = { draft:'草稿', confirmed:'已確認', shipped:'已出貨', cancelled:'已取消', invoiced:'已開票' }
   const PAYMENT_STATUS: Record<string,string> = { unpaid:'未付款', partial:'部分付款', paid:'已付清', overdue:'逾期' }
 

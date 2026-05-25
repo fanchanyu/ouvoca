@@ -55,6 +55,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
         auth_header = request.headers.get("Authorization", "")
         token = auth_header.replace("Bearer ", "").strip()
 
+        # v3.53: SSE (EventSource) cannot send custom headers — accept
+        # ?access_token=<jwt> query param as fallback for /api/events/stream
+        # and similar streaming endpoints.
+        if not token:
+            qp_token = request.query_params.get("access_token", "").strip()
+            if qp_token:
+                token = qp_token
+
         if not token:
             return JSONResponse(
                 {"code": "missing_token", "detail": "缺少 Authorization 標頭"},
