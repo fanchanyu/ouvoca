@@ -32,6 +32,24 @@
 > 🇹🇼 **不講工程術語，只說「你能用到什麼」**。每條修復都按「你會看到什麼差別」描述。
 > 🇺🇸 **No tech jargon — only what you'll notice as a user.**
 
+### 🆕 v3.54（2026-05-25）— 法規合規 + 資料洩漏 + 跨國時區三維修補
+
+> 范展裕回饋：「業務不能看財務報表」「出貨單沒對應發票傳票」「跨國 UTC 怎麼處理」「公司機密洩露就麻煩了」
+> 三維審計揭露 16 個 P0，本版修最關鍵的 9 個。
+
+| 修了什麼 | 你會看到的差別 |
+|---|---|
+| 🔒 **業務再也看不到成本** | `unit_cost` / `credit_limit` 對非會計角色強制隱藏（無 accounting 權限就 strip 掉）|
+| 📧 **老闆儀表板不再能被外洩** | email-digest preview/send 從 `ai.agent.use` 升級到 `analytics.view`，且外部 email 留 log |
+| 📊 **存貨估值報表給業務即 403** | inventory-monthly.xlsx 改為會計專屬，無權限版本連 unit_cost 欄都不會出現 |
+| 🧾 **電子發票真正存進 DB** | EInvoiceRecord 表上線，重啟不再遺失（之前是 in-memory dict 違反 5 年保存義務）|
+| 🔗 **發票自動回連 SO** | 開立發票時可帶 so_id，SO.invoice_no 自動回寫，稽核可追溯 |
+| 📋 **發票清單 API 上線** | GET /api/tax/tw/einvoice/list 支援日期/買方/狀態 filter，稽核員調得到 |
+| ⏰ **台灣發票時區修正** | invoice_date 改用 Asia/Taipei（之前 UTC 在凌晨 0-8 點開的發票會打到前一天，違反統一發票使用辦法）|
+| 🔐 **demo-admin 後門關閉** | production 環境（DEBUG=false）拒絕 demo-admin token，留 IP/UA log |
+| 🎨 **側欄選單按權限隱藏** | 業務角色不再看到「會計/報表/權限」選單（不只後端 403，前端直接不顯示）|
+| 💰 **付款/收款自動建傳票** | 之前 record_payment/receipt 工具直接 crash（缺 lines），現在會建 DR/CR 分錄 + 連結 source SO/PO |
+
 ### 🆕 v3.53（2026-05-25）— 多人並發三大命門全修
 
 > 范展裕回饋：「同時不同人上線資料會同步更新嗎？早上下單下午到貨會很嚴重」
