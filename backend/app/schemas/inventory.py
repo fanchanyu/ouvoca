@@ -41,7 +41,8 @@ class PartResponse(BaseModel):
     max_stock: float
     safety_stock: float
     lead_time_days: int
-    unit_cost: float
+    # F-1：unit_cost 改 Optional，API 端對非財務角色會 strip 為 None
+    unit_cost: Optional[float] = None
     is_active: bool
     is_critical: bool
     created_at: datetime

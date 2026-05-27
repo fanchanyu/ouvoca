@@ -22,7 +22,8 @@ class CustomerResponse(BaseModel):
     contact_person: Optional[str] = None
     contact_email: Optional[str] = None
     contact_phone: Optional[str] = None
-    credit_limit: float
+    # F-2：credit_limit 改 Optional，API 端對非財務角色會 strip 為 None
+    credit_limit: Optional[float] = None
     is_active: bool
 
     class Config:

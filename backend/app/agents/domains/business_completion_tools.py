@@ -345,14 +345,34 @@ async def _record_payment_to_supplier(
     )
 
     async def execute():
+        # v3.54 GAP-5 fix：原本傳 total_debit/total_credit（schema 沒這欄位）
+        # 且漏傳 lines（service 必填）→ 整個 nested JE 建立會 crash。
+        # 修正：先依 account.code 解出 account_id，再傳合規 lines。
         from app.services.accounting import create_journal_entry
+        # 解析科目：DR 2100 應付帳款 / CR 1100 現金（依 seed.py chart-of-accounts）
+        ap_acct = (await db.execute(
+            select(Account).where(Account.code == "2100")
+        )).scalar_one_or_none()
+        cash_acct = (await db.execute(
+            select(Account).where(Account.code == "1100")
+        )).scalar_one_or_none()
+        if not ap_acct or not cash_acct:
+            return {
+                "error": "Chart of accounts 缺 2100 / 1100，請先跑 seed.py 建立預設科目",
+            }
         je = await create_journal_entry(db, {
             "entry_no": f"PAY-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:4]}",
             "entry_date": datetime.now(UTC).replace(tzinfo=None),
-            "description": f"付款給 {sup.name}: {payment_method}, {notes}".strip(),
-            "total_debit": amount,
-            "total_credit": amount,
+            "description": f"付款給 {sup.name} (PO:{po_no or '(未指定)'}): {payment_method}, {notes}".strip(),
+            "source_type": "PurchaseOrder",  # GAP-5: 補來源（讓 JE 可追溯）
+            "source_id": po_no or None,
             "status": "draft",
+            "lines": [  # GAP-5: 補 lines（service 必填，否則 BusinessRuleError）
+                {"account_id": ap_acct.id, "debit": amount, "credit": 0,
+                 "description": "應付帳款"},
+                {"account_id": cash_acct.id, "debit": 0, "credit": amount,
+                 "description": "現金"},
+            ],
         }, user=user)
         return {
             "entry_no": je.entry_no, "amount": amount,
@@ -417,14 +437,32 @@ async def _record_receipt_from_customer(
     )
 
     async def execute():
+        # v3.54 GAP-5 fix：同 record_payment_to_supplier_with_confirm
         from app.services.accounting import create_journal_entry
+        # DR 1100 現金 / CR 1200 應收帳款（依 seed.py chart-of-accounts）
+        cash_acct = (await db.execute(
+            select(Account).where(Account.code == "1100")
+        )).scalar_one_or_none()
+        ar_acct = (await db.execute(
+            select(Account).where(Account.code == "1200")
+        )).scalar_one_or_none()
+        if not cash_acct or not ar_acct:
+            return {
+                "error": "Chart of accounts 缺 1100 / 1200，請先跑 seed.py 建立預設科目",
+            }
         je = await create_journal_entry(db, {
             "entry_no": f"RCT-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:4]}",
             "entry_date": datetime.now(UTC).replace(tzinfo=None),
-            "description": f"客戶收款 {cu.name}: {payment_method}, {notes}".strip(),
-            "total_debit": amount,
-            "total_credit": amount,
+            "description": f"客戶收款 {cu.name} (SO:{so_no or '(未指定)'}): {payment_method}, {notes}".strip(),
+            "source_type": "SalesOrder",
+            "source_id": so_no or None,
             "status": "draft",
+            "lines": [
+                {"account_id": cash_acct.id, "debit": amount, "credit": 0,
+                 "description": "現金"},
+                {"account_id": ar_acct.id, "debit": 0, "credit": amount,
+                 "description": "應收帳款"},
+            ],
         }, user=user)
         return {
             "entry_no": je.entry_no, "amount": amount, "customer": cu.name,

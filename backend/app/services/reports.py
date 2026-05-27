@@ -240,7 +240,11 @@ def render_ar_aging_xlsx(rows: list[dict], generated_at: str = "") -> bytes:
 # 庫存月報 Excel
 # ─────────────────────────────────────────────────────────
 
-def render_inventory_monthly_xlsx(rows: list[dict], period_label: str = "") -> bytes:
+def render_inventory_monthly_xlsx(
+    rows: list[dict],
+    period_label: str = "",
+    include_cost: bool = True,
+) -> bytes:
     """庫存月報 Excel。
 
     rows: [{
@@ -248,6 +252,8 @@ def render_inventory_monthly_xlsx(rows: list[dict], period_label: str = "") -> b
       "qty_on_hand": float, "qty_available": float, "safety_stock": float,
       "unit_cost": float, "value": float,  # 帳面金額
     }, ...]
+
+    F-4：include_cost=False 時不輸出「單位成本」「帳面金額」兩欄（防財務外洩）。
     """
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font, PatternFill
@@ -263,17 +269,18 @@ def render_inventory_monthly_xlsx(rows: list[dict], period_label: str = "") -> b
     header_fill = PatternFill("solid", fgColor="E5E7EB")
     low_fill = PatternFill("solid", fgColor="FEF3C7")  # 低於安全庫存
 
-    ws.merge_cells("A1:I1")
+    n_cols = 9 if include_cost else 7
+    merge_range = f"A1:{get_column_letter(n_cols)}1"
+    ws.merge_cells(merge_range)
     ws["A1"] = f"庫存月報表 — {period_label}"
     ws["A1"].font = title_font
     ws["A1"].fill = title_fill
     ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
     ws.row_dimensions[1].height = 28
 
-    headers = [
-        "料號", "名稱", "類別", "單位",
-        "在手量", "可用量", "安全庫存", "單位成本", "帳面金額",
-    ]
+    headers = ["料號", "名稱", "類別", "單位", "在手量", "可用量", "安全庫存"]
+    if include_cost:
+        headers += ["單位成本", "帳面金額"]
     for col, h in enumerate(headers, 1):
         c = ws.cell(row=2, column=col, value=h)
         c.font = header_font
@@ -287,8 +294,6 @@ def render_inventory_monthly_xlsx(rows: list[dict], period_label: str = "") -> b
         qty_on_hand = float(r.get("qty_on_hand", 0))
         qty_available = float(r.get("qty_available", 0))
         safety_stock = float(r.get("safety_stock", 0))
-        unit_cost = float(r.get("unit_cost", 0))
-        value = float(r.get("value", qty_on_hand * unit_cost))
 
         ws.cell(row=i, column=1, value=r.get("part_no", ""))
         ws.cell(row=i, column=2, value=r.get("name", ""))
@@ -297,27 +302,33 @@ def render_inventory_monthly_xlsx(rows: list[dict], period_label: str = "") -> b
         ws.cell(row=i, column=5, value=qty_on_hand)
         ws.cell(row=i, column=6, value=qty_available)
         ws.cell(row=i, column=7, value=safety_stock)
-        ws.cell(row=i, column=8, value=unit_cost).number_format = "#,##0.00"
-        ws.cell(row=i, column=9, value=value).number_format = "#,##0"
+
+        if include_cost:
+            unit_cost = float(r.get("unit_cost", 0))
+            value = float(r.get("value", qty_on_hand * unit_cost))
+            ws.cell(row=i, column=8, value=unit_cost).number_format = "#,##0.00"
+            ws.cell(row=i, column=9, value=value).number_format = "#,##0"
+            total_value += value
 
         if safety_stock > 0 and qty_available < safety_stock:
-            for col in range(1, 10):
+            for col in range(1, n_cols + 1):
                 ws.cell(row=i, column=col).fill = low_fill
             low_count += 1
-
-        total_value += value
 
     # Totals
     n = len(rows) + 3
     ws.cell(row=n, column=1, value="合計").font = header_font
-    ws.cell(row=n, column=9, value=total_value).font = header_font
-    ws.cell(row=n, column=9).number_format = "#,##0"
-    ws.cell(row=n, column=9).fill = header_fill
+    if include_cost:
+        ws.cell(row=n, column=9, value=total_value).font = header_font
+        ws.cell(row=n, column=9).number_format = "#,##0"
+        ws.cell(row=n, column=9).fill = header_fill
 
     # Notes
     ws.cell(row=n + 2, column=1, value=f"⚠️ 低於安全庫存品項：{low_count} 筆（黃色標示）").font = header_font
 
-    widths = [16, 30, 14, 8, 12, 12, 12, 12, 14]
+    widths = [16, 30, 14, 8, 12, 12, 12]
+    if include_cost:
+        widths += [12, 14]
     for i, w in enumerate(widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
 

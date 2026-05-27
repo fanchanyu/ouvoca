@@ -194,8 +194,18 @@ async def load_user_context(request: Request, db: AsyncSession) -> UserContext:
         raise AuthenticationError("尚未登入")
 
     # Demo bypass: demo-admin → super-admin context（不查 DB）
+    # F-6：production 環境（DEBUG=False 且 ALLOW_DEMO_BYPASS=False）一律擋掉，
+    # 避免 JWT_SECRET 外洩時惡意人偽造 employee_id="demo-admin" 拿到 super-admin。
     employee_id = raw.get("employee_id")
     if employee_id == "demo-admin":
+        from app.config import settings
+        if not settings.DEBUG and not settings.ALLOW_DEMO_BYPASS:
+            log.warning(
+                "demo-admin bypass blocked in production: ip=%s ua=%s",
+                getattr(request.client, "host", None) if request.client else None,
+                request.headers.get("user-agent"),
+            )
+            raise AuthenticationError("demo-admin bypass disabled in production")
         ctx = UserContext(
             user_id="demo-admin",
             employee_id="demo-admin",

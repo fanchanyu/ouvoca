@@ -19,6 +19,31 @@ from app.services import inventory as svc
 router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 
 
+# ─── F-1：成本欄位敏感資料隔離 ──────────────────────────
+def _can_see_cost(user_ctx: UserContext) -> bool:
+    """非財務角色看不到 unit_cost。"""
+    return (
+        user_ctx.is_superuser
+        or user_ctx.has("accounting.account.read")
+        or user_ctx.has("accounting.ar.read")
+    )
+
+
+def _strip_cost_if_no_perm(parts_list, user_ctx: UserContext):
+    """非財務角色 → unit_cost 一律 None。"""
+    if _can_see_cost(user_ctx):
+        return parts_list
+    for p in parts_list:
+        if isinstance(p, dict):
+            p["unit_cost"] = None
+        else:
+            try:
+                p.unit_cost = None
+            except Exception:
+                pass
+    return parts_list
+
+
 @router.post("/parts", response_model=PartResponse)
 async def create_part_endpoint(
     data: PartCreate,
@@ -45,7 +70,8 @@ async def list_parts_endpoint(
     if category: q = q.where(Part.category == category)
     q = q.offset(skip).limit(limit).order_by(Part.part_no)
     parts = (await db.execute(q)).scalars().all()
-    return [PartResponse.model_validate(p) for p in parts]
+    responses = [PartResponse.model_validate(p) for p in parts]
+    return _strip_cost_if_no_perm(responses, user)
 
 
 @router.get("/parts/{part_no}", response_model=PartResponse)
@@ -64,7 +90,9 @@ async def get_part_endpoint(
         and "tenant.cross" not in user.permissions
     ):
         raise NotFoundError("零件不存在", part_no=part_no)  # 故意回 404 不洩漏存在性
-    return PartResponse.model_validate(part)
+    resp = PartResponse.model_validate(part)
+    _strip_cost_if_no_perm([resp], user)
+    return resp
 
 
 @router.get("/parts/{part_id}/inventory", response_model=InventoryResponse)

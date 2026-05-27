@@ -19,24 +19,50 @@ import OnboardingTour from './OnboardingTour'
 import AskAiFloat from './AskAiFloat'
 import CommandPalette from './CommandPalette'
 
-const navConfig = [
+// F-7：每個 menu 加 requires，無此權限的使用者看不到該 menu
+const navConfig: ReadonlyArray<{
+  path: string
+  key: string
+  icon: string
+  group: 'overview' | 'operations' | 'system'
+  requires?: string
+}> = [
   { path: '/',                key: 'dashboard',      icon: '📊', group: 'overview' },
-  { path: '/chat',            key: 'aiAssistant',    icon: '💬', group: 'overview' },
+  { path: '/chat',            key: 'aiAssistant',    icon: '💬', group: 'overview', requires: 'ai.agent.use' },
   { path: '/events',          key: 'eventStream',    icon: '📡', group: 'overview' },
-  { path: '/inventory',       key: 'inventory',      icon: '📦', group: 'operations' },
-  { path: '/purchase',        key: 'purchase',       icon: '🛒', group: 'operations' },
-  { path: '/production',      key: 'production',     icon: '🏭', group: 'operations' },
-  { path: '/sales',           key: 'sales',          icon: '💰', group: 'operations' },
-  { path: '/crm',             key: 'crm',            icon: '🤝', group: 'operations' },
-  { path: '/accounting',      key: 'accounting',     icon: '📒', group: 'operations' },
-  { path: '/einvoice',        key: 'einvoice',       icon: '🧾', group: 'operations' },
-  { path: '/quality',         key: 'quality',        icon: '🔬', group: 'operations' },
-  { path: '/reports',         key: 'reports',        icon: '📈', group: 'operations' },
-  { path: '/approvals',       key: 'approvals',      icon: '✅', group: 'operations' },
-  { path: '/permissions',     key: 'permissions',    icon: '🛡️', group: 'system' },
+  { path: '/inventory',       key: 'inventory',      icon: '📦', group: 'operations', requires: 'inventory.part.list' },
+  { path: '/purchase',        key: 'purchase',       icon: '🛒', group: 'operations', requires: 'purchase.order.list' },
+  { path: '/production',      key: 'production',     icon: '🏭', group: 'operations', requires: 'production.work_order.list' },
+  { path: '/sales',           key: 'sales',          icon: '💰', group: 'operations', requires: 'sales.order.list' },
+  { path: '/crm',             key: 'crm',            icon: '🤝', group: 'operations', requires: 'crm.lead.list' },
+  { path: '/accounting',      key: 'accounting',     icon: '📒', group: 'operations', requires: 'accounting.journal.list' },
+  { path: '/einvoice',        key: 'einvoice',       icon: '🧾', group: 'operations', requires: 'accounting.einvoice.read' },
+  { path: '/quality',         key: 'quality',        icon: '🔬', group: 'operations', requires: 'quality.inspection.list' },
+  { path: '/reports',         key: 'reports',        icon: '📈', group: 'operations', requires: 'analytics.view' },
+  { path: '/approvals',       key: 'approvals',      icon: '✅', group: 'operations', requires: 'organization.role.read' },
+  { path: '/permissions',     key: 'permissions',    icon: '🛡️', group: 'system', requires: 'organization.role.read' },
   { path: '/me/permissions',  key: 'myPermissions',  icon: '🔑', group: 'system' },
   { path: '/settings',        key: 'settings',       icon: '⚙️', group: 'system' },
-] as const
+]
+
+
+/**
+ * F-7：權限比對（含 wildcard）。
+ * - is_superuser 直接通過
+ * - 'sales.order.list' 命中 'sales.order.list' / 'sales.order.*' / 'sales.*' / '*'
+ */
+function hasPermission(perms: string[], code: string | undefined, isSuper: boolean): boolean {
+  if (!code) return true
+  if (isSuper) return true
+  if (!perms || perms.length === 0) return false
+  if (perms.includes(code) || perms.includes('*')) return true
+  const parts = code.split('.')
+  for (let i = parts.length - 1; i > 0; i--) {
+    const wc = parts.slice(0, i).join('.') + '.*'
+    if (perms.includes(wc)) return true
+  }
+  return false
+}
 
 export default function Layout() {
   const location = useLocation()
@@ -88,6 +114,11 @@ export default function Layout() {
 
   const groups = ['overview', 'operations', 'system'] as const
 
+  // F-7：依使用者權限過濾 navConfig（superuser 看全部）
+  const userPerms = user?.permissions ?? []
+  const isSuper = !!user?.is_superuser
+  const visibleNav = navConfig.filter(item => hasPermission(userPerms, item.requires, isSuper))
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-ink-50 to-brand-50/30 flex">
       {drawerOpen && (
@@ -125,7 +156,7 @@ export default function Layout() {
                 {t(`nav.group.${group}`)}
               </p>
               <div className="space-y-0.5">
-                {navConfig.filter(i => i.group === group).map(item => {
+                {visibleNav.filter(i => i.group === group).map(item => {
                   const active = location.pathname === item.path
                   return (
                     <Link

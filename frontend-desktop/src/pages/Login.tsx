@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/auth'
-import { apiLogin, apiHealth, ApiError } from '../lib/api'
+import { apiLogin, apiHealth, apiMyPermissions, ApiError } from '../lib/api'
 import { Button, useToast } from '../components/ui'
 import { useTranslation, type Lang } from '../i18n'
 
@@ -12,6 +12,7 @@ export default function Login() {
   const navigate = useNavigate()
   const toast = useToast()
   const setAuth = useAuthStore(s => s.setAuth)
+  const setPermissions = useAuthStore(s => s.setPermissions)
   const loginAsDemo = useAuthStore(s => s.loginAsDemo)
   const { t, lang, setLang } = useTranslation()
 
@@ -46,6 +47,13 @@ export default function Login() {
         id: res.user.id, username: res.user.username,
         employee_id: res.user.employee_id, is_superuser: res.user.is_superuser,
       })
+      // F-7：載入使用者有效權限 → 前端 menu 依此過濾（失敗就 fallback 空陣列，非阻塞登入）
+      try {
+        const perms = await apiMyPermissions()
+        setPermissions(perms.permissions.map(p => p.permission_code))
+      } catch {
+        setPermissions([])
+      }
       // 記住 username 方便下次預填（不存密碼）
       try { localStorage.setItem('ouvoca_last_username', username) } catch { /* ignore */ }
       // v3.37 D0-2：若還在用預設密碼，提示一定要改

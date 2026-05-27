@@ -16,7 +16,7 @@ from fastapi.responses import HTMLResponse, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db
-from app.core.security import UserContext, require_permission
+from app.core.security import UserContext, require_any_permission, require_permission
 from app.services.reports import (
     render_ar_aging_xlsx, render_form_401_html, render_inventory_monthly_xlsx,
 )
@@ -99,9 +99,21 @@ async def report_inventory_monthly_xlsx(
     period_label: str = Query("", description="期別文字（如 2026-05）"),
     only_low: bool = Query(False, description="只列低於安全庫存的品項"),
     db: AsyncSession = Depends(get_db),
-    user: UserContext = Depends(require_permission("inventory.part.list")),
+    # F-4：要看庫存月報必須有 inventory.part.list **且** 任一財務閱讀權限之一才能看 unit_cost/value
+    # 這裡只擋「能不能呼叫」：呼叫權限要求二者其一財務權限或 tax_report，避免任意 part.list 使用者匯出
+    user: UserContext = Depends(
+        require_any_permission(
+            "accounting.tax_report",
+            "accounting.account.read",
+            "accounting.ar.read",
+            "inventory.inventory.read",
+        )
+    ),
 ):
-    """庫存月報 Excel。低於安全庫存自動黃底高亮。"""
+    """庫存月報 Excel。低於安全庫存自動黃底高亮。
+
+    F-4：unit_cost / value 兩欄敏感（成本），對沒有財務權限的呼叫者直接不輸出。
+    """
     from sqlalchemy import select
     from app.models.inventory import Inventory, Part
 
@@ -115,20 +127,32 @@ async def report_inventory_monthly_xlsx(
         q = q.where(Part.safety_stock > 0)
 
     rows_orm = (await db.execute(q)).all()
-    rows = [
-        {
+
+    # F-4：是否能看成本欄位（unit_cost / value）
+    can_see_cost = (
+        user.is_superuser
+        or user.has("accounting.account.read")
+        or user.has("accounting.ar.read")
+        or user.has("accounting.tax_report")
+    )
+
+    rows = []
+    for inv, p in rows_orm:
+        row = {
             "part_no": p.part_no, "name": p.name,
             "category": p.category, "unit": p.unit,
             "qty_on_hand": inv.qty_on_hand,
             "qty_available": inv.qty_available,
             "safety_stock": p.safety_stock,
-            "unit_cost": p.unit_cost,
-            "value": (inv.qty_on_hand or 0) * (p.unit_cost or 0),
         }
-        for inv, p in rows_orm
-    ]
+        if can_see_cost:
+            row["unit_cost"] = p.unit_cost
+            row["value"] = (inv.qty_on_hand or 0) * (p.unit_cost or 0)
+        rows.append(row)
     label = period_label or datetime.now(UTC).strftime("%Y-%m")
-    xlsx_bytes = render_inventory_monthly_xlsx(rows, period_label=label)
+    xlsx_bytes = render_inventory_monthly_xlsx(
+        rows, period_label=label, include_cost=can_see_cost,
+    )
     return Response(
         content=xlsx_bytes,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

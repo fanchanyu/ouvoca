@@ -12,6 +12,13 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, UTC
 from typing import Optional
+from zoneinfo import ZoneInfo
+
+# v3.54 P0：統一發票使用辦法要求發票日期時間為「台灣時間（UTC+8）」。
+# 若以 UTC 戳記，台灣凌晨 00:00–08:00 開立的發票會被打上前一天日期，
+# 跨月時甚至影響營業稅期別歸屬，直接違反法規。所有「代表台灣稅務日期/期別」
+# 的欄位皆改用 TAIWAN_TZ；純系統時間戳（例：generated_at audit log）保留 UTC。
+TAIWAN_TZ = ZoneInfo("Asia/Taipei")
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import select, func, and_
@@ -211,15 +218,19 @@ class EInvoiceCreateRequest(BaseModel):
     buyer_tax_id: str = ""
     buyer_name: str = ""
     items: list[dict] = []  # 每項 {description, qty, unit_price}
+    so_id: Optional[str] = None  # v3.54: 對應之 SalesOrder（建立合規追溯鏈）
 
 
 @router.post("/einvoice/issue")
 async def issue_einvoice(
     req: EInvoiceCreateRequest,
+    db: AsyncSession = Depends(get_db),
     user: UserContext = Depends(require_permission("accounting.einvoice.issue")),
 ):
     """開立電子發票（送加值中心 / 財政部）。
-    回成功與否 + tracking_no（生產換成 real provider）。
+
+    v3.54: 成功後落 DB（EInvoiceRecord）並反寫 SalesOrder.invoice_no，
+    形成 SO -> Invoice 合規追溯鏈（統一發票使用辦法 5 年保存要求）。
     """
     items = [
         InvoiceLineItem(
@@ -233,10 +244,12 @@ async def issue_einvoice(
     sales_amount = sum(it.amount for it in items) / 1.05
     tax, total = calc_tax(round(sales_amount))
 
+    # v3.54 P0 fix：發票時間必須用台灣時區（統一發票使用辦法），不能用 UTC。
+    _taipei_now = datetime.now(TAIWAN_TZ)
     inv = EInvoice(
         invoice_no=req.invoice_no,
-        invoice_date=datetime.now(UTC).replace(tzinfo=None).strftime("%Y%m%d"),
-        invoice_time=datetime.now(UTC).replace(tzinfo=None).strftime("%H:%M:%S"),
+        invoice_date=_taipei_now.strftime("%Y%m%d"),
+        invoice_time=_taipei_now.strftime("%H:%M:%S"),
         seller_tax_id=req.seller_tax_id,
         seller_name=req.seller_name,
         buyer_tax_id=req.buyer_tax_id,
@@ -251,11 +264,48 @@ async def issue_einvoice(
         raise HTTPException(400, detail={
             "code": "einvoice_invalid", "errors": result["errors"],
         })
+
+    # v3.54: 持久化發票記錄 + 反寫 SO.invoice_no（合規追溯鏈）
+    from app.models.tax_tw import EInvoiceRecord
+    from app.models.crm_sales import SalesOrder
+
+    linked_so = None
+    if req.so_id:
+        linked_so = (await db.execute(
+            select(SalesOrder).where(SalesOrder.id == req.so_id)
+        )).scalar_one_or_none()
+
+    raw_user = getattr(user, "raw_user", None) or {}
+    einvoice_rec = EInvoiceRecord(
+        invoice_no=inv.invoice_no,
+        invoice_date=inv.invoice_date,
+        invoice_time=inv.invoice_time,
+        seller_tax_id=inv.seller_tax_id,
+        buyer_tax_id=inv.buyer_tax_id or None,
+        buyer_name=inv.buyer_name or "",
+        sales_amount=inv.sales_amount,
+        tax_amount=inv.tax_amount,
+        total_amount=inv.total_amount,
+        so_id=linked_so.id if linked_so else None,
+        status="issued",
+        tracking_no=result.get("tracking_no"),
+        mig_payload=result.get("mig_payload") or result,
+        tenant_id=raw_user.get("tenant_id", "HQ"),
+        created_by=raw_user.get("employee_id"),
+    )
+    db.add(einvoice_rec)
+
+    # 反寫 SO.invoice_no（追溯鏈關鍵步驟）
+    if linked_so:
+        linked_so.invoice_no = inv.invoice_no
+
+    await db.commit()
+
     # v3.50: 寫 audit log（不上 ORM 表，純 logger，方便日後查證 / 重印）
     log.info(
-        "E-invoice issued: invoice_no=%s seller=%s buyer=%s amount=%.2f tracking_no=%s",
+        "E-invoice issued: invoice_no=%s seller=%s buyer=%s amount=%.2f tracking_no=%s so_id=%s",
         req.invoice_no, req.seller_tax_id, req.buyer_tax_id or "(個人)",
-        float(total), result.get("tracking_no", ""),
+        float(total), result.get("tracking_no", ""), req.so_id or "(none)",
     )
     return result
 
@@ -270,6 +320,62 @@ async def cancel_einvoice(
     if not result["success"]:
         raise HTTPException(400, detail=result)
     return result
+
+
+@router.get("/einvoice/list")
+async def list_einvoices(
+    start_date: Optional[str] = None,   # YYYYMMDD
+    end_date: Optional[str] = None,     # YYYYMMDD
+    buyer_tax_id: Optional[str] = None,
+    status: Optional[str] = None,       # issued / cancelled / voided
+    limit: int = 50,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("accounting.einvoice.read")),
+):
+    """v3.54: 已開發票清單（合規必備：5 年保存 + 查詢）。
+
+    支援以日期 / 買方統編 / 狀態過濾，預設依 invoice_date desc 排序。
+    """
+    from app.models.tax_tw import EInvoiceRecord
+
+    q = select(EInvoiceRecord).order_by(
+        EInvoiceRecord.invoice_date.desc(),
+        EInvoiceRecord.invoice_no.desc(),
+    )
+    if start_date:
+        q = q.where(EInvoiceRecord.invoice_date >= start_date)
+    if end_date:
+        q = q.where(EInvoiceRecord.invoice_date <= end_date)
+    if buyer_tax_id:
+        q = q.where(EInvoiceRecord.buyer_tax_id == buyer_tax_id)
+    if status:
+        q = q.where(EInvoiceRecord.status == status)
+
+    all_rows = (await db.execute(q)).scalars().all()
+    items = all_rows[offset:offset + limit]
+    return {
+        "total": len(all_rows),
+        "limit": limit,
+        "offset": offset,
+        "items": [
+            {
+                "invoice_no": e.invoice_no,
+                "invoice_date": e.invoice_date,
+                "invoice_time": e.invoice_time,
+                "buyer_tax_id": e.buyer_tax_id,
+                "buyer_name": e.buyer_name,
+                "sales_amount": e.sales_amount,
+                "tax_amount": e.tax_amount,
+                "total_amount": e.total_amount,
+                "status": e.status,
+                "tracking_no": e.tracking_no,
+                "so_id": e.so_id,
+                "journal_entry_id": e.journal_entry_id,
+            }
+            for e in items
+        ],
+    }
 
 
 @router.get("/einvoice/{invoice_no}")

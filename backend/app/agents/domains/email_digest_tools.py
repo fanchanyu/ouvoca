@@ -23,7 +23,7 @@ from app.services.email_digest import build_digest, send_email
         Slot("period_hours", "integer", required=False,
              description="統計區間（小時），預設 24"),
     ],
-    required_permission="ai.agent.use",
+    required_permission="analytics.view",
 )
 async def _preview_digest(db, user, period_hours: int = 24):
     if period_hours < 1:
@@ -63,7 +63,7 @@ async def _preview_digest(db, user, period_hours: int = 24):
         Slot("to", "string", required=True, description="收件人 email"),
         Slot("period_hours", "integer", required=False, description="統計區間，預設 24"),
     ],
-    required_permission="ai.agent.use",
+    required_permission="analytics.view",
 )
 async def _send_digest_with_confirm(db, user, to: str, period_hours: int = 24):
     if "@" not in to:

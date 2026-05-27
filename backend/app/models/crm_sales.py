@@ -50,6 +50,11 @@ class SalesOrder(Base, TenantMixin):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # v3.54: 合規追溯鏈（SO -> Invoice -> JE -> AR）
+    invoice_no = Column(String(20))  # 對應 EInvoiceRecord.invoice_no
+    delivery_note_no = Column(String(50))  # 出貨單號（暫存字串，未來改 FK）
+    ar_id = Column(String(36), ForeignKey("accounts_receivable.id"))
+
     customer = relationship("Customer", back_populates="sales_orders")
     items = relationship("SalesOrderItem", back_populates="sales_order", cascade="all, delete-orphan")
     production_orders = relationship("ProductionOrder", back_populates="sales_order", foreign_keys="ProductionOrder.so_id")

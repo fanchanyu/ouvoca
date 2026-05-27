@@ -25,6 +25,7 @@ EXPECTED_TENANT_MIXIN = {
     "policy_rule",        # v3.25 新增（家規 House Rules：PolicyRule + AuditLog）
     "quotation",          # v3.32 新增（報價單 + 行）
     "stock_count",        # v3.32 新增（盤點單 + 行）
+    "tax_tw",             # v3.54 新增（EInvoiceRecord 持久化，統一發票合規）
     "attachment",   # v3.13 新增（檔案上傳，按租戶隔離存 uploads/{tenant_id}/）
     "crm_sales",
     "inventory",

@@ -494,6 +494,16 @@ export const apiLogin = (username: string, password: string) =>
     '/auth/login', { username, password },
   )
 
+// F-7：登入後查自己有效權限 → 拿來過濾前端 menu
+export interface MyPermissionsResponse {
+  user_id: string
+  roles: Array<{ role_code: string; scope: string }>
+  permissions: Array<{ permission_code: string; source: string; role_code?: string }>
+  overrides: unknown[]
+}
+export const apiMyPermissions = () =>
+  api.get<MyPermissionsResponse>('/permission/me/effective')
+
 // v3.38 N8：第三個 arg = AbortSignal（讓使用者可取消）
 export const apiChat = (message: string, session_id: string, signal?: AbortSignal) =>
   request<ChatResponse>('POST', '/chat-v2', { message, session_id }, signal)

@@ -17,6 +17,31 @@ from app.services import sales as svc
 router = APIRouter(prefix="/api/sales", tags=["Sales"])
 
 
+# ─── F-2：信用額度敏感資料隔離 ──────────────────────────
+def _can_see_credit(user_ctx: UserContext) -> bool:
+    """非財務角色看不到 credit_limit。"""
+    return (
+        user_ctx.is_superuser
+        or user_ctx.has("accounting.ar.read")
+        or user_ctx.has("accounting.ar.list")
+    )
+
+
+def _strip_credit_if_no_perm(customers_list, user_ctx: UserContext):
+    """非財務角色 → credit_limit 一律 None。"""
+    if _can_see_credit(user_ctx):
+        return customers_list
+    for c in customers_list:
+        if isinstance(c, dict):
+            c["credit_limit"] = None
+        else:
+            try:
+                c.credit_limit = None
+            except Exception:
+                pass
+    return customers_list
+
+
 @router.post("/customers", response_model=CustomerResponse)
 async def create_customer(
     data: CustomerCreate,
@@ -46,7 +71,8 @@ async def list_customers(
         q = q.where((Customer.name.like(like)) | (Customer.code.like(like)))
     q = q.offset(skip).limit(limit).order_by(Customer.code)
     rows = (await db.execute(q)).scalars().all()
-    return [CustomerResponse.model_validate(r) for r in rows]
+    responses = [CustomerResponse.model_validate(r) for r in rows]
+    return _strip_credit_if_no_perm(responses, user)
 
 
 @router.post("/orders", response_model=SalesOrderResponse)
@@ -71,7 +97,13 @@ async def list_so(
     if status: q = q.where(SalesOrder.status == status)
     q = q.offset(skip).limit(limit).order_by(SalesOrder.created_at.desc())
     rows = (await db.execute(q)).unique().scalars().all()
-    return [SalesOrderResponse.model_validate(r) for r in rows]
+    responses = [SalesOrderResponse.model_validate(r) for r in rows]
+    # F-2：nested customer 的 credit_limit 也要 strip
+    if not _can_see_credit(user):
+        for so in responses:
+            if so.customer is not None:
+                so.customer.credit_limit = None
+    return responses
 
 
 @router.get("/orders/{so_id}", response_model=SalesOrderResponse)
@@ -84,7 +116,10 @@ async def get_so(
     if not so:
         from app.core.exceptions import NotFoundError
         raise NotFoundError("銷售訂單不存在", so_id=so_id)
-    return SalesOrderResponse.model_validate(so)
+    resp = SalesOrderResponse.model_validate(so)
+    if not _can_see_credit(user) and resp.customer is not None:
+        resp.customer.credit_limit = None
+    return resp
 
 
 @router.post("/orders/{so_id}/confirm", response_model=SalesOrderResponse)
@@ -137,7 +172,9 @@ async def update_customer_endpoint(
 ):
     patch = data.model_dump(exclude_unset=True)
     c = await svc.update_customer(db, customer_id, patch, user=user.raw_user)
-    return CustomerResponse.model_validate(c)
+    resp = CustomerResponse.model_validate(c)
+    _strip_credit_if_no_perm([resp], user)
+    return resp
 
 
 @router.delete("/customers/{customer_id}")
