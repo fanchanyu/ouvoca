@@ -210,6 +210,7 @@ async def seed():
             ("1200", "應收帳款", "asset", True),
             ("1300", "存貨", "asset", True),
             ("2100", "應付帳款", "liability", False),
+            ("2200", "銷項稅額", "liability", False),  # v3.55 — O2C 鏈 5% VAT
             ("3100", "資本", "equity", False),
             ("4100", "銷售收入", "revenue", False),
             ("5100", "銷貨成本", "expense", True),

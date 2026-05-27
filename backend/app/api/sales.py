@@ -1,6 +1,7 @@
 """Sales API — 全 endpoint RBAC 保護版。"""
 from typing import Optional, List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy import select
@@ -132,14 +133,137 @@ async def confirm_so(
     return SalesOrderResponse.model_validate(so)
 
 
-@router.post("/orders/{so_id}/ship", response_model=SalesOrderResponse)
+class ShipRequest(BaseModel):
+    """v3.55: ship_sales_order 請求體 — O2C 鏈控制旗標。"""
+    auto_invoice: bool = True
+    auto_journal: bool = True
+    carrier: Optional[str] = None
+    tracking_no: Optional[str] = None
+    qty_to_ship: Optional[dict] = None  # {so_item_id: qty}
+
+
+@router.post("/orders/{so_id}/ship")
 async def ship_so(
     so_id: str,
+    auto_invoice: bool = True,
+    auto_journal: bool = True,
+    carrier: Optional[str] = None,
+    tracking_no: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
     user: UserContext = Depends(require_permission("sales.order.ship")),
 ):
-    so = await svc.ship_sales_order(db, so_id, user.raw_user)
-    return SalesOrderResponse.model_validate(so)
+    """v3.55: 出貨 — 全鏈原子化建立 DN/Invoice/JE/AR。
+
+    Query params: auto_invoice / auto_journal / carrier / tracking_no（皆 optional）。
+    Returns: {"delivery_note": {...}, "invoice": {...}|None, "journal_entry": {...}|None,
+              "ar": {...}|None, "so_id", "so_status", "total_amount", ...}
+    """
+    return await svc.ship_sales_order(
+        db, so_id,
+        qty_to_ship=None,
+        user=user.raw_user,
+        auto_invoice=auto_invoice,
+        auto_journal=auto_journal,
+        carrier=carrier,
+        tracking_no=tracking_no,
+    )
+
+
+# ─── v3.55 出貨單 endpoints ────────────────────────────────
+
+@router.get("/delivery-notes")
+async def list_delivery_notes(
+    start_date: Optional[str] = None,   # ISO date YYYY-MM-DD
+    end_date: Optional[str] = None,
+    so_id: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("sales.order.list")),
+):
+    """v3.55: 出貨單清單。"""
+    from app.models.delivery import DeliveryNote
+    from datetime import datetime as _dt
+
+    q = select(DeliveryNote).order_by(DeliveryNote.ship_date.desc())
+    if start_date:
+        q = q.where(DeliveryNote.ship_date >= _dt.fromisoformat(start_date))
+    if end_date:
+        q = q.where(DeliveryNote.ship_date <= _dt.fromisoformat(end_date))
+    if so_id:
+        q = q.where(DeliveryNote.so_id == so_id)
+    if status:
+        q = q.where(DeliveryNote.status == status)
+
+    all_rows = (await db.execute(q)).scalars().all()
+    items = all_rows[offset:offset + limit]
+    return {
+        "total": len(all_rows),
+        "limit": limit,
+        "offset": offset,
+        "items": [
+            {
+                "id": dn.id,
+                "dn_no": dn.dn_no,
+                "so_id": dn.so_id,
+                "ship_date": dn.ship_date.isoformat() if dn.ship_date else None,
+                "carrier": dn.carrier,
+                "tracking_no": dn.tracking_no,
+                "status": dn.status,
+                "invoice_no": dn.invoice_no,
+                "journal_entry_id": dn.journal_entry_id,
+                "signed_by": dn.signed_by,
+            }
+            for dn in items
+        ],
+    }
+
+
+@router.get("/delivery-notes/{dn_id}")
+async def get_delivery_note(
+    dn_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("sales.order.list")),
+):
+    """v3.55: 出貨單明細 + items + 連結到的 invoice/JE。"""
+    from app.models.delivery import DeliveryNote, DeliveryNoteItem
+    from app.core.exceptions import NotFoundError
+    from sqlalchemy.orm import selectinload
+
+    dn = (await db.execute(
+        select(DeliveryNote)
+        .options(selectinload(DeliveryNote.items))
+        .where(DeliveryNote.id == dn_id)
+    )).scalar_one_or_none()
+    if not dn:
+        raise NotFoundError("出貨單不存在", dn_id=dn_id)
+
+    return {
+        "id": dn.id,
+        "dn_no": dn.dn_no,
+        "so_id": dn.so_id,
+        "ship_date": dn.ship_date.isoformat() if dn.ship_date else None,
+        "carrier": dn.carrier,
+        "tracking_no": dn.tracking_no,
+        "signed_by": dn.signed_by,
+        "signed_at": dn.signed_at.isoformat() if dn.signed_at else None,
+        "status": dn.status,
+        "invoice_no": dn.invoice_no,
+        "journal_entry_id": dn.journal_entry_id,
+        "remarks": dn.remarks,
+        "items": [
+            {
+                "id": it.id,
+                "so_item_id": it.so_item_id,
+                "part_id": it.part_id,
+                "qty_shipped": it.qty_shipped,
+                "unit_price": it.unit_price,
+                "line_amount": it.line_amount,
+            }
+            for it in (dn.items or [])
+        ],
+    }
 
 
 # ─── v3.10 PATCH/DELETE/Cancel ────────────────────────────

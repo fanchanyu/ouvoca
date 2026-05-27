@@ -62,3 +62,4 @@ from app.models.stock_count import StockCount, StockCountItem
 __all__ = ["Base"]
 from app.models.glossary import GlossaryItem  # v3.46
 from app.models.tax_tw import EInvoiceRecord  # v3.54 — Taiwan e-invoice persistence
+from app.models.delivery import DeliveryNote, DeliveryNoteItem  # v3.55 — O2C chain

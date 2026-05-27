@@ -303,16 +303,18 @@ async def _ship_so_with_confirm(db, user, so_no: str):
         f"💰 總額：${so.total_amount or 0:,.0f}",
         f"📊 狀態：{so.status} → shipped",
         "",
-        "📌 此動作將：",
-        "  1. 扣減成品庫存",
-        "  2. 產生出貨記錄",
-        "  3. 觸發應收帳款入帳",
+        "📌 v3.55：確認後將自動建立：",
+        "  1. 出貨單 (DeliveryNote)",
+        "  2. 電子發票（若客戶有統編）",
+        "  3. 會計傳票 (DR AR / CR 銷售收入 / CR 銷項稅額)",
+        "  4. 應收帳款 (AR) 入帳",
+        "  5. 扣減成品庫存 + 反寫 SO.delivery_note_no/invoice_no/ar_id",
         "",
-        "⚠️ 出貨後不可逆 — 確認貨已運出再按確認",
+        "⚠️ 出貨後不可逆 — 全鏈原子化，失敗則全部 rollback",
     ]
     card = make_card(
         tool_name="ship_sales_order_with_confirm",
-        title="🚚 確認出貨",
+        title="🚚 確認出貨（O2C 全鏈）",
         summary=summary,
         slots={"so_id": so.id, "so_no": so.so_no},
         risk_tier="hard-write",
@@ -321,10 +323,29 @@ async def _ship_so_with_confirm(db, user, so_no: str):
 
     async def execute():
         from app.services.sales import ship_sales_order
-        shipped = await ship_sales_order(db, so.id, user=user)
+        result = await ship_sales_order(
+            db, so.id, user=user,
+            auto_invoice=True, auto_journal=True,
+        )
+        # v3.55: result is dict with delivery_note / invoice / journal_entry / ar
+        dn = (result or {}).get("delivery_note") or {}
+        inv = (result or {}).get("invoice") or {}
+        je = (result or {}).get("journal_entry") or {}
+        msg_parts = [f"✅ 銷售單 {so.so_no} 已出貨"]
+        if dn.get("dn_no"):
+            msg_parts.append(f"出貨單：{dn['dn_no']}")
+        if inv.get("invoice_no"):
+            msg_parts.append(f"發票：{inv['invoice_no']}")
+        if je.get("entry_no"):
+            msg_parts.append(f"傳票：{je['entry_no']}")
         return {
-            "so_no": shipped.so_no, "status": shipped.status,
-            "message": f"✅ 銷售單 {shipped.so_no} 已出貨",
+            "so_no": so.so_no, "status": "shipped",
+            "delivery_note": dn,
+            "invoice": inv or None,
+            "journal_entry": je or None,
+            "ar": (result or {}).get("ar"),
+            "total_amount": (result or {}).get("total_amount"),
+            "message": " / ".join(msg_parts),
         }
 
     await stash_card(card, execute)

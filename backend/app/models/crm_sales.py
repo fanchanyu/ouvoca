@@ -12,6 +12,8 @@ class Customer(Base, TenantMixin):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     code = Column(String(50), unique=True, nullable=False)
     name = Column(String(200), nullable=False)
+    # v3.55: 統一編號（B2B 客戶必填，B2C 留空）— O2C 鏈用以判斷是否開發票
+    tax_id = Column(String(20))
     grade = Column(String(5), default="C")
     contact_person = Column(String(100))
     contact_email = Column(String(150))
