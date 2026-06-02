@@ -1,0 +1,11 @@
+case_id,category,difficulty,expected_intent,intent_correct_all_seeds,strict_pass_count,strict_pass_rate,strict_pass_rate_ci_lo,strict_pass_rate_ci_hi,loose_pass_count,loose_pass_rate,loose_pass_rate_ci_lo,loose_pass_rate_ci_hi,mean_latency_sec,stdev_latency_sec,latency_ci_lo,latency_ci_hi,mean_tool_count
+T01,simple_query,easy,inventory,True,5,1.0,1.0,1.0,5,1.0,1.0,1.0,6.7166,0.43841338939407415,6.3798,7.053400000000001,1
+T02,specific_lookup,easy,inventory,True,5,1.0,1.0,1.0,5,1.0,1.0,1.0,3.9442,0.31412847690077383,3.7060000000000004,4.1814,1
+T03,fuzzy_query,medium,inventory,True,5,1.0,1.0,1.0,5,1.0,1.0,1.0,6.1276,0.8242064668516014,5.429399999999999,6.7246,1
+T04,multi_step,hard,production,True,5,1.0,1.0,1.0,5,1.0,1.0,1.0,10.3924,1.9768371961292104,9.0692,12.1752,3.8
+T05,cross_domain,hard,general,True,3,0.6,0.2,1.0,3,0.6,0.2,1.0,6.2336,0.5358664012606126,5.8322,6.635,3.4
+T06,business_scenario,medium,crm,True,5,1.0,1.0,1.0,5,1.0,1.0,1.0,4.2558,1.1102921687555938,3.465,5.115,1.4
+T07,typo_tolerance,medium,inventory,True,5,1.0,1.0,1.0,5,1.0,1.0,1.0,3.987,0.1499916664351725,3.8954,4.123600000000001,1
+T08,open_dialog,medium,inventory,True,5,1.0,1.0,1.0,5,1.0,1.0,1.0,11.4634,0.8354796825776191,10.8094,12.1174,2
+T09,supplier_query,easy,purchase,True,5,1.0,1.0,1.0,5,1.0,1.0,1.0,6.3232,0.38252280977740405,6.0838,6.653200000000001,1
+T10,quality_query,medium,quality,True,5,1.0,1.0,1.0,5,1.0,1.0,1.0,7.4078,0.963717385959183,6.6696,8.146,4

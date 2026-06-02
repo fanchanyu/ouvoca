@@ -541,11 +541,16 @@ async def seed_permissions():
             db.add(role)
             await db.flush()
             # Attach permissions（含 wildcard 展開）
+            # paper-isf fix: deduplicate (perm_id) per role - overlapping
+            # wildcards like "sales.*" + "sales.order.*" double-insert and
+            # break the rbac_role_permissions UNIQUE constraint.
+            seen_perms: set[str] = set()
             for pattern, scope in role_spec["permissions"]:
                 for code in _expand_wildcard(all_perms, pattern):
                     perm_id = all_perms.get(code)
-                    if not perm_id:
+                    if not perm_id or perm_id in seen_perms:
                         continue
+                    seen_perms.add(perm_id)
                     db.add(RolePermissionLink(
                         id=str(uuid.uuid4()), role_id=role.id,
                         permission_id=perm_id, scope=scope,
