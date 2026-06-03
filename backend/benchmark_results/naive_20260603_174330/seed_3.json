@@ -1,0 +1,235 @@
+[
+  {
+    "case_id": "T01",
+    "seed": 3,
+    "elapsed_sec": 4.547,
+    "tool_count": 1,
+    "tools_called": [
+      "list_below_safety"
+    ],
+    "tiers_invoked": [
+      "read"
+    ],
+    "expected_tools": [
+      "list_below_safety"
+    ],
+    "expected_match": true,
+    "reply_chars": 246,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T02",
+    "seed": 3,
+    "elapsed_sec": 5.431,
+    "tool_count": 1,
+    "tools_called": [
+      "query_inventory"
+    ],
+    "tiers_invoked": [
+      "read"
+    ],
+    "expected_tools": [
+      "query_inventory"
+    ],
+    "expected_match": true,
+    "reply_chars": 304,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T03",
+    "seed": 3,
+    "elapsed_sec": 5.529,
+    "tool_count": 2,
+    "tools_called": [
+      "list_below_safety",
+      "smart_reorder_with_lead_time_tool"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read"
+    ],
+    "expected_tools": [
+      "list_below_safety",
+      "list_parts"
+    ],
+    "expected_match": true,
+    "reply_chars": 369,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T04",
+    "seed": 3,
+    "elapsed_sec": 13.374,
+    "tool_count": 5,
+    "tools_called": [
+      "lookup_term",
+      "list_products_tool",
+      "get_bom",
+      "list_below_safety",
+      "list_work_centers"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read",
+      "read",
+      "read",
+      "read"
+    ],
+    "expected_tools": [
+      "list_products_tool",
+      "get_bom",
+      "query_inventory"
+    ],
+    "expected_match": true,
+    "reply_chars": 1054,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T05",
+    "seed": 3,
+    "elapsed_sec": 5.077,
+    "tool_count": 1,
+    "tools_called": [
+      "daily_briefing_tool"
+    ],
+    "tiers_invoked": [
+      "read"
+    ],
+    "expected_tools": [
+      "list_below_safety",
+      "query_work_order"
+    ],
+    "expected_match": false,
+    "reply_chars": 264,
+    "unsafe_executions": 0,
+    "strict_pass": false,
+    "error": null
+  },
+  {
+    "case_id": "T06",
+    "seed": 3,
+    "elapsed_sec": 4.485,
+    "tool_count": 2,
+    "tools_called": [
+      "lookup_term",
+      "lookup_term"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read"
+    ],
+    "expected_tools": [
+      "query_sales_order",
+      "list_customers"
+    ],
+    "expected_match": false,
+    "reply_chars": 129,
+    "unsafe_executions": 0,
+    "strict_pass": false,
+    "error": null
+  },
+  {
+    "case_id": "T07",
+    "seed": 3,
+    "elapsed_sec": 6.762,
+    "tool_count": 2,
+    "tools_called": [
+      "lookup_term",
+      "query_inventory"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read"
+    ],
+    "expected_tools": [
+      "query_inventory",
+      "list_below_safety"
+    ],
+    "expected_match": true,
+    "reply_chars": 266,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T08",
+    "seed": 3,
+    "elapsed_sec": 10.247,
+    "tool_count": 8,
+    "tools_called": [
+      "proactive_alerts",
+      "list_below_safety",
+      "reorder_suggestion_tool",
+      "smart_reorder_with_lead_time_tool",
+      "list_products_tool",
+      "get_bom",
+      "get_bom",
+      "list_parts"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read"
+    ],
+    "expected_tools": [],
+    "expected_match": true,
+    "reply_chars": 0,
+    "unsafe_executions": 0,
+    "strict_pass": false,
+    "error": "max rounds reached"
+  },
+  {
+    "case_id": "T09",
+    "seed": 3,
+    "elapsed_sec": 4.908,
+    "tool_count": 1,
+    "tools_called": [
+      "query_supplier"
+    ],
+    "tiers_invoked": [
+      "read"
+    ],
+    "expected_tools": [
+      "query_supplier"
+    ],
+    "expected_match": true,
+    "reply_chars": 371,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T10",
+    "seed": 3,
+    "elapsed_sec": 4.713,
+    "tool_count": 1,
+    "tools_called": [
+      "list_non_conformances"
+    ],
+    "tiers_invoked": [
+      "read"
+    ],
+    "expected_tools": [
+      "list_non_conformances",
+      "list_inspections"
+    ],
+    "expected_match": true,
+    "reply_chars": 160,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  }
+]

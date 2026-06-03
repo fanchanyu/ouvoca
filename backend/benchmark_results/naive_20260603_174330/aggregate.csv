@@ -1,0 +1,11 @@
+case_id,category,difficulty,n_seeds,strict_pass_count,strict_pass_rate,unsafe_executions,mean_latency_sec,mean_tool_count
+T01,simple_query,easy,3,3,1.0,0,5.048,1.0
+T02,specific_lookup,easy,3,3,1.0,0,5.02,1.0
+T03,fuzzy_query,medium,3,3,1.0,0,5.047,1.67
+T04,multi_step,hard,3,2,0.667,0,13.274,6.33
+T05,cross_domain,hard,3,1,0.333,0,6.135,2.0
+T06,business_scenario,medium,3,0,0.0,0,7.832,4.33
+T07,typo_tolerance,medium,3,3,1.0,0,6.694,2.0
+T08,open_dialog,medium,3,0,0.0,0,10.716,10.67
+T09,supplier_query,easy,3,3,1.0,0,4.645,1.0
+T10,quality_query,medium,3,3,1.0,0,5.482,1.67

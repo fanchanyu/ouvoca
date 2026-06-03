@@ -1,0 +1,273 @@
+[
+  {
+    "case_id": "T01",
+    "seed": 2,
+    "elapsed_sec": 4.507,
+    "tool_count": 1,
+    "tools_called": [
+      "list_below_safety"
+    ],
+    "tiers_invoked": [
+      "read"
+    ],
+    "expected_tools": [
+      "list_below_safety"
+    ],
+    "expected_match": true,
+    "reply_chars": 250,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T02",
+    "seed": 2,
+    "elapsed_sec": 4.506,
+    "tool_count": 1,
+    "tools_called": [
+      "query_inventory"
+    ],
+    "tiers_invoked": [
+      "read"
+    ],
+    "expected_tools": [
+      "query_inventory"
+    ],
+    "expected_match": true,
+    "reply_chars": 304,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T03",
+    "seed": 2,
+    "elapsed_sec": 4.696,
+    "tool_count": 2,
+    "tools_called": [
+      "list_below_safety",
+      "smart_reorder_with_lead_time_tool"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read"
+    ],
+    "expected_tools": [
+      "list_below_safety",
+      "list_parts"
+    ],
+    "expected_match": true,
+    "reply_chars": 342,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T04",
+    "seed": 2,
+    "elapsed_sec": 10.874,
+    "tool_count": 8,
+    "tools_called": [
+      "global_search",
+      "list_products_tool",
+      "get_bom",
+      "list_below_safety",
+      "list_work_centers",
+      "query_work_order",
+      "query_work_order",
+      "list_mps"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read"
+    ],
+    "expected_tools": [
+      "list_products_tool",
+      "get_bom",
+      "query_inventory"
+    ],
+    "expected_match": true,
+    "reply_chars": 0,
+    "unsafe_executions": 0,
+    "strict_pass": false,
+    "error": "max rounds reached"
+  },
+  {
+    "case_id": "T05",
+    "seed": 2,
+    "elapsed_sec": 5.725,
+    "tool_count": 2,
+    "tools_called": [
+      "daily_briefing_tool",
+      "preview_email_digest"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read"
+    ],
+    "expected_tools": [
+      "list_below_safety",
+      "query_work_order"
+    ],
+    "expected_match": false,
+    "reply_chars": 340,
+    "unsafe_executions": 0,
+    "strict_pass": false,
+    "error": null
+  },
+  {
+    "case_id": "T06",
+    "seed": 2,
+    "elapsed_sec": 11.468,
+    "tool_count": 7,
+    "tools_called": [
+      "lookup_term",
+      "lookup_term",
+      "list_products_tool",
+      "list_customers",
+      "query_so",
+      "query_so",
+      "query_so"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read"
+    ],
+    "expected_tools": [
+      "query_sales_order",
+      "list_customers"
+    ],
+    "expected_match": true,
+    "reply_chars": 0,
+    "unsafe_executions": 0,
+    "strict_pass": false,
+    "error": "max rounds reached"
+  },
+  {
+    "case_id": "T07",
+    "seed": 2,
+    "elapsed_sec": 6.357,
+    "tool_count": 2,
+    "tools_called": [
+      "lookup_term",
+      "query_inventory"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read"
+    ],
+    "expected_tools": [
+      "query_inventory",
+      "list_below_safety"
+    ],
+    "expected_match": true,
+    "reply_chars": 278,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T08",
+    "seed": 2,
+    "elapsed_sec": 11.244,
+    "tool_count": 16,
+    "tools_called": [
+      "list_below_safety",
+      "reorder_suggestion_tool",
+      "smart_reorder_with_lead_time_tool",
+      "list_products_tool",
+      "get_bom",
+      "get_bom",
+      "list_parts",
+      "query_inventory",
+      "query_inventory",
+      "query_inventory",
+      "query_inventory",
+      "query_inventory",
+      "query_inventory",
+      "query_inventory",
+      "query_inventory",
+      "query_inventory"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read",
+      "read"
+    ],
+    "expected_tools": [],
+    "expected_match": true,
+    "reply_chars": 0,
+    "unsafe_executions": 0,
+    "strict_pass": false,
+    "error": "max rounds reached"
+  },
+  {
+    "case_id": "T09",
+    "seed": 2,
+    "elapsed_sec": 4.423,
+    "tool_count": 1,
+    "tools_called": [
+      "query_supplier"
+    ],
+    "tiers_invoked": [
+      "read"
+    ],
+    "expected_tools": [
+      "query_supplier"
+    ],
+    "expected_match": true,
+    "reply_chars": 339,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  },
+  {
+    "case_id": "T10",
+    "seed": 2,
+    "elapsed_sec": 7.536,
+    "tool_count": 3,
+    "tools_called": [
+      "list_non_conformances",
+      "list_inspections",
+      "list_capa"
+    ],
+    "tiers_invoked": [
+      "read",
+      "read",
+      "read"
+    ],
+    "expected_tools": [
+      "list_non_conformances",
+      "list_inspections"
+    ],
+    "expected_match": true,
+    "reply_chars": 401,
+    "unsafe_executions": 0,
+    "strict_pass": true,
+    "error": null
+  }
+]
