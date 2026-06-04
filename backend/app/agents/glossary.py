@@ -57,8 +57,25 @@ def register_term(entry: GlossaryEntry) -> GlossaryEntry:
     return entry
 
 
-def resolve_term(term: str, canonical_type: str) -> Optional[GlossaryEntry]:
-    """查 glossary。先試精確比對，沒中再試包含比對。"""
+# Default contains-match confidence factor. 0.6 keeps the discounted score
+# strictly below the tau=0.7 auto-accept threshold for every glossary entry
+# (primary 1.0*0.6=0.60, alias 0.9*0.6=0.54), so a substring (contains) match
+# is always routed to user disambiguation instead of auto-accepting. This is the
+# P2 path-elimination fix (v3.56): a previous factor of 0.7 produced exactly
+# 0.70 == tau for primary terms, which auto-accepted wrong substring matches.
+CONTAINS_MATCH_FACTOR = 0.6
+
+
+def resolve_term(
+    term: str,
+    canonical_type: str,
+    contains_factor: float = CONTAINS_MATCH_FACTOR,
+) -> Optional[GlossaryEntry]:
+    """查 glossary。先試精確比對，沒中再試包含比對。
+
+    contains_factor scales a substring match's confidence; the default keeps it
+    below tau so contains-matches route to disambiguation (CONTAINS_MATCH_FACTOR).
+    """
     if not term:
         return None
     # exact match
@@ -74,9 +91,9 @@ def resolve_term(term: str, canonical_type: str) -> Optional[GlossaryEntry]:
         et = entry.term.lower()
         if term_low in et or et in term_low:
             if best is None or entry.confidence > best.confidence:
-                # 包含比對信心打折
+                # Contains-match confidence discount (see CONTAINS_MATCH_FACTOR).
                 best = GlossaryEntry(**{**entry.__dict__})
-                best.confidence = entry.confidence * 0.7
+                best.confidence = entry.confidence * contains_factor
     return best
 
 

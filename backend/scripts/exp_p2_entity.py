@@ -94,13 +94,13 @@ CORPUS = [
 TAU = 0.7
 
 
-def run_condition(seed_glossary: bool) -> list[dict]:
+def run_condition(seed_glossary: bool, contains_factor: float = 0.6) -> list[dict]:
     clear_glossary()
     if seed_glossary:
         seed_default_glossary()
     rows = []
     for term, ctype, gt_id, label in CORPUS:
-        e = resolve_term(term, ctype)
+        e = resolve_term(term, ctype, contains_factor=contains_factor)
         got_id = e.canonical_id if e is not None else None
         conf = e.confidence if e is not None else None
         # Would the architecture auto-accept this resolution without asking?
@@ -153,67 +153,73 @@ def summarise(rows: list[dict], cond: str) -> dict:
 
 
 def main() -> int:
-    full = run_condition(seed_glossary=True)
+    # Pre-fix (contains_factor 0.7) reproduces the originally reported P2 gap;
+    # post-fix (0.6, the production default) is the path-elimination intervention.
+    before = run_condition(seed_glossary=True, contains_factor=0.7)
+    after = run_condition(seed_glossary=True, contains_factor=0.6)
     ablated = run_condition(seed_glossary=False)
-    s_full = summarise(full, "FULL (L2 alias active)")
+    s_before = summarise(before, "FULL pre-fix (contains x0.7)")
+    s_after = summarise(after, "FULL post-fix (contains x0.6)")
     s_abl = summarise(ablated, "ABLATED (L2 alias disabled)")
 
-    print(f"\n{'Condition':30} {'resolvable':>12} {'nonexist->None':>16} "
+    print(f"\n{'Condition':32} {'resolvable':>12} {'nonexist->None':>16} "
           f"{'silent halluc.':>14} {'soft<tau':>10}")
-    print("-" * 88)
-    for s in (s_full, s_abl):
-        print(f"  {s['condition']:28} "
+    print("-" * 92)
+    for s in (s_before, s_after, s_abl):
+        print(f"  {s['condition']:30} "
               f"{s['resolvable_correct']}/{s['n_resolvable']}".rjust(12),
               f"{s['nonexistent_correct_none']}/{s['n_nonexistent']}".rjust(16),
               f"{s['silent_hallucination_count']}".rjust(14),
               f"{s['soft_match_below_tau_count']}".rjust(10))
-    print("-" * 88)
-    print(f"P2 (refined): a non-existent reference never yields a SILENT (auto-")
-    print(f"accepted, conf >= {TAU}) wrong entity. Soft matches below {TAU} trigger a")
-    print(f"disambiguation prompt rather than a tool call.")
-    print(f"Observed silent hallucinations: FULL={s_full['silent_hallucination_count']}, "
-          f"ABLATED={s_abl['silent_hallucination_count']}")
-    print(f"Observed soft matches below tau (-> disambiguation): "
-          f"FULL={s_full['soft_match_below_tau_count']}")
+    print("-" * 92)
+    print(f"P2 intervention: discounting the contains-match confidence below "
+          f"tau={TAU} routes every substring match to disambiguation.")
+    print(f"Silent hallucinations  pre-fix (x0.7): {s_before['silent_hallucination_count']}"
+          f"  ->  post-fix (x0.6): {s_after['silent_hallucination_count']}")
+    print(f"Soft matches below tau  pre-fix: {s_before['soft_match_below_tau_count']}"
+          f"  ->  post-fix: {s_after['soft_match_below_tau_count']}")
 
     out_dir = Path(__file__).resolve().parents[3] / "ISF_Q2_投稿" / "eval"
     out_dir.mkdir(parents=True, exist_ok=True)
     with (out_dir / "exp_p2_entity.csv").open("w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(full[0].keys()) + ["condition"])
+        w = csv.DictWriter(f, fieldnames=list(before[0].keys()) + ["variant"])
         w.writeheader()
-        for r in full:
-            w.writerow({**r, "condition": "FULL"})
+        for r in before:
+            w.writerow({**r, "variant": "FULL_PREFIX_x0.7"})
+        for r in after:
+            w.writerow({**r, "variant": "FULL_POSTFIX_x0.6"})
         for r in ablated:
-            w.writerow({**r, "condition": "ABLATED"})
+            w.writerow({**r, "variant": "ABLATED"})
     (out_dir / "exp_p2_entity_summary.json").write_text(
         json.dumps({
             "proposition": "P2 catalogue-grounded entity resolution",
             "tau": TAU,
-            "full": s_full, "ablated": s_abl,
+            "pre_fix_full": s_before,
+            "post_fix_full": s_after,
+            "ablated": s_abl,
             "interpretation": (
-                f"With L2 alias resolution active, {s_full['resolvable_correct']}/"
-                f"{s_full['n_resolvable']} resolvable references map to the correct "
-                f"canonical entity; with it disabled, {s_abl['resolvable_correct']}/"
-                f"{s_abl['n_resolvable']} do (exact and alias matches depend on the "
-                f"glossary). The dedicated adversarial corpus refines P2 rather than "
-                f"cleanly confirming it. Of the non-existent references, "
-                f"{s_full['silent_hallucination_count']} produced a SILENT wrong "
-                f"resolution (auto-accepted at confidence >= {TAU}) and "
-                f"{s_full['soft_match_below_tau_count']} produced a soft match below "
-                f"the {TAU} threshold that the architecture routes to a "
-                f"disambiguation prompt rather than a tool call. The silent cases all "
-                f"arise from the contains-match (substring) fallback resolving a "
-                f"qualified variant (e.g. a titanium nut) to its substring's "
-                f"registered entity at confidence exactly {TAU}. This is an honest "
-                f"limitation: exact and alias matching achieve true path elimination "
-                f"(Section 2.6.4), but the fuzzy contains-match fallback degrades to a "
-                f"probabilistic heuristic and does not. The concrete fix is to lower "
-                f"the contains-match confidence discount below {TAU} so that all "
-                f"substring matches trigger disambiguation; this is scoped as a design "
-                f"refinement in Section 4.11. The finding strengthens the "
-                f"path-elimination thesis by showing precisely where set-theoretic "
-                f"elimination holds (exact/alias) and where it lapses into "
-                f"probability reduction (contains-match)."
+                f"The dedicated adversarial corpus of {s_after['n_resolvable']} "
+                f"resolvable and {s_after['n_nonexistent']} non-existent references "
+                f"refines and then closes P2 by intervention. Pre-fix (contains-match "
+                f"confidence factor 0.7, which yields exactly 0.70 == tau for a primary "
+                f"term), {s_before['silent_hallucination_count']} non-existent references "
+                f"produced a SILENT wrong resolution: the contains-match (substring) "
+                f"fallback resolved a qualified variant (e.g. a titanium nut) to its "
+                f"substring's registered entity and auto-accepted it at confidence "
+                f"exactly tau. This localises where the path-elimination property "
+                f"(Section 2.6.4) holds -- exact and alias matching are set-theoretic and "
+                f"produce zero silent hallucinations -- and where it lapses: the fuzzy "
+                f"contains-match degrades to a probabilistic heuristic. The theory "
+                f"predicts the fix: remove the probabilistic auto-accept path by "
+                f"discounting the contains-match confidence strictly below tau. Post-fix "
+                f"(factor 0.6: primary 0.60, alias 0.54), silent hallucinations fall to "
+                f"{s_after['silent_hallucination_count']} and all "
+                f"{s_after['soft_match_below_tau_count']} substring matches route to a "
+                f"user disambiguation prompt, while resolvable accuracy is unchanged "
+                f"({s_after['resolvable_correct']}/{s_after['n_resolvable']}). The "
+                f"intervention converts probability reduction into path elimination "
+                f"inside a single architectural layer -- the boundary that is the "
+                f"central theoretical finding (Section 5.3). Applied in v3.56."
             ),
         }, ensure_ascii=False, indent=2),
         encoding="utf-8",
