@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
-import { apiListParts, apiCreatePart, apiListInventoryTxns, ApiError, type Part, type InventoryTransaction } from '../lib/api'
+import { apiListParts, apiCreatePart, apiListInventoryTxns, ApiError,
+  apiScanBarcode, apiPrintPartLabel, apiTraceBatch, apiTraceSerial,
+  type Part, type InventoryTransaction, type ScanResult } from '../lib/api'
 import EmptyState from '../components/EmptyState'
 import { useAuthStore } from '../store/auth'
 
@@ -10,6 +12,10 @@ export default function Inventory() {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [tab, setTab] = useState<'parts' | 'txns'>('parts')   // v3.23
+  const [scanCode, setScanCode] = useState('')
+  const [scanResult, setScanResult] = useState<ScanResult | null>(null)
+  const [scanMsg, setScanMsg] = useState<string | null>(null)
+  const [scanBusy, setScanBusy] = useState(false)
   const [form, setForm] = useState({
     part_no: '', name: '', category: 'raw_material', unit: 'pcs',
     safety_stock: 0, unit_cost: 0, lead_time_days: 0,
@@ -51,6 +57,41 @@ export default function Inventory() {
       es.close()
     }
   }, [])
+
+  // v3.64 條碼槍掃描
+  async function doScan() {
+    const code = scanCode.trim()
+    if (!code) return
+    setScanBusy(true)
+    setScanMsg(null)
+    setScanResult(null)
+    try {
+      setScanResult(await apiScanBarcode(code))
+    } catch (e: unknown) {
+      setScanMsg(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '掃描失敗')
+    } finally {
+      setScanBusy(false)
+    }
+  }
+
+  async function trace(code: string) {
+    setScanMsg(null)
+    try {
+      if (scanResult?.match === 'serial' || code.startsWith('SN-')) {
+        const r = await apiTraceSerial(code)
+        setScanResult({ match: 'serial', serial_no: r.serial_no, status: r.status, actions: ['trace_serial'] })
+        setScanMsg(`序號 ${r.serial_no}：${r.status}${r.last_document_no ? `，最近文件 ${r.last_document_no}` : ''}`)
+      } else {
+        const r = await apiTraceBatch(code)
+        const m = (r.movements || []) as Array<{ direction: string; document_no?: string; qty?: number }>
+        const fwd = m.filter(x => x.direction === 'out').length
+        const bwd = m.filter(x => x.direction === 'in').length
+        setScanMsg(`批號 ${r.lot_no}：流入 ${bwd} 筆 / 流出 ${fwd} 筆動向`)
+      }
+    } catch (e: unknown) {
+      setScanMsg(e instanceof ApiError ? e.friendly() : e instanceof Error ? e.message : '追溯失敗')
+    }
+  }
 
   async function submit() {
     if (!form.part_no.trim() || !form.name.trim()) {
@@ -98,6 +139,48 @@ export default function Inventory() {
 
       {error && <div className="bg-red-50 text-red-700 px-3 py-2 rounded-lg mb-4 text-sm">{error}</div>}
 
+      {/* v3.64 條碼槍作業列 */}
+      <div className="galaxy-scan-card p-4 mb-6">
+        <div className="flex items-center gap-3">
+          <span className="text-xl">🔫</span>
+          <input
+            value={scanCode}
+            onChange={e => setScanCode(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') void doScan() }}
+            placeholder="掃描 / 輸入料號、批號或序號…"
+            className="flex-1 input"
+            autoFocus
+          />
+          <button onClick={() => void doScan()} disabled={scanBusy}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+            {scanBusy ? '掃描中…' : '掃描'}
+          </button>
+        </div>
+        {scanMsg && <div className="mt-3 text-sm text-blue-700">{scanMsg}</div>}
+        {scanResult && (
+          <div className="mt-3 border-t border-gray-200 pt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div><span className="text-gray-400">類型</span><div className="font-semibold">{scanResult.match === 'part' ? '料件' : scanResult.match === 'serial' ? '序號' : '批號'}</div></div>
+            <div><span className="text-gray-400">代碼</span><div className="font-mono">{scanResult.part_no ?? scanResult.serial_no ?? scanResult.lot_no}</div></div>
+            <div><span className="text-gray-400">名稱</span><div>{scanResult.name ?? scanResult.status ?? '—'}</div></div>
+            <div><span className="text-gray-400">庫存</span><div>{scanResult.qty_on_hand ?? scanResult.qty ?? '—'}</div></div>
+            <div className="col-span-2 md:col-span-4 flex gap-2 mt-1">
+              {(scanResult.actions || []).includes('print_label') && scanResult.part_no && (
+                <button onClick={() => void apiPrintPartLabel(scanResult.part_no!, scanResult.name || '')}
+                  className="px-3 py-1.5 bg-gray-800 text-white text-xs rounded-lg hover:bg-gray-700">
+                  🏷️ 列印標籤
+                </button>
+              )}
+              {scanResult.match !== 'part' && (
+                <button onClick={() => void trace(scanResult.serial_no ?? scanResult.lot_no ?? scanCode)}
+                  className="px-3 py-1.5 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-500">
+                  🔍 追溯
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* v3.23: Transactions tab */}
       {tab === 'txns' && <TransactionsTab parts={parts} />}
       {tab === 'parts' && <>
@@ -138,13 +221,14 @@ export default function Inventory() {
               <th className="text-right p-3">單位成本</th>
               <th className="text-right p-3">前置時間</th>
               <th className="text-center p-3">狀態</th>
+              <th className="text-center p-3">操作</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="p-4 text-center text-gray-400">載入中…</td></tr>
+              <tr><td colSpan={8} className="p-4 text-center text-gray-400">載入中…</td></tr>
             ) : parts.length === 0 ? (
-              <tr><td colSpan={7}>
+              <tr><td colSpan={8}>
                 <EmptyState
                   icon="📦"
                   title="你還沒有任何料件"
@@ -167,6 +251,15 @@ export default function Inventory() {
                     <span className={`px-2 py-1 rounded-full text-xs ${p.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
                       {p.is_active ? '啟用' : '停用'}
                     </span>
+                  </td>
+                  <td className="p-3 text-center">
+                    <button
+                      onClick={() => void apiPrintPartLabel(p.part_no, p.name)}
+                      className="px-2 py-1 bg-gray-800 text-white text-xs rounded hover:bg-gray-700"
+                      title="列印 QR 標籤"
+                    >
+                      🏷️
+                    </button>
                   </td>
                 </tr>
               ))

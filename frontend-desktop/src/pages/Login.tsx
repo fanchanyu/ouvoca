@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/auth'
-import { apiLogin, apiHealth, apiMyPermissions, ApiError } from '../lib/api'
+import { apiLogin, apiHealth, apiMyPermissions, apiMfaVerify, ApiError } from '../lib/api'
 import { Button, useToast } from '../components/ui'
 import { useTranslation, type Lang } from '../i18n'
 
@@ -26,6 +26,9 @@ export default function Login() {
   }, [])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // v3.66 P0-2：MFA 第二步狀態
+  const [mfaStep, setMfaStep] = useState<{ mfaToken: string; username: string } | null>(null)
+  const [mfaCode, setMfaCode] = useState('')
   const [demoBypass, setDemoBypass] = useState(false)
   const [version, setVersion] = useState<string>('')
   const [llmProvider, setLlmProvider] = useState<string>('')
@@ -43,6 +46,12 @@ export default function Login() {
     setError(null); setLoading(true)
     try {
       const res = await apiLogin(username, password)
+      // P0-2：啟用 MFA 的帳號 → 切到驗證碼輸入步驟
+      if (res.mfa_required && res.mfa_token) {
+        setMfaStep({ mfaToken: res.mfa_token, username })
+        return
+      }
+      if (!res.access_token || !res.user) throw new ApiError(401, '登入回應不完整', null)
       setAuth(res.access_token, {
         id: res.user.id, username: res.user.username,
         employee_id: res.user.employee_id, is_superuser: res.user.is_superuser,
@@ -79,6 +88,33 @@ export default function Login() {
     } finally { setLoading(false) }
   }
 
+  async function submitMfa(e: React.FormEvent) {
+    e.preventDefault()
+    if (!mfaStep || !mfaCode.trim()) return
+    setError(null); setLoading(true)
+    try {
+      const res = await apiMfaVerify(mfaStep.mfaToken, mfaCode.trim())
+      setAuth(res.access_token, {
+        id: res.user.id, username: res.user.username,
+        employee_id: res.user.employee_id, is_superuser: res.user.is_superuser,
+      })
+      try {
+        const perms = await apiMyPermissions()
+        setPermissions(perms.permissions.map(p => p.permission_code))
+      } catch {
+        setPermissions([])
+      }
+      try { localStorage.setItem('ouvoca_last_username', mfaStep.username) } catch { /* ignore */ }
+      toast.success(`✅ ${mfaStep.username} 雙重驗證通過`)
+      navigate('/')
+    } catch (err) {
+      setError(err instanceof ApiError ? err.friendly() : '驗證碼錯誤，請重試')
+    } finally {
+      setLoading(false)
+      setMfaCode('')
+    }
+  }
+
   function useDemoToken() {
     loginAsDemo()
     toast.info('Demo mode')
@@ -113,6 +149,32 @@ export default function Login() {
           </p>
         </div>
 
+        {mfaStep ? (
+          <form onSubmit={submitMfa} className="space-y-4">
+            <div className="bg-brand-50 border border-brand-200 text-brand-800 px-3 py-2 rounded-input text-body-sm">
+              🔐 <strong>{mfaStep.username}</strong> 已啟用雙重驗證 — 請輸入 Authenticator App 的 6 位驗證碼
+            </div>
+            <div>
+              <label className="block text-body-sm text-ink-700 mb-1.5 font-medium">驗證碼</label>
+              <input
+                type="text" inputMode="numeric" value={mfaCode}
+                onChange={e => setMfaCode(e.target.value)}
+                className="w-full px-4 py-3 border border-ink-200 rounded-input bg-white focus-ring focus:border-brand-400 transition-colors text-center tracking-[0.5em] font-mono"
+                placeholder="000000" autoFocus required
+              />
+            </div>
+            {error && (
+              <div className="bg-danger-50 border border-danger-200 text-danger-700 px-3 py-2 rounded-input text-body-sm">⚠️ {error}</div>
+            )}
+            <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full mt-2">
+              {loading ? '驗證中…' : '驗證並登入'}
+            </Button>
+            <button type="button" onClick={() => { setMfaStep(null); setError(null) }}
+              className="w-full text-center text-caption text-ink-400 hover:text-ink-600">
+              ← 返回重新輸入帳號密碼
+            </button>
+          </form>
+        ) : (
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="block text-body-sm text-ink-700 mb-1.5 font-medium">
@@ -154,6 +216,7 @@ export default function Login() {
             {loading ? t('login.signingIn') : t('login.signIn')}
           </Button>
         </form>
+        )}
 
         {demoBypass && (
           <>

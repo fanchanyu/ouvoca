@@ -489,8 +489,17 @@ export interface ChatResponse {
 
 export const apiHealth = () => api.get<HealthResponse>('/health')
 
+export interface LoginUser { id: string; username: string; employee_id: string; is_superuser: boolean; is_active: boolean }
+export interface LoginResponse {
+  access_token?: string
+  token_type?: string
+  user?: LoginUser
+  mfa_required?: boolean
+  mfa_token?: string
+}
+
 export const apiLogin = (username: string, password: string) =>
-  api.post<{ access_token: string; token_type: string; user: { id: string; username: string; employee_id: string; is_superuser: boolean; is_active: boolean } }>(
+  api.post<LoginResponse>(
     '/auth/login', { username, password },
   )
 
@@ -865,3 +874,134 @@ export const apiApprove = (request_id: string, comment?: string) =>
 
 export const apiReject = (request_id: string, comment: string) =>
   api.post<ApprovalRequest>(`/approvals/${request_id}/reject`, { comment })
+
+// ──────────────────────────────────────────────────────────
+// v3.64 現場作業 / 資安 / 治理 / RFQ
+// ──────────────────────────────────────────────────────────
+
+export interface ScanResult {
+  match: 'part' | 'serial' | 'batch'
+  part_no?: string
+  name?: string
+  serial_no?: string
+  lot_no?: string
+  qty_on_hand?: number
+  qty_available?: number
+  status?: string
+  actions?: string[]
+  qty?: number
+  unit_cost?: number
+}
+
+export const apiScanBarcode = (code: string) =>
+  api.post<ScanResult>('/warehouse/scan', { barcode: code })
+
+/** 料件 QR 標籤：抓 PDF blob 並觸發下載。 */
+export async function apiPrintPartLabel(partNo: string, name = '', qty = ''): Promise<void> {
+  const token = useAuthStore.getState().token
+  const resp = await fetch(BASE + '/print/label/part', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ part_no: partNo, name, qty }),
+  })
+  if (!resp.ok) {
+    let payload: unknown = null
+    try { payload = await resp.json() } catch { /* ignore */ }
+    throw new ApiError(resp.status, (payload as { detail?: string })?.detail || '列印失敗', payload)
+  }
+  const blob = await resp.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `label-${partNo}.pdf`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
+export interface BatchInfo {
+  id: string
+  lot_no: string
+  part_id: string
+  qty: number
+  expiry_date: string | null
+  status: string
+}
+
+export const apiListBatches = (partId?: string) =>
+  api.get<BatchInfo[]>(`/warehouse/batches${partId ? `?part_id=${encodeURIComponent(partId)}` : ''}`)
+
+export const apiTraceBatch = (lotNo: string) =>
+  api.get<{ lot_no: string; lots: unknown[]; movements: unknown[] }>(
+    `/warehouse/batches/${encodeURIComponent(lotNo)}/trace`,
+  )
+
+export const apiTraceSerial = (serialNo: string) =>
+  api.get<{ serial_no: string; status: string; last_document_no?: string }>(
+    `/warehouse/serials/${encodeURIComponent(serialNo)}/trace`,
+  )
+
+// MFA（TOTP）
+export const apiMfaSetup = () => api.post<{ secret: string; otpauth_url: string; enabled: boolean }>('/auth/mfa/setup')
+export const apiMfaEnable = (code: string) => api.post<{ enabled: boolean; message: string }>('/auth/mfa/enable', { code })
+export const apiMfaDisable = (code: string) => api.post<{ enabled: boolean; message: string }>('/auth/mfa/disable', { code })
+export const apiMfaVerify = (mfaToken: string, code: string) =>
+  api.post<{ access_token: string; user: { id: string; username: string; employee_id: string; is_superuser: boolean } }>(
+    '/auth/mfa/verify', { mfa_token: mfaToken, code },
+  )
+
+// 備份
+export interface BackupInfo {
+  name: string
+  size_bytes: number
+  created_at?: string
+  valid_sqlite?: boolean
+}
+
+export const apiListBackups = () => api.get<{ total: number; backups: BackupInfo[] }>('/system/backups')
+export const apiCreateBackup = () => api.post<{ created: boolean; name?: string; reason?: string }>('/system/backups')
+export const apiDeleteBackup = (name: string) =>
+  api.del<{ deleted: boolean }>(`/system/backups/${encodeURIComponent(name)}`)
+export const apiRestoreBackup = (name: string) =>
+  api.post<{ restored: boolean; name?: string; rescue_file?: string; reason?: string }>(
+    `/system/backups/${encodeURIComponent(name)}/restore?confirm=true`,
+  )
+
+// 系統組態
+export interface SystemSetting {
+  key: string
+  value: unknown
+  group: string
+  description: string | null
+  source: string
+  is_system: boolean
+}
+export const apiListSettings = () => api.get<{ total: number; settings: SystemSetting[] }>('/system/settings')
+export const apiUpdateSetting = (key: string, value: unknown) =>
+  api.put<{ key: string; value: unknown }>(`/system/settings/${key}`, { value })
+
+// RFQ
+export interface RFQInfo {
+  id: string
+  rfq_no: string
+  status: string
+  need_date: string | null
+  quote_count: number
+  items: Array<{ part_id: string; qty: number; line_no?: number }>
+}
+export const apiListRFQs = () => api.get<RFQInfo[]>('/purchase/rfqs')
+export const apiCreateRFQ = (data: { items: Array<{ part_id: string; qty: number }>; need_date?: string; remark?: string }) =>
+  api.post<{ id: string; rfq_no: string; status: string }>('/purchase/rfqs', data)
+export const apiSendRFQ = (id: string) => api.post<{ id: string; rfq_no: string; status: string }>(`/purchase/rfqs/${id}/send`)
+export const apiReceiveQuote = (id: string, data: { supplier_id: string; items: Array<{ part_id: string; qty: number; unit_price: number }>; lead_time_days?: number }) =>
+  api.post<{ id: string; amount: number; status: string }>(`/purchase/rfqs/${id}/quotes`, data)
+export const apiCompareRFQ = (id: string) =>
+  api.get<{ rfq_id: string; rfq_no: string; status: string; quotes: Array<{ quote_id: string; supplier_id: string; amount: number; status: string }>; best_per_part: unknown[] }>(
+    `/purchase/rfqs/${id}/compare`,
+  )
+export const apiAwardRFQ = (id: string, quoteId: string) =>
+  api.post<{ po_id: string; po_no: string }>(`/purchase/rfqs/${id}/award`, { quote_id: quoteId })

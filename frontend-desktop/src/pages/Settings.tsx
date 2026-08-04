@@ -16,7 +16,13 @@ import {
   apiUploadAttachment, apiListAttachments, apiDeleteAttachment,
   downloadAttachmentUrl, type Attachment,
   apiLlmStatus, apiLlmTest, apiLlmConfigure, type LlmStatus,
+  // v3.64
+  apiMfaSetup, apiMfaEnable, apiMfaDisable,
+  apiListBackups, apiCreateBackup, apiDeleteBackup, apiRestoreBackup,
+  apiListSettings, apiUpdateSetting, type BackupInfo, type SystemSetting,
 } from '../lib/api'
+import GalaxyToggle from '../components/ui/GalaxyToggle'
+import GalaxyLoader from '../components/ui/GalaxyLoader'
 
 const CATEGORIES: { value: string; label: string }[] = [
   { value: 'quote',    label: '📋 客戶報價單' },
@@ -38,10 +44,257 @@ export default function Settings() {
       </div>
 
       <AiSettingsSection />
+      <SecuritySection />
+      <BackupSection />
+      <SystemConfigSection />
       <DemoDataSection />
       <FileUploadSection />
       <SystemInfoSection />
     </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+// v3.64 資安：MFA（TOTP）
+// ────────────────────────────────────────────────────────────
+function SecuritySection() {
+  const [secret, setSecret] = useState<string | null>(null)
+  const [otpauth, setOtpauth] = useState('')
+  const [enabled, setEnabled] = useState(false)
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState<string | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+
+  async function setup() {
+    setBusy(true); setErr(null); setMsg(null)
+    try {
+      const r = await apiMfaSetup()
+      setSecret(r.secret); setOtpauth(r.otpauth_url); setEnabled(r.enabled)
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : 'MFA 設定失敗')
+    } finally { setBusy(false) }
+  }
+
+  async function toggle(v: boolean) {
+    if (!code.trim()) { setErr('請先輸入驗證碼（使用 Authenticator App 掃描 QR/輸入密鑰）'); return }
+    setBusy(true); setErr(null); setMsg(null)
+    try {
+      if (v) {
+        const r = await apiMfaEnable(code.trim())
+        setEnabled(r.enabled); setMsg(r.message)
+      } else {
+        const r = await apiMfaDisable(code.trim())
+        setEnabled(r.enabled); setMsg(r.message)
+        setSecret(null)
+      }
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : '操作失敗')
+    } finally { setBusy(false) }
+  }
+
+  return (
+    <section className="bg-white rounded-xl shadow p-6">
+      <h2 className="text-lg font-semibold mb-1">🔐 雙重驗證（MFA）</h2>
+      <p className="text-sm text-gray-500 mb-4">Google Authenticator / Authy 等 TOTP App；登入時除密碼外需輸入 6 位驗證碼</p>
+
+      {!secret && !enabled && (
+        <button onClick={() => void setup()} disabled={busy}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+          {busy ? <GalaxyLoader label="產生中…" /> : '啟用設定'}
+        </button>
+      )}
+
+      {secret && !enabled && (
+        <div className="mt-3 space-y-3 text-sm">
+          <div className="bg-gray-50 rounded-lg p-3 break-all">
+            <div className="text-gray-500 mb-1">密鑰（手動輸入到 Authenticator App）：</div>
+            <code className="font-mono text-indigo-700">{secret}</code>
+            {otpauth && <div className="mt-2 text-gray-400 text-xs">或掃描 QR：<a className="text-blue-600 underline" href={otpauth} target="_blank" rel="noopener noreferrer">開啟 otpauth 連結</a></div>}
+          </div>
+          <div className="flex items-center gap-2">
+            <input value={code} onChange={e => setCode(e.target.value)} placeholder="6 位驗證碼"
+              className="input max-w-xs" inputMode="numeric" />
+            <button onClick={() => void toggle(true)} disabled={busy}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">啟用</button>
+          </div>
+        </div>
+      )}
+
+      {enabled && (
+        <div className="mt-3 space-y-3 text-sm">
+          <GalaxyToggle checked={enabled} onChange={(v) => void toggle(v)} label="MFA 已啟用（關閉需輸入驗證碼）" />
+          <div className="flex items-center gap-2">
+            <input value={code} onChange={e => setCode(e.target.value)} placeholder="驗證碼（停用時輸入）"
+              className="input max-w-xs" inputMode="numeric" />
+          </div>
+        </div>
+      )}
+
+      {msg && <div className="mt-3 text-green-700 text-sm">{msg}</div>}
+      {err && <div className="mt-3 text-red-600 text-sm">{err}</div>}
+    </section>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+// v3.64 備份管理
+// ────────────────────────────────────────────────────────────
+function BackupSection() {
+  const [backups, setBackups] = useState<BackupInfo[]>([])
+  const [busy, setBusy] = useState<string | null>(null)
+  const [msg, setMsg] = useState<string | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+
+  async function load() {
+    try { setBackups((await apiListBackups()).backups) } catch { setBackups([]) }
+  }
+  useEffect(() => { void load() }, [])
+
+  async function create() {
+    setBusy('create'); setErr(null); setMsg(null)
+    try {
+      const r = await apiCreateBackup()
+      setMsg(r.created ? `✅ 備份完成：${r.name}` : r.reason ?? '備份未建立')
+      await load()
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : '備份失敗')
+    } finally { setBusy(null) }
+  }
+
+  async function remove(name: string) {
+    if (!window.confirm(`刪除備份 ${name}？`)) return
+    setBusy(name)
+    try { await apiDeleteBackup(name); await load() } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : '刪除失敗')
+    } finally { setBusy(null) }
+  }
+
+  async function restore(name: string) {
+    if (!window.confirm(`⚠️ 從 ${name} 還原會覆蓋目前資料庫且不可逆！確定？`)) return
+    setBusy(name)
+    try {
+      const r = await apiRestoreBackup(name)
+      setMsg(r.restored ? `✅ 已還原 ${r.name}（救援檔 ${r.rescue_file}，請重新整理）` : r.reason ?? '還原失敗')
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : '還原失敗')
+    } finally { setBusy(null) }
+  }
+
+  return (
+    <section className="bg-white rounded-xl shadow p-6">
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="text-lg font-semibold">💾 備份管理</h2>
+        <button onClick={() => void create()} disabled={busy !== null}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+          {busy === 'create' ? '備份中…' : '立即備份'}
+        </button>
+      </div>
+      <p className="text-sm text-gray-500 mb-4">每日 03:00 自動備份（保留 30 天，可在下方系統設定調整）</p>
+
+      {backups.length === 0 ? (
+        <div className="text-sm text-gray-400 py-3">尚無備份</div>
+      ) : (
+        <table className="w-full text-sm">
+          <thead><tr className="bg-gray-50">
+            <th className="text-left p-2">備份</th><th className="text-right p-2">大小</th>
+            <th className="text-right p-2">操作</th>
+          </tr></thead>
+          <tbody>
+            {backups.map(b => (
+              <tr key={b.name} className="border-t">
+                <td className="p-2 font-mono text-xs">{b.name}</td>
+                <td className="p-2 text-right">{(b.size_bytes / 1024).toFixed(0)} KB</td>
+                <td className="p-2 text-right space-x-2">
+                  <button onClick={() => void restore(b.name)} disabled={busy !== null}
+                    className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-500 disabled:opacity-40">還原</button>
+                  <button onClick={() => void remove(b.name)} disabled={busy !== null}
+                    className="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300 disabled:opacity-40">刪除</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      {msg && <div className="mt-3 text-green-700 text-sm">{msg}</div>}
+      {err && <div className="mt-3 text-red-600 text-sm">{err}</div>}
+    </section>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+// v3.64 系統組態（env > DB > 預設）
+// ────────────────────────────────────────────────────────────
+const TOGGLE_KEYS = ['finance.credit_limit_check', 'backup.enabled']
+const VALUE_KEYS = ['tax.vat_rate', 'backup.retention_days', 'security.login_lockout_threshold', 'backup.schedule']
+
+function SystemConfigSection() {
+  const [settings, setSettings] = useState<SystemSetting[]>([])
+  const [saving, setSaving] = useState<string | null>(null)
+  const [msg, setMsg] = useState<string | null>(null)
+
+  async function load() {
+    try { setSettings((await apiListSettings()).settings) } catch { setSettings([]) }
+  }
+  useEffect(() => { void load() }, [])
+
+  async function setValue(key: string, value: unknown) {
+    setSaving(key)
+    try {
+      await apiUpdateSetting(key, value)
+      setMsg(`✅ ${key} 已更新`)
+      await load()
+    } catch { setMsg('⚠️ 更新失敗（可能權限不足）') }
+    finally { setSaving(null) }
+  }
+
+  const toggle = (key: string) => settings.find(s => s.key === key)
+  const value = (key: string) => settings.find(s => s.key === key)?.value
+
+  return (
+    <section className="bg-white rounded-xl shadow p-6">
+      <h2 className="text-lg font-semibold mb-1">⚙️ 系統組態</h2>
+      <p className="text-sm text-gray-500 mb-4">優先序：環境變數 &gt; 資料庫 &gt; 預設值</p>
+      <div className="space-y-3 text-sm">
+        {TOGGLE_KEYS.map(key => {
+          const s = toggle(key)
+          if (!s) return null
+          return (
+            <div key={key} className="flex items-center justify-between border-b border-gray-100 pb-2">
+              <div>
+                <div className="font-medium">{s.description || key}</div>
+                <div className="text-xs text-gray-400 font-mono">{key}（來源 {s.source}）</div>
+              </div>
+              <GalaxyToggle checked={Boolean(s.value)} disabled={saving === key}
+                onChange={(v) => void setValue(key, v)} />
+            </div>
+          )
+        })}
+        {VALUE_KEYS.map(key => {
+          const s = value(key)
+          if (s === undefined) return null
+          return (
+            <div key={key} className="flex items-center justify-between border-b border-gray-100 pb-2">
+              <div>
+                <div className="font-medium">{settings.find(x => x.key === key)?.description || key}</div>
+                <div className="text-xs text-gray-400 font-mono">{key}</div>
+              </div>
+              <input
+                defaultValue={String(s)}
+                onBlur={(e) => {
+                  const raw = e.target.value
+                  // 健檢 #17：支援小數（0.05）與整數，否則會存成字串
+                  const parsed = /^-?\d*\.?\d+$/.test(raw) ? Number(raw) : raw
+                  void setValue(key, parsed)
+                }}
+                className="input max-w-[160px]"
+              />
+            </div>
+          )
+        })}
+      </div>
+      {msg && <div className="mt-3 text-sm text-green-700">{msg}</div>}
+    </section>
   )
 }
 

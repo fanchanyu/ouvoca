@@ -5,6 +5,8 @@ import {
   apiCancelPO, apiCreateSupplier, apiCreatePO,
   apiApprovePO, apiReceivePO, apiGetPO,
   apiListParts, type Part,
+  apiListRFQs, apiCreateRFQ, apiSendRFQ, apiReceiveQuote, apiCompareRFQ, apiAwardRFQ,
+  type RFQInfo,
   type PurchaseOrder, type Supplier,
   ApiError,
 } from '../lib/api'
@@ -51,9 +53,10 @@ const SUPPLIER_FIELDS: FieldDef[] = [
 export default function Purchase() {
   const [pos, setPos] = useState<PurchaseOrder[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [parts, setParts] = useState<Part[]>([])   // v3.64 RFQ 選料用
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<string>('')
-  const [tab, setTab] = useState<'orders' | 'suppliers'>('orders')
+  const [tab, setTab] = useState<'orders' | 'suppliers' | 'rfq'>('orders')
   const [editingSup, setEditingSup] = useState<Supplier | null>(null)
   const [printPO, setPrintPO] = useState<PurchaseOrder | null>(null)
   const [chainPO, setChainPO] = useState<PurchaseOrder | null>(null)
@@ -62,8 +65,10 @@ export default function Purchase() {
   async function load() {
     setLoading(true)
     try {
-      const [p, s] = await Promise.all([apiListPOs(filterStatus || undefined), apiListSuppliers()])
-      setPos(p); setSuppliers(s)
+      const [p, s, pr] = await Promise.all([
+        apiListPOs(filterStatus || undefined), apiListSuppliers(), apiListParts(),
+      ])
+      setPos(p); setSuppliers(s); setParts(pr)
     } finally { setLoading(false) }
   }
 
@@ -134,6 +139,10 @@ export default function Purchase() {
               onClick={() => setTab('suppliers')}
               className={`px-3 py-1.5 text-sm rounded ${tab === 'suppliers' ? 'bg-white shadow' : 'text-gray-500'}`}
             >🏭 供應商</button>
+            <button
+              onClick={() => setTab('rfq')}
+              className={`px-3 py-1.5 text-sm rounded ${tab === 'rfq' ? 'bg-white shadow' : 'text-gray-500'}`}
+            >📨 RFQ 詢價</button>
           </div>
           {tab === 'orders' && (
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="border rounded-lg px-3 py-2 text-sm">
@@ -158,7 +167,9 @@ export default function Purchase() {
         <Stat title="總金額 (TWD)" value={pos.reduce((sum, p) => sum + p.total_amount, 0).toLocaleString('zh-TW', { maximumFractionDigits: 0 })} />
       </div>
 
-      {tab === 'orders' ? (
+      {tab === 'rfq' ? (
+        <RfqSection parts={parts} suppliers={suppliers} onAfterChange={load} />
+      ) : tab === 'orders' ? (
         <div className="bg-white rounded-xl shadow overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
@@ -326,6 +337,208 @@ export default function Purchase() {
           </div>
           <DocFooter note="請確認規格、數量、價格後簽回。" />
         </PrintableDocument>
+      )}
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+// v3.64 RFQ 詢價比價
+// ────────────────────────────────────────────────────────────
+function RfqSection({ parts, suppliers, onAfterChange }: {
+  parts: Part[]; suppliers: Supplier[]; onAfterChange: () => void
+}) {
+  const [rfqs, setRfqs] = useState<RFQInfo[]>([])
+  const [msg, setMsg] = useState<string | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+  const [busy, setBusy] = useState<string | null>(null)
+  // 建立表單
+  const [partId, setPartId] = useState('')
+  const [qty, setQty] = useState(100)
+  const [showCreate, setShowCreate] = useState(false)
+  // 比價
+  const [compare, setCompare] = useState<Awaited<ReturnType<typeof apiCompareRFQ>> | null>(null)
+  // 報價表單
+  const [quoteFor, setQuoteFor] = useState<string | null>(null)
+  const [quoteSup, setQuoteSup] = useState('')
+  const [quotePrice, setQuotePrice] = useState(0)
+  const [quoteItem, setQuoteItem] = useState<{ part_id: string; qty: number } | null>(null)  // 健檢 #18
+
+  async function load() {
+    try { setRfqs(await apiListRFQs()) } catch { setRfqs([]) }
+  }
+  useEffect(() => { void load() }, [])
+
+  async function create() {
+    if (!partId) { setErr('請選擇料件'); return }
+    setBusy('create'); setErr(null); setMsg(null)
+    try {
+      await apiCreateRFQ({ items: [{ part_id: partId, qty }] })
+      setMsg('✅ RFQ 已建立')
+      setShowCreate(false); setPartId(''); await load()
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : '建立失敗')
+    } finally { setBusy(null) }
+  }
+
+  async function send(id: string) {
+    setBusy(id); setErr(null)
+    try { await apiSendRFQ(id); setMsg('已送出詢價'); await load() }
+    catch (e: unknown) { setErr(e instanceof Error ? e.message : '送出失敗') }
+    finally { setBusy(null) }
+  }
+
+  async function compareRfq(id: string) {
+    setBusy(id); setErr(null); setMsg(null)
+    try { setCompare(await apiCompareRFQ(id)) }
+    catch (e: unknown) { setErr(e instanceof Error ? e.message : '比價失敗') }
+    finally { setBusy(null) }
+  }
+
+  async function submitQuote(rfqId: string) {
+    if (!quoteSup) { setErr('請選擇供應商'); return }
+    if (!quoteItem) { setErr('此詢價單沒有可報價的項目'); return }
+    setBusy('quote')
+    try {
+      await apiReceiveQuote(rfqId, {
+        supplier_id: quoteSup,
+        items: [{ part_id: quoteItem.part_id, qty: quoteItem.qty, unit_price: quotePrice }],
+      })
+      setMsg('✅ 報價已登錄'); setQuoteFor(null); setQuoteItem(null); await load()
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '登錄失敗') }
+    finally { setBusy(null) }
+  }
+
+  async function award(rfqId: string, quoteId: string) {
+    if (!window.confirm('決標後將自動轉採購單，確定？')) return
+    setBusy('award')
+    try {
+      const r = await apiAwardRFQ(rfqId, quoteId)
+      setMsg(`✅ 已決標並轉成 ${r.po_no}`)
+      setCompare(null); await load(); onAfterChange()  // 健檢 #18：決標後刷新 PO 清單
+    } catch (e: unknown) { setErr(e instanceof Error ? e.message : '決標失敗') }
+    finally { setBusy(null) }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <button onClick={() => setShowCreate(!showCreate)}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+          {showCreate ? '取消' : '＋ 建立詢價單'}
+        </button>
+      </div>
+
+      {showCreate && (
+        <div className="galaxy-scan-card p-4 flex flex-wrap items-end gap-3">
+          <label className="flex flex-col text-sm">
+            <span className="text-gray-500 mb-1">料件</span>
+            <select value={partId} onChange={e => setPartId(e.target.value)} className="input min-w-[200px]">
+              <option value="">選擇料件…</option>
+              {parts.map(p => <option key={p.id} value={p.id}>{p.part_no} {p.name}</option>)}
+            </select>
+          </label>
+          <label className="flex flex-col text-sm">
+            <span className="text-gray-500 mb-1">數量</span>
+            <input type="number" value={qty} min={1} onChange={e => setQty(+e.target.value)} className="input w-32" />
+          </label>
+          <button onClick={() => void create()} disabled={busy === 'create'}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">
+            建立
+          </button>
+        </div>
+      )}
+
+      {msg && <div className="text-green-700 text-sm">{msg}</div>}
+      {err && <div className="text-red-600 text-sm">{err}</div>}
+
+      <div className="bg-white rounded-xl shadow overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="text-left p-3">詢價單號</th>
+              <th className="text-left p-3">狀態</th>
+              <th className="text-right p-3">報價數</th>
+              <th className="text-right p-3">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rfqs.length === 0 ? (
+              <tr><td colSpan={4} className="p-4 text-center text-gray-400">尚無詢價單</td></tr>
+            ) : rfqs.map(r => (
+              <tr key={r.id} className="border-t">
+                <td className="p-3 font-mono">{r.rfq_no}</td>
+                <td className="p-3">{r.status}</td>
+                <td className="p-3 text-right">{r.quote_count}</td>
+                <td className="p-3 text-right space-x-2">
+                  {r.status === 'draft' && (
+                    <button onClick={() => void send(r.id)} disabled={busy !== null}
+                      className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-500 disabled:opacity-40">送出</button>
+                  )}
+                  {r.status === 'sent' && (
+                    <>
+                      <button onClick={() => {
+                        setQuoteFor(r.id)
+                        setQuoteItem(r.items[0] ?? null)
+                        setQuotePrice(0)
+                        setErr(null)
+                      }} disabled={busy !== null}
+                        className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-500 disabled:opacity-40">登錄報價</button>
+                      <button onClick={() => void compareRfq(r.id)} disabled={busy !== null}
+                        className="px-2 py-1 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-500 disabled:opacity-40">比價</button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {quoteFor && (
+        <div className="galaxy-scan-card p-4 flex flex-wrap items-end gap-3">
+          <label className="flex flex-col text-sm">
+            <span className="text-gray-500 mb-1">供應商</span>
+            <select value={quoteSup} onChange={e => setQuoteSup(e.target.value)} className="input min-w-[180px]">
+              <option value="">選擇供應商…</option>
+              {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </label>
+          <label className="flex flex-col text-sm">
+            <span className="text-gray-500 mb-1">單價</span>
+            <input type="number" value={quotePrice} min={0} onChange={e => setQuotePrice(+e.target.value)} className="input w-32" />
+          </label>
+          <button onClick={() => void submitQuote(quoteFor)} disabled={busy === 'quote'}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">登錄</button>
+          <button onClick={() => setQuoteFor(null)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg">取消</button>
+        </div>
+      )}
+
+      {compare && (
+        <div className="bg-white rounded-xl shadow p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold">比價結果：{compare.rfq_no}</h3>
+            <button onClick={() => setCompare(null)} className="text-sm text-gray-400 hover:text-gray-600">✕ 關閉</button>
+          </div>
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr><th className="text-left p-2">報價</th><th className="text-right p-2">金額</th><th className="text-right p-2">操作</th></tr>
+            </thead>
+            <tbody>
+              {compare.quotes.map(q => (
+                <tr key={q.quote_id} className="border-t">
+                  <td className="p-2 font-mono text-xs">{q.supplier_id}</td>
+                  <td className="p-2 text-right">{q.amount.toLocaleString('zh-TW')}</td>
+                  <td className="p-2 text-right">
+                    <button onClick={() => void award(compare.rfq_id, q.quote_id)}
+                      disabled={busy === 'award'}
+                      className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-500 disabled:opacity-40">決標</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )
