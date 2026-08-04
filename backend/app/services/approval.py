@@ -18,7 +18,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.exceptions import BusinessRuleError, NotFoundError
+from app.core.exceptions import BusinessRuleError, NotFoundError, PermissionDeniedError
 from app.core.logging import get_logger
 from app.events import EventBus, DomainEvent
 from app.models.approval_workflow import (
@@ -174,6 +174,49 @@ async def _record_step(
     return step
 
 
+async def _assert_can_decide(
+    db: AsyncSession, req: ApprovalRequestV2, user: Optional[dict],
+) -> None:
+    """決行授權檢查 —— 只有具備該單 `approver_role` 的人（或超級管理員）能核准/駁回。
+
+    修復前的狀態：endpoint 只有 `Depends(get_current_user)`（僅驗「有沒有登入」），
+    service 層也只檢查單據存在且為 pending。結果是**任何已登入者**——包含權限最低的
+    現場作業員——都能核准任何待審單據，包含家規因「超過 10 萬要老闆簽」而擋下來的
+    採購單。這等於架空「家規 + 多階審批」整條治理鏈。
+
+    放行條件（任一即可）：
+      1. demo bypass 使用者（permissions 含 "*"）
+      2. JWT 的 roles 命中該單的 approver_role
+      3. DB 中 is_superuser=True（JWT 不帶此欄位，需回查）
+    """
+    u = user or {}
+
+    if "*" in (u.get("permissions") or []):
+        return
+    if req.approver_role and req.approver_role in (u.get("roles") or []):
+        return
+
+    employee_id = u.get("employee_id")
+    if employee_id:
+        from app.models.organization import User
+        is_superuser = (await db.execute(
+            select(User.is_superuser).where(User.employee_id == employee_id)
+        )).scalar_one_or_none()
+        if is_superuser:
+            return
+
+    log.warning(
+        "Approval decision denied: user=%s roles=%s required=%s request=%s",
+        employee_id, u.get("roles"), req.approver_role, req.id,
+    )
+    raise PermissionDeniedError(
+        f"此審批單需具備「{req.approver_role}」角色才能決行",
+        request_id=req.id,
+        required_role=req.approver_role,
+        user_roles=u.get("roles") or [],
+    )
+
+
 async def approve(
     db: AsyncSession,
     request_id: str,
@@ -185,6 +228,7 @@ async def approve(
         raise NotFoundError("審批單不存在", request_id=request_id)
     if req.status != "pending":
         raise BusinessRuleError(f"審批單已結案（status={req.status}）")
+    await _assert_can_decide(db, req, user)
 
     await _record_step(db, req, "approved", user, comment or None)
 
@@ -226,6 +270,7 @@ async def reject(
         raise NotFoundError("審批單不存在", request_id=request_id)
     if req.status != "pending":
         raise BusinessRuleError(f"審批單已結案（status={req.status}）")
+    await _assert_can_decide(db, req, user)
 
     await _record_step(db, req, "rejected", user, comment.strip())
     req.status = "rejected"

@@ -136,6 +136,9 @@ async def aggregate(
     domain: str = Query(..., description="要查詢的 domain，如 inventory"),
     part_no: str | None = Query(None, description="可選：限定某零件"),
     timeout_seconds: float = Query(5.0, ge=0.5, le=30.0),
+    # 修復：本 endpoint 原本是 mesh 五支裡唯一沒有權限檢查的，
+    # 任何已登入者都能跨廠查詢。改與 register/list/unregister 一致。
+    _user: UserContext = Depends(require_permission("mesh.factory.query")),
 ):
     """
     跨廠聚合查詢的核心 endpoint。
