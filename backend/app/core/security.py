@@ -77,8 +77,10 @@ class UserContext:
 # 權限快取 — process-local TTL cache
 # ============================================================
 
+# P0-1 fix: 權限快取從 5 分鐘縮短為 30 秒 — 撤權/授權的生效延遲窗大幅縮小。
+# （tool 執行路徑額外使用 fresh=True 直接查 DB，撤權立即生效。）
 _PERMISSION_CACHE: dict[str, tuple[float, dict[str, str]]] = {}
-_CACHE_TTL_SECONDS = 300  # 5 minutes
+_CACHE_TTL_SECONDS = 30
 
 
 def invalidate_user_cache(user_id: str) -> None:
@@ -193,6 +195,16 @@ async def load_user_context(request: Request, db: AsyncSession) -> UserContext:
     if not raw:
         raise AuthenticationError("尚未登入")
 
+    # P0-1（健檢 #1）：MFA 挑戰 token 不得當正式 token 使用 —
+    # mfa_pending 的 JWT 只能拿去 /api/auth/mfa/verify 換正式 token。
+    if raw.get("mfa_pending"):
+        log.info("MFA-pending token rejected for protected API: user=%s",
+                 raw.get("employee_id") or raw.get("username") or "?")
+        raise AuthenticationError(
+            "此 token 僅供 MFA 驗證使用，請完成雙重驗證後再操作",
+            code="mfa_pending",
+        )
+
     # Demo bypass: demo-admin → super-admin context（不查 DB）
     # F-6：production 環境（DEBUG=False 且 ALLOW_DEMO_BYPASS=False）一律擋掉，
     # 避免 JWT_SECRET 外洩時惡意人偽造 employee_id="demo-admin" 拿到 super-admin。
@@ -223,18 +235,30 @@ async def load_user_context(request: Request, db: AsyncSession) -> UserContext:
     from app.models.organization import User
     from app.models.permission import UserRoleAssignment
 
-    user_q = select(User).where(User.employee_id == employee_id)
-    user = (await db.execute(user_q)).scalar_one_or_none()
-    if not user:
-        raise AuthenticationError("使用者不存在", employee_id=employee_id)
-
-    # 載入 tenant_id（取第一個有效的 UserRoleAssignment 的 tenant）
-    tenant_q = (
-        select(UserRoleAssignment.tenant_id)
-        .where(UserRoleAssignment.user_id == user.id, UserRoleAssignment.is_active == True)  # noqa: E712
+    # 效能健檢 ②：user + tenant 合併成一次 LEFT JOIN，
+    # 取代原本兩次獨立查詢（users + user_role_assignments）。
+    user_q = (
+        select(User, UserRoleAssignment.tenant_id)
+        .outerjoin(
+            UserRoleAssignment,
+            (UserRoleAssignment.user_id == User.id)
+            & (UserRoleAssignment.is_active == True),  # noqa: E712
+        )
+        .where(User.employee_id == employee_id)
         .limit(1)
     )
-    tenant_id = (await db.execute(tenant_q)).scalar_one_or_none() or "HQ"
+    row = (await db.execute(user_q)).first()
+    user = row[0] if row else None
+    if not user:
+        raise AuthenticationError("使用者不存在", employee_id=employee_id)
+    # v3.62：session 撤銷 — JWT ver 必須等於使用者目前 token_version
+    token_ver = int(raw.get("ver", 0) or 0)
+    if token_ver != (user.token_version or 0):
+        log.info("Stale token rejected: user=%s token_ver=%s current=%s",
+                 employee_id, token_ver, user.token_version)
+        raise AuthenticationError("Token 已失效，請重新登入", code="stale_token")
+
+    tenant_id = row[1] or "HQ"
 
     permissions = await get_user_permissions(db, user.id)
 
@@ -374,7 +398,11 @@ def apply_row_filter(
     """
     # 找出該 resource 的所有 action permissions，取 list / read 的 scope（最常用）
     # 簡化：用 resource.list 或 resource.read 的 scope
-    list_scope = ctx.scope_for(f"{resource}.list") or ctx.scope_for(f"{resource}.read")
+    # 健檢 #21：scope_for 找不到會回 "none"（truthy），
+    # 舊寫法 `or` fallback 永遠不觸發 → 改成先取 list、none 才退化 read
+    list_scope = ctx.scope_for(f"{resource}.list")
+    if list_scope == "none":
+        list_scope = ctx.scope_for(f"{resource}.read")
 
     # Look up the underlying SQL entity
     entity = query.column_descriptions[0]["entity"] if query.column_descriptions else None

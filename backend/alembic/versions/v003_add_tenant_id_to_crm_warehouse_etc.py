@@ -46,9 +46,14 @@ TABLES: tuple[str, ...] = (
 
 
 def upgrade() -> None:
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
     for table in TABLES:
-        op.add_column(table, sa.Column("tenant_id", sa.String(50), nullable=True))
-        op.create_index(f"ix_{table}_tenant_id", table, ["tenant_id"])
+        # 冪等保護：v001 baseline 可能已用當下模型（含 tenant_id）建表
+        existing_cols = {c["name"] for c in inspector.get_columns(table)}
+        if "tenant_id" not in existing_cols:
+            op.add_column(table, sa.Column("tenant_id", sa.String(50), nullable=True))
+            op.create_index(f"ix_{table}_tenant_id", table, ["tenant_id"])
 
 
 def downgrade() -> None:

@@ -50,6 +50,22 @@ async def seed():
     from scripts.seed_permissions import seed_permissions
     await seed_permissions()
 
+    # M1-4：TW 會計科目表（86 科，is_system 保護）
+    from scripts.seed_accounts import seed_accounts
+    await seed_accounts()
+
+    # M1-3：系統組態開機即用預設（14 項，env > DB > default）
+    from app.services.system_settings import DEFAULT_SETTINGS, set_setting
+    async with AsyncSessionLocal() as _db:
+        for key, spec in DEFAULT_SETTINGS.items():
+            await set_setting(
+                _db, key, spec["value"],
+                group=spec.get("group", "general"),
+                description=spec.get("description"),
+                updated_by="system",
+                is_system=True,
+            )
+
     async with AsyncSessionLocal() as db:
         # --- Departments + Employees + User ---
         dept_it, _ = await get_or_create(db, Department,

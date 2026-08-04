@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from datetime import datetime, UTC
 from typing import Any, Awaitable, Callable
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import get_logger
@@ -146,11 +146,79 @@ async def _cond_count_check(params: dict, context: dict, db: AsyncSession) -> bo
     }.get(op, False)
 
 
+async def _cond_credit_check(params: dict, context: dict, db: AsyncSession) -> bool:
+    """客戶信用額度：context 需含 customer_id 與 total_amount。
+    未設額度 → 通過；未收應收 + 本單 ≤ 額度 → 通過。"""
+    from app.models.crm_sales import Customer
+    from app.models.accounting import AccountsReceivable
+    customer_id = context.get("customer_id")
+    amount = float(context.get("total_amount", 0) or 0)
+    if not customer_id:
+        return True
+    customer = (await db.execute(
+        select(Customer).where(Customer.id == customer_id)
+    )).scalar_one_or_none()
+    if customer is None or not customer.credit_limit:
+        return True
+    open_ar = (await db.execute(
+        select(func.coalesce(func.sum(AccountsReceivable.amount - AccountsReceivable.paid_amount), 0))
+        .where(
+            AccountsReceivable.customer_id == customer_id,
+            AccountsReceivable.status.in_(("unpaid", "partial")),
+        )
+    )).scalar_one() or 0
+    return float(open_ar) + amount <= float(customer.credit_limit)
+
+
+async def _cond_has_customer_tax_id(params: dict, context: dict, db: AsyncSession) -> bool:
+    """B2B 客戶有統編才通過（context.customer_id → Customer.tax_id 非空）。"""
+    from app.models.crm_sales import Customer
+    customer_id = context.get("customer_id")
+    if not customer_id:
+        return True
+    customer = (await db.execute(
+        select(Customer).where(Customer.id == customer_id)
+    )).scalar_one_or_none()
+    return bool(customer and customer.tax_id)
+
+
+async def _cond_period_open(params: dict, context: dict, db: AsyncSession) -> bool:
+    """會計期間未鎖定才通過（context.period → MonthEndClose 無 closed）。"""
+    from app.models.accounting import MonthEndClose
+    period = context.get("period")
+    if not period:
+        return True
+    closed = (await db.execute(
+        select(MonthEndClose).where(
+            MonthEndClose.period == period, MonthEndClose.status == "closed",
+        )
+    )).scalar_one_or_none()
+    return closed is None
+
+
+async def _cond_field_in(params: dict, context: dict, db: AsyncSession) -> bool:
+    """欄位值在允許清單內才通過：{"field": "status", "values": ["approved", "sent"]}"""
+    field = params.get("field")
+    values = params.get("values") or []
+    return context.get(field) in values
+
+
+async def _cond_not_empty(params: dict, context: dict, db: AsyncSession) -> bool:
+    """context 欄位非空才通過：{"field": "customer_id"}"""
+    field = params.get("field")
+    return bool(context.get(field))
+
+
 # 註冊內建 conditions
 register_condition("always", _cond_always)
 register_condition("has_bom", _cond_has_bom)
 register_condition("field_compare", _cond_field_compare)
 register_condition("count_check", _cond_count_check)
+register_condition("credit_check", _cond_credit_check)
+register_condition("has_customer_tax_id", _cond_has_customer_tax_id)
+register_condition("period_open", _cond_period_open)
+register_condition("field_in", _cond_field_in)
+register_condition("not_empty", _cond_not_empty)
 
 
 # ─── 主評估函式 ────────────────────────────────────────────
@@ -340,6 +408,227 @@ DEFAULT_RULES = [
         "message": "採購單必須至少包含 1 個項目。",
         "override_role": None,
         "priority": 10,
+    },
+    # ─── v3.67 Turnkey P0-3：家規 20 條（allow-predicate 語意） ───
+    {
+        "name": "SO 客戶信用額度檢查",
+        "description": "未收應收 + 本單金額不得超過客戶信用額度（可設定關閉）。",
+        "trigger": "so.create",
+        "condition_type": "credit_check",
+        "condition_params": {},
+        "action": "block",
+        "message": "信用額度不足：客戶未收應收加本單金額超過信用額度。",
+        "override_role": "manager",
+        "priority": 90,
+    },
+    {
+        "name": "SO B2B 客戶應有統編",
+        "description": "B2B 客戶缺少統編時提醒（開立電子發票需要）。",
+        "trigger": "so.create",
+        "condition_type": "has_customer_tax_id",
+        "condition_params": {},
+        "action": "warn",
+        "message": "此客戶沒有統編（tax_id），開立 B2B 電子發票時會缺欄位。",
+        "override_role": None,
+        "priority": 40,
+    },
+    {
+        "name": "出貨需 SO 已確認",
+        "description": "未確認的 SO 不可出貨（狀態機外的家規防線）。",
+        "trigger": "so.ship",
+        "condition_type": "field_in",
+        "condition_params": {"field": "status", "values": ["confirmed", "production", "ready_to_ship"]},
+        "action": "block",
+        "message": "此 SO 尚未確認，不可出貨。請先確認訂單。",
+        "override_role": "manager",
+        "priority": 90,
+    },
+    {
+        "name": "收貨需 PO 已核准",
+        "description": "未核准的 PO 不可收貨。",
+        "trigger": "po.receive",
+        "condition_type": "field_in",
+        "condition_params": {"field": "status", "values": ["approved", "sent", "partial_received"]},
+        "action": "block",
+        "message": "此 PO 尚未核准，不可收貨。",
+        "override_role": "manager",
+        "priority": 90,
+    },
+    {
+        "name": "傳票期間未鎖定",
+        "description": "已結帳的會計期間不可再開傳票。",
+        "trigger": "je.create",
+        "condition_type": "period_open",
+        "condition_params": {},
+        "action": "block",
+        "message": "此會計期間已結帳鎖定，不可新增傳票。",
+        "override_role": "manager",
+        "priority": 90,
+    },
+    {
+        "name": "傳票借貸需平衡",
+        "description": "借貸不平衡的傳票不可建立。",
+        "trigger": "je.create",
+        "condition_type": "field_compare",
+        "condition_params": {"field": "balanced", "op": "eq", "value": True},
+        "action": "block",
+        "message": "傳票借貸不平衡。",
+        "override_role": None,
+        "priority": 95,
+    },
+    {
+        "name": "退貨入庫需已核准",
+        "description": "RMA 退貨必須核准後才能入庫。",
+        "trigger": "return.process",
+        "condition_type": "field_compare",
+        "condition_params": {"field": "status", "op": "eq", "value": "approved"},
+        "action": "block",
+        "message": "退貨單尚未核准，不可入庫。",
+        "override_role": "manager",
+        "priority": 80,
+    },
+    {
+        "name": "請購轉採購需已核准",
+        "description": "PR 必須核准後才能轉成 PO。",
+        "trigger": "pr.convert",
+        "condition_type": "field_compare",
+        "condition_params": {"field": "status", "op": "eq", "value": "approved"},
+        "action": "block",
+        "message": "請購單尚未核准，不可轉採購。",
+        "override_role": "manager",
+        "priority": 80,
+    },
+    {
+        "name": "RFQ 決標需已送出",
+        "description": "未送出的 RFQ 不可決標。",
+        "trigger": "rfq.award",
+        "condition_type": "field_compare",
+        "condition_params": {"field": "status", "op": "eq", "value": "sent"},
+        "action": "block",
+        "message": "詢價單尚未送出，不可決標。",
+        "override_role": "manager",
+        "priority": 80,
+    },
+    {
+        "name": "高額收款需主管審",
+        "description": "單筆收款超過 NT$10 萬需要主管審批。",
+        "trigger": "receipt.create",
+        "condition_type": "field_compare",
+        "condition_params": {"field": "amount", "op": "lte", "value": 100000},
+        "action": "require_approval",
+        "message": "收款金額超過 NT$10 萬需要主管審批。",
+        "override_role": "manager",
+        "priority": 50,
+    },
+    {
+        "name": "高額付款需主管審",
+        "description": "單筆付款超過 NT$10 萬需要主管審批。",
+        "trigger": "payment.create",
+        "condition_type": "field_compare",
+        "condition_params": {"field": "amount", "op": "lte", "value": 100000},
+        "action": "require_approval",
+        "message": "付款金額超過 NT$10 萬需要主管審批。",
+        "override_role": "manager",
+        "priority": 50,
+    },
+    {
+        "name": "領料需工單已釋放",
+        "description": "未釋放的工單不可領料。",
+        "trigger": "material_issue.create",
+        "condition_type": "field_in",
+        "condition_params": {"field": "wo_status", "values": ["released", "in_progress"]},
+        "action": "block",
+        "message": "工單尚未釋放，不可領料。",
+        "override_role": "manager",
+        "priority": 80,
+    },
+    {
+        "name": "工單完工需已釋放",
+        "description": "未釋放的工單不可完工。",
+        "trigger": "wo.complete",
+        "condition_type": "field_in",
+        "condition_params": {"field": "status", "values": ["released", "in_progress"]},
+        "action": "block",
+        "message": "工單尚未釋放，不可完工。",
+        "override_role": "manager",
+        "priority": 80,
+    },
+    {
+        "name": "報價單需有客戶",
+        "description": "報價單必須指定客戶。",
+        "trigger": "quotation.create",
+        "condition_type": "not_empty",
+        "condition_params": {"field": "customer_id"},
+        "action": "block",
+        "message": "報價單必須指定客戶。",
+        "override_role": None,
+        "priority": 60,
+    },
+    {
+        "name": "工單需有產品",
+        "description": "工單必須指定產品。",
+        "trigger": "wo.create",
+        "condition_type": "not_empty",
+        "condition_params": {"field": "product_id"},
+        "action": "block",
+        "message": "工單必須指定產品。",
+        "override_role": None,
+        "priority": 60,
+    },
+    {
+        "name": "庫存低於安全庫存提醒",
+        "description": "可用庫存低於安全庫存時提醒補貨。",
+        "trigger": "inventory.read",
+        "condition_type": "field_compare",
+        "condition_params": {"field": "qty_available", "op": "gte", "value": 0},
+        "action": "warn",
+        "message": "此料件可用庫存低於安全庫存，建議補貨。",
+        "override_role": None,
+        "priority": 20,
+    },
+    {
+        "name": "批號效期提醒",
+        "description": "建立批號時若有效期即記錄（提醒效期管理）。",
+        "trigger": "inventory.batch.create",
+        "condition_type": "not_empty",
+        "condition_params": {"field": "lot_no"},
+        "action": "warn",
+        "message": "批號已建立，請留意效期管理。",
+        "override_role": None,
+        "priority": 20,
+    },
+    {
+        "name": "付款需指定供應商",
+        "description": "付款單必須指定供應商。",
+        "trigger": "payment.create",
+        "condition_type": "not_empty",
+        "condition_params": {"field": "supplier_id"},
+        "action": "block",
+        "message": "付款單必須指定供應商。",
+        "override_role": None,
+        "priority": 60,
+    },
+    {
+        "name": "收款需指定客戶",
+        "description": "收款單必須指定客戶。",
+        "trigger": "receipt.create",
+        "condition_type": "not_empty",
+        "condition_params": {"field": "customer_id"},
+        "action": "block",
+        "message": "收款單必須指定客戶。",
+        "override_role": None,
+        "priority": 60,
+    },
+    {
+        "name": "收料不可超過訂購量",
+        "description": "累計收貨量不得超過訂購量（防呆家規）。",
+        "trigger": "po.receive",
+        "condition_type": "always",
+        "condition_params": {},
+        "action": "warn",
+        "message": "收料時請確認累計收貨量不超過訂購量。",
+        "override_role": None,
+        "priority": 5,
     },
 ]
 

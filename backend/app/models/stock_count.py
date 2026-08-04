@@ -37,7 +37,7 @@ class StockCount(Base, TenantMixin):
                          order_by="StockCountItem.sequence_no")
 
 
-class StockCountItem(Base):
+class StockCountItem(Base, TenantMixin):
     """盤點單行項目（每料件一行）。"""
     __tablename__ = "stock_count_items"
 

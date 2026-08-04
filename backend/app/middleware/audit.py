@@ -61,6 +61,10 @@ class AuditMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         if not settings.AUDIT_LOG_ENABLED or _skip(request.url.path):
             return await call_next(request)
+        # 效能健檢 ②：GET 是唯讀，不寫稽核日誌（避免每個請求
+        # 都 fire-and-forget 開 session + INSERT）。業務動作（mutation）照記。
+        if request.method == "GET":
+            return await call_next(request)
 
         start = time.perf_counter()
         body_preview = None

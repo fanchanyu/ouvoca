@@ -102,6 +102,42 @@ async def list_wo_endpoint(
     return [ProductionOrderResponse.model_validate(r) for r in rows]
 
 
+@router.get("/work-orders/{wo_id}/cost")
+async def get_wo_cost(
+    wo_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("production.work_order.cost")),
+):
+    """M2-6：單張工單成本彙總（材料 + 人工 + 製造費用）。"""
+    from app.services.production_cost import aggregate_wo_cost
+    return await aggregate_wo_cost(db, wo_id)
+
+
+@router.post("/material-issues")
+async def create_material_issue_endpoint(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("production.material_issue.create")),
+):
+    """v3.63 M3：工單領料（扣原料庫存 + 成本快照）。"""
+    from app.services.m3_documents import issue_material
+    issue = await issue_material(
+        db, data["wo_id"], data.get("items", []),
+        {"employee_id": user.employee_id},
+    )
+    return {"id": issue.id, "issue_no": issue.issue_no, "status": issue.status}
+
+
+@router.get("/material-issues")
+async def list_material_issues_endpoint(
+    wo_id: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("production.material_issue.read")),
+):
+    from app.services.m3_documents import list_material_issues
+    return await list_material_issues(db, wo_id)
+
+
 @router.post("/work-centers")
 async def create_work_center_endpoint(
     data: WorkCenterCreate,

@@ -16,6 +16,9 @@ import pathlib
 
 def _upload(client, headers, content: bytes, filename: str = "test.pdf",
             category: str = "quote", description: str = ""):
+    # v3.62 內容簽名檢查：.pdf 檔內容必須以 %PDF 開頭，否則被拒
+    if content and filename.lower().endswith(".pdf") and not content.startswith(b"%PDF"):
+        content = b"%PDF-1.4 " + content
     files = {"file": (filename, io.BytesIO(content), "application/pdf")}
     data = {"category": category}
     if description:
@@ -56,7 +59,7 @@ def test_list_files_filter_by_category(seeded_client, admin_headers):
 
 
 def test_download_returns_same_bytes(seeded_client, admin_headers):
-    content = b"DOWNLOAD-TEST-CONTENT-12345"
+    content = b"%PDF-1.4 DOWNLOAD-TEST-CONTENT-12345"
     r = _upload(seeded_client, admin_headers, content, "dl.pdf", "general")
     att_id = r.json()["id"]
     r2 = seeded_client.get(f"/api/files/{att_id}/download", headers=admin_headers)

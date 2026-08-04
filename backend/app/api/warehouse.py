@@ -1,6 +1,6 @@
 """Warehouse API — 全 endpoint RBAC 保護版。"""
 from typing import Optional, List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 
@@ -15,6 +15,108 @@ from app.schemas.warehouse import (
 from app.services import warehouse as svc
 
 router = APIRouter(prefix="/api/warehouse", tags=["Warehouse"])
+
+
+@router.post("/scan")
+async def scan_barcode(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("inventory.inventory.read")),
+):
+    """v3.64：條碼槍掃描 — 支援料號 / 批號 / 序號，回庫存與可執行操作。"""
+    from sqlalchemy import select, or_
+    from app.models.inventory import Part, Inventory
+    from app.models.traceability import BatchLot, SerialNumber
+    from app.core.exceptions import NotFoundError
+
+    code = (data.get("barcode") or data.get("code") or "").strip()
+    if not code:
+        raise HTTPException(400, "請提供 barcode")
+
+    # 1) 料號
+    part = (await db.execute(
+        select(Part).where(Part.part_no == code)
+    )).scalar_one_or_none()
+    if part is not None:
+        inv = (await db.execute(
+            select(Inventory).where(Inventory.part_id == part.id)
+        )).scalar_one_or_none()
+        return {
+            "match": "part",
+            "part_no": part.part_no,
+            "name": part.name,
+            "unit_cost": part.unit_cost,
+            "qty_on_hand": inv.qty_on_hand if inv else 0,
+            "qty_available": inv.qty_available if inv else 0,
+            "actions": ["view_inventory", "create_batch", "print_label"],
+        }
+    # 2) 序號
+    sn = (await db.execute(
+        select(SerialNumber).where(SerialNumber.serial_no == code)
+    )).scalar_one_or_none()
+    if sn is not None:
+        return {
+            "match": "serial",
+            "serial_no": sn.serial_no,
+            "part_id": sn.part_id,
+            "status": sn.status,
+            "actions": ["trace_serial"],
+        }
+    # 3) 批號
+    lot = (await db.execute(
+        select(BatchLot).where(BatchLot.lot_no == code)
+    )).scalar_one_or_none()
+    if lot is not None:
+        return {
+            "match": "batch",
+            "lot_no": lot.lot_no,
+            "part_id": lot.part_id,
+            "qty": lot.qty,
+            "status": lot.status,
+            "actions": ["trace_batch", "print_label"],
+        }
+    raise HTTPException(404, f"找不到對應料號/批號/序號：{code}")
+
+
+@router.get("/batches")
+async def list_batches_endpoint(
+    part_id: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("inventory.batch.read")),
+):
+    """v3.64：批號清單。"""
+    from app.services.traceability import list_batches
+    return await list_batches(db, part_id)
+
+
+@router.get("/batches/{lot_no}/trace")
+async def trace_batch_endpoint(
+    lot_no: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("inventory.batch.read")),
+):
+    """v3.64：批號正反向追溯。"""
+    from app.services.traceability import trace_batch
+    from app.core.exceptions import NotFoundError
+    try:
+        return await trace_batch(db, lot_no)
+    except NotFoundError as e:
+        raise HTTPException(404, e.message)
+
+
+@router.get("/serials/{serial_no}/trace")
+async def trace_serial_endpoint(
+    serial_no: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("inventory.serial.read")),
+):
+    """v3.64：序號追溯。"""
+    from app.services.traceability import trace_serial
+    from app.core.exceptions import NotFoundError
+    try:
+        return await trace_serial(db, serial_no)
+    except NotFoundError as e:
+        raise HTTPException(404, e.message)
 
 
 @router.post("/zones", response_model=WarehouseZoneResponse)

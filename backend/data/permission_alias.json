@@ -1,0 +1,55 @@
+{
+  "_comment": "M1-0 同義權限碼組。規則：組內任一碼被程式碼引用時，整組都必須存在於 PermissionDef（審計工具 gate）。canonical（tax.*/approval.*/quality.ncr.*/purchase.po.*）與 legacy（accounting.einvoice.*/quality.nc.*/purchase.order.*）並存。",
+  "tax.einvoice": [
+    "tax.einvoice.issue",
+    "tax.einvoice.void",
+    "tax.einvoice.read",
+    "accounting.einvoice.issue",
+    "accounting.einvoice.read",
+    "accounting.einvoice.cancel"
+  ],
+  "tax.tax_id": [
+    "tax.tax_id.validate",
+    "accounting.tax_report"
+  ],
+  "approval.request": [
+    "approval.request.read",
+    "approval.request.approve",
+    "approval.request.reject"
+  ],
+  "quality.ncr": [
+    "quality.ncr.create",
+    "quality.ncr.read",
+    "quality.nc.read",
+    "quality.nc.list"
+  ],
+  "purchase.po": [
+    "purchase.po.create",
+    "purchase.po.approve",
+    "purchase.po.read",
+    "purchase.po.update",
+    "purchase.order.create",
+    "purchase.order.approve",
+    "purchase.order.read",
+    "purchase.order.update"
+  ],
+  "production.wo": [
+    "production.wo.read",
+    "production.wo.update",
+    "production.work_order.read",
+    "production.work_order.list",
+    "production.work_order.update"
+  ],
+  "production.workcenter": [
+    "production.workcenter.list",
+    "production.work_center.list"
+  ],
+  "sales.so": [
+    "sales.so.update",
+    "sales.order.update"
+  ],
+  "customer.read": [
+    "crm.customer.read",
+    "sales.customer.read"
+  ]
+}

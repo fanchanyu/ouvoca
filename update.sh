@@ -158,6 +158,10 @@ if [ -f backend/alembic.ini ] && [ -d backend/venv ]; then
     (cd backend && PYTHONIOENCODING=utf-8 venv/bin/python -m alembic upgrade head 2>/dev/null) \
       && ok "資料庫結構已升級" \
       || warn "alembic upgrade 失敗或無需升級"
+    # 健檢 #5：升級後重跑權限 seed，讓新權限碼展開到角色（否則非 superuser 全 403）
+    (cd backend && PYTHONIOENCODING=utf-8 venv/bin/python -m scripts.seed_permissions >/dev/null 2>&1) \
+      && ok "權限已同步（新功能角色授權完成）" \
+      || warn "權限 seed 失敗（請手動執行 python -m scripts.seed_permissions）"
 fi
 
 # Step 6: 重啟

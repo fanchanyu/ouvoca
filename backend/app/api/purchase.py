@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from app.core.deps import get_db
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from app.core.security import require_permission, UserContext, apply_row_filter
 from app.models.purchase import Supplier, PurchaseOrder
 from app.core.exceptions import NotFoundError
@@ -58,7 +58,12 @@ async def list_po_endpoint(
     db: AsyncSession = Depends(get_db),
     user: UserContext = Depends(require_permission("purchase.order.list")),
 ):
-    q = select(PurchaseOrder).options(joinedload(PurchaseOrder.supplier))
+    # 健檢：列表查詢也要 eager-load items，否則獨立 session 下
+    # PurchaseOrderResponse 序列化 items 時 MissingGreenlet → HTTP 400
+    q = select(PurchaseOrder).options(
+        joinedload(PurchaseOrder.supplier),
+        selectinload(PurchaseOrder.items),
+    )
     q = apply_row_filter(q, user, "purchase.order")
     if status: q = q.where(PurchaseOrder.status == status)
     q = q.offset(skip).limit(limit).order_by(PurchaseOrder.created_at.desc())
@@ -188,3 +193,147 @@ async def patch_po_endpoint(
     await db.commit()
     await db.refresh(po, attribute_names=["supplier"])
     return PurchaseOrderResponse.model_validate(po)
+
+
+# ═══════════════════════════════════════════════════════════
+# v3.63 M3 — 請購單（PR）+ 收料單（GRN）
+# ═══════════════════════════════════════════════════════════
+
+@router.post("/requisitions")
+async def create_pr_endpoint(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.pr.create")),
+):
+    from app.services.m3_documents import create_purchase_requisition
+    pr = await create_purchase_requisition(db, data, {"employee_id": user.employee_id})
+    return {"id": pr.id, "pr_no": pr.pr_no, "status": pr.status}
+
+
+@router.post("/requisitions/{pr_id}/approve")
+async def approve_pr_endpoint(
+    pr_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.pr.approve")),
+):
+    from app.services.m3_documents import approve_purchase_requisition
+    pr = await approve_purchase_requisition(db, pr_id)
+    return {"id": pr.id, "pr_no": pr.pr_no, "status": pr.status}
+
+
+@router.post("/requisitions/{pr_id}/convert")
+async def convert_pr_endpoint(
+    pr_id: str,
+    supplier_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.pr.convert")),
+):
+    from app.services.m3_documents import convert_pr_to_po
+    po = await convert_pr_to_po(db, pr_id, supplier_id, {"employee_id": user.employee_id})
+    return {"po_id": po.id, "po_no": po.po_no, "status": po.status}
+
+
+@router.post("/grns")
+async def create_grn_endpoint(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.grn.create")),
+):
+    from app.services.m3_documents import create_grn
+    grn = await create_grn(
+        db, data["po_id"], data.get("receipts", []),
+        {"employee_id": user.employee_id},
+    )
+    return {"id": grn.id, "grn_no": grn.grn_no, "status": grn.status}
+
+
+@router.get("/grns")
+async def list_grns_endpoint(
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.grn.read")),
+):
+    from app.services.m3_documents import list_grns
+    return await list_grns(db)
+
+
+# ─── v3.64 RFQ 詢價比價 ─────────────────────────────────────
+
+@router.post("/rfqs")
+async def create_rfq_endpoint(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.rfq.create")),
+):
+    from app.services.rfq import create_rfq
+    rfq = await create_rfq(db, data, {"employee_id": user.employee_id})
+    return {"id": rfq.id, "rfq_no": rfq.rfq_no, "status": rfq.status}
+
+
+@router.get("/rfqs")
+async def list_rfqs_endpoint(
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.rfq.read")),
+):
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+    from app.models.rfq import RFQ
+    rows = (await db.execute(
+        select(RFQ).options(selectinload(RFQ.quotes), selectinload(RFQ.items))
+        .order_by(RFQ.created_at.desc()).limit(100)
+    )).scalars().all()
+    return [
+        {"id": r.id, "rfq_no": r.rfq_no, "status": r.status,
+         "need_date": r.need_date.isoformat() if r.need_date else None,
+         "quote_count": len(r.quotes),
+         "items": [
+             {"part_id": it.part_id, "qty": it.qty, "line_no": it.line_no}
+             for it in r.items
+         ]}
+        for r in rows
+    ]
+
+
+@router.post("/rfqs/{rfq_id}/send")
+async def send_rfq_endpoint(
+    rfq_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.rfq.create")),
+):
+    from app.services.rfq import send_rfq
+    rfq = await send_rfq(db, rfq_id)
+    return {"id": rfq.id, "rfq_no": rfq.rfq_no, "status": rfq.status}
+
+
+@router.post("/rfqs/{rfq_id}/quotes")
+async def receive_quote_endpoint(
+    rfq_id: str,
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.rfq.create")),
+):
+    from app.services.rfq import receive_quote
+    quote = await receive_quote(db, {**data, "rfq_id": rfq_id},
+                                {"employee_id": user.employee_id})
+    return {"id": quote.id, "amount": quote.amount, "status": quote.status}
+
+
+@router.get("/rfqs/{rfq_id}/compare")
+async def compare_rfq_endpoint(
+    rfq_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.rfq.read")),
+):
+    from app.services.rfq import compare_quotes
+    return await compare_quotes(db, rfq_id)
+
+
+@router.post("/rfqs/{rfq_id}/award")
+async def award_rfq_endpoint(
+    rfq_id: str,
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("purchase.rfq.award")),
+):
+    from app.services.rfq import award_rfq
+    return await award_rfq(db, rfq_id, data["quote_id"],
+                           {"employee_id": user.employee_id})

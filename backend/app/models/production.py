@@ -52,7 +52,7 @@ class ProductionOrder(Base, TenantMixin):
     releaser = relationship("Employee", foreign_keys=[released_by])
 
 
-class Operation(Base):
+class Operation(Base, TenantMixin):
     __tablename__ = "operations"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -80,7 +80,7 @@ class Operation(Base):
     dispatch_logs = relationship("DispatchLog", back_populates="operation")
 
 
-class DispatchLog(Base):
+class DispatchLog(Base, TenantMixin):
     __tablename__ = "dispatch_logs"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -138,7 +138,7 @@ class Routing(Base, TenantMixin):
                          order_by="RoutingStep.sequence_no")
 
 
-class RoutingStep(Base):
+class RoutingStep(Base, TenantMixin):
     """A single operation step in a Routing template.
 
     Operation time decomposition (Karmarkar 1987 *Mgmt Sci* 33):

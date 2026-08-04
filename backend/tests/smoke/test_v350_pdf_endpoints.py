@@ -62,7 +62,8 @@ def test_einvoice_pdf_works_without_optional_totals(seeded_client, admin_headers
 
 def test_po_so_delivery_pdf_routes_registered(_app):
     """確認 v3.36 的 PO / SO / Delivery PDF 路由仍存在（前端 v3.50 直接呼叫）。"""
-    routes = {getattr(r, "path", "") for r in _app.routes}
+    from tests.smoke.route_utils import flatten_app_routes
+    routes = {getattr(r, "path", "") for r in flatten_app_routes(_app.routes)}
     assert "/api/print/po/{po_id}.pdf" in routes
     assert "/api/print/so/{so_id}.pdf" in routes
     assert "/api/print/delivery/{so_id}.pdf" in routes

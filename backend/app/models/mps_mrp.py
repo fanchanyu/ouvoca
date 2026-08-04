@@ -26,7 +26,7 @@ class MpsMaster(Base, TenantMixin):
     approver = relationship("Employee", foreign_keys=[approved_by])
 
 
-class MpsEntry(Base):
+class MpsEntry(Base, TenantMixin):
     __tablename__ = "mps_entries"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -72,7 +72,7 @@ class MrpMaster(Base, TenantMixin):
     items = relationship("MrpItem", back_populates="mrp_master", cascade="all, delete-orphan")
 
 
-class MrpItem(Base):
+class MrpItem(Base, TenantMixin):
     __tablename__ = "mrp_items"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

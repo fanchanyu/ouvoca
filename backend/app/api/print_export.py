@@ -53,6 +53,22 @@ def _pdf_response(data: bytes, filename: str) -> Response:
     )
 
 
+@print_router.post("/label/part")
+async def print_part_label(
+    data: dict,
+    user: UserContext = Depends(require_permission("print.label")),
+):
+    """v3.64：料件 QR 標籤列印（60×40mm）。"""
+    from app.services.print_service import render_part_label_pdf
+    part_no = data.get("part_no") or ""
+    if not part_no:
+        raise HTTPException(400, "part_no 必填")
+    pdf = render_part_label_pdf(
+        part_no, name=data.get("name", ""), qty=str(data.get("qty", "")),
+    )
+    return _pdf_response(pdf, f"label-{part_no}.pdf")
+
+
 @print_router.get("/quotation/{quote_id}.pdf")
 async def print_quotation(
     quote_id: str,
@@ -126,6 +142,36 @@ async def print_einvoice(
     invoice_no = str(invoice_data.get("invoice_no") or "einvoice")
     safe_no = "".join(c for c in invoice_no if c.isalnum() or c in "-_")[:32] or "einvoice"
     return _pdf_response(data, f"einvoice_{safe_no}.pdf")
+
+
+@print_router.get("/inspection/{inspection_id}.pdf")
+async def print_inspection(
+    inspection_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("quality.inspection.read")),
+):
+    """v3.67：檢驗報告 PDF（Turnkey 表單 #7）。"""
+    from app.services.print_service import generate_inspection_pdf
+    try:
+        data = await generate_inspection_pdf(db, inspection_id)
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+    return _pdf_response(data, f"inspection-{inspection_id[:8]}.pdf")
+
+
+@print_router.get("/stock-count/{stock_count_id}.pdf")
+async def print_stock_count(
+    stock_count_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("inventory.inventory.read")),
+):
+    """v3.67：盤點表 PDF（Turnkey 表單 #8）。"""
+    from app.services.print_service import generate_stock_count_pdf
+    try:
+        data = await generate_stock_count_pdf(db, stock_count_id)
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+    return _pdf_response(data, f"stock-count-{stock_count_id[:8]}.pdf")
 
 
 # ════════════════════════════════════════════════════════════════════

@@ -1,9 +1,16 @@
-"""Seed RBAC tables：~115 個權限 + 10 個預設角色 + 1 個 HQ tenant。
+"""Seed RBAC tables：~168 個權限 + 10 個預設角色 + 1 個 HQ tenant。
 
 v3.50 (2026-05-24)：
 - UPSERT 取代 skip-if-exists（既有部署重新跑 seed 也會拿到新權限/描述）
 - 新增 EXTRA_PERMISSIONS 處理 2 段別名（accounting.tax_report, analytics.view, system.admin）
 - 補齊 ~20 個 require_permission() 用到但漏定義的權限碼
+
+v3.56 (M1-0.2, 2026-08-04)：
+- 依 scripts/audit_permission_codes.py 實測（160 引用 vs 137 seed，MISSING 60）
+  補齊 53 個權限碼：approval.* / tax.* / inventory.count.* / sales.quotation.* /
+  crm.*.list / production.wo.* / production.workcenter.list / sales.so.update /
+  crm.customer.read / accounting.ap.* / accounting.payment|receipt.record /
+  dashboard.read 等。alias 對照見 backend/data/permission_alias.json。
 
 Usage:
     python -m scripts.seed_permissions
@@ -45,6 +52,12 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("inventory", "transaction", "export", "匯出庫存交易", False, "low"),
     ("inventory", "inventory", "read", "查看庫存", False, "low"),
     ("inventory", "inventory", "adjust", "庫存調整", True, "high"),
+    # M1-0.2：盤點五操作（audit MISSING）
+    ("inventory", "count", "read", "查看盤點", False, "low"),
+    ("inventory", "count", "create", "建立盤點", False, "medium"),
+    ("inventory", "count", "record", "盤點記錄", False, "medium"),
+    ("inventory", "count", "adjust", "盤點調整", True, "high"),
+    ("inventory", "count", "cancel", "取消盤點", True, "high"),
 
     # --- purchase (11) ---
     ("purchase", "supplier", "read", "查看供應商", False, "low"),
@@ -58,6 +71,13 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("purchase", "order", "update", "修改採購單", False, "medium"),
     ("purchase", "order", "approve", "簽核採購單", True, "high"),
     ("purchase", "order", "receive", "收貨", False, "medium"),
+    # M1-0.2：取消/單價查詢（audit MISSING）
+    ("purchase", "order", "cancel", "取消採購單", False, "medium"),
+    ("purchase", "price", "read", "查看進貨單價", False, "low"),
+    # M1-0.2：po 短名變體（alias 見 permission_alias.json；po.update 為既有）
+    ("purchase", "po", "create", "建立採購單（po 別名）", False, "medium"),
+    ("purchase", "po", "approve", "簽核採購單（po 別名）", True, "high"),
+    ("purchase", "po", "read", "查看採購單（po 別名）", False, "low"),
 
     # --- production (16) ---
     ("production", "product", "read", "查看產品", False, "low"),
@@ -78,6 +98,12 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("production", "operation", "create", "建立工序", False, "medium"),
     ("production", "dispatch", "create", "建立派工", False, "medium"),
     ("production", "work_order", "update", "修改工單", False, "medium"),
+    # M1-0.2：audit MISSING（含 wo/workcenter 短名變體，alias 見 permission_alias.json）
+    ("production", "bom", "delete", "刪除 BOM", True, "high"),
+    ("production", "work_order", "cancel", "取消工單", False, "medium"),
+    ("production", "workcenter", "list", "列出工作中心（別名）", False, "low"),
+    ("production", "wo", "read", "查看工單（別名）", False, "low"),
+    ("production", "wo", "update", "修改工單（別名）", False, "medium"),
 
     # --- sales (11) ---
     ("sales", "customer", "read", "查看客戶", False, "low"),
@@ -92,6 +118,14 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("sales", "order", "ship", "出貨", False, "medium"),
     ("sales", "order", "export", "匯出銷售資料", False, "low"),
     ("sales", "order", "update", "修改銷售訂單", False, "medium"),
+    # M1-0.2：audit MISSING（含 quotation 五操作 / so 短名變體）
+    ("sales", "order", "cancel", "取消銷售訂單", False, "medium"),
+    ("sales", "quotation", "create", "建立報價單", False, "medium"),
+    ("sales", "quotation", "read", "查看報價單", False, "low"),
+    ("sales", "quotation", "update", "修改報價單", False, "medium"),
+    ("sales", "quotation", "send", "寄送報價單", False, "medium"),
+    ("sales", "quotation", "cancel", "取消報價單", False, "medium"),
+    ("sales", "so", "update", "修改銷售訂單（別名）", False, "medium"),
 
     # --- quality (7) ---
     ("quality", "inspection", "read", "查看檢驗", False, "low"),
@@ -101,6 +135,10 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("quality", "nc", "read", "查看不良品", False, "low"),
     ("quality", "nc", "list", "列出不良品", False, "low"),
     ("quality", "capa", "create", "建立 CAPA", False, "medium"),
+    # M1-0.2：audit MISSING（ncr 別名組見 permission_alias.json）
+    ("quality", "capa", "list", "列出 CAPA", False, "low"),
+    ("quality", "ncr", "create", "建立不良紀錄", False, "medium"),
+    ("quality", "ncr", "read", "查看不良紀錄", False, "low"),
 
     # --- accounting (10 + 8 補) ---
     ("accounting", "account", "read", "查看科目", False, "low"),
@@ -120,6 +158,11 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("accounting", "einvoice", "read", "查看電子發票", False, "low"),
     ("accounting", "einvoice", "issue", "開立電子發票", True, "high"),
     ("accounting", "einvoice", "cancel", "作廢電子發票", True, "high"),
+    # M1-0.2：audit MISSING（AP/月結查詢/收付款/刪科目）
+    ("accounting", "account", "delete", "刪除科目", True, "high"),
+    ("accounting", "month_close", "read", "查看月結狀態", False, "medium"),
+    ("accounting", "payment", "record", "記錄付款", True, "high"),
+    ("accounting", "receipt", "record", "記錄收款", True, "high"),
 
     # --- warehouse (6 + 6 補) ---
     ("warehouse", "zone", "read", "查看倉區", False, "low"),
@@ -133,6 +176,10 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("warehouse", "pick", "create", "建立揀貨", False, "medium"),
     ("warehouse", "pick", "complete", "完成揀貨", False, "medium"),
     ("warehouse", "cycle_count", "create", "盤點", False, "medium"),
+    # M1-0.2：audit MISSING（揀貨/循環盤點查詢）
+    ("warehouse", "pick", "list", "列出揀貨", False, "low"),
+    ("warehouse", "pick", "read", "查看揀貨", False, "low"),
+    ("warehouse", "cycle_count", "list", "列出循環盤點", False, "low"),
 
     # --- crm (5) ---
     ("crm", "lead", "read", "查看潛在客戶", False, "low"),
@@ -140,12 +187,22 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("crm", "opportunity", "read", "查看商機", False, "low"),
     ("crm", "opportunity", "create", "建立商機", False, "medium"),
     ("crm", "opportunity", "change_stage", "變更商機階段", False, "medium"),
+    # M1-0.2：audit MISSING（list 系 + customer 別名）
+    ("crm", "lead", "list", "列出潛在客戶", False, "low"),
+    ("crm", "opportunity", "list", "列出商機", False, "low"),
+    ("crm", "event", "list", "列出客戶事件", False, "low"),
+    ("crm", "customer", "read", "查看客戶（別名）", False, "low"),
 
     # --- mps_mrp (4) ---
     ("mps_mrp", "mps", "read", "查看 MPS", False, "low"),
     ("mps_mrp", "mps", "create", "建立 MPS", False, "medium"),
     ("mps_mrp", "mrp", "read", "查看 MRP", False, "low"),
     ("mps_mrp", "mrp", "run", "執行 MRP 計算", False, "medium"),
+    # M1-0.2：audit MISSING
+    ("mps_mrp", "mps", "list", "列出 MPS", False, "low"),
+    ("mps_mrp", "mrp", "list", "列出 MRP", False, "low"),
+    ("mps_mrp", "master", "create", "建立 MPS/MRP 主檔", False, "medium"),
+    ("mps_mrp", "master", "read", "查看 MPS/MRP 主檔", False, "low"),
 
     # --- outsource (v3.0 移除：外協 persona 砍掉) ---
 
@@ -172,6 +229,27 @@ PERMISSIONS: list[tuple[str, str, str, str, bool, str]] = [
     ("system", "permission", "grant", "授權", True, "critical"),
     ("system", "permission", "revoke", "撤權", True, "critical"),
     ("system", "admin", "all", "系統最高管理（全權）", True, "critical"),
+    # M1-0.2：audit MISSING
+    ("system", "health", "read", "系統健康檢查", False, "low"),
+
+    # --- approval (M1-0.2：整族新增，audit MISSING) ---
+    ("approval", "request", "read", "查看審批單", True, "high"),
+    ("approval", "request", "approve", "核准審批單", True, "high"),
+    ("approval", "request", "reject", "退回審批單", True, "high"),
+
+    # --- tax (M1-0.2：整族新增；accounting.einvoice.* 為 legacy，alias 見 permission_alias.json) ---
+    ("tax", "einvoice", "issue", "開立電子發票（tax 別名）", True, "high"),
+    ("tax", "einvoice", "read", "查看電子發票（tax 別名）", False, "low"),
+    ("tax", "einvoice", "void", "作廢電子發票（tax 別名）", True, "high"),
+    ("tax", "tax_id", "validate", "驗證統一編號", False, "low"),
+    ("tax", "report", "read", "查詢稅務報表", False, "medium"),
+
+    # --- audit / chat / permission / user (M1-0.2 新模組) ---
+    ("audit", "log", "read", "查看稽核日誌", True, "high"),
+    ("chat", "history", "read", "查看對話紀錄", False, "low"),
+    ("permission", "role", "read", "查看角色權限", False, "low"),
+    ("permission", "role", "assign", "指派角色權限", True, "critical"),
+    ("user", "profile", "read", "查看個人資料", False, "medium"),
 
     # --- ai (2) ---
     ("ai", "agent", "use", "使用 AI 助手", False, "low"),
@@ -209,6 +287,106 @@ EXTRA_PERMISSIONS: list[dict] = [
     {"code": "system.admin", "module": "system", "resource": "system.admin",
      "action": "manage", "name_zh": "系統管理（2 段別名）",
      "is_sensitive": True, "risk_level": "critical"},
+    # --- v3.60 G-510：外部 DB 整合權限（3 段別名） ---
+    {"code": "external_db.connection.list", "module": "external_db", "resource": "external_db.connection",
+     "action": "list", "name_zh": "列出外部 DB 連接", "is_sensitive": False, "risk_level": "low"},
+    {"code": "external_db.connection.write", "module": "external_db", "resource": "external_db.connection",
+     "action": "write", "name_zh": "新增/修改/刪除外部 DB 連接", "is_sensitive": True, "risk_level": "high"},
+    {"code": "external_db.table.list", "module": "external_db", "resource": "external_db.table",
+     "action": "list", "name_zh": "列出外部 DB table", "is_sensitive": False, "risk_level": "low"},
+    {"code": "external_db.query", "module": "external_db", "resource": "external_db.query",
+     "action": "run", "name_zh": "跨 DB 查詢", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "external_db.mapping.preview", "module": "external_db", "resource": "external_db.mapping",
+     "action": "preview", "name_zh": "Schema 對映預覽", "is_sensitive": False, "risk_level": "low"},
+    {"code": "external_db.migrate", "module": "external_db", "resource": "external_db.migrate",
+     "action": "run", "name_zh": "外部 DB 資料匯入", "is_sensitive": True, "risk_level": "high"},
+    # --- v3.60 Phase B1：金流閉環權限（3 段別名） ---
+    {"code": "accounting.ap.read", "module": "accounting", "resource": "accounting.ap",
+     "action": "read", "name_zh": "查看應付帳款", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "accounting.bank.read", "module": "accounting", "resource": "accounting.bank",
+     "action": "read", "name_zh": "查看銀行帳戶", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "accounting.bank.write", "module": "accounting", "resource": "accounting.bank",
+     "action": "write", "name_zh": "新增/修改銀行帳戶", "is_sensitive": True, "risk_level": "high"},
+    {"code": "accounting.payment.read", "module": "accounting", "resource": "accounting.payment",
+     "action": "read", "name_zh": "查看付款/收款單", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "accounting.payment.create", "module": "accounting", "resource": "accounting.payment",
+     "action": "create", "name_zh": "建立付款單", "is_sensitive": True, "risk_level": "high"},
+    {"code": "accounting.receipt.create", "module": "accounting", "resource": "accounting.receipt",
+     "action": "create", "name_zh": "建立收款單", "is_sensitive": True, "risk_level": "high"},
+    # M1-0.2：2 段別名（audit MISSING）
+    {"code": "dashboard.read", "module": "dashboard", "resource": "dashboard",
+     "action": "read", "name_zh": "儀表板檢視（2 段別名）",
+     "is_sensitive": False, "risk_level": "low"},
+    # --- v3.61 M2：財務閉環權限（三大報表 / 401-405 / 3-Way Match / 票據 / 固定資產） ---
+    {"code": "accounting.statement.read", "module": "accounting", "resource": "accounting.statement",
+     "action": "read", "name_zh": "查看三大報表", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "accounting.supplier_invoice.read", "module": "accounting", "resource": "accounting.supplier_invoice",
+     "action": "read", "name_zh": "查看供應商發票", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "accounting.supplier_invoice.create", "module": "accounting", "resource": "accounting.supplier_invoice",
+     "action": "create", "name_zh": "建立供應商發票", "is_sensitive": True, "risk_level": "high"},
+    {"code": "accounting.supplier_invoice.match", "module": "accounting", "resource": "accounting.supplier_invoice",
+     "action": "match", "name_zh": "執行 3-Way Match", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "accounting.note.read", "module": "accounting", "resource": "accounting.note",
+     "action": "read", "name_zh": "查看票據", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "accounting.note.create", "module": "accounting", "resource": "accounting.note",
+     "action": "create", "name_zh": "建立票據", "is_sensitive": True, "risk_level": "high"},
+    {"code": "accounting.fixed_asset.read", "module": "accounting", "resource": "accounting.fixed_asset",
+     "action": "read", "name_zh": "查看固定資產", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "accounting.fixed_asset.create", "module": "accounting", "resource": "accounting.fixed_asset",
+     "action": "create", "name_zh": "建立固定資產", "is_sensitive": True, "risk_level": "high"},
+    {"code": "accounting.fixed_asset.depreciate", "module": "accounting", "resource": "accounting.fixed_asset",
+     "action": "depreciate", "name_zh": "過帳折舊", "is_sensitive": True, "risk_level": "high"},
+    {"code": "accounting.cost_settle.execute", "module": "accounting", "resource": "accounting.cost_settle",
+     "action": "execute", "name_zh": "月結銷貨成本結轉", "is_sensitive": True, "risk_level": "high"},
+    {"code": "production.work_order.cost", "module": "production", "resource": "production.work_order",
+     "action": "cost", "name_zh": "查看工單成本", "is_sensitive": False, "risk_level": "medium"},
+    # --- v3.62 備份管理權限 ---
+    {"code": "system.backup.read", "module": "system", "resource": "system.backup",
+     "action": "read", "name_zh": "查看備份清單", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "system.backup.create", "module": "system", "resource": "system.backup",
+     "action": "create", "name_zh": "建立/刪除備份", "is_sensitive": True, "risk_level": "high"},
+    {"code": "system.backup.restore", "module": "system", "resource": "system.backup",
+     "action": "restore", "name_zh": "還原備份（破壞性）", "is_sensitive": True, "risk_level": "critical"},
+    # --- v3.63 M3 表單工程權限 ---
+    {"code": "purchase.pr.create", "module": "purchase", "resource": "purchase.pr",
+     "action": "create", "name_zh": "建立請購單", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "purchase.pr.approve", "module": "purchase", "resource": "purchase.pr",
+     "action": "approve", "name_zh": "核准請購單", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "purchase.pr.convert", "module": "purchase", "resource": "purchase.pr",
+     "action": "convert", "name_zh": "請購轉採購", "is_sensitive": False, "risk_level": "high"},
+    {"code": "purchase.grn.create", "module": "purchase", "resource": "purchase.grn",
+     "action": "create", "name_zh": "建立收料單", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "purchase.grn.read", "module": "purchase", "resource": "purchase.grn",
+     "action": "read", "name_zh": "查看收料單", "is_sensitive": False, "risk_level": "low"},
+    {"code": "production.material_issue.create", "module": "production", "resource": "production.material_issue",
+     "action": "create", "name_zh": "建立領料單", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "production.material_issue.read", "module": "production", "resource": "production.material_issue",
+     "action": "read", "name_zh": "查看領料單", "is_sensitive": False, "risk_level": "low"},
+    {"code": "sales.return.create", "module": "sales", "resource": "sales.return",
+     "action": "create", "name_zh": "建立退貨單", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "sales.return.read", "module": "sales", "resource": "sales.return",
+     "action": "read", "name_zh": "查看退貨單", "is_sensitive": False, "risk_level": "low"},
+    {"code": "sales.return.approve", "module": "sales", "resource": "sales.return",
+     "action": "approve", "name_zh": "核准退貨單", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "sales.return.process", "module": "sales", "resource": "sales.return",
+     "action": "process", "name_zh": "退貨入庫", "is_sensitive": True, "risk_level": "high"},
+    # --- v3.64 追溯 / RFQ / 標籤權限 ---
+    {"code": "inventory.batch.create", "module": "inventory", "resource": "inventory.batch",
+     "action": "create", "name_zh": "建立批號", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "inventory.batch.read", "module": "inventory", "resource": "inventory.batch",
+     "action": "read", "name_zh": "查看/追溯批號", "is_sensitive": False, "risk_level": "low"},
+    {"code": "inventory.serial.create", "module": "inventory", "resource": "inventory.serial",
+     "action": "create", "name_zh": "登記序號", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "inventory.serial.read", "module": "inventory", "resource": "inventory.serial",
+     "action": "read", "name_zh": "查看/追溯序號", "is_sensitive": False, "risk_level": "low"},
+    {"code": "purchase.rfq.create", "module": "purchase", "resource": "purchase.rfq",
+     "action": "create", "name_zh": "建立詢價單", "is_sensitive": False, "risk_level": "medium"},
+    {"code": "purchase.rfq.read", "module": "purchase", "resource": "purchase.rfq",
+     "action": "read", "name_zh": "查看詢價/比價", "is_sensitive": False, "risk_level": "low"},
+    {"code": "purchase.rfq.award", "module": "purchase", "resource": "purchase.rfq",
+     "action": "award", "name_zh": "詢價決標", "is_sensitive": True, "risk_level": "high"},
+    {"code": "print.label", "module": "print", "resource": "print.label",
+     "action": "run", "name_zh": "列印料件標籤", "is_sensitive": False, "risk_level": "low"},
 ]
 
 
@@ -530,16 +708,42 @@ async def seed_permissions():
             existing = (await db.execute(
                 select(RoleDef).where(RoleDef.code == role_spec["code"], RoleDef.tenant_id.is_(None))
             )).scalar_one_or_none()
+            # M1-2：系統角色全量 sync（metadata + permission links 重建）。
+            # 舊安裝的系統角色若被 skip-if-exists 卡住，永遠拿不到修正；
+            # 現在只要是 is_system（或與系統角色同名）就同步，
+            # 自訂角色（is_system=False 且非系統 code）不動。
+            if existing and not existing.is_system and not any(
+                r["code"] == existing.code for r in ROLES
+            ):
+                continue  # 純自訂角色 → 保留不動
             if existing:
-                continue
-            role = RoleDef(
-                id=str(uuid.uuid4()), code=role_spec["code"],
-                name_zh=role_spec["name_zh"], description=role_spec["description"],
-                icon=role_spec["icon"], color=role_spec["color"],
-                priority=role_spec["priority"], is_system=True, is_active=True,
-            )
-            db.add(role)
-            await db.flush()
+                role = existing
+                changed = False
+                for attr in ("name_zh", "description", "icon", "color", "priority"):
+                    if getattr(role, attr) != role_spec[attr]:
+                        setattr(role, attr, role_spec[attr])
+                        changed = True
+                role.is_system = True
+                role.is_active = True
+                # 重建 permission links（先清後插，修正 drift / 錯配）
+                old_links = (await db.execute(
+                    select(RolePermissionLink).where(RolePermissionLink.role_id == role.id)
+                )).scalars().all()
+                for link in old_links:
+                    await db.delete(link)
+                await db.flush()
+                if changed:
+                    print(f"↻ Role updated: {role_spec['code']} ({role_spec['name_zh']})")
+            else:
+                role = RoleDef(
+                    id=str(uuid.uuid4()), code=role_spec["code"],
+                    name_zh=role_spec["name_zh"], description=role_spec["description"],
+                    icon=role_spec["icon"], color=role_spec["color"],
+                    priority=role_spec["priority"], is_system=True, is_active=True,
+                )
+                db.add(role)
+                await db.flush()
+                print(f"✓ Role: {role_spec['code']} ({role_spec['name_zh']})")
             # Attach permissions（含 wildcard 展開）
             # paper-isf fix: deduplicate (perm_id) per role - overlapping
             # wildcards like "sales.*" + "sales.order.*" double-insert and

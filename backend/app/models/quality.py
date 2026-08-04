@@ -29,7 +29,7 @@ class InspectionOrder(Base, TenantMixin):
     non_conformances = relationship("NonConformance", back_populates="inspection_order")
 
 
-class InspectionResult(Base):
+class InspectionResult(Base, TenantMixin):
     __tablename__ = "inspection_results"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

@@ -82,7 +82,7 @@ class ApprovalRequestV2(Base, TenantMixin):
 
 
 # ── 決議紀錄 ────────────────────────────────────────────────
-class ApprovalStepV2(Base):
+class ApprovalStepV2(Base, TenantMixin):
     """每一階的決議紀錄。"""
     __tablename__ = "approval_workflow_steps"
 

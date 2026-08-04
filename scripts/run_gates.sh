@@ -127,6 +127,49 @@ fi
 
 echo
 
+# ── Gate 4：治理閘（v3.70）──────────────────────────────
+echo -e "${B}[Gate 4 · 治理閘 / Governance Gate]${N}"
+echo -e "${Y}  攔截類型：升級後 403（權限未 seed）、全新安裝無 FK 索引、migration 鏈斷裂${N}"
+
+# 4a. 全新 DB alembic upgrade（攔 migration 鏈問題 + 索引建立）
+if [ -f backend/alembic.ini ]; then
+  TMPDB="$(mktemp -d)/gate.db"
+  run_check "alembic upgrade head (fresh DB)" \
+    "cd backend && DATABASE_URL=sqlite+aiosqlite:///$TMPDB python -m alembic upgrade head"
+
+  # 4b. 全新安裝路徑（init_db）也要有 FK 複合索引
+  run_check "fresh install creates FK indexes" \
+    "cd backend && DATABASE_URL=sqlite+aiosqlite:///$TMPDB python -c \"
+import asyncio, sqlite3, os
+from app.database import init_db
+asyncio.run(init_db())
+c = sqlite3.connect('$TMPDB')
+comp = [r[0] for r in c.execute(\\\"SELECT name FROM sqlite_master WHERE type='index' AND name LIKE 'ix_%_tenant'\\\")]
+assert len(comp) >= 50, f'FK 複合索引不足: {len(comp)}'
+print(f'  FK 複合索引: {len(comp)}')
+\""
+
+  # 4c. 權限 seed + 審計（攔「升級後非 superuser 403」）
+  run_check "seed_permissions + audit MISSING=0" \
+    "cd backend && DATABASE_URL=sqlite+aiosqlite:///$TMPDB python -c \"
+import asyncio
+from app.database import init_db, AsyncSessionLocal
+from scripts.seed_permissions import seed_permissions
+async def main():
+    await init_db()
+    async with AsyncSessionLocal() as db:
+        await seed_permissions()
+        import scripts.audit_permission_codes as audit
+        codes = await audit.load_db_codes()
+        result = audit.audit(codes)
+        assert not result.get('missing'), result.get('missing')
+        print('  MISSING=0')
+asyncio.run(main())
+\""
+fi
+
+echo
+
 # ── Summary ────────────────────────────────────────────────
 TOTAL=$((PASS_COUNT + FAIL_COUNT + SKIP_COUNT))
 DT=$(($(date +%s) - START_TS))

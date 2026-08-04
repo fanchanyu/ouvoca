@@ -142,7 +142,7 @@ async def test_p1_4_freeze_blocks_tool_with_rich_payload(seeded_client):
 
         result = await execute_tool(
             "create_customer_with_confirm",
-            {"name": "X"}, db=db, user={"user_id": "u-test"},
+            {"name": "X"}, db=db, user={"user_id": "u-test", "is_superuser": True, "permissions": ["*"]},
         )
         parsed = json.loads(result)
         assert parsed.get("frozen") is True
@@ -186,7 +186,7 @@ async def test_p1_4_undo_still_works_when_frozen(seeded_client):
 
         result = await execute_tool(
             "undo_last_admin_change",
-            {}, db=db, user={"user_id": "u-test"},
+            {}, db=db, user={"user_id": "u-test", "is_superuser": True, "permissions": ["*"]},
         )
         parsed = json.loads(result)
         # 不應該被凍結攔截

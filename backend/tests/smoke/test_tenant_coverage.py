@@ -36,15 +36,22 @@ EXPECTED_TENANT_MIXIN = {
     "purchase",
     "quality",
     "warehouse",   # v3.x P0 跨租戶洩漏修復：WarehouseZone/BinLocation/PickTask/CycleCount 全上 TenantMixin
+    "document_numbering",  # v3.60 Phase C1：集中編號計數器（per-tenant 原子序號）
+    "external_connection", # v3.60 G-510：外部 DB 連接主檔（加密儲存，租戶隔離）
+    "finance",             # v3.60 Phase B1：AP/付款/收款/銀行帳戶
+    "supplier_plus",       # v3.60 P0-2 修復：ReorderRule/ReplenishSuggestion 補 TenantMixin
+    "documents_m3",        # v3.63 M3：請購/收料/領料/退貨單（全 TenantMixin）
+    "traceability",        # v3.64：批號/序號追溯（全 TenantMixin）
+    "rfq",                 # v3.64：RFQ 詢價比價（全 TenantMixin）
 }
 
 # ─── 已知 gap：暫時沒上 TenantMixin（但有理由） ─────────────────
 KNOWN_GAPS = {
     "permission": "手動 tenant_id Column；super_admin 跨租戶刻意設計",
-    "supplier_plus": "v3.9 補（同上）",
     "ai_governance": "v3.9 補（DecisionLog/ConversationLog 跨租戶分析有需求）",
     "organization": "保留討論：員工/部門可能屬公司而非租戶層級",
     "glossary": "v3.46 Phase 2 G-201：同義詞表全公司共用，不需 tenant 隔離（單廠部署）；多租戶擴充時再加 created_by tenant 過濾",
+    "system_setting": "v3.60 M1-3：系統組態全公司共用（同 glossary 設計，多租戶擴充時再加 tenant 過濾）",
 }
 
 

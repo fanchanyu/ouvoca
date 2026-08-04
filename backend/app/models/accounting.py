@@ -16,6 +16,10 @@ class Account(Base):
     parent_id = Column(String(36), ForeignKey("accounts.id"), nullable=True)
     is_debit_normal = Column(Boolean, default=True)
     is_active = Column(Boolean, default=True)
+    # v006 (M1-1)：三大報表行對應（值域見 app.services.fs_defs.FS_LINES）
+    fs_line = Column(String(80))
+    # v006 (M1-1)：系統內建科目保護（硬編碼五碼 1100/1200/2100/2200/4100）
+    is_system = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     parent = relationship("Account", remote_side=[id], backref="children")
@@ -41,7 +45,7 @@ class JournalEntry(Base, TenantMixin):
     lines = relationship("JournalLine", back_populates="journal_entry", cascade="all, delete-orphan")
 
 
-class JournalLine(Base):
+class JournalLine(Base, TenantMixin):
     __tablename__ = "journal_lines"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

@@ -191,6 +191,10 @@ async def _change_my_password_with_confirm(db, user, new_password: str):
         # v3.38 N2：先存舊密碼 hash，供 90 秒內撤銷
         old_hash = u.hashed_password
         u.hashed_password = hash_password(new_password)
+        # v3.62：改密碼 → token_version +1，所有舊 token 立即失效（session 撤銷）
+        u.token_version = (u.token_version or 0) + 1
+        u.failed_login_count = 0
+        u.locked_until = None
         await db.commit()
         # 推 undo（舊 hash 已記，撤銷時直接還原）
         user_id = (user or {}).get("user_id") or (user or {}).get("employee_id") or "anonymous"

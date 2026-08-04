@@ -48,9 +48,12 @@ async def create_purchase_order(db: AsyncSession, data: dict, user: Optional[dic
     if not items_data:
         raise BusinessRuleError("採購單必須至少包含 1 個項目")
 
+    # Phase C1：集中式單據編號（原子計數器，防並發重號）
+    from app.services.document_numbering import next_document_no
+    po_no = await next_document_no(db, "PO")
     po = PurchaseOrder(
         id=str(uuid.uuid4()),
-        po_no=f"PO-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        po_no=po_no,
         created_by=(user or {}).get("employee_id"),
         **data,
     )
@@ -103,8 +106,9 @@ async def approve_purchase_order(db: AsyncSession, po_id: str, user: dict) -> Pu
     po = await get_purchase_order(db, po_id)
     if not po:
         raise NotFoundError("採購單不存在", po_id=po_id)
-    if po.status not in ("draft", "pending"):
-        raise BusinessRuleError(f"狀態 '{po.status}' 不可審核", po_id=po_id, current_status=po.status)
+    # Phase C2：狀態機驗證（取代手寫 if）
+    from app.core.status_machine import assert_transition
+    assert_transition("PO", po.status, "approved", po.po_no)
     po.status = "approved"
     po.approved_by = user.get("employee_id")
     await db.commit()
@@ -155,7 +159,11 @@ async def receive_purchase_order(db: AsyncSession, po_id: str,
         if item.received_qty < item.ordered_qty:
             all_received = False
 
-    po.status = "received" if all_received else "partial_received"
+    # Phase C2：狀態機驗證
+    from app.core.status_machine import assert_transition
+    target = "received" if all_received else "partial_received"
+    assert_transition("PO", po.status, target, po.po_no)
+    po.status = target
     po.actual_delivery_date = datetime.now(UTC).replace(tzinfo=None) if all_received else po.actual_delivery_date
     await db.commit()
     await db.refresh(po, attribute_names=["supplier"])
@@ -225,8 +233,9 @@ async def cancel_purchase_order(db: AsyncSession, po_id: str, user: dict, reason
     po = await get_purchase_order(db, po_id)
     if not po:
         raise NotFoundError("採購單不存在", po_id=po_id)
-    if po.status in ("received", "cancelled"):
-        raise BusinessRuleError(f"狀態 {po.status!r} 不可取消", po_id=po_id)
+    # Phase C2：狀態機驗證（取代手寫 if）
+    from app.core.status_machine import assert_transition
+    assert_transition("PO", po.status, "cancelled", po.po_no)
     old = po.status
     po.status = "cancelled"
     if reason:

@@ -3,6 +3,7 @@
 PostgreSQL uses an asyncpg pool; SQLite (dev) uses a single shared connection
 with `check_same_thread=False` semantics under aiosqlite.
 """
+import asyncio
 import logging
 import os
 from pathlib import Path
@@ -16,6 +17,19 @@ from app.core.base import Base
 import app.models  # noqa: F401 — ensure all models are imported so metadata is populated
 
 log = logging.getLogger(__name__)
+
+
+# v3.60 fix：在部分容器/沙箱環境（含本開發環境），CPython 預設
+# `_UnixSelectorEventLoop` 的 `call_soon_threadsafe` 跨執行緒喚醒會延遲數十秒，
+# 導致 aiosqlite（依賴背景 thread + queue 跨執行緒回報結果）的每個操作都像 hang。
+# uvloop 改用 eventfd 喚醒，不受影響。在 app import 階段就裝成預設 policy，
+# uvicorn / pytest / scripts 全部受益（uvicorn[standard] 已帶 uvloop）。
+try:
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    log.debug("uvloop event loop policy installed")
+except Exception:  # pragma: no cover - fallback for exotic environments
+    log.warning("uvloop unavailable; falling back to default asyncio policy")
 
 
 def _ensure_sqlite_dir(url: str) -> None:
@@ -60,8 +74,19 @@ def _make_engine():
     _ensure_sqlite_dir(url)
     log.info("SQLite DB: %s (cwd=%s)", url, os.getcwd())
 
-    # SQLite (aiosqlite): NullPool avoids lock contention in async tests
-    sqlite_engine = create_async_engine(url, echo=settings.DEBUG, poolclass=NullPool)
+    # SQLite (aiosqlite)：預設 NullPool（測試避免 lock contention）。
+    # 效能健檢 ②：單機桌面版可設 SQLITE_POOL_REUSE=true 改用小型 QueuePool
+    # （連線重用，實測每請求省 ~0.5ms；並發寫入場景建議維持 NullPool）。
+    pool_reuse = os.getenv("SQLITE_POOL_REUSE", "").lower() == "true"
+    if pool_reuse:
+        from sqlalchemy.pool import AsyncAdaptedQueuePool
+        sqlite_engine = create_async_engine(
+            url, echo=settings.DEBUG,
+            poolclass=AsyncAdaptedQueuePool,
+            pool_size=5, max_overflow=5,
+        )
+    else:
+        sqlite_engine = create_async_engine(url, echo=settings.DEBUG, poolclass=NullPool)
 
     # A4 修復：每條 SQLite 連線啟用 WAL + 友善 pragma，避免 50 人並發時 database is locked。
     #   - journal_mode=WAL：讀寫並發（reader 不擋 writer）
@@ -113,6 +138,13 @@ async def get_db() -> AsyncSession:
 
 
 async def init_db() -> None:
-    """Create all tables (dev mode; production uses Alembic)."""
+    """Create all tables (dev mode; production uses Alembic).
+
+    v3.70：create_all 後呼叫 ensure_fk_indexes —
+    全新安裝（一鍵/Docker/每次啟動）直接拿到 FK 複合索引，
+    不再只有走 alembic 的升級路徑有索引。
+    """
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        from app.services.db_indexes import ensure_fk_indexes
+        await conn.run_sync(ensure_fk_indexes)

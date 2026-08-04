@@ -64,7 +64,7 @@ class SalesOrder(Base, TenantMixin):
     approver = relationship("Employee", foreign_keys=[approved_by])
 
 
-class SalesOrderItem(Base):
+class SalesOrderItem(Base, TenantMixin):
     __tablename__ = "sales_order_items"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -136,7 +136,7 @@ class Contract(Base, TenantMixin):
     pricing = relationship("ContractPricing", back_populates="contract", cascade="all, delete-orphan")
 
 
-class ContractPricing(Base):
+class ContractPricing(Base, TenantMixin):
     __tablename__ = "contract_pricing"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

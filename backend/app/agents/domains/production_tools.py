@@ -111,5 +111,7 @@ register_agent(
         "query_work_order", "list_products_tool", "get_bom", "list_work_centers",
         "query_inventory",
         "release_work_order_with_confirm",  # v3.2 hard-write
+        "query_wo_cost",  # v3.61 M2-6 工單成本彙總
+        "issue_material_with_confirm",  # v3.63 M3 領料
     ],
 )

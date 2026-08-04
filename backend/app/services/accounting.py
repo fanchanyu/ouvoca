@@ -11,17 +11,73 @@ from app.models.accounting import (
     Account, JournalEntry, JournalLine, AccountsReceivable, MonthEndClose,
 )
 from app.events import EventBus, DomainEvent
-from app.core.exceptions import BusinessRuleError, NotFoundError
+from app.core.exceptions import BusinessRuleError, NotFoundError, PermissionDeniedError
+from app.services import fs_defs
 
 
 # -------- Accounts --------
 
 async def create_account(db: AsyncSession, data: dict) -> Account:
+    fs_line = data.get("fs_line")
+    if fs_line is not None and fs_line not in fs_defs.FS_LINES:
+        raise BusinessRuleError(f"fs_line 非白名單: {fs_line}，允許值: {', '.join(fs_defs.FS_LINES)}")
     a = Account(id=str(uuid.uuid4()), **data)
     db.add(a)
     await db.commit()
     await db.refresh(a)
     return a
+
+
+async def update_account(db: AsyncSession, code: str, data: dict) -> Account:
+    """更新科目。is_system 科目禁止改 code；fs_line/account_type 走白名單驗證。"""
+    a = (await db.execute(
+        select(Account).where(Account.code == code)
+    )).scalar_one_or_none()
+    if not a:
+        raise NotFoundError("科目不存在", code=code)
+
+    new_code = data.get("code")
+    if new_code and new_code != code:
+        if a.is_system:
+            raise PermissionDeniedError(f"系統內建科目 {code} 不可改號")
+        dup = (await db.execute(
+            select(Account).where(Account.code == new_code)
+        )).scalar_one_or_none()
+        if dup:
+            raise BusinessRuleError(f"科目編號 {new_code} 已存在")
+
+    fs_line = data.get("fs_line")
+    if fs_line is not None and fs_line not in fs_defs.FS_LINES:
+        raise BusinessRuleError(f"fs_line 非白名單: {fs_line}")
+
+    atype = data.get("account_type")
+    if atype is not None and atype not in fs_defs.ACCOUNT_TYPES:
+        raise BusinessRuleError(f"account_type 非法: {atype}")
+
+    for field in ("code", "name", "account_type", "is_debit_normal", "fs_line", "is_active"):
+        if field in data:
+            setattr(a, field, data[field])
+    await db.commit()
+    await db.refresh(a)
+    return a
+
+
+async def delete_account(db: AsyncSession, code: str) -> None:
+    """刪除科目。is_system 禁止刪除；有子科目禁止刪除。"""
+    a = (await db.execute(
+        select(Account).where(Account.code == code)
+    )).scalar_one_or_none()
+    if not a:
+        raise NotFoundError("科目不存在", code=code)
+    if a.is_system:
+        raise PermissionDeniedError(f"系統內建科目 {code} 不可刪除")
+    child = (await db.execute(
+        select(Account).where(Account.parent_id == a.id).limit(1)
+    )).scalar_one_or_none()
+    if child:
+        raise BusinessRuleError(f"科目 {code} 仍有子科目，不可刪除")
+    await db.delete(a)
+    await db.commit()
 
 
 async def list_accounts(db: AsyncSession, account_type: Optional[str] = None) -> List[Account]:
@@ -54,9 +110,21 @@ async def create_journal_entry(db: AsyncSession, data: dict, user: Optional[dict
     if closed:
         raise BusinessRuleError(f"會計期間 {period} 已結帳鎖定", period=period)
 
+    # v3.67 家規：期間未鎖 + 借貸平衡（allow-predicate）
+    from app.services.policy_engine import evaluate_policies
+    policy = await evaluate_policies(db, "je.create", {
+        "period": period,
+        "balanced": round(total_debit, 2) == round(total_credit, 2),
+    }, user_id=(user or {}).get("employee_id"))
+    if policy.blocked:
+        raise BusinessRuleError(policy.message, can_override=policy.can_override)
+
+    # Phase C1：集中式單據編號（原子計數器，防並發重號）
+    from app.services.document_numbering import next_document_no
+    entry_no = await next_document_no(db, "JE")
     je = JournalEntry(
         id=str(uuid.uuid4()),
-        entry_no=f"JE-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        entry_no=entry_no,
         entry_date=data.get("entry_date", datetime.now(UTC).replace(tzinfo=None)),
         period=period,
         created_by=(user or {}).get("employee_id"),
@@ -90,8 +158,9 @@ async def post_journal(db: AsyncSession, entry_id: str, user: dict) -> JournalEn
     )).scalar_one_or_none()
     if not je:
         raise NotFoundError("傳票不存在", entry_id=entry_id)
-    if je.status != "draft":
-        raise BusinessRuleError(f"傳票狀態 '{je.status}' 不可過帳")
+    # Phase C2：狀態機驗證（取代手寫 if）
+    from app.core.status_machine import assert_transition
+    assert_transition("JE", je.status, "posted", je.entry_no)
     je.status = "posted"
     je.posted_at = datetime.now(UTC).replace(tzinfo=None)
     await db.commit()

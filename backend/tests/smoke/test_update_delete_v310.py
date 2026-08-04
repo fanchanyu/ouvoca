@@ -276,10 +276,12 @@ def test_endpoint_route_inventory():
     Note：FastAPI 同 path 不同 method 是分開的 route 物件，要 aggregate。
     """
     from app.main import app
-    paths = [r.path for r in app.routes if hasattr(r, "path")]
+    from tests.smoke.route_utils import flatten_app_routes
+    routes = flatten_app_routes(app.routes)
+    paths = [r.path for r in routes if hasattr(r, "path")]
     # Aggregate methods per path (一個 path 可有多個 route)
     methods_by_path: dict[str, set] = {}
-    for r in app.routes:
+    for r in routes:
         if not (hasattr(r, "methods") and hasattr(r, "path")):
             continue
         methods_by_path.setdefault(r.path, set()).update(r.methods)

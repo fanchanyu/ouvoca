@@ -13,8 +13,7 @@ RequestID middleware — 每個請求自動分配一個 ID，貫穿整個 log + 
 from __future__ import annotations
 import uuid
 from contextvars import ContextVar
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
+from starlette.types import ASGIApp, Receive, Scope, Send, Message
 
 # Context-var 讓任何地方的 log 都拿得到當前 request_id
 _request_id_var: ContextVar[str | None] = ContextVar("request_id", default=None)
@@ -25,17 +24,31 @@ def get_request_id() -> str | None:
     return _request_id_var.get()
 
 
-class RequestIDMiddleware(BaseHTTPMiddleware):
+class RequestIDMiddleware:
     HEADER = "X-Request-ID"
 
-    async def dispatch(self, request: Request, call_next):
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
         # 沿用 client 帶的，否則生成
-        rid = request.headers.get(self.HEADER) or str(uuid.uuid4())
+        headers = dict(scope.get("headers") or [])
+        rid = headers.get(self.HEADER.lower().encode(), b"").decode() or str(uuid.uuid4())
         token = _request_id_var.set(rid)
         try:
-            request.state.request_id = rid
-            response = await call_next(request)
-            response.headers[self.HEADER] = rid
-            return response
+            scope["state"]["request_id"] = rid
+
+            async def send_with_rid(message: Message) -> None:
+                if message["type"] == "http.response.start":
+                    message["headers"] = list(message.get("headers", [])) + [
+                        (self.HEADER.lower().encode(), rid.encode())
+                    ]
+                await send(message)
+
+            await self.app(scope, receive, send_with_rid)
         finally:
             _request_id_var.reset(token)

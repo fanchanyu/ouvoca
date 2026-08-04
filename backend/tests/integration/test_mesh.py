@@ -22,9 +22,13 @@ import httpx
 
 # ─── helpers ───────────────────────────────────────────────
 def _free_port() -> int:
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
+    try:
+        with socket.socket() as s:
+            s.bind(("127.0.0.1", 0))
+            return s.getsockname()[1]
+    except PermissionError:
+        # 受限沙箱（無 network namespace）無法 bind socket → 讓測試 skip
+        pytest.skip("環境不允許建立 socket（sandbox network 限制）")
 
 
 def _wait_for(url: str, timeout: float = 15.0) -> bool:

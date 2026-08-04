@@ -82,6 +82,12 @@ class User(Base):
     employee_id = Column(String(36), ForeignKey("employees.id"), unique=True, nullable=False)
     is_superuser = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
+    # v3.62 資安強化：
+    token_version = Column(Integer, default=0)          # 改密碼 +1 → 舊 token 失效（session 撤銷）
+    failed_login_count = Column(Integer, default=0)     # 連續失敗次數（登入鎖定）
+    locked_until = Column(DateTime)                     # 鎖定截止（None = 未鎖）
+    mfa_secret = Column(String(64), nullable=True)      # v3.64 TOTP secret（未啟用 = None）
+    mfa_enabled = Column(Boolean, default=False)        # v3.64 是否要求 MFA
     last_login = Column(DateTime)
     created_at = Column(DateTime, default=datetime.utcnow)
 

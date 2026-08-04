@@ -21,38 +21,44 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.create_table(
-        "einvoice_records",
-        sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("invoice_no", sa.String(20), nullable=False, index=True),
-        sa.Column("invoice_date", sa.String(8), nullable=False),
-        sa.Column("invoice_time", sa.String(8)),
-        sa.Column("seller_tax_id", sa.String(20), nullable=False),
-        sa.Column("buyer_tax_id", sa.String(20)),
-        sa.Column("buyer_name", sa.String(200)),
-        sa.Column("sales_amount", sa.Float(), nullable=False, server_default="0"),
-        sa.Column("tax_amount", sa.Float(), nullable=False, server_default="0"),
-        sa.Column("total_amount", sa.Float(), nullable=False, server_default="0"),
-        sa.Column("tax_rate", sa.Float(), server_default="0.05"),
-        sa.Column("so_id", sa.String(36), sa.ForeignKey("sales_orders.id")),
-        sa.Column("journal_entry_id", sa.String(36), sa.ForeignKey("journal_entries.id")),
-        sa.Column("status", sa.String(20), server_default="issued"),
-        sa.Column("tracking_no", sa.String(50)),
-        sa.Column("cancelled_at", sa.DateTime()),
-        sa.Column("cancel_reason", sa.Text()),
-        sa.Column("mig_payload", sa.JSON()),
-        sa.Column("tenant_id", sa.String(36), index=True),
-        sa.Column("created_at", sa.DateTime()),
-        sa.Column("created_by", sa.String(36)),
-    )
-    op.create_index(
-        "ix_einvoice_no_date", "einvoice_records",
-        ["invoice_no", "invoice_date"],
-    )
+    # 冪等保護：v001 baseline 會先建出當下模型的全部表（含 einvoice_records）
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    if not inspector.has_table("einvoice_records"):
+        op.create_table(
+            "einvoice_records",
+            sa.Column("id", sa.String(36), primary_key=True),
+            sa.Column("invoice_no", sa.String(20), nullable=False, index=True),
+            sa.Column("invoice_date", sa.String(8), nullable=False),
+            sa.Column("invoice_time", sa.String(8)),
+            sa.Column("seller_tax_id", sa.String(20), nullable=False),
+            sa.Column("buyer_tax_id", sa.String(20)),
+            sa.Column("buyer_name", sa.String(200)),
+            sa.Column("sales_amount", sa.Float(), nullable=False, server_default="0"),
+            sa.Column("tax_amount", sa.Float(), nullable=False, server_default="0"),
+            sa.Column("total_amount", sa.Float(), nullable=False, server_default="0"),
+            sa.Column("tax_rate", sa.Float(), server_default="0.05"),
+            sa.Column("so_id", sa.String(36), sa.ForeignKey("sales_orders.id")),
+            sa.Column("journal_entry_id", sa.String(36), sa.ForeignKey("journal_entries.id")),
+            sa.Column("status", sa.String(20), server_default="issued"),
+            sa.Column("tracking_no", sa.String(50)),
+            sa.Column("cancelled_at", sa.DateTime()),
+            sa.Column("cancel_reason", sa.Text()),
+            sa.Column("mig_payload", sa.JSON()),
+            sa.Column("tenant_id", sa.String(36), index=True),
+            sa.Column("created_at", sa.DateTime()),
+            sa.Column("created_by", sa.String(36)),
+        )
+        op.create_index(
+            "ix_einvoice_no_date", "einvoice_records",
+            ["invoice_no", "invoice_date"],
+        )
 
     # SalesOrder chain fields — SQLite ALTER TABLE 限制：使用 batch_alter_table
-    with op.batch_alter_table("sales_orders") as batch_op:
-        batch_op.add_column(sa.Column("invoice_no", sa.String(20)))
+    existing_cols = {c["name"] for c in inspector.get_columns("sales_orders")}
+    if "invoice_no" not in existing_cols:
+        with op.batch_alter_table("sales_orders") as batch_op:
+            batch_op.add_column(sa.Column("invoice_no", sa.String(20)))
         batch_op.add_column(sa.Column("delivery_note_no", sa.String(50)))
         batch_op.add_column(sa.Column("ar_id", sa.String(36)))
 

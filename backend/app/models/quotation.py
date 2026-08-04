@@ -40,7 +40,7 @@ class Quotation(Base, TenantMixin):
                          order_by="QuotationItem.sequence_no")
 
 
-class QuotationItem(Base):
+class QuotationItem(Base, TenantMixin):
     """報價單行項目。"""
     __tablename__ = "quotation_items"
 

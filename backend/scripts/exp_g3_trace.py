@@ -59,7 +59,8 @@ async def main() -> int:
             + "\n\nUser context: test admin"},
         {"role": "user", "content": T04_QUERY},
     ]
-    user_info = {"employee_id": "g3", "username": "g3", "roles": ["admin"]}
+    user_info = {"employee_id": "g3", "username": "g3", "roles": ["admin"],
+                 "is_superuser": True, "permissions": ["*"]}
     steps = []
     async with AsyncSessionLocal() as db:
         for round_idx in range(5):

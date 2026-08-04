@@ -77,5 +77,6 @@ register_agent(
     tool_names=[
         "query_so", "list_customers", "list_products_tool",
         "update_sales_order_delivery_with_confirm",  # v3.2 hard-write
+        "create_return_note_with_confirm",  # v3.63 M3 退貨（RMA）
     ],
 )

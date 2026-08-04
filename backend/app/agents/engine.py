@@ -10,6 +10,81 @@ log = get_logger(__name__)
 
 
 # --------------------------------------------------------------------------
+# Tool-level RBAC enforcement (P0-1 fix — chat 管線不得繞過 tool 權限)
+#
+# 權限檢查的單一事實來源 = registry 上的 required_permission。
+# 所有呼叫工具的路徑（chat-v2 / agents_exec / benchmark scripts）都必須
+# 通過這裡，否則任何有 ai.agent.use 的帳號都能指揮 AI 執行越權操作。
+# --------------------------------------------------------------------------
+
+def _permission_in_list(permissions: list[str], code: str) -> bool:
+    """檢查 permission code 是否命中使用者權限清單（含 wildcard）。"""
+    if not permissions:
+        return False
+    if "*" in permissions:
+        return True
+    if code in permissions:
+        return True
+    parts = code.split(".")
+    for i in range(len(parts) - 1, -1, -1):
+        wildcard = ".".join(parts[:i]) + (".*" if i else "*")
+        if wildcard in permissions:
+            return True
+    return False
+
+
+async def _ensure_tool_permission(db, user, code: str) -> bool:
+    """驗證使用者是否可執行需要 code 權限的 tool。
+
+    優先順序（fail-closed 原則）：
+      1. is_superuser → 允許
+      2. user dict 帶 explicit permissions list → 直接比對（wildcard-aware）
+      3. user dict 帶 user_id 且 db 可用 → 從 DB 即時載入（撤權立即生效）
+      4. 無法驗證（無 db / 無 user_id / 無 permissions）→ 拒絕並記 warning，
+         避免「資料不足時放行」的漏洞（fail-closed）
+
+    chat-v2 與 agents_exec 都必須傳入完整 UserContext 轉出的 dict（含
+    user_id + permissions），因此正式路徑永遠走 1/2/3，不會誤擋。
+    """
+    if user is None:
+        log.warning("Tool RBAC: user=None 拒絕執行 %s (fail-closed)", code)
+        return False
+
+    if user.get("is_superuser"):
+        return True
+
+    explicit_perms = user.get("permissions")
+    if explicit_perms is not None:
+        if _permission_in_list(list(explicit_perms), code):
+            return True
+        log.warning(
+            "Tool RBAC denied: user=%s code=%s (explicit permissions)",
+            user.get("username") or user.get("employee_id") or user.get("user_id"),
+            code,
+        )
+        return False
+
+    # DB-backed lookup — 撤權/授權即時生效，不依賴 JWT 舊資料
+    if db is not None and user.get("user_id"):
+        from app.core.security import get_user_permissions
+        perms = await get_user_permissions(db, str(user["user_id"]), fresh=True)
+        if _permission_in_list(list(perms.keys()), code):
+            return True
+        log.warning(
+            "Tool RBAC denied: user_id=%s code=%s (DB lookup)",
+            user.get("user_id"), code,
+        )
+        return False
+
+    log.warning(
+        "Tool RBAC: 無法驗證權限（無 db/user_id/permissions），fail-closed 拒絕 "
+        "user=%s code=%s",
+        user.get("employee_id") or user.get("user_id") or "unknown", code,
+    )
+    return False
+
+
+# --------------------------------------------------------------------------
 # Intent classifier — weighted keyword match
 # --------------------------------------------------------------------------
 
@@ -170,11 +245,26 @@ async def execute_tool(name: str, args: dict, db=None, user=None) -> str:
     if meta is None or meta.func is None:
         return json.dumps({"error": f"Unknown tool: {name}"}, ensure_ascii=False)
 
-    # NOTE: meta.required_permission is stored in registry and visible via to_llm_dict().
-    # Engine-level enforcement is NOT done here because the JWT carries "permissions": []
-    # (actual RBAC permissions live in DB, not JWT). Permission enforcement must happen at
-    # the API layer (agents_exec.py) via RBAC service lookup before execute_tool() is called.
-    # Phase 3 task: add async RBAC check here using db session when available.
+    # P0-1 fix (2026-08): tool 級 RBAC — chat-v2 與 agents_exec 共用同一道檢查。
+    # 之前只有 agents_exec.py 檢查 required_permission，chat-v2 只檢查 ai.agent.use，
+    # 等於任何能對話的帳號都能叫 AI 建 PO、批准、刪 BOM、作廢發票。
+    # 現在檢查內建在執行路徑，任何工具呼叫都必須通過。
+    if meta.required_permission and not await _ensure_tool_permission(db, user, meta.required_permission):
+        log.warning(
+            "Tool RBAC denied (execute_tool): tool=%s required=%s user=%s",
+            name, meta.required_permission,
+            (user or {}).get("username") or (user or {}).get("user_id") or "anon",
+        )
+        return json.dumps({
+            "error": (
+                f"您沒有執行此操作的權限（需要 {meta.required_permission}）。"
+                "請聯絡系統管理員授權，或改用您有權限的操作。"
+            ),
+            "permission_denied": True,
+            "required_permission": meta.required_permission,
+            "tool_blocked": name,
+            "http_equivalent": 403,
+        }, ensure_ascii=False)
 
     # v3.40 M5：hard-write 凍結檢查（讓「解凍」工具本身可以執行）
     if (meta.risk_tier == RiskTier.HARD_WRITE
@@ -268,6 +358,7 @@ _NO_REGISTRY_META: set[str] = set()
 # v3.39 K4：per-user-per-tool slot-filling retry counter
 # 結構：{ user_key: {tool_name: count} }
 _SLOT_RETRY: dict[str, dict[str, int]] = {}
+_SLOT_RETRY_MAX_ENTRIES = 2000  # v3.62：防無上限成長（記憶體守衛）
 
 
 def _slot_retry_key(user) -> str:
@@ -277,6 +368,8 @@ def _slot_retry_key(user) -> str:
 def _bump_slot_retry(user, tool_name: str) -> int:
     """記錄該使用者該 tool 之 slot-filling 失敗次數；回新值（從 1 起）。"""
     key = _slot_retry_key(user)
+    if len(_SLOT_RETRY) >= _SLOT_RETRY_MAX_ENTRIES:
+        _SLOT_RETRY.clear()  # 滿了先清空（最簡單的防護，重來一次成本可忽略）
     entry = _SLOT_RETRY.setdefault(key, {})
     entry[tool_name] = entry.get(tool_name, 0) + 1
     return entry[tool_name]

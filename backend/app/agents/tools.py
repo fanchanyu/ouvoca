@@ -26,4 +26,8 @@ from app.agents.domains import (  # noqa: F401
     polish_v340_tools,   # v3.40 第四輪卡關修補：相對日期 / 帳齡 / 凍結 / Audit / 比較 / case-insensitive
     polish_v341_tools,   # v3.41 第五輪卡關修補：毛利率 / 訂單跟單 / 寄 PDF email / FAQ / 資料健康
     polish_v342_tools,   # v3.42 第六輪卡關修補：使用者帳號 / 全域搜尋 / 附件 / 工作天 / transcript / 時區
+    finance_tools,       # v3.60 Phase B1 金流閉環：AP / 付款 / 收款 / 銀行帳戶
+    backup_tools,        # v3.62 備份管理（審計 P1-7）
+    m3_tools,            # v3.63 M3 表單工程：請購 / 收料 / 領料 / 退貨
+    v364_tools,          # v3.64 追溯 / RFQ / 標籤
 )

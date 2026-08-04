@@ -57,7 +57,7 @@ class PurchaseOrder(Base, TenantMixin):
     inspection_orders = relationship("InspectionOrder", back_populates="purchase_order")
 
 
-class PurchaseOrderItem(Base):
+class PurchaseOrderItem(Base, TenantMixin):
     __tablename__ = "purchase_order_items"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

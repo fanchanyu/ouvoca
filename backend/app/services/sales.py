@@ -39,10 +39,57 @@ async def create_sales_order(db: AsyncSession, data: dict, user: Optional[dict] 
     items_data = data.pop("items", [])
     if not items_data:
         raise BusinessRuleError("銷售訂單必須至少包含 1 個項目")
+    order_total = sum(
+        float(i.get("ordered_qty", 0)) * float(i.get("unit_price", 0))
+        for i in items_data
+    )
 
+    # v3.67 Turnkey P0-3：家規評估（so.create：信用額度 / B2B 統編提醒）
+    from app.services.policy_engine import evaluate_policies
+    policy = await evaluate_policies(db, "so.create", {
+        "customer_id": data.get("customer_id"),
+        "total_amount": order_total,
+        "items": items_data,
+    }, user_id=(user or {}).get("employee_id"))
+    if policy.blocked:
+        raise BusinessRuleError(policy.message, can_override=policy.can_override)
+
+    # v3.62：信用額度強制檢查（審計 P1-6：credit_limit 不能只是欄位）
+    customer_id = data.get("customer_id")
+    if customer_id:
+        from app.models.crm_sales import Customer
+        from app.models.accounting import AccountsReceivable
+        customer = (await db.execute(
+            select(Customer).where(Customer.id == customer_id)
+        )).scalar_one_or_none()
+        if customer is not None and customer.credit_limit:
+            from app.services.system_settings import get_setting
+            enforce = await get_setting(db, "finance.credit_limit_check", True)
+            if enforce:
+                open_ar = (await db.execute(
+                    select(func.coalesce(func.sum(AccountsReceivable.amount - AccountsReceivable.paid_amount), 0))
+                    .where(
+                        AccountsReceivable.customer_id == customer_id,
+                        AccountsReceivable.status.in_(("unpaid", "partial")),
+                    )
+                )).scalar_one() or 0
+                if float(open_ar) + order_total > float(customer.credit_limit):
+                    raise BusinessRuleError(
+                        f"客戶 {customer.name} 信用額度不足："
+                        f"未收應收 {float(open_ar):,.0f} + 本單 {order_total:,.0f} "
+                        f"> 額度 {float(customer.credit_limit):,.0f}",
+                        customer_id=customer_id,
+                        credit_limit=customer.credit_limit,
+                        open_ar=float(open_ar),
+                        order_total=order_total,
+                    )
+
+    # Phase C1：集中式單據編號（原子計數器，防並發重號）
+    from app.services.document_numbering import next_document_no
+    so_no = await next_document_no(db, "SO")
     so = SalesOrder(
         id=str(uuid.uuid4()),
-        so_no=f"SO-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        so_no=so_no,
         created_by=(user or {}).get("employee_id"),
         **data,
     )
@@ -73,8 +120,9 @@ async def confirm_sales_order(db: AsyncSession, so_id: str, user: dict) -> Sales
     so = await get_sales_order(db, so_id)
     if not so:
         raise NotFoundError("銷售訂單不存在", so_id=so_id)
-    if so.status != "draft":
-        raise BusinessRuleError(f"狀態 '{so.status}' 不可確認")
+    # Phase C2：狀態機驗證（取代手寫 if）
+    from app.core.status_machine import assert_transition
+    assert_transition("SO", so.status, "confirmed", so.so_no)
     so.status = "confirmed"
     so.approved_by = user.get("employee_id")
     await db.commit()
@@ -116,20 +164,20 @@ _TAX_RATE = 0.05  # Taiwan 5% VAT
 
 async def _gen_dn_no(db: AsyncSession) -> str:
     """產生 DN-YYYYMMDD-NNNN 格式單號（當日序號）。"""
-    from app.models.delivery import DeliveryNote
-    today = datetime.now(UTC).replace(tzinfo=None).strftime("%Y%m%d")
-    prefix = f"DN-{today}-"
-    cnt = (await db.execute(
-        select(func.count(DeliveryNote.id)).where(DeliveryNote.dn_no.like(f"{prefix}%"))
-    )).scalar() or 0
-    return f"{prefix}{cnt + 1:04d}"
+    # Phase C1：改用原子計數器（原 COUNT+1 在多寫者並發下有重號風險）
+    from app.services.document_numbering import next_document_no
+    return await next_document_no(db, "DN")
 
 
 async def _gen_invoice_no(db: AsyncSession) -> str:
-    """產生 AB + 8 碼數字之 mock 發票號（生產環境由加值中心配發）。"""
-    from app.models.tax_tw import EInvoiceRecord
-    cnt = (await db.execute(select(func.count(EInvoiceRecord.id)))).scalar() or 0
-    return f"AB{(cnt + 1) % 100000000:08d}"
+    """產生 AB + 8 碼數字之 mock 發票號（生產環境由加值中心配發）。
+
+    v3.62：改用集中式原子計數器（原 COUNT+1 在多寫者並發下有重號風險）。
+    """
+    from app.services.document_numbering import next_document_no
+    return await next_document_no(
+        db, "INVOICE", period="GLOBAL", fmt="AB{SEQ:08d}",
+    )
 
 
 async def ship_sales_order(
@@ -181,8 +229,16 @@ async def ship_sales_order(
     so = await get_sales_order(db, so_id)
     if not so:
         raise NotFoundError("銷售訂單不存在", so_id=so_id)
-    if so.status not in ("confirmed", "production", "ready_to_ship"):
-        raise BusinessRuleError(f"狀態 '{so.status}' 不可出貨")
+    # v3.67 家規：出貨需 SO 已確認
+    from app.services.policy_engine import evaluate_policies
+    policy = await evaluate_policies(db, "so.ship", {
+        "status": so.status, "so_id": so.id, "so_no": so.so_no,
+    }, user_id=(user or {}).get("employee_id"))
+    if policy.blocked:
+        raise BusinessRuleError(policy.message, can_override=policy.can_override)
+    # Phase C2：狀態機驗證（取代手寫 if）
+    from app.core.status_machine import assert_transition
+    assert_transition("SO", so.status, "shipped", so.so_no)
 
     raw_user = user or {}
     tenant_id = raw_user.get("tenant_id") or getattr(so, "tenant_id", None) or "HQ"
@@ -556,8 +612,9 @@ async def cancel_sales_order(db: AsyncSession, so_id: str, user: dict, reason: s
     so = await get_sales_order(db, so_id)
     if not so:
         raise NotFoundError("銷售訂單不存在", so_id=so_id)
-    if so.status in ("shipped", "delivered", "closed", "cancelled"):
-        raise BusinessRuleError(f"狀態 {so.status!r} 不可取消", so_id=so_id)
+    # Phase C2：狀態機驗證（取代手寫 if）
+    from app.core.status_machine import assert_transition
+    assert_transition("SO", so.status, "cancelled", so.so_no)
     old = so.status
     so.status = "cancelled"
     if reason:

@@ -85,5 +85,18 @@ register_agent(
         "3. 提醒逾期款項\n\n"
         "請使用繁體中文，金額一律加上幣別。涉及借貸時務必驗證平衡。"
     ),
-    tool_names=["list_journals", "list_receivables", "check_month_close"],
+    tool_names=[
+        "list_journals", "list_receivables", "check_month_close",
+        # v3.60 Phase B1 金流閉環
+        "query_payables", "query_bank_accounts", "query_payments",
+        "create_bank_account_with_confirm",
+        "record_payment_with_confirm", "record_receipt_with_confirm",
+        # v3.61 M2 財務閉環
+        "query_financial_statements", "query_tax_report_401_405",
+        "query_supplier_invoice_matches", "record_supplier_invoice_with_confirm",
+        "query_fixed_assets", "create_fixed_asset_with_confirm",
+        "post_depreciation_with_confirm",
+        "query_promissory_notes", "record_promissory_note_with_confirm",
+        "settle_cogs_with_confirm",
+    ],
 )

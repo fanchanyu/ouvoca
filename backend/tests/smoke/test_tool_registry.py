@@ -7,6 +7,18 @@ from app.agents.registry import (
 )
 
 
+# ─── 測試隔離：unit tests 會 clear_registry()，結束後必須還原 ───
+# 否則後續（字母順序較後）依賴真實 tools 的測試（如 chat RBAC）會
+# 拿到空的 registry → "Unknown tool"。module 結束時 snapshot 還原。
+@pytest.fixture(autouse=True, scope="module")
+def _restore_registry_after():
+    from app.agents.registry import _REGISTRY
+    saved = dict(_REGISTRY)
+    yield
+    _REGISTRY.clear()
+    _REGISTRY.update(saved)
+
+
 # ─── 純函式測試（不依賴實際 tools）──────────────────────
 
 def test_registry_can_register_and_retrieve():

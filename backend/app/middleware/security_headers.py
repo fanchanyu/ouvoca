@@ -16,8 +16,7 @@ SecurityHeadersMiddleware — OWASP 對齊的 HTTP 安全標頭。
 """
 from __future__ import annotations
 import os
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
+from starlette.types import ASGIApp, Receive, Scope, Send, Message
 
 
 # 預設 CSP（保守，可能需要客製化）
@@ -34,49 +33,50 @@ _DEFAULT_CSP = (
 )
 
 
-class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+class SecurityHeadersMiddleware:
     """設好幾乎所有 OWASP 推薦的 security headers。
 
     可透過 env 微調：
     - SECURITY_CSP_ENABLED=true (default false)
     - SECURITY_CSP_VALUE=...（自訂）
     - SECURITY_HSTS_MAX_AGE=31536000（1 年，default）
+
+    v3.69（效能健檢 ②）：pure ASGI — 不經 BaseHTTPMiddleware 的
+    anyio task group + 雙向 stream 慢路徑，純加 header 幾乎零開銷。
     """
-    def __init__(self, app, **opts):
-        super().__init__(app)
+    def __init__(self, app: ASGIApp):
+        self.app = app
         self.hsts_max_age = int(os.getenv("SECURITY_HSTS_MAX_AGE", "31536000"))
         self.csp_enabled = os.getenv("SECURITY_CSP_ENABLED", "false").lower() == "true"
         self.csp_value = os.getenv("SECURITY_CSP_VALUE", _DEFAULT_CSP)
 
-    async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        h = response.headers
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
 
-        # HSTS：強制 HTTPS（瀏覽器 1 年內都記住）
-        h["Strict-Transport-Security"] = (
-            f"max-age={self.hsts_max_age}; includeSubDomains"
-        )
-        # 防 clickjacking
-        h["X-Frame-Options"] = "DENY"
-        # 防 MIME 嗅探
-        h["X-Content-Type-Options"] = "nosniff"
-        # 限制 referrer 外流（送的時候帶 origin，不送完整 path）
-        h["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        # 禁用所有敏感瀏覽器 API（依需求微調）
-        h["Permissions-Policy"] = (
-            "geolocation=(), microphone=(), camera=(), "
-            "payment=(), usb=(), magnetometer=(), gyroscope=()"
-        )
-        # 跨來源隔離 — 防 Spectre / 跨 origin 攻擊
-        h["Cross-Origin-Opener-Policy"] = "same-origin"
-        h["Cross-Origin-Resource-Policy"] = "same-origin"
+        async def send_with_headers(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                headers = message.get("headers", [])
+                extra = {
+                    b"strict-transport-security":
+                        f"max-age={self.hsts_max_age}; includeSubDomains".encode(),
+                    b"x-frame-options": b"DENY",
+                    b"x-content-type-options": b"nosniff",
+                    b"referrer-policy": b"strict-origin-when-cross-origin",
+                    b"permissions-policy":
+                        b"geolocation=(), microphone=(), camera=(), "
+                        b"payment=(), usb=(), magnetometer=(), gyroscope=()",
+                    b"cross-origin-opener-policy": b"same-origin",
+                    b"cross-origin-resource-policy": b"same-origin",
+                }
+                if self.csp_enabled:
+                    extra[b"content-security-policy"] = self.csp_value.encode()
+                seen = {k.lower() for k, _ in headers}
+                merged = list(headers) + [
+                    (k, v) for k, v in extra.items() if k not in seen
+                ]
+                message["headers"] = merged
+            await send(message)
 
-        # CSP — 預設關閉避免破壞前端，正式部署建議開
-        if self.csp_enabled:
-            h["Content-Security-Policy"] = self.csp_value
-
-        # 隱藏 server 軟體版本資訊（紙上談兵但合規要求）
-        if "Server" in h:
-            del h["Server"]
-
-        return response
+        await self.app(scope, receive, send_with_headers)

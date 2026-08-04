@@ -8,9 +8,20 @@ Shared pytest fixtures for LLM-ERP backend tests.
 """
 from __future__ import annotations
 
+import asyncio
 import os
 import tempfile
 from pathlib import Path
+
+# v3.60：在 pytest-asyncio 快取 event loop policy 之前，先安裝 uvloop。
+# 背景：pytest-asyncio 的 session-scoped `event_loop_policy` fixture 在
+# test module import（app.database 才設定 uvloop）之前就快取 policy；
+# 若漏掉這行，aiosqlite（依賴跨執行緒喚醒）在 selector loop 下會 hang。
+try:
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except Exception:  # pragma: no cover
+    pass
 
 # 必須在 import app 之前設好環境變數
 _TMP_DIR = Path(tempfile.mkdtemp(prefix="llmerp-test-"))

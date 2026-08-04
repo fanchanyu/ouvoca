@@ -94,5 +94,10 @@ register_agent(
         "3. 解讀庫存狀態\n\n"
         "請使用繁體中文，語氣專業簡潔。若需要進一步動作，請建議使用者切換到對應頁面。"
     ),
-    tool_names=["query_inventory", "list_parts", "list_below_safety"],
+    tool_names=[
+        "query_inventory", "list_parts", "list_below_safety",
+        # v3.64 批號/序號追溯 + 標籤
+        "assign_batch_with_confirm", "trace_batch", "record_serials_with_confirm",
+        "trace_serial", "print_part_label",
+    ],
 )

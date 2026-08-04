@@ -29,7 +29,7 @@ class Product(Base, TenantMixin):
     production_orders = relationship("ProductionOrder", back_populates="product")
 
 
-class BOMItem(Base):
+class BOMItem(Base, TenantMixin):
     __tablename__ = "bom_items"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

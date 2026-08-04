@@ -188,7 +188,8 @@ async def run_benchmark(provider_label: str) -> dict:
     print(f"{'=' * 70}\n")
 
     result = BenchmarkResult()
-    user_info = {"employee_id": "bench", "username": "bench", "roles": ["admin"]}
+    user_info = {"employee_id": "bench", "username": "bench", "roles": ["admin"],
+                 "is_superuser": True, "permissions": ["*"]}
 
     for case in TEST_CASES:
         print(f"  [{case['id']}] [{case['difficulty']:6}] {case['q']}")

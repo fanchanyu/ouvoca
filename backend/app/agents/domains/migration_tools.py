@@ -31,9 +31,14 @@ from app.integrations.connectors.exceptions import ConnectorError
 # Helper: 取 connection by name（從 external_db_tools 共用）
 # ────────────────────────────────────────────────────────────
 
-def _get_connection_info(name: str) -> Optional[dict]:
-    """v3.8 fix #4: 走 service layer，不再讀 agent 模組私有 dict。"""
-    from app.services.connections import get_connection_info
+async def _get_connection_info(db, name: str) -> Optional[dict]:
+    """v3.8 fix #4: 走 service layer；v3.60 G-510: db 可用時走加密 DB 儲存。"""
+    from app.services.connections import get_connection_info_db, get_connection_info
+    if db is not None:
+        info = await get_connection_info_db(db, name)
+        if info is not None:
+            return info
+        # DB 沒有 → 退回 in-memory（舊測試/腳本相容）
     return get_connection_info(name)
 
 
@@ -63,7 +68,7 @@ async def _preview_schema_mapping(
     db, user,
     connection: str, source_table: str, target_domain: str,
 ):
-    info = _get_connection_info(connection)
+    info = await _get_connection_info(db, connection)
     if info is None:
         return {"error": f"連接不存在: {connection!r}"}
 
@@ -144,7 +149,7 @@ async def _migrate_with_confirm(
         }
 
     # 3. 取總筆數
-    info = _get_connection_info(connection)
+    info = await _get_connection_info(db, connection)
     conn = get_connector(info["connector"], info["config"])
     sample = await conn.query(source_table, limit=1000)  # PoC 上限
     total_rows = len(sample)
@@ -243,7 +248,7 @@ async def _do_migration(
       • 走 service 層（create_part 會建 Inventory + emit event；create_supplier/customer 同理）
       • 不再在 errors > 10 時 break（避免靜默丟棄剩下 989 筆）
     """
-    info = _get_connection_info(connection)
+    info = await _get_connection_info(db, connection)
     if info is None:
         return {"error": "連接不存在（execute 階段）"}
 

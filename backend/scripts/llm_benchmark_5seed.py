@@ -338,7 +338,9 @@ def write_csv(agg: dict, path: Path) -> None:
 # ----------------------------------------------------------------------------
 
 async def run_seeds(seeds: list[int], label: str) -> dict:
-    user_info = {"employee_id": "bench", "username": "bench", "roles": ["admin"]}
+    # P0-1 fix：benchmark 是受信任研究工具，直接以 superuser persona 執行
+    user_info = {"employee_id": "bench", "username": "bench", "roles": ["admin"],
+                 "is_superuser": True, "permissions": ["*"]}
     per_seed: list[list[dict]] = []
 
     out_root = Path("benchmark_results") / f"{settings.LLM_PROVIDER}_5seed_{datetime.now().strftime('%Y%m%d_%H%M%S')}"

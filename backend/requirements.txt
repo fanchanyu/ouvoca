@@ -29,3 +29,7 @@ anthropic>=0.28.0
 # --- PDF / Excel (v3.36 文件列印 + 匯出) ---
 reportlab>=4.0.0       # 純 Python PDF 產生器，無系統相依
 openpyxl>=3.1.0        # Excel .xlsx 讀寫
+
+# --- v3.64 資安 / 現場作業 ---
+pyotp>=2.9.0           # MFA TOTP
+qrcode[pil]>=8.0       # 料件 QR 標籤（[pil] 確保 Pillow 一起安裝）

@@ -174,7 +174,8 @@ async def test_k4_slot_retry_three_strikes(seeded_client):
     import json
     from app.agents.engine import execute_tool, _SLOT_RETRY
     _SLOT_RETRY.clear()
-    user = {"user_id": "test-3strike"}
+    # P0-1 fix：slot-retry 測試聚焦 slot 邏輯，用受信任執行者 persona 通過 RBAC
+    user = {"user_id": "test-3strike", "is_superuser": True, "permissions": ["*"]}
 
     # 用一個有 required slot 的 tool（create_customer_with_confirm 之 name 必填）
     # 第 1, 2 次 should be needs_input

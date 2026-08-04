@@ -56,7 +56,8 @@ async def ablation_l4_confirmcard(out_dir: Path) -> dict:
     placeholder args passed validation. Without ConfirmCard, they would have
     written to the database.
     """
-    user = {"employee_id": "ablation", "username": "ablation", "roles": ["admin"]}
+    user = {"employee_id": "ablation", "username": "ablation", "roles": ["admin"],
+            "is_superuser": True, "permissions": ["*"]}
     hard_write_tools = list_tools(tier=RiskTier.HARD_WRITE)
 
     rows: list[dict] = []
@@ -153,7 +154,7 @@ async def ablation_l1_routing(out_dir: Path, seed: int = 1) -> dict:
     engine_mod.classify_intent = lambda message: "general"
 
     user_info = {"employee_id": "ablation", "username": "ablation",
-                 "roles": ["admin"]}
+                 "roles": ["admin"], "is_superuser": True, "permissions": ["*"]}
 
     async def _seeded_chat(messages, tools, _seed):
         async with httpx.AsyncClient(

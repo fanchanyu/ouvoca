@@ -29,5 +29,8 @@ register_agent(
         "list_mps", "list_mrp",
         # external DB (v3.1)
         "list_external_connections", "list_external_tables", "query_external_db",
+        "save_external_connection_with_confirm", "delete_external_connection_with_confirm",
+        # backup (v3.62)
+        "list_backups", "create_backup_with_confirm", "restore_backup_with_confirm",
     ],
 )

@@ -345,3 +345,50 @@ async def patch_so_endpoint(
     await db.commit()
     await db.refresh(so, attribute_names=["customer"])
     return SalesOrderResponse.model_validate(so)
+
+
+# ═══════════════════════════════════════════════════════════
+# v3.63 M3 — 退貨單（RMA）
+# ═══════════════════════════════════════════════════════════
+
+@router.post("/returns")
+async def create_return_note_endpoint(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("sales.return.create")),
+):
+    from app.services.m3_documents import create_return_note
+    note = await create_return_note(db, data, {"employee_id": user.employee_id})
+    return {"id": note.id, "return_no": note.return_no, "status": note.status}
+
+
+@router.get("/returns")
+async def list_return_notes_endpoint(
+    status: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("sales.return.read")),
+):
+    from app.services.m3_documents import list_return_notes
+    return await list_return_notes(db, status)
+
+
+@router.post("/returns/{return_id}/approve")
+async def approve_return_note_endpoint(
+    return_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("sales.return.approve")),
+):
+    from app.services.m3_documents import approve_return_note
+    note = await approve_return_note(db, return_id)
+    return {"id": note.id, "return_no": note.return_no, "status": note.status}
+
+
+@router.post("/returns/{return_id}/process")
+async def process_return_note_endpoint(
+    return_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: UserContext = Depends(require_permission("sales.return.process")),
+):
+    from app.services.m3_documents import process_return_note
+    note = await process_return_note(db, return_id, {"employee_id": user.employee_id})
+    return {"id": note.id, "return_no": note.return_no, "status": note.status}

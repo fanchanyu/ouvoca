@@ -21,6 +21,7 @@ log = get_logger(__name__)
 
 PUBLIC_PATHS = {
     "/", "/api/health", "/api/auth/login",
+    "/api/auth/mfa/verify",  # v3.64：MFA 第二步（登入延續），不需 token
     # Note: /api/auth/register is NOT public — handler enforces
     # require_permission("organization.user.read"). Listing it here
     # used to make register effectively unreachable (middleware skipped
@@ -82,6 +83,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 "username": payload.get("username"),
                 "roles": payload.get("roles", []),
                 "permissions": payload.get("permissions", []),
+                "ver": payload.get("ver", 0),  # v3.62：token 版本（改密碼後失效）
+                "mfa_pending": payload.get("mfa_pending", False),  # v3.66 P0-1：MFA 挑戰 token 標記
             }
         except JWTError as exc:
             log.info("JWT decode failed: %s", exc)

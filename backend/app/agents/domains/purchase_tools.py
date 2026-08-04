@@ -95,5 +95,11 @@ register_agent(
         "query_supplier", "query_purchase_order", "supplier_price_history",
         "query_inventory",
         "create_purchase_order_with_confirm",  # v3.2 hard-write
+        # v3.63 M3：請購 → 採購 → 收料
+        "create_pr_with_confirm", "convert_pr_to_po_with_confirm",
+        "receive_grn_with_confirm",
+        # v3.64 RFQ 詢價比價
+        "create_rfq_with_confirm", "receive_quote_with_confirm",
+        "compare_quotes", "award_rfq_with_confirm",
     ],
 )

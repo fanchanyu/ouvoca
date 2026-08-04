@@ -59,6 +59,36 @@ def _validate_ext(filename: str) -> None:
         )
 
 
+_MAGIC_BY_EXT: dict[str, tuple[bytes, int]] = {
+    ".pdf": (b"%PDF", 5),
+    ".png": (b"\x89PNG\r\n\x1a\n", 8),
+    ".jpg": (b"\xff\xd8\xff", 3),
+    ".jpeg": (b"\xff\xd8\xff", 3),
+    ".xlsx": (b"PK\x03\x04", 4),   # ZIP container（xlsx）
+    ".docx": (b"PK\x03\x04", 4),   # ZIP container（docx）
+    ".xls": (b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1", 8),  # OLE2
+}
+
+
+def _validate_content(filename: str, content: bytes) -> None:
+    """v3.62：magic bytes 內容驗證 — 防「.txt 改名 .pdf」之類偽裝。"""
+    ext = Path(filename).suffix.lower()
+    signature = _MAGIC_BY_EXT.get(ext)
+    if signature is not None:
+        magic, length = signature
+        if not content.startswith(magic):
+            raise HTTPException(
+                400,
+                f"檔案內容與副檔名 {ext} 不符（內容簽名檢查失敗），已拒絕上傳",
+            )
+    # 純文字檔（csv/txt）：拒絕可執行/腳本內容（HTML/script 偽裝）
+    if ext in (".csv", ".txt"):
+        sample = content[:4096].lower()
+        for danger in (b"<script", b"<html", b"javascript:", b"vbscript:", b"<?php"):
+            if danger in sample:
+                raise HTTPException(400, "檔案內容包含不允許的腳本標記，已拒絕上傳")
+
+
 # ── Schemas ─────────────────────────────────────────────────
 class AttachmentResponse(BaseModel):
     id: str
@@ -109,6 +139,13 @@ async def upload_file(
         raise HTTPException(413, f"檔案太大：{len(content) // 1024 // 1024} MB（上限 25 MB）")
     if len(content) == 0:
         raise HTTPException(400, "檔案為空")
+    _validate_content(safe_name, content)
+
+    # v3.64 病毒掃描（設定 AV_SCAN_URL 後啟用）
+    from app.services.av_scan import scan_bytes
+    av_result = await scan_bytes(content, safe_name)
+    if av_result and av_result.get("infected"):
+        raise HTTPException(400, f"檔案被偵測為病毒，已拒絕上傳：{av_result.get('virus_name') or 'unknown'}")
 
     # 算目錄：uploads/{tenant_id}/{yyyy-mm}/
     tenant_id = (user.tenant_id or "HQ") if hasattr(user, "tenant_id") else "HQ"

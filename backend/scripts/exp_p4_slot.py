@@ -43,7 +43,8 @@ from app.database import AsyncSessionLocal
 
 
 async def main() -> int:
-    user = {"employee_id": "p4", "username": "p4", "roles": ["admin"]}
+    user = {"employee_id": "p4", "username": "p4", "roles": ["admin"],
+            "is_superuser": True, "permissions": ["*"]}
     tools_with_required = [
         t for t in list_tools()
         if any(s.required for s in t.slots)

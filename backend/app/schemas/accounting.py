@@ -2,13 +2,31 @@ from datetime import datetime, timezone
 from typing import List, Literal, Optional
 from pydantic import BaseModel, Field, model_validator
 
+# 與 app.services.fs_defs.ACCOUNT_TYPES 同步（M1-1.4：補 cost/other_*/tax）
+ACCOUNT_TYPE_LITERAL = Literal[
+    "asset", "liability", "equity", "revenue", "cost", "expense",
+    "other_income", "other_expense", "tax",
+]
+
 
 class AccountCreate(BaseModel):
     code: str = Field(..., min_length=1)
     name: str = Field(..., min_length=1)
-    account_type: Literal["asset", "liability", "equity", "revenue", "expense"]
+    account_type: ACCOUNT_TYPE_LITERAL
     parent_id: Optional[str] = None
     is_debit_normal: bool = True
+    # v006 (M1)：三大報表行（值域白名單在 service 層驗證）
+    fs_line: Optional[str] = None
+
+
+class AccountUpdate(BaseModel):
+    code: Optional[str] = None
+    name: Optional[str] = None
+    account_type: Optional[ACCOUNT_TYPE_LITERAL] = None
+    parent_id: Optional[str] = None
+    is_debit_normal: Optional[bool] = None
+    fs_line: Optional[str] = None
+    is_active: Optional[bool] = None
 
 
 class AccountResponse(BaseModel):
@@ -18,6 +36,8 @@ class AccountResponse(BaseModel):
     account_type: str
     is_debit_normal: bool
     is_active: bool
+    fs_line: Optional[str] = None
+    is_system: bool = False
 
     class Config:
         from_attributes = True

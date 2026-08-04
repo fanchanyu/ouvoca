@@ -169,6 +169,10 @@ async def test_create_po_with_confirm_emits_card(db, demo_user):
     from app.models.inventory import Part
 
     # 準備 supplier + part
+    from app.models.purchase import PurchaseOrder
+    from sqlalchemy import select as _select
+    # 共享測試 DB 可能有其它測試建的 PO → 記錄 call 前筆數，比對「沒新增」
+    po_count_before = len((await db.execute(_select(PurchaseOrder))).scalars().all())
     sup = Supplier(
         id=str(uuid.uuid4()), code="SUP-001", name="長江五金",
         tier="T2", is_approved=True,
@@ -198,9 +202,8 @@ async def test_create_po_with_confirm_emits_card(db, demo_user):
     assert card_data["risk_tier"] == "hard-write"
 
     # 此時 DB 還沒有 PO（因為要點確認才執行）
-    from app.models.purchase import PurchaseOrder
-    pos = (await db.execute(__import__("sqlalchemy").select(PurchaseOrder))).scalars().all()
-    assert len(pos) == 0, "Tool 不應該在出卡時就建 PO"
+    pos = (await db.execute(_select(PurchaseOrder))).scalars().all()
+    assert len(pos) == po_count_before, "Tool 不應該在出卡時就建 PO"
 
     # 確認卡有 stash 在 pending
     card = await peek_card(card_data["id"])

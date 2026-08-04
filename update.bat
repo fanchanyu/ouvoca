@@ -225,6 +225,15 @@ if exist backend\alembic.ini (
         ) else (
             echo   OK 資料庫結構已升級
         )
+        REM 健檢 #5：升級後必須重跑權限 seed —
+        REM 新權限碼（RFQ/GRN/追溯/備份/財報等）要靠 seed 展開到角色，
+        REM 否則非 superuser 帳號對新功能全部 403。
+        "venv\Scripts\python.exe" -m scripts.seed_permissions >nul 2>&1
+        if errorlevel 1 (
+            echo   WARN 權限 seed 失敗（請手動執行 python -m scripts.seed_permissions）
+        ) else (
+            echo   OK 權限已同步（新功能角色授權完成）
+        )
         popd
     )
 )

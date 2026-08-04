@@ -136,11 +136,61 @@ async def lifespan(app: FastAPI):
 
     gc_task = _asyncio.create_task(_confirm_card_gc_loop(), name="confirm-card-gc")
 
+    # v3.62：排程備份（審計 P1-7）— 依 system_settings 的
+    # backup.enabled / backup.schedule（HH:MM）/ backup.retention_days 執行。
+    async def _backup_scheduler():
+        from app.services.system_settings import get_setting
+        from app.services import backup as _backup
+
+        while True:
+            try:
+                from app.database import AsyncSessionLocal as _SessionLocal
+                async with _SessionLocal() as _sess:
+                    enabled = bool(await get_setting(_sess, "backup.enabled", True))
+                if enabled:
+                    async with _SessionLocal() as _sess:
+                        schedule = str(await get_setting(_sess, "backup.schedule", "03:00") or "03:00")
+                        retention = int(await get_setting(_sess, "backup.retention_days", 30) or 30)
+                    from datetime import datetime as _dt
+                    hh, mm = (schedule.split(":") + ["00"])[:2]
+                    target = _dt.now().replace(
+                        hour=int(hh), minute=int(mm), second=0, microsecond=0,
+                    )
+                    if target <= _dt.now():
+                        # 健檢 #16：用 timedelta 而非 replace(day+1) —
+                        # 後者每逢月底會 ValueError（如 8/31 → day 32）
+                        from datetime import timedelta as _td
+                        target = target + _td(days=1)
+                    wait_seconds = (target - _dt.now()).total_seconds()
+                    await _asyncio.sleep(min(wait_seconds, 3600))  # 每小時檢查一次
+                    # 到達排程時間視窗（±5 分鐘）才執行
+                    if abs((target - _dt.now()).total_seconds()) < 300:
+                        async with _SessionLocal() as _sess:
+                            await _backup.create_backup(_sess, reason="scheduled")
+                        removed = _backup.cleanup_old_backups(retention)
+                        if removed:
+                            log.info("Backup retention cleaned %d old backup(s)", removed)
+                        await _asyncio.sleep(60)  # 執行後休息避免重複觸發
+                else:
+                    await _asyncio.sleep(3600)
+            except _asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                log.warning("Backup scheduler error: %s", exc)
+                await _asyncio.sleep(3600)
+
+    backup_task = _asyncio.create_task(_backup_scheduler(), name="backup-scheduler")
+
     yield
 
     gc_task.cancel()
     try:
         await gc_task
+    except _asyncio.CancelledError:
+        pass
+    backup_task.cancel()
+    try:
+        await backup_task
     except _asyncio.CancelledError:
         pass
     log.info("Shutting down %s", settings.APP_NAME)
@@ -176,16 +226,8 @@ async def _rate_limit_handler(request, exc):
 
 app.add_middleware(SlowAPIMiddleware)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 # Middleware execution order in Starlette is LIFO: last added runs first.
-# Outermost (first to run) → SecurityHeaders → RequestID → Auth → Audit → handler.
-# add 順序：Audit → Auth → RequestID → SecurityHeaders（最後加 = 最先跑 = 最外層）
+# 外層（最先跑）→ CORS → SecurityHeaders → RequestID → Auth → AiRateLimit → Audit → handler
 app.add_middleware(AuditMiddleware)
 # v3.42 R4：per-user AI 用量限制（每人每日 N 次）
 from app.core.ai_rate_limit import AiRateLimitMiddleware
@@ -193,6 +235,15 @@ app.add_middleware(AiRateLimitMiddleware)
 app.add_middleware(AuthMiddleware)
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
+# 健檢 #10：CORS 必須是最外層 — 預檢 OPTIONS 不帶 Authorization，
+# 若 CORS 在 Auth 內層，跨網域請求會被 Auth 401 且無 CORS header，瀏覽器全擋。
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # --- routers ---
@@ -204,6 +255,9 @@ from app.api import (
     approval, policy,
     print_export,  # v3.36 PDF 列印 + CSV/Excel 匯出
     chat_feedback,  # v3.41 P7 chat thumbs up/down
+    external_connections,  # v3.60 G-510 外部 DB 連接管理
+    system_settings,  # M1-3 系統組態
+    backups,  # v3.62 備份管理
 )
 
 app.include_router(chat.router)
@@ -235,6 +289,9 @@ app.include_router(policy.router)
 app.include_router(print_export.print_router)
 app.include_router(print_export.export_router)
 app.include_router(chat_feedback.router)
+app.include_router(external_connections.router)
+app.include_router(system_settings.router)
+app.include_router(backups.router)
 
 
 @app.get("/")

@@ -201,7 +201,7 @@ async def test_m5_engine_blocks_hard_write_when_frozen(seeded_client):
         # 嘗試執行 hard-write tool（用 set_company_info）→ 應被攔截
         result = await execute_tool(
             "set_company_info_with_confirm",
-            {"name": "X"}, db=db, user={"user_id": "u-test"},
+            {"name": "X"}, db=db, user={"user_id": "u-test", "is_superuser": True, "permissions": ["*"]},
         )
         parsed = json.loads(result)
         assert parsed.get("frozen") is True, f"應被凍結攔截：{parsed}"
@@ -209,7 +209,7 @@ async def test_m5_engine_blocks_hard_write_when_frozen(seeded_client):
         # toggle_hard_write_freeze_with_confirm 本身不應被攔
         result2 = await execute_tool(
             "toggle_hard_write_freeze_with_confirm",
-            {"action": "unfreeze"}, db=db, user={"user_id": "u-test"},
+            {"action": "unfreeze"}, db=db, user={"user_id": "u-test", "is_superuser": True, "permissions": ["*"]},
         )
         parsed2 = json.loads(result2)
         assert parsed2.get("frozen") is not True, "解凍工具不應被攔"

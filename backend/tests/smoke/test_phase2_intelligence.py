@@ -40,7 +40,16 @@ async def db(client):
 
 @pytest.fixture
 def demo_user():
-    return {"employee_id": "emp-phase2-001", "username": "tester", "roles": ["admin"]}
+    # P0-1 fix：直接呼叫 execute_tool 的測試用「受信任執行者」persona，
+    # 避免被新的 tool 級 RBAC 誤擋（正式 API 路徑由 load_user_context 提供真實權限）。
+    return {
+        "employee_id": "emp-phase2-001",
+        "username": "tester",
+        "roles": ["admin"],
+        "user_id": "phase2-test-user",
+        "is_superuser": True,
+        "permissions": ["*"],
+    }
 
 
 # ============================================================

@@ -30,6 +30,52 @@ from reportlab.platypus import (
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+
+# v3.64：料件標籤（QR 條碼）列印
+def render_part_label_pdf(part_no: str, name: str = "", qty: str = "") -> bytes:
+    """產生一張 60×40mm 的料件標籤 PDF（料號 + 名稱 + QR code）。
+
+    現場可用標籤機/一般印表機印出，貼到料架/容器/半成品上。
+    """
+    import qrcode
+    from PIL import Image
+    from reportlab.lib.utils import ImageReader
+
+    buf = io.BytesIO()
+    # 健檢 #9：60mm × 40mm = 170pt × 113pt（reportlab 的 mm 單位）
+    from reportlab.lib.units import mm
+    c = canvas.Canvas(buf, pagesize=(60 * mm, 40 * mm))
+    c.setTitle(f"Label-{part_no}")
+
+    # 料號（大字）
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(8, 88, (part_no or "N/A")[:32])
+    # 名稱
+    c.setFont("Helvetica", 8)
+    c.drawString(8, 78, (name or "")[:40])
+    # 數量
+    if qty:
+        c.setFont("Helvetica", 8)
+        c.drawString(8, 68, f"QTY: {qty}")
+
+    # QR（內容 = part_no，方便條碼槍直接掃）
+    qr = qrcode.QRCode(border=1, box_size=2)
+    qr.add_data(part_no or "N/A")
+    qr.make(fit=True)
+    img: Image.Image = qr.make_image(fill_color="black", back_color="white")
+    img_buf = io.BytesIO()
+    img.save(img_buf, format="PNG")
+    img_buf.seek(0)
+    # 健檢殘留 #1：畫布 170.08×113.39pt，QR x=108..163、y=30..85 不超框
+    c.drawImage(ImageReader(img_buf), 108, 30, width=55, height=55)
+
+    # 邊框
+    c.setStrokeColor(colors.black)
+    c.rect(2, 2, 166, 109)
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -305,6 +351,106 @@ async def generate_quotation_pdf(
     # 簽章區
     story.append(_signature_block(s))
 
+    doc.build(story)
+    return buf.getvalue()
+
+
+# ─── v3.67 Turnkey P0-4：檢驗報告 / 盤點表 PDF ─────────────
+
+async def generate_inspection_pdf(db, inspection_id: str) -> bytes:
+    """檢驗報告 PDF（Turnkey 表單 #7）。"""
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+    from app.models.quality import InspectionOrder
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+
+    insp = (await db.execute(
+        select(InspectionOrder)
+        .options(selectinload(InspectionOrder.results), selectinload(InspectionOrder.part))
+        .where(InspectionOrder.id == inspection_id)
+    )).scalar_one_or_none()
+    if insp is None:
+        raise ValueError(f"檢驗單不存在: {inspection_id}")
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4)
+    styles = getSampleStyleSheet()
+    story = [
+        Paragraph("檢驗報告 / Inspection Report", styles["Title"]),
+        Paragraph(f"檢驗單號：{insp.inspection_no}　料件：{insp.part.part_no if insp.part else '-'} "
+                  f"（{insp.part.name if insp.part else ''}）", styles["Normal"]),
+        Paragraph(f"狀態：{insp.status}　抽樣計畫：{insp.sampling_plan or '-'}　"
+                  f"檢驗日期：{insp.inspected_at.isoformat() if insp.inspected_at else '-'}", styles["Normal"]),
+        Paragraph(f"檢驗數：{insp.inspected_qty:g}　合格：{insp.accepted_qty:g}　不合格：{insp.rejected_qty:g}",
+                  styles["Normal"]),
+    ]
+    data = [["項次", "檢驗特性", "規格", "量測值", "結果"]]
+    for i, r in enumerate(insp.results, 1):
+        data.append([str(i), r.characteristic, r.specification or "",
+                     r.measured_value or "", "✅ 合格" if r.result == "pass" else "❌ 不合格"])
+    if len(data) == 1:
+        data.append(["—", "無檢驗項目", "", "", ""])
+    table = Table(data, colWidths=[40, 180, 120, 120, 80])
+    table.setStyle(TableStyle([
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+    ]))
+    story.append(table)
+    doc.build(story)
+    return buf.getvalue()
+
+
+async def generate_stock_count_pdf(db, stock_count_id: str) -> bytes:
+    """盤點表 PDF（Turnkey 表單 #8）。"""
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+    from app.models.stock_count import StockCount, StockCountItem
+    from app.models.inventory import Part
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+
+    sc = (await db.execute(
+        select(StockCount)
+        .options(selectinload(StockCount.items))
+        .where(StockCount.id == stock_count_id)
+    )).scalar_one_or_none()
+    if sc is None:
+        raise ValueError(f"盤點單不存在: {stock_count_id}")
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4)
+    styles = getSampleStyleSheet()
+    story = [
+        Paragraph("盤點表 / Stock Count Sheet", styles["Title"]),
+        Paragraph(f"盤點單號：{sc.count_no}　日期：{sc.count_date.isoformat() if sc.count_date else '-'}　"
+                  f"範圍：{sc.scope}　狀態：{sc.status}", styles["Normal"]),
+    ]
+    items = (await db.execute(
+        select(StockCountItem, Part.part_no, Part.name)
+        .join(Part, Part.id == StockCountItem.part_id)
+        .where(StockCountItem.count_id == sc.id)
+        .order_by(StockCountItem.sequence_no)
+    )).all()
+    data = [["項次", "料號", "料名", "帳面數", "實盤數", "差異", "備註"]]
+    for i, (item, part_no, part_name) in enumerate(items, 1):
+        data.append([
+            str(i), part_no, part_name,
+            f"{item.book_qty:g}",
+            f"{item.counted_qty:g}" if item.counted_qty is not None else "—",
+            f"{item.variance:g}",
+            item.notes or "",
+        ])
+    if len(data) == 1:
+        data.append(["—", "無盤點項目", "", "", "", "", ""])
+    table = Table(data, colWidths=[40, 90, 130, 70, 70, 70, 90])
+    table.setStyle(TableStyle([
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+    ]))
+    story.append(table)
     doc.build(story)
     return buf.getvalue()
 

@@ -15,6 +15,14 @@ from app.config import settings  # noqa: E402
 from app.core.base import Base   # noqa: E402
 import app.models                # noqa: F401, E402  populate metadata
 
+# v3.60：與 app.database 相同的 uvloop policy —
+# 否則 aiosqlite 在部分容器/沙箱環境的 selector loop 下會 hang。
+try:
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except Exception:  # pragma: no cover
+    pass
+
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

@@ -118,7 +118,8 @@ def _has_token(parsed: dict) -> bool:
 # ----------------------------------------------------------------------------
 
 async def main() -> int:
-    user = {"employee_id": "audit", "username": "audit", "roles": ["admin"]}
+    user = {"employee_id": "audit", "username": "audit", "roles": ["admin"],
+            "is_superuser": True, "permissions": ["*"]}
     rows: list[dict] = []
 
     hard_write_tools = [t for t in list_tools(tier=RiskTier.HARD_WRITE)]

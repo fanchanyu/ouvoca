@@ -3,9 +3,10 @@ from datetime import datetime
 from sqlalchemy import Column, String, Text, Float, Integer, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from app.core.base import Base
+from app.models._mixins import TenantMixin
 
 
-class ReorderRule(Base):
+class ReorderRule(Base, TenantMixin):
     __tablename__ = "reorder_rules"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -24,7 +25,7 @@ class ReorderRule(Base):
     preferred_supplier = relationship("Supplier")
 
 
-class ReplenishSuggestion(Base):
+class ReplenishSuggestion(Base, TenantMixin):
     __tablename__ = "replenish_suggestions"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
