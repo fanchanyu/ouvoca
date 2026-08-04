@@ -5,7 +5,7 @@
 > 打一句話：**「跟長江廠下 100 個 M6 螺絲，交期下週五」**
 > → AI 幫你把採購單開好，跳出確認卡讓你按「確認」才真的送出。
 >
-> 給 **20–100 人的台灣中小製造廠**。不用學系統、不用教育訓練、雙擊安裝。
+> 給 **50–100 人的台灣中小製造廠**。不用學系統、不用教育訓練、雙擊安裝。
 > **同時在線 20 人以內，整套完全免費。**
 
 [![CI](https://github.com/fanchanyu/ouvoca/actions/workflows/ci.yml/badge.svg)](https://github.com/fanchanyu/ouvoca/actions/workflows/ci.yml)
@@ -18,7 +18,7 @@
 
 | 你是誰 | 你要的 | 點這裡 |
 |---|---|---|
-| 👔 **老闆 / 採購 / 業務 / 倉管** | 我要裝起來用，不會寫程式 | 👉 [**5 分鐘安裝**](#-5-分鐘安裝) |
+| 👔 **老闆 / 採購 / 業務 / 倉管** | 我要裝起來用，不會寫程式 | 👉 [**5 分鐘安裝**](#-5-分鐘安裝電腦小白模式) |
 | 🧐 **還在評估要不要用** | 這東西能幹嘛、要多少錢 | 👉 [**功能總覽**](#-功能總覽) · [**三軌授權**](#️-三軌授權20-人以內免費) |
 | 🆘 **裝失敗了** | 錯誤訊息怎麼解 | 👉 [**安裝排錯指南**](./docs/INSTALL_TROUBLESHOOTING_ZH.md) |
 | 👨‍💻 **工程師 / IT** | 看程式碼、跑測試、送 PR | 👉 [**開發者快速上手**](#-開發者快速上手) |
@@ -118,7 +118,7 @@ Step 3️⃣  等 10–20 分鐘 → 瀏覽器自動打開 → 登入 admin / ad
 | 顯示卡 | ❌ 不需要 | ❌ 不需要（AI 走雲端 API） |
 | 網路 | 安裝時需要 | 日常使用**不需要**（除非開 AI 對話） |
 
-下載量：Python ~26MB + Node ~30MB + 套件 ~500MB ≒ **約 750MB**，全部在專案資料夾內。
+下載量約 **556MB**（Python ~26MB + Node ~30MB + 套件 ~500MB）；解壓安裝後磁碟佔用約 **750MB**，全部在專案資料夾內。
 10 Mbps 的網路大約 10 分鐘裝完。
 
 📋 **安裝程式到底從哪裡下載了什麼、各自是什麼授權** → [`THIRD_PARTY_DOWNLOADS_ZH.md`](./docs/THIRD_PARTY_DOWNLOADS_ZH.md)
@@ -133,7 +133,7 @@ Step 3️⃣  等 10–20 分鐘 → 瀏覽器自動打開 → 登入 admin / ad
 ```text
 1️⃣ 改密碼      → 在 AI 助手講：「改密碼，我的新密碼是 MyN3wP@ss」
 2️⃣ 設公司資料  → 「公司叫 長江精密股份有限公司 統編 12345678 地址 台北市…」（PDF 上會印）
-3️⃣ 載示範資料  → 「載入示範資料」（5 客戶 / 3 供應商 / 10 料件，玩完可一鍵清除）
+3️⃣ 載示範資料  → 「載入示範資料」（3 客戶 / 3 供應商 / 5 料件 + 1 訂單 + 1 採購單，玩完可一鍵清除）
 4️⃣ 試一句業務  → 「印 SO-001」「匯出客戶清單 Excel」「今天有什麼要注意的？」
 ```
 
@@ -273,7 +273,7 @@ bash scripts/run_gates.sh
 | 桌機 UI | http://localhost:5173 | 登入 `admin / admin123` |
 | API 文件 | http://localhost:8000/docs | OpenAPI / Swagger |
 | War Room | http://localhost:8080 | 即時事件儀表板（SSE） |
-| 分廠節點 | http://localhost:8001/api/factory/health | MESH 節點健康檢查 |
+| 分廠節點 | http://localhost:8001/api/health | MESH 節點健康檢查（`/api/factory/*` 只有 register/list/aggregate） |
 
 **技術堆疊**：FastAPI + SQLAlchemy 2 async + Alembic ｜ React 18 + Vite + Tailwind ｜
 SQLite（開發）/ PostgreSQL（正式）｜ LLM 預設 DeepSeek，可換 OpenAI / Anthropic / Ollama。

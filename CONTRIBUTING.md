@@ -40,7 +40,7 @@ git checkout -b feat/my-thing
 ### Step 3 · 跑自證閘 → commit -s → PR
 
 ```bash
-# 7 道 gate 全綠才能 PR（CI 也會跑一次）
+# 4 道 gate 全綠才能 PR（CI 也會跑一次）
 bash scripts/run_gates.sh
 
 # 一定要加 -s（Signed-off-by → CLA 簽署）
@@ -135,7 +135,7 @@ python -m pytest -k test_update_part   # 跑特定 test
 
 CI（[`.github/workflows/ci.yml`](./.github/workflows/ci.yml)）會跑：
 
-1. ✅ 7 道 self-verification gates
+1. ✅ 4 道 self-verification gates
 2. ✅ Pytest 全套
 3. ✅ Frontend `tsc --noEmit`
 4. ✅ CLA / DCO check（Signed-off-by trailer）

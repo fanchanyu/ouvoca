@@ -147,7 +147,7 @@ not need Docker, Python, or Node installed beforehand.
 | Update to a new version | `update.bat` — backs up your data, pulls, migrates, restarts |
 | Uninstall completely | `uninstall_easy.bat` — also cleans Windows registry entries |
 
-**Disk:** ~750 MB total (Python ~26 MB + Node ~30 MB + packages ~500 MB), all inside the project
+**Download:** ~556 MB (Python ~26 MB + Node ~30 MB + packages ~500 MB). **Disk after install:** ~750 MB, all inside the project
 folder. **Time:** roughly 10 minutes on a 10 Mbps connection.
 
 > ⚠️ **Antivirus software may flag the silent Python installer.** Whitelist the folder or disable
@@ -397,7 +397,7 @@ ouvoca/
 │   ├── alembic/          v001 → v016 migrations
 │   └── tests/            883 tests
 ├── frontend-desktop/     React 18 + Vite + Tailwind · 17 pages
-├── docs/                 97 markdown docs · 74 bilingual PDFs
+├── docs/                101 markdown docs · 74 bilingual PDFs
 └── scripts/              gates, PDF builder, release tooling
 ```
 

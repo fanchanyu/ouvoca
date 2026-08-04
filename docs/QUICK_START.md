@@ -167,4 +167,4 @@ Without an API key, the system still runs — only the AI chat shows a friendly 
 | 沒有 Docker / No Docker | Local dev: `cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload` |
 | 中文亂碼 / Chinese garbled | Browser font must support CJK (Chrome/Edge are fine) |
 
-[完整疑難排解](./USER_MANUAL_ZH.md#9-疑難排解) · [Full Troubleshooting](./USER_MANUAL_EN.md#9-troubleshooting)
+[完整疑難排解](./USER_MANUAL_ZH.md#11-疑難排解) · [Full Troubleshooting](./USER_MANUAL_EN.md#11-troubleshooting)

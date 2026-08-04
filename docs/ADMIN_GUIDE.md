@@ -176,7 +176,7 @@ asyncio.run(q())
 
 3. 確認 HQ 看得到：
    ```bash
-   curl http://localhost:8004/api/factory/health
+   curl http://localhost:8004/api/health
    ```
 
 ### 4.2 外協廠加入

@@ -3,7 +3,7 @@
 > **版本基準**：發布版 **v3.70**（git tag）／程式版 **3.70.0**（`backend/app/config.py` 與 `frontend-desktop/package.json`）
 > 兩個數字並存是刻意的，原因見 [`CHANGELOG_ZH.md`](./CHANGELOG_ZH.md)。
 > **本索引校對日期**：2026-08-04
-> **這裡有什麼**：`docs/` 底下 **99 份說明文件**（不含本索引）+ 74 份 PDF + 4 張架構圖 + 實測逐字稿
+> **這裡有什麼**：`docs/` 底下 **100 份說明文件**（不含本索引）+ 74 份 PDF + 4 張架構圖 + 實測逐字稿
 
 **不知道要看哪一份？** 直接跳到 👉 [我想做 X，要看哪一份？](#-我想做-x要看哪一份)
 
@@ -143,7 +143,7 @@ API 的權威來源是後端啟動後的 <http://localhost:8000/docs>（自動�
 | 2️⃣ | <http://localhost:8000/docs> | **API 的權威來源**（自動產生）；概覽再看 [`API_REFERENCE.md`](./API_REFERENCE.md) |
 | 3️⃣ | [`DEVELOPMENT_SOP.md`](./DEVELOPMENT_SOP.md) | 「新增一個 domain / tool / API」的標準步驟 |
 
-**想懂為什麼這樣設計**：[`ARCHITECTURE_DECISIONS.md`](./ARCHITECTURE_DECISIONS.md)（13 條 ADR，記錄取捨理由）
+**想懂為什麼這樣設計**：[`ARCHITECTURE_DECISIONS.md`](./ARCHITECTURE_DECISIONS.md)（14 條 ADR，記錄取捨理由）
 **想懂演算法**：[§05 設計規格](#05-設計規格-design-specs)（MRP、TOC、需求預測、Throughput Accounting 全套方法論）
 **要發 PR**：[`../CONTRIBUTING.md`](../CONTRIBUTING.md) → [`../CLA.md`](../CLA.md) → [`../CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md)
 
@@ -190,7 +190,7 @@ These have **no English twin at all**. Use machine translation, or ask us.
 
 ## 📖 完整文件清單
 
-> 這一區收錄 `docs/` 底下**全部 99 份文件**，每份只列一次。上面的讀者導覽只是捷徑。
+> 這一區收錄 `docs/` 底下**全部 100 份文件**，每份只列一次。上面的讀者導覽只是捷徑。
 
 ### 01. 安裝與上手 Install & Onboarding
 
@@ -202,7 +202,6 @@ These have **no English twin at all**. Use machine translation, or ask us.
 | **申請 LLM API Key** — 讓 AI 真的會回話的最後一步 | 裝完但 AI 沒反應 | [`HOW_TO_GET_LLM_API_KEY_ZH.md`](./HOW_TO_GET_LLM_API_KEY_ZH.md) | [`HOW_TO_GET_LLM_API_KEY_EN.md`](./HOW_TO_GET_LLM_API_KEY_EN.md) | 🟢 |
 | **第三方下載揭露** — 安裝腳本會從哪裡下載什麼、各自授權 | 資安要求要盤點來源 | [`THIRD_PARTY_DOWNLOADS_ZH.md`](./THIRD_PARTY_DOWNLOADS_ZH.md) | [`THIRD_PARTY_DOWNLOADS_EN.md`](./THIRD_PARTY_DOWNLOADS_EN.md) | 🟢 |
 
-> ⚠️ `QUICK_START` / `INSTALLATION_*` / `THIRD_PARTY_DOWNLOADS_*` 內的指令仍寫舊資料夾名 `opnetest`，**請自行改成 `ouvoca`**。
 
 ### 02. 日常使用 Daily Use
 
@@ -323,7 +322,7 @@ These have **no English twin at all**. Use machine translation, or ask us.
 | **程式碼自查報告** — 2026-05-14 的跨檔案靜態審查 | 追歷史 | [`CODE_REVIEW_REPORT.md`](./CODE_REVIEW_REPORT.md) | ❌ 無英文版 | 📦 |
 | **實測逐字稿** — AI 對話 demo、CRUD 全流程、DeepSeek E2E 九大場景 | 想看真實對話長什麼樣 | [`demos/`](./demos/) 共 4 份 | — | 📦 |
 
-> 📦 `CODE_REVIEW_REPORT.md` 的範圍仍寫舊專案名 `opnetest/`，統計數字與 v3.65 之後的健檢修復無法對應，僅作歷史快照。
+> 📦 `CODE_REVIEW_REPORT.md` 的統計數字停在 v3.65 之前，與後續健檢修復無法對應，僅作歷史快照。
 > 📦 `demos/deepseek_e2e_latest.md` 與 `demos/deepseek_e2e_20260515_1939.md` 內容完全相同（同一份存兩次）。
 
 ### 09. 內部工程文件 Internal（客戶不需閱讀）
@@ -394,15 +393,11 @@ These have **no English twin at all**. Use machine translation, or ask us.
 
 **只要動到金流、稅務、個資、資安**，就必須新增或更新對應的法律聲明。
 
-### 已知斷鏈（尚未修復）
+### 連結健康度
 
 | 位置 | 問題 | 應改為 |
 |---|---|---|
-| `ADMIN_GUIDE.md` · `NETWORK_DEPLOYMENT_ZH/EN.md` · `QUICK_START.md` | 連到 `./DEPLOYMENT.md`（檔案其實在 repo 根目錄） | `../DEPLOYMENT.md` |
-| `API_REFERENCE.md` · 根 `README.md` | 連到 `docs/WORKLOG.md`，但該檔已列入 `.gitignore`（GitHub 上不存在，讀者一點就 404） | 改指 [`CHANGELOG_ZH.md`](./CHANGELOG_ZH.md) |
-| `CONVERSATIONAL_PLANNING_DESIGN_ZH.md` | 連到 `./CLAUDE.md`（repo 內不存在） | 移除該連結 |
-| `QUICK_START.md` | 錨點寫 `#9-疑難排解`，但疑難排解其實是 §11 | `#11-疑難排解` / `#11-troubleshooting` |
-| `mobile-evidence/README.md` | 指向已移除的 `frontend-mobile/` | 刪除該資料夾 |
+| — | 全庫 697 個相對連結已於 2026-08-04 逐一驗證，**目前 0 斷鏈** | — |
 
 建議在 `.github/workflows/` 加一支 Markdown 連結檢查，避免重複發生。
 
