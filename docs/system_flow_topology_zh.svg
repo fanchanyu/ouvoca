@@ -55,7 +55,7 @@
 
   <!-- Title -->
   <text x="800" y="42" font-size="28" font-weight="700" fill="#0f172a" text-anchor="middle">
-    LLM-ERP 系統架構流程關聯拓樸圖
+    Ouvoca 系統架構流程關聯拓樸圖
   </text>
   <text x="800" y="66" font-size="13" fill="#64748b" text-anchor="middle">
     AI 原生小型製造業 ERP · Multi-Agent · MESH 多廠協同

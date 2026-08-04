@@ -1,4 +1,4 @@
-# LLM-ERP System Architecture Blueprint (English) — v3.0
+# Ouvoca System Architecture Blueprint (English) — v3.0
 
 > **For IT directors / system architects / security consultants**
 > From 1 to 1000 customers — how does this system grow?

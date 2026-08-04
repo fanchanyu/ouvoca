@@ -375,5 +375,5 @@ async with httpx.AsyncClient() as client:
 
 ## 13. 變更通知
 
-API 重大變更會在 [WORKLOG.md](./WORKLOG.md) 註明。
+API 重大變更會在 [CHANGELOG_ZH.md](./CHANGELOG_ZH.md) 註明。
 v2.x 內保證 backward compatible，v3.0 可能有 breaking changes（屆時提早 30 天公告）。

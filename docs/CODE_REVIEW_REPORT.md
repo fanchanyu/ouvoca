@@ -2,7 +2,7 @@
 
 > **時間**：2026-05-14
 > **檢查視角**：頂尖程式設計師 + 系統分析架構師
-> **範圍**：整個 opnetest/ 程式碼基底
+> **範圍**：整個 ouvoca/ 程式碼基底
 > **方法**：跨檔案靜態審查 + 模式比對 + 商業情境驗證
 >
 > **A self-review from the perspective of a senior software engineer + systems architect, against business scenarios.**

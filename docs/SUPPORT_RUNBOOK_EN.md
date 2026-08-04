@@ -1,4 +1,4 @@
-# LLM-ERP Support Runbook (English) — v3.0
+# Ouvoca Support Runbook (English) — v3.0
 
 > **What to do when things break — for customer IT or our support staff**
 > Designed so you can self-resolve 90% by following this; only the last 10% needs us.
@@ -271,7 +271,7 @@ LINE_TOKEN=$YOUR_LINE_NOTIFY_TOKEN
 if [ "$(echo $HEALTH | jq -r .status)" != "ok" ]; then
     curl -X POST https://notify-api.line.me/api/notify \
          -H "Authorization: Bearer $LINE_TOKEN" \
-         -d "message=⚠️ LLM-ERP health check failed: $HEALTH"
+         -d "message=⚠️ Ouvoca health check failed: $HEALTH"
 fi
 ```
 

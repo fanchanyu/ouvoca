@@ -12,7 +12,7 @@ from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 class Settings(BaseSettings):
     # --- app ---
     APP_NAME: str = "Ouvoca"
-    APP_VERSION: str = "3.69.0"  # v3.70：與實際版本統一（原本 2.0.0 過時）
+    APP_VERSION: str = "3.70.0"  # 與 git tag v3.70 一致（原本 2.0.0 過時）
     DEBUG: bool = False
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     LOG_JSON: bool = False

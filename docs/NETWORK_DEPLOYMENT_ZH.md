@@ -439,11 +439,11 @@ factory-a:
 
 ```bash
 #!/bin/bash
-# LLM-ERP 一鍵啟動腳本
+# Ouvoca 一鍵啟動腳本
 
 set -e
 
-echo "🚀 LLM-ERP 一鍵啟動..."
+echo "🚀 Ouvoca 一鍵啟動..."
 
 # 1. 檢查 Docker
 if ! command -v docker &> /dev/null; then
@@ -513,7 +513,7 @@ echo "   登入：admin / admin123"
 
 - [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) - 系統架構拓樸圖
 - [ADMIN_GUIDE.md](./ADMIN_GUIDE.md) - 管理員指南
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - 完整部署指南
+- [DEPLOYMENT.md](../DEPLOYMENT.md) - 完整部署指南
 - [USER_MANUAL_ZH.md](./USER_MANUAL_ZH.md) - 使用者操作手冊
 
 ---

@@ -1,4 +1,4 @@
-# LLM-ERP 支援運維手冊（繁體中文）— v3.0
+# Ouvoca 支援運維手冊（繁體中文）— v3.0
 
 > **出狀況怎麼辦 — 給客戶 IT 或我們客服**
 > 設計：照著做就能 90% 自救，剩下 10% 才需要找原廠。
@@ -272,7 +272,7 @@ LINE_TOKEN=$YOUR_LINE_NOTIFY_TOKEN
 if [ "$(echo $HEALTH | jq -r .status)" != "ok" ]; then
     curl -X POST https://notify-api.line.me/api/notify \
          -H "Authorization: Bearer $LINE_TOKEN" \
-         -d "message=⚠️ LLM-ERP 健康檢查失敗：$HEALTH"
+         -d "message=⚠️ Ouvoca 健康檢查失敗：$HEALTH"
 fi
 ```
 

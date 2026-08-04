@@ -437,11 +437,11 @@ Save as `start.sh`:
 
 ```bash
 #!/bin/bash
-# LLM-ERP one-click start script
+# Ouvoca one-click start script
 
 set -e
 
-echo "🚀 Starting LLM-ERP..."
+echo "🚀 Starting Ouvoca..."
 
 # 1. Check Docker
 if ! command -v docker &> /dev/null; then
@@ -511,7 +511,7 @@ Run: `chmod +x start.sh && ./start.sh`
 
 - [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) - System topology
 - [ADMIN_GUIDE.md](./ADMIN_GUIDE.md) - Admin guide
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Full deployment
+- [DEPLOYMENT.md](../DEPLOYMENT.md) - Full deployment
 - [USER_MANUAL_EN.md](./USER_MANUAL_EN.md) - User manual
 
 ---

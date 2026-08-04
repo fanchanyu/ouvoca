@@ -66,7 +66,7 @@ Ouvoca 本身**不收集任何安裝統計、使用統計、錯誤回報**。本
 ### Step 2 — 把檔案放到對應位置
 
 ```
-opnetest\
+ouvoca\
 └── tools\
     └── downloads\
         ├── python-installer.exe   (步驟 1 下載的)

@@ -1,6 +1,6 @@
 # 系統架構流程關聯拓樸圖（繁體中文）— v3.0
 
-> **本檔提供六種視角**，由淺入深、由靜態到動態，讓技術與非技術讀者都能掌握 LLM-ERP 全貌。
+> **本檔提供六種視角**，由淺入深、由靜態到動態，讓技術與非技術讀者都能掌握 Ouvoca 全貌。
 >
 > - **視覺版**：[`system_flow_topology.svg`](./system_flow_topology.svg)（精美 SVG，可貼簡報、印 A3）
 > - **舊版靜態圖**：[`architecture_diagram.svg`](./architecture_diagram.svg)（5 層分層）

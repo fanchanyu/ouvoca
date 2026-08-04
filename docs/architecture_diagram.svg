@@ -55,7 +55,7 @@
 
   <!-- 標題 -->
   <text x="700" y="50" font-size="32" font-weight="700" fill="#fff" text-anchor="middle">
-    LLM-ERP 系統架構拓樸圖
+    Ouvoca 系統架構拓樸圖
   </text>
   <text x="700" y="78" font-size="14" fill="#94a3b8" text-anchor="middle">
     AI-Native Enterprise Resource Planning · Multi-Agent · MESH 多廠協同

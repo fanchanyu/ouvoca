@@ -70,7 +70,7 @@ Tool registry / RiskTier / ConfirmCard 全部都能複用，**Phase 1 的投資�
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│             LLM-ERP（桌機 Chat 對話入口）                │
+│             Ouvoca（桌機 Chat 對話入口）                │
 └──────┬───────────────────────────────────────────────┘
        │
        │  AI tools:
@@ -89,7 +89,7 @@ Tool registry / RiskTier / ConfirmCard 全部都能複用，**Phase 1 的投資�
 │                      │ 適：客戶想「先看看」，不動原系統   │
 │                      │ 例：「鼎新 5 月份訂單?」          │
 ├──────────────────────┼───────────────────────────────┤
-│ ② One-time Migration│ 一次性把舊資料搬進 LLM-ERP        │
+│ ② One-time Migration│ 一次性把舊資料搬進 Ouvoca        │
 │                      │ 適：徹底換系統的客戶              │
 │                      │ 例：阿玲「把客戶搬過來」          │
 ├──────────────────────┼───────────────────────────────┤
@@ -183,7 +183,7 @@ class Connector(ABC):
 |---|---|---|
 | `register_external_connection_with_confirm` | HARD_WRITE | 新增連接設定（測 connection 通過後存 DB） |
 | `delete_external_connection_with_confirm` | HARD_WRITE | 刪連接 |
-| `preview_schema_mapping` | READ | 列出外部 table 對映到 LLM-ERP domain 的建議（AI 自動推薦） |
+| `preview_schema_mapping` | READ | 列出外部 table 對映到 Ouvoca domain 的建議（AI 自動推薦） |
 | `migrate_from_external_with_confirm` | HARD_WRITE | 一次性遷移（出 ConfirmCard 給人類確認筆數） |
 
 ---
@@ -203,7 +203,7 @@ AI 走 chain：
 4. 加總 amount 欄位 → 回答
 
 王董看到：「鼎新 5 月份訂單金額 $3.2M（45 筆）。
-            LLM-ERP 同月 $580K（12 筆）。
+            Ouvoca 同月 $580K（12 筆）。
             合計 $3.78M。」
 ```
 
@@ -216,11 +216,11 @@ AI 走 chain：
 1. tool: list_external_tables("legacy_dingxin") → 找到 Customer
 2. tool: preview_schema_mapping("legacy_dingxin", "Customer", target="Customer")
    AI 建議：
-     鼎新.Customer.CustNo    → LLM-ERP.Customer.code
-     鼎新.Customer.CustName  → LLM-ERP.Customer.name
-     鼎新.Customer.Grade     → LLM-ERP.Customer.grade
-     鼎新.Customer.Phone     → LLM-ERP.Customer.phone
-     鼎新.Customer.Address   → LLM-ERP.Customer.address
+     鼎新.Customer.CustNo    → Ouvoca.Customer.code
+     鼎新.Customer.CustName  → Ouvoca.Customer.name
+     鼎新.Customer.Grade     → Ouvoca.Customer.grade
+     鼎新.Customer.Phone     → Ouvoca.Customer.phone
+     鼎新.Customer.Address   → Ouvoca.Customer.address
    不對映：CreateUser, ModifyTime
 3. tool: migrate_from_external_with_confirm(...) → 出 ConfirmCard
         「將從鼎新匯入 124 筆客戶，欄位對映已自動偵測。
@@ -259,7 +259,7 @@ AI 引導：
    - `VARCHAR(50)` ↔ `String`
    - `DECIMAL(18,2)` ↔ `Float`
 3. **Domain 約束**：
-   - LLM-ERP `customer.grade` 必須 ∈ {A,B,C,D} → 預警告
+   - Ouvoca `customer.grade` 必須 ∈ {A,B,C,D} → 預警告
 4. **Confidence 分數**：
    - 95%+ → 自動套用
    - 70-95% → 出 ConfirmCard 給人類確認
@@ -268,8 +268,8 @@ AI 引導：
 ### 7.2 用到 Phase 2 Glossary
 
 `docs/CONVERSATIONAL_ERP_DESIGN_ZH.md` 的 Glossary 機制可直接複用：
-- 「客戶」「Customer」「CustNo」「Cust」→ 都對到 LLM-ERP.Customer
-- 「料件」「Part」「Material」「Item」→ 都對到 LLM-ERP.Part
+- 「客戶」「Customer」「CustNo」「Cust」→ 都對到 Ouvoca.Customer
+- 「料件」「Part」「Material」「Item」→ 都對到 Ouvoca.Part
 
 ---
 
@@ -347,7 +347,7 @@ AI 引導：
 
 ## 11. 與其它競品比較
 
-| 競品 | 外部 DB 接法 | LLM-ERP v3.0 |
+| 競品 | 外部 DB 接法 | Ouvoca v3.0 |
 |---|---|---|
 | **SAP Business One** | DI API 自己寫，貴 | ✅ 5 行 config 完成 |
 | **Odoo** | 需寫 module，學習 | ✅ AI 對話設定 |

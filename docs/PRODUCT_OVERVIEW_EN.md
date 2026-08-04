@@ -1,4 +1,4 @@
-# LLM-ERP Product Overview (English) — v3.0 Conversational ERP
+# Ouvoca Product Overview (English) — v3.0 Conversational ERP
 
 > **One-page snapshot → Full buying guide for decision makers**
 > Audience: Owners / Procurement managers / IT directors / System integrators / Consultants
@@ -34,7 +34,7 @@
 
 | Item | Detail |
 |---|---|
-| **Product** | LLM-ERP (AI-Native ERP for SMB Manufacturers) |
+| **Product** | Ouvoca (AI-Native ERP for SMB Manufacturers) |
 | **Positioning** | The **LINE-Native ERP** for 50-100 person factories |
 | **Core Promise** | The owner runs the factory from LINE; live in 2 weeks, productive in 2 hours |
 | **Three Weapons** | ① Natural language ops ② Mobile-first ③ Outsource LINE collaboration |
@@ -399,7 +399,7 @@ Additional: per-factory install, WireGuard VPN setup, cross-factory permissions,
 
 ### Q2: Isn't open-source risky?
 
-No. LLM-ERP is a commercial project; **open-source core** lets customers: ① see the code ② leave anytime without lock-in ③ find someone else to maintain. **Our value is in service**, not in trapping customers.
+No. Ouvoca is a commercial project; **open-source core** lets customers: ① see the code ② leave anytime without lock-in ③ find someone else to maintain. **Our value is in service**, not in trapping customers.
 
 ### Q3: Is our data safe?
 
@@ -453,7 +453,7 @@ All exportable to PDF (`build_pdfs.bat`).
 
 ### 12.1 Three Solutions
 
-| Dimension | SAP Business One | Odoo Enterprise | **LLM-ERP** |
+| Dimension | SAP Business One | Odoo Enterprise | **Ouvoca** |
 |---|---|---|---|
 | **License / year** | NT$ 1-2M | NT$ 300-800K | **NT$ 300-500K** |
 | **Rollout time** | 6-18 months | 2-4 months | **< 2 weeks** |
@@ -467,7 +467,7 @@ All exportable to PDF (`build_pdfs.bat`).
 
 ### 12.2 Why Not Just Excel?
 
-| Scenario | Excel | LLM-ERP |
+| Scenario | Excel | Ouvoca |
 |---|---|---|
 | Owner asks "today's status" | Flip 5 sheets | One sentence reply |
 | Sales checks stock | Open front desk PC | 3-second mobile |
@@ -513,4 +513,4 @@ Step 7  Day 14 go-live + final payment
 
 ---
 
-**Version**: 2.3 · **Last updated**: 2026-05-14 · **© 2026 LLM-ERP Project**
+**Version**: 2.3 · **Last updated**: 2026-05-14 · **© 2026 Ouvoca Project**

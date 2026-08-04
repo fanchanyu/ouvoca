@@ -1,4 +1,4 @@
-# LLM-ERP AI Agent & Tool Catalog (English)
+# Ouvoca AI Agent & Tool Catalog (English)
 
 > **AI transparency document for customers**:
 > Exactly what our AI can do, can't do, how much it costs, and how we prevent it from misbehaving.

@@ -55,7 +55,7 @@
 
   <!-- Title -->
   <text x="800" y="42" font-size="28" font-weight="700" fill="#0f172a" text-anchor="middle">
-    LLM-ERP System Flow & Topology Diagram
+    Ouvoca System Flow & Topology Diagram
   </text>
   <text x="800" y="66" font-size="13" fill="#64748b" text-anchor="middle">
     AI-Native ERP for Small Manufacturers · Multi-Agent · MESH

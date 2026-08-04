@@ -251,3 +251,18 @@ AI tools 201 支、DB 107 張表。
 - HR（考勤/薪資）、客戶/供應商 Portal、外協託工 — 2+ 客戶簽約後啟動
 - MESH HTTPS/mTLS 實際部署（憑證管理屬運維）
 - 病毒掃描需外部 AV 服務（掛鉤已備）
+
+---
+
+## 十七、v3.70 版控與發布整備（`Ouvoca vs.txt` 審計 A/B + 其他）
+
+| 項目 | 修復 |
+|---|---|
+| 全新安裝無 FK 索引（B） | FK 索引邏輯抽成 `app/services/db_indexes.py`，`init_db()` 與 migration v016 共用 —— 全新安裝實測 300 個索引（原本 133） |
+| v3.56–3.70 未進版控（A） | `.gitattributes` 行尾正規化（582 → 163 個真實變更），結構化提交 2 筆 + tag `v3.70` |
+| 版本號四處打架 | `APP_VERSION`/`package.json` → 3.69.0；README badge → 880 tests / v3.69 |
+| CI 攔不住升級/索引/403 | `run_gates.sh` 新增 Gate 4 治理閘：fresh alembic upgrade + 全新安裝索引驗證 + seed_permissions/審計 MISSING=0 |
+| 缺 SECURITY/CODE_OF_CONDUCT | 新增 `SECURITY.md`（支援版本/回報流程/內建安全機制/部署清單）+ `CODE_OF_CONDUCT.md` |
+| README 過時（76→74 PDF、badge） | 更新 badge、PDF 計數、版本 |
+| i18n「缺 37 鍵」 | 用 esbuild 正確解析：zh/en 皆 267 鍵、缺 0（reviewer 字數比對誤判）；JSX 硬編碼中文 399 處為已知限制，記錄於 roadmap |
+| 附帶修復 | `FACTORY_NODES=` 空值讓 config 解析炸掉 → `NoDecode` + before-validator 容忍空/逗號分隔 |

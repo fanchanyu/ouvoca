@@ -1,4 +1,4 @@
-# LLM-ERP 業務 demo 一頁紙 — 9 個 killer moments（v3.5）
+# Ouvoca 業務 demo 一頁紙 — 9 個 killer moments（v3.5）
 
 > **給銷售團隊**：客戶 demo 30 分鐘 走完這 9 個畫面 = 30 萬簽約
 > **產品狀態**：~91% MVP，193 tests 全綠 / 38 tools registered / 8 PDF + 33 份雙語文件
@@ -124,7 +124,7 @@ AI 自動 chain：
     query_external_db (filters={order_date_gte: 2026-05-01})
     → 加總 Amount
 
-AI：「鼎新 5 月份 $3.2M（45 筆）+ LLM-ERP $580K（12 筆）= 合計 $3.78M」
+AI：「鼎新 5 月份 $3.2M（45 筆）+ Ouvoca $580K（12 筆）= 合計 $3.78M」
 
 ★ 「鼎新不用砍，繼續跑」★（前提：客戶已取得原 ERP 授權）
 ```
@@ -190,7 +190,7 @@ AI：preview_email_digest → 出當下摘要
     send_email_digest_with_confirm → ConfirmCard
         收件人：wang@example.com
         區間：最近 24 小時
-        主旨：[LLM-ERP] 最近 24 小時摘要：⚠️ 今日 2 項警示需注意
+        主旨：[Ouvoca] 最近 24 小時摘要：⚠️ 今日 2 項警示需注意
         段落：⚠️ 關鍵警示（2 項）/ 📅 今日事件（8 個）/ 📊 KPI 快照
         [取消]    [✓ 確認寄送]
 
@@ -209,7 +209,7 @@ AI：preview_email_digest → 出當下摘要
 | Day 2 | 連客戶舊系統（鼎新 / 正航 / 叡揚 / Excel） + Migration 預覽 |
 | Day 3-4 | RBAC 角色設定 + Glossary 教 AI 客戶的俗稱 |
 | Day 5 | 客戶 5 個關鍵員工 2 小時上手訓練 |
-| Day 6-10 | 並行運作（舊系統 + LLM-ERP），客戶熟悉 |
+| Day 6-10 | 並行運作（舊系統 + Ouvoca），客戶熟悉 |
 | Day 11 | 全廠正式切換 / 舊系統 read-only |
 | Day 12-14 | 線上支援 + 微調 + 補 Glossary |
 
@@ -226,7 +226,7 @@ AI：preview_email_digest → 出當下摘要
 | **鼎新 Workflow** | 80-150 萬 | 弱 | 無 | 不接 |
 | **Odoo** | 0-30 萬 | 中 | 弱 | 寫 module |
 | **Excel + LINE** | 0 | 強 | 無 | 無 |
-| **LLM-ERP** | **30 萬** | 桌機+Toast | **內建 38 tools** | **AI Schema Mapping** |
+| **Ouvoca** | **30 萬** | 桌機+Toast | **內建 38 tools** | **AI Schema Mapping** |
 
 ---
 

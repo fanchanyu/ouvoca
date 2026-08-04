@@ -1,6 +1,6 @@
 # System Topology & Flow Diagram (English) — v3.0
 
-> **Six perspectives from shallow to deep, static to dynamic** — making LLM-ERP understandable to both technical and non-technical readers.
+> **Six perspectives from shallow to deep, static to dynamic** — making Ouvoca understandable to both technical and non-technical readers.
 >
 > - **Visual**: [`system_flow_topology.svg`](./system_flow_topology.svg) (beautiful SVG for slides / A3 print)
 > - **Static legacy**: [`architecture_diagram.svg`](./architecture_diagram.svg) (5-layer)

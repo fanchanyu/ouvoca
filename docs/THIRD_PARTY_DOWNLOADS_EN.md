@@ -72,7 +72,7 @@ or you don't trust auto-downloads, you can install offline:
 ### Step 2 — Place files in the right location
 
 ```
-opnetest\
+ouvoca\
 └── tools\
     └── downloads\
         ├── python-installer.exe   (from Step 1)

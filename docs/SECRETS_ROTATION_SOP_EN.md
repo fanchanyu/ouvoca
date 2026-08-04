@@ -1,4 +1,4 @@
-# LLM-ERP Secrets Rotation SOP (English)
+# Ouvoca Secrets Rotation SOP (English)
 
 > **Leaked secrets = system fall. Regular rotation is the minimum.**
 > Audience: Customer IT, our ops, security consultants.

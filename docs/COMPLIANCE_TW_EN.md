@@ -1,4 +1,4 @@
-# LLM-ERP Taiwan Compliance Reference (English)
+# Ouvoca Taiwan Compliance Reference (English)
 
 > **For accountants / legal / IT leads to confirm**
 > What Taiwan regulations we support, what we don't, what the customer must configure themselves.
@@ -41,7 +41,7 @@
 | P5 | Sep-Oct | Nov 15 |
 | P6 | Nov-Dec | Jan 15 (next year) |
 
-LLM-ERP auto-pushes LINE reminder 5 days before each deadline (planned).
+Ouvoca auto-pushes LINE reminder 5 days before each deadline (planned).
 
 ### 1.3 Corporate Income Tax (25%/20%)
 
@@ -171,7 +171,7 @@ Planned VAC integrations:
 
 ## 6. Compliance Level Matrix
 
-| Compliance Level | LLM-ERP Coverage | Customer Must Add |
+| Compliance Level | Ouvoca Coverage | Customer Must Add |
 |---|---|---|
 | **Solo (<5 people)** | 100% ✅ | None |
 | **SMB Manufacturer (50-100 people, ICP)** | 90% ✅ | External payroll |
@@ -216,7 +216,7 @@ Items the customer must configure during rollout:
 | Tax (401/403/annual) | Retained CPA firm |
 | E-invoice setup | VAC provider / tax authority |
 | Personal data compliance | Retained lawyer / DPO course |
-| LLM-ERP config issues | support@llm-erp.example |
+| Ouvoca config issues | support@llm-erp.example |
 
 ---
 

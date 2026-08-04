@@ -9,7 +9,7 @@
 ### 第 1 步：Docker 一鍵啟動
 
 ```bash
-cd opnetest
+cd ouvoca
 cp backend/.env.example backend/.env
 docker compose up -d --build
 ```
@@ -62,7 +62,7 @@ docker compose exec backend python -m scripts.seed_industries textile   # 紡織
 ### Step 1: Docker One-Command Start
 
 ```bash
-cd opnetest
+cd ouvoca
 cp backend/.env.example backend/.env
 docker compose up -d --build
 ```
@@ -154,7 +154,7 @@ Without an API key, the system still runs — only the AI chat shows a friendly 
 - **管理員指南** [ADMIN_GUIDE.md](./ADMIN_GUIDE.md)
 - **API 參考** [API_REFERENCE.md](./API_REFERENCE.md)
 - **架構圖** [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md)
-- **部署到生產** [DEPLOYMENT.md](./DEPLOYMENT.md)
+- **部署到生產** [DEPLOYMENT.md](../DEPLOYMENT.md)
 
 ---
 

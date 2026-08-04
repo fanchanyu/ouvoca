@@ -259,7 +259,7 @@
 
 ### G-508 Schema mapping AI（preview_schema_mapping tool）
 - **嚴重度**：P0 Critical
-- **應有**：AI 看外部 table schema → 自動推薦 LLM-ERP domain 對映
+- **應有**：AI 看外部 table schema → 自動推薦 Ouvoca domain 對映
 - **工時**：2 天
 
 ### G-509 migrate_from_external_with_confirm

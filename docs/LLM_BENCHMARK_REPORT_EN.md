@@ -1,7 +1,7 @@
 # LLM Benchmark Report (English)
 
 > **Date**: 2026-05-14
-> **Environment**: Windows + Python 3.12 + LLM-ERP v2.0.0
+> **Environment**: Windows + Python 3.12 + Ouvoca v2.0.0
 > **Purpose**: Objective comparison of mainstream LLMs in ERP scenarios
 
 ---

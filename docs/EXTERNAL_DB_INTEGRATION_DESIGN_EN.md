@@ -67,7 +67,7 @@ Tool registry / RiskTier / ConfirmCard from Phase 1 are **all reused**.
 
 ```
 ┌────────────────────────────────────────────────┐
-│        LLM-ERP (Desktop Chat entry)              │
+│        Ouvoca (Desktop Chat entry)              │
 └──────┬─────────────────────────────────────────┘
        │  AI tools:
        │   • query_external_db        (Federated)
@@ -82,7 +82,7 @@ Tool registry / RiskTier / ConfirmCard from Phase 1 are **all reused**.
        ▼
 ┌─────────────────┬──────────────────────────────┐
 │ ① Federated    │ AI queries external, no copy  │
-│ ② One-time mig │ Bulk import to LLM-ERP        │
+│ ② One-time mig │ Bulk import to Ouvoca        │
 │ ③ Two-way sync │ Bidirectional + conflict      │ Phase 2
 │ ④ CDC stream   │ Real-time event capture       │ Phase 3
 └─────────────────┴──────────────────────────────┘
@@ -175,7 +175,7 @@ AI: list_external_connections → finds legacy_dingxin
     list_external_tables(legacy_dingxin) → finds OrderHeader
     query_external_db(legacy_dingxin, OrderHeader,
                        filters={order_date_gte: 2026-05-01})
-    Sums Amount → "$3.2M (45 orders) in Dingxin; $580K (12 orders) in LLM-ERP."
+    Sums Amount → "$3.2M (45 orders) in Dingxin; $580K (12 orders) in Ouvoca."
 ```
 
 ### Scenario B: One-time migration
@@ -184,9 +184,9 @@ AI: list_external_connections → finds legacy_dingxin
 Alice: "Migrate customers from Dingxin"
 AI: list_external_tables → Customer
     preview_schema_mapping → auto suggests:
-      Dingxin.Customer.CustNo   → LLM-ERP.Customer.code
-      Dingxin.Customer.CustName → LLM-ERP.Customer.name
-      Dingxin.Customer.Grade    → LLM-ERP.Customer.grade
+      Dingxin.Customer.CustNo   → Ouvoca.Customer.code
+      Dingxin.Customer.CustName → Ouvoca.Customer.name
+      Dingxin.Customer.Grade    → Ouvoca.Customer.grade
     Emits ConfirmCard: "Import 124 customers. Conflict policy: overwrite by code."
     Alice clicks Confirm → migration runs → progress bar → done.
 ```
@@ -210,7 +210,7 @@ AI: register_external_connection(name=customer_a_csv, connector=csv_folder,
 
 1. **Column name match** (exact + LLM fuzzy via Glossary)
 2. **Type inference** (`VARCHAR(50)` ↔ String, `DECIMAL(18,2)` ↔ Float)
-3. **Domain constraints** (LLM-ERP `customer.grade` ∈ {A,B,C,D} → warn)
+3. **Domain constraints** (Ouvoca `customer.grade` ∈ {A,B,C,D} → warn)
 4. **Confidence score**:
    - 95%+ → auto apply
    - 70-95% → emit ConfirmCard for human review
@@ -219,8 +219,8 @@ AI: register_external_connection(name=customer_a_csv, connector=csv_folder,
 ### 7.2 Reuses Phase 2 Glossary
 
 The Glossary from `CONVERSATIONAL_ERP_DESIGN_EN.md` directly applies:
-- "Customer" / "CustNo" / "Cust" → all map to LLM-ERP.Customer
-- "Part" / "Material" / "Item" → all map to LLM-ERP.Part
+- "Customer" / "CustNo" / "Cust" → all map to Ouvoca.Customer
+- "Part" / "Material" / "Item" → all map to Ouvoca.Part
 
 ---
 

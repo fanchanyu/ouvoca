@@ -1,4 +1,4 @@
-# LLM-ERP Implementation Playbook (Consultant Edition · English) — v3.0
+# Ouvoca Implementation Playbook (Consultant Edition · English) — v3.0
 
 > **2-week go-live, day-by-day SOP**
 > For implementation consultants / integrators / internal IT
@@ -310,7 +310,7 @@ Audience: customer's IT lead / system administrator
 09:00 All-hands (video or onsite):
 - Owner's 1-minute speech
 - Consultant demos "today's AI ask" for 5 minutes
-- Immediately switch to LLM-ERP (no more legacy / Excel)
+- Immediately switch to Ouvoca (no more legacy / Excel)
 
 ### Day-14 Must-Do
 
@@ -342,7 +342,7 @@ Bring this report to owner:
 
 ```
 ┌─────────────────────────────────────┐
-│ LLM-ERP 30-Day Review               │
+│ Ouvoca 30-Day Review               │
 ├─────────────────────────────────────┤
 │ • Total users _____ / Active _____  │
 │ • DAU avg _____ (target 60%)        │

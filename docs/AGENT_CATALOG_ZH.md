@@ -1,4 +1,4 @@
-# LLM-ERP AI Agent 與 Tool 目錄（繁體中文）
+# Ouvoca AI Agent 與 Tool 目錄（繁體中文）
 
 > **給客戶的 AI 透明度文件**：
 > 我們的 AI 到底「能做什麼、不能做什麼、會花多少錢、怎麼防出包」。

@@ -1,4 +1,4 @@
-# LLM-ERP Sales Demo One-Pager — 9 Killer Moments (v3.5)
+# Ouvoca Sales Demo One-Pager — 9 Killer Moments (v3.5)
 
 > **For sales team**: walk through these 9 moments in a 30-min demo = signed contract
 > **Product status**: ~91% MVP, 193 tests green / 38 AI tools / 33 bilingual docs
@@ -80,7 +80,7 @@ Procurement (30s after order): "cancel my last order"
 ```
 Boss: "What's our Dingxin order amount for May?"
 → AI: list_external_connections → list_external_tables → query_external_db
-→ "Dingxin: $3.2M (45 orders) + LLM-ERP: $580K (12) = $3.78M"
+→ "Dingxin: $3.2M (45 orders) + Ouvoca: $580K (12) = $3.78M"
 ★ "Don't kill Dingxin, run both" ★ (provided customer has obtained written authorization)
 ```
 
@@ -149,7 +149,7 @@ Boss: "Send daily digest to wang@example.com at 7am"
 | **Dingxin Workflow** | $80-150k | Weak | None | Won't |
 | **Odoo** | $0-30k | Mid | Weak | Write module |
 | **Excel + LINE** | $0 | Strong | None | None |
-| **LLM-ERP** | **$30k** | Desktop+Toast | **38 tools built-in** | **AI Schema Mapping** |
+| **Ouvoca** | **$30k** | Desktop+Toast | **38 tools built-in** | **AI Schema Mapping** |
 
 ---
 

@@ -1,4 +1,4 @@
-# LLM-ERP Secrets 輪換 SOP（繁體中文）
+# Ouvoca Secrets 輪換 SOP（繁體中文）
 
 > **密鑰外洩 = 系統淪陷。定期輪換是底線。**
 > 對象：客戶 IT、我們的維運、資安顧問。

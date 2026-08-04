@@ -31,8 +31,8 @@
 ### 2.2 一鍵部署
 
 ```bash
-git clone <your-repo> opnetest
-cd opnetest
+git clone <your-repo> ouvoca
+cd ouvoca
 cp backend/.env.example backend/.env
 # 編輯 backend/.env（至少改 JWT_SECRET）
 vi backend/.env
@@ -208,7 +208,7 @@ docker compose exec postgres pg_dump -U erp erp | gzip > /backup/erp-$(date +%F)
 ```bash
 # SQLite
 docker compose down
-cp /backup/erp-2026-05-14.db opnetest/backend/erp.db
+cp /backup/erp-2026-05-14.db ouvoca/backend/erp.db
 docker compose up -d
 
 # PostgreSQL
@@ -233,7 +233,7 @@ zcat /backup/erp-2026-05-14.sql.gz | docker compose exec -T postgres psql -U erp
 
 ```bash
 curl http://localhost:8000/api/health
-# {"status":"ok","app":"LLM-ERP","version":"2.0.0","db":"ok","llm_provider":"deepseek","demo_bypass":true}
+# {"status":"ok","app":"Ouvoca","version":"2.0.0","db":"ok","llm_provider":"deepseek","demo_bypass":true}
 ```
 
 ### 6.2 Docker healthcheck
@@ -280,7 +280,7 @@ curl http://localhost:8000/api/health
 
 ### 7.1 SQLite → PostgreSQL 切換
 
-詳見 [DEPLOYMENT.md §2](./DEPLOYMENT.md)。
+詳見 [DEPLOYMENT.md §2](../DEPLOYMENT.md)。
 
 ---
 
