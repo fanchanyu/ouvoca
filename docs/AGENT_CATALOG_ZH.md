@@ -5,6 +5,39 @@
 
 ---
 
+## ⚠️ 版本說明（2026-08-04 · v3.70）
+
+**本文件後續章節的「26 個 Tool 清單」是早期版本的內容，僅代表核心工具的代表性子集。**
+截至 v3.70，實際註冊的工具數量如下（以 `app.agents.registry._REGISTRY` 實際點算）：
+
+| 項目 | 數量 |
+|---|---|
+| 工具總數 | **201 個** |
+| 領域數 | **19 個** |
+| 唯讀（read，直接回答不需確認） | **106 個** |
+| 硬寫入（hard-write，一律走 ConfirmCard 人工確認） | **94 個** |
+| 軟寫入（soft-write） | **1 個** |
+
+**依領域分佈**：
+
+| 領域 | 工具數 | 領域 | 工具數 |
+|---|---:|---|---:|
+| system 系統管理 | 34 | export 匯出 | 6 |
+| sales 銷售 | 25 | crm 客戶關係 | 5 |
+| accounting 會計財務 | 25 | tax 稅務 | 5 |
+| purchase 採購 | 23 | print 列印 | 5 |
+| inventory 庫存 | 18 | glossary 同義詞 | 3 |
+| production 生產 | 13 | approval 審批 | 3 |
+| planning 規劃 | 10 | mps_mrp 排程 | 2 |
+| quality 品質 | 7 | analytics 分析 | 2 |
+| external_db 外部資料庫 | 7 | permission 權限 | 2 |
+| warehouse 倉儲 | 6 | | |
+
+**下方的安全設計（4 道防線）、成本透明度、AI 拒答清單等章節仍然有效**，
+只是工具清單本身尚未逐一補齊。最新的完整清單請看程式碼 `backend/app/agents/domains/`。
+
+---
+
 ## 📑 目錄
 
 1. [Agent 架構速覽](#1-agent-架構速覽)

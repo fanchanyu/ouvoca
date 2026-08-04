@@ -110,7 +110,7 @@
 
 2026-05-15T19:40:01 [ERROR] app.agents.engine: Tool query_inventory execution failed
 Traceback (most recent call last):
-  File "D:\114-DOWN\LLM-ERP\program\opnetest\backend\app\agents\engine.py", line 136, in execute_tool
+  File "<專案目錄>\backend\app\agents\engine.py", line 136, in execute_tool
     result = await tool["func"](db=db, user=user, **args)
                    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
 TypeError: _query_inventory() got an unexpected keyword argument 'part_keyword'

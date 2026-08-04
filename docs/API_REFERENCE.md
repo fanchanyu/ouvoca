@@ -309,25 +309,45 @@ curl -X POST http://localhost:8000/api/permission/overrides \
 
 啟動後訪問 http://localhost:8000/docs 取得互動式 OpenAPI 文件。
 
-**目前共 102 個 endpoints，分布如下**：
+> ⚠️ **本檔的清單為人工維護，會落後於程式碼。**
+> 權威來源永遠是後端啟動後的 <http://localhost:8000/docs>（由 FastAPI 自動產生）。
+> 下表的數字是 v3.70（2026-08-04）以 FastAPI route introspection 實際點算的結果。
+
+**目前共 242 個 `/api` endpoints，分布如下**：
 
 | Domain | 端點數 | 主要操作 |
 |---|---|---|
-| Auth | 2 | login / register |
-| Organization | 6 | department / employee / role |
-| Inventory | 8 | part / inventory / transaction |
-| Purchase | 7 | supplier / order / approve / receive |
-| Production | 13 | product / bom / wo / work_center / operation |
-| Sales | 7 | customer / order / confirm / ship |
-| Quality | 5 | inspection / nc / capa |
-| MPS/MRP | 6 | mps / mrp / run |
-| Accounting | 8 | account / journal / ar / month_close |
-| Warehouse | 8 | zone / bin / pick / cycle_count |
-| CRM | 8 | lead / opportunity / event |
-| Chat (AI) | 3 | chat / sessions / health |
-| Events | 2 | recent / stream |
-| Permission | 15 | tenants / permissions / roles / assignments / overrides |
-| Misc | 4 | root / docs / openapi.json / redoc |
+| Accounting | 23 | 科目 / 傳票 / AR / 月結 / 三大報表 / 固定資產 / 供應商發票 |
+| Purchase | 22 | 供應商 / 採購單 / 核准 / 收貨 / 請購 PR / 收料 GRN / RFQ 詢價 |
+| Production | 17 | 產品 / BOM / 工單 / 工作中心 / 工序 / 領料 MI / 工單成本 |
+| Sales | 17 | 客戶 / 訂單 / 確認 / 出貨 / 報價 / 退貨 RT |
+| Permission / RBAC | 15 | 租戶 / 權限 / 角色 / 指派 / 覆寫 |
+| Export | 12 | CSV / Excel 匯出 |
+| Warehouse | 12 | 儲區 / 儲位 / 揀貨 / 盤點 / 掃描 / 批號序號追溯 |
+| Inventory | 10 | 料件 / 庫存 / 異動 / 調撥 |
+| Policy Rules | 9 | 家規 CRUD / 評估 / 灌預設 |
+| CRM | 8 | 潛在客戶 / 商機 / 互動紀錄 |
+| Print | 8 | PDF 列印（採購單 / 訂單 / 出貨單 / 標籤…） |
+| Taiwan Tax | 8 | 電子發票 / 401-405 / 統編驗證 |
+| Analytics | 7 | DSO / 存貨週轉 / 毛利 / KPI |
+| Approvals | 7 | 審批規則 / 待審 / 核准 / 駁回 / 歷史 |
+| Auth | 6 | 登入 / 註冊 / MFA setup-verify-enable-disable |
+| MPS / MRP | 6 | 主生產排程 / 物料需求展開 |
+| Organization | 6 | 部門 / 員工 / 角色 |
+| Files | 5 | 上傳 / 列表 / 下載 / 刪除 |
+| MESH | 5 | 分廠註冊 / 清單 / 跨廠彙總 |
+| Quality | 5 | 檢驗 / 不合格 / CAPA |
+| Backups | 4 | 建立 / 列出 / 刪除 / 還原 |
+| Chat | 4 | 對話 / session / 健康檢查 |
+| ConfirmCard | 4 | 確認 / 取消 / 查詢 / 待確認清單 |
+| EmailDigest | 3 | 每日摘要預覽 / 寄送 |
+| ExternalConnections | 3 | 外部 DB 連線管理（加密儲存） |
+| LLM Status | 3 | 狀態 / 測試 / 設定 |
+| Onboarding | 3 | 狀態 / 載入示範資料 / 清除 |
+| Reports | 3 | AR 帳齡 / 庫存月報 / 401 報表 |
+| SystemSettings | 3 | 讀取 / 單筆讀取 / 更新 |
+| AgentExec | 2 | 直接執行 AI 工具 |
+| Events | 2 | 最近事件 / SSE 串流 |
 
 ---
 

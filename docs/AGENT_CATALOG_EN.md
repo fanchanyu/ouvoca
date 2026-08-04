@@ -5,6 +5,40 @@
 
 ---
 
+## ⚠️ Version note (2026-08-04 · v3.70)
+
+**The "26 tools" list in the later sections dates from an early release and now represents only a
+core subset.** As of v3.70 the registry (`app.agents.registry._REGISTRY`) actually contains:
+
+| Metric | Count |
+|---|---|
+| Total tools | **201** |
+| Domains | **19** |
+| Read-only (answered immediately, no confirmation) | **106** |
+| Hard-write (always routed through a human ConfirmCard) | **94** |
+| Soft-write | **1** |
+
+**By domain:**
+
+| Domain | Tools | Domain | Tools |
+|---|---:|---|---:|
+| system | 34 | export | 6 |
+| sales | 25 | crm | 5 |
+| accounting | 25 | tax | 5 |
+| purchase | 23 | print | 5 |
+| inventory | 18 | glossary | 3 |
+| production | 13 | approval | 3 |
+| planning | 10 | mps_mrp | 2 |
+| quality | 7 | analytics | 2 |
+| external_db | 7 | permission | 2 |
+| warehouse | 6 | | |
+
+**The safety design (4 defence layers), cost transparency, and AI refusal-list sections below remain
+accurate** — only the per-tool enumeration is behind. For the authoritative current list, see
+`backend/app/agents/domains/`.
+
+---
+
 ## 📑 Contents
 
 1. [Agent Architecture Overview](#1-agent-architecture-overview)
