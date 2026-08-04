@@ -38,6 +38,16 @@
 
 ---
 
+## 📚 Documentation
+
+| Start here | What it is |
+|---|---|
+| 🗂 **[`docs/README.md`](./docs/README.md)** | **The master index — read this first.** All 100 documents under `docs/`, each tagged 🟢 current / 🟡 partly stale / 🔴 known-outdated so you know what to trust, with a reading path per reader type and a dedicated **English Readers** section that also names the 21 documents which exist in Chinese only |
+| 📕 [`docs/DOCUMENT_INDEX.md`](./docs/DOCUMENT_INDEX.md) | The 74 bilingual PDFs, per-file — for printing or taking to a shop floor with no network |
+| 📜 [`docs/CHANGELOG_ZH.md`](./docs/CHANGELOG_ZH.md) | Plain-language release notes, v3.49 → v3.70 (Chinese only) |
+
+---
+
 ## ⚡ What Is Ouvoca
 
 Conventional ERP fails small factories for a predictable reason: the software is capable, but nobody
@@ -103,6 +113,80 @@ from a human clicking a button or from the AI acting on a sentence. Ouvoca ships
 | Audit trail of blocks | Rare | Every blocked transaction logged |
 
 `POST /api/policies/seed-defaults` loads all 23 in one call · [House Rules Guide](./docs/HOUSE_RULES_GUIDE_EN.md)
+
+---
+
+## 🔒 Where Does My Data Live? What Reaches the LLM Vendor?
+
+The first question any owner should ask about an AI-native ERP. Answered below strictly from what the
+code does — no marketing gloss, no scare tactics.
+
+### 📁 Your data stays on your machine
+
+**Ouvoca has no cloud back end. There is no code path that uploads your database anywhere.**
+
+| Install method | Where the database lives |
+|---|---|
+| One-click installer (`install_easy.bat` / `.sh`) | `backend\erp.db` — a single SQLite file inside the folder you extracted (e.g. `C:\Ouvoca\backend\erp.db`) |
+| Docker (`install.bat` / `docker compose`) | Docker volume `backend-data`, mounted at `/app/data/erp.db` |
+| Production PostgreSQL | Whatever server you point `DATABASE_URL_PROD` at in `backend/.env` |
+
+Uploaded attachments live in `backend\uploads\`, built-in backups in `backend\backups\backup-*.db` —
+also on your own machine. Copy those yourself for off-site retention → [Backup SOP](./docs/BACKUP_RESTORE_SOP_EN.md).
+
+### 🤖 What actually leaves the building when chat is enabled
+
+Only the sentence you submit, and whatever was looked up to answer it, reaches your configured LLM
+vendor (DeepSeek by default). Itemized:
+
+| Sent to the vendor | Detail |
+|---|---|
+| ✅ The sentence you typed | e.g. "Order 500 M6 bolts from Changjiang" |
+| ✅ The last **10 messages** of that chat session | `backend/app/api/chat.py` loads exactly 10 rows as context |
+| ✅ Your username, employee ID, roles, and permission codes | Embedded in the system prompt so the model won't steer you toward actions you aren't authorized for |
+| ✅ Tool definitions for the routed domain (name / description / parameters) | Schema only — contains none of your business data |
+| ⚠️ **The rows a tool returned while answering you** | The one that matters. Ask "list parts below safety stock" and that list is posted back to the vendor — it is the only way the model can narrate it to you |
+
+| Never sent | Why |
+|---|---|
+| ❌ The database file itself | No such code path exists |
+| ❌ Database credentials | The model never receives connection details and never emits SQL. It may only pick one **registered tool** and fill its declared slots; the backend runs the query (`execute_tool` in `backend/app/agents/engine.py`) |
+| ❌ Anything this question didn't touch | If no tool read it, it isn't in the payload |
+
+> 📌 **In one line:** the vendor sees exactly the data fetched to answer your sentence — no more, no less.
+> Which also means **whatever you ask about, you hand over**. If a customer list or cost structure must
+> not leave the company, don't ask the AI about it — or run the offline option below.
+
+The default vendor is DeepSeek (`https://api.deepseek.com/v1`); OpenAI, Anthropic, and Ollama are
+selectable from the settings page. ⚠️ **DeepSeek, OpenAI, and Anthropic are all hosted abroad, so
+using them means cross-border data transfer** — assess this against your privacy obligations first
+→ [Taiwan compliance notes](./docs/COMPLIANCE_TW_EN.md).
+
+### 🚫 Does it still work with the AI turned off?
+
+**Yes — as a complete ERP.** With no API key set, the assistant returns a "not configured yet" card
+and everything else runs normally: 17 web pages, 242 REST endpoints, house rules, approvals, RBAC,
+backups, and PDF output need no LLM at all. The whole system can run on an air-gapped LAN; only the
+install itself requires internet.
+
+> ⚠️ One exception: modules marked **💬 only** in the [Feature Overview](#-feature-overview) — with
+> neither 🖥️ nor 🔌 — currently **Cash cycle** (bank accounts, payment/receipt recording). Those ship
+> as AI tools with no screen and no REST endpoint, so they are unreachable without chat enabled.
+
+### 🏠 Fully offline: Ollama
+
+For "not one byte leaves the building," switch the provider to **Ollama** — the model runs on your own
+hardware (`http://localhost:11434` by default), the API key stays blank, and no conversation leaves
+your LAN. Setup steps are in [`HOW_TO_GET_LLM_API_KEY_EN.md`](./docs/HOW_TO_GET_LLM_API_KEY_EN.md).
+
+> ⚠️ **Honest limitation as of v3.70:** the Ollama path is **conversational only — it cannot create
+> documents.** `_ollama_chat()` in `backend/app/agents/engine.py` does not forward tool definitions to
+> the model and always returns an empty `tool_calls` list. So under Ollama, "order 500 bolts from
+> Changjiang" produces **no ConfirmCard and no purchase order**. Transactional chat currently requires
+> DeepSeek, OpenAI, or Anthropic.
+
+📖 Data classification, retention, and pruning strategy → [`docs/DATA_LIFECYCLE.md`](./docs/DATA_LIFECYCLE.md) (Chinese only) ·
+🔐 Vulnerability reporting → [`SECURITY.md`](./SECURITY.md)
 
 ---
 
@@ -345,6 +429,43 @@ no embedding into a product distributed to third parties.
 > party to those agreements. See [External DB licensing notice](./docs/EXTERNAL_DB_LICENSING_NOTICE_EN.md).
 
 Not sure which track applies? The decision tree is in [`LICENSE-COMMERCIAL.md`](./LICENSE-COMMERCIAL.md).
+
+---
+
+## 📅 How Long Does Rollout Take, and Who Trains the Staff?
+
+Installing it to try is a [5-minute job](#-5-minute-install). Getting a whole factory to *switch* —
+legacy data migrated, staff operating it daily, the owner reading the reports — is a different
+project. It's written up as a **14-day, day-by-day rollout SOP**:
+
+| Phase | Days | What happens |
+|---|---|---|
+| 📋 Requirements interview | 1–2 | Four hours on site mapping current flows, documents, and unwritten rules |
+| 🖥 Environment prep | 3–5 | Single machine vs. server decision tree, deployment checklist, account provisioning |
+| 📦 Install + industry sample | 6–7 | Standard install (under 2 hours), then load one of the 5 industry seed packs |
+| 📥 Customer data migration | 8–9 | Parts, suppliers, customers, BOMs in priority order; a data-quality check flags orphan records, duplicate master data, and malformed BOMs |
+| 🧑‍💼 Administrator training | 10 | **2 hours**: accounts and permissions, backup, reading logs, upgrades, emergency restart |
+| 👥 Department-head training | 11–12 | **5 sessions × 1 hour**, including a dedicated 60 minutes for the owner |
+| 🧪 Internal pilot | 13 | Real documents, real flow, issues tracked to closure |
+| 🚀 Go-live | 14 | Go-live ceremony; the playbook lists owner attendance as mandatory — it is the stated prevention for "nobody uses it after go-live" |
+| 🩺 Hyper-care | +30 days | Week 1: daily usage review, any bug patched within 24 h. Day 30: retrospective report for the owner |
+
+**Success metric:** daily active users ÷ headcount ≥ 60% within 30 days of go-live.
+The playbook closes with a table of rollout pitfalls and their prevention steps — the customer never
+hands over their data, staff resist the change, a firewall blocks the LLM API, the owner skips
+go-live day.
+
+📖 Full day-by-day playbook → [`docs/IMPLEMENTATION_PLAYBOOK_EN.md`](./docs/IMPLEMENTATION_PLAYBOOK_EN.md)
+(interview checklists, training outlines, migration commands, acceptance checklist)
+
+> ⚠️ Written for **implementation consultants, integrators, and in-house IT**, and it assumes a Docker
+> deployment. Content dates to 2026-05 and has not fully caught up with v3.70 — it is tagged 🟡 in
+> [`docs/README.md`](./docs/README.md). The schedule and training plan still hold; take the commands
+> from [`INSTALLATION_EN.md`](./docs/INSTALLATION_EN.md) instead.
+>
+> 🌱 **The Small Business track does not include rollout services** — §3.4 of that license grants
+> community support only, with no SLA. The playbook is public, so run it yourself or hand it to your
+> own IT consultant. For hands-on help, that's the [commercial track](./LICENSE-COMMERCIAL.md).
 
 ---
 

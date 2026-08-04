@@ -14,7 +14,7 @@
 1. [Phase 1 Goal + Success Criteria](#1-phase-1-goal)
 2. [Day 1: Tool Registry + Risk-Tier](#day-1-tool-registry--risk-tier)
 3. [Day 2: ConfirmCard Schema + Frontend](#day-2-confirmcard-schema--frontend)
-4. [Day 3: First Hard-Write Tool](#day-3-first-hard-write-tool)
+4. [Day 3: First Hard-Write Tool](#day-3-first-hard-write-tool--createpurchaseorderwithconfirm)
 5. [Day 4: Slot-filling Reverse-Ask](#day-4-slot-filling-reverse-ask)
 6. [Day 5: E2E Demo + Recording](#day-5-e2e-demo--recording)
 7. [Cross-Day Test Plan](#7-cross-day-test-plan)

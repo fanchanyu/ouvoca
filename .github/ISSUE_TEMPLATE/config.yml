@@ -1,0 +1,21 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🧯 裝不起來 / 安裝排錯 — Install failed? Troubleshooting guide
+    url: https://github.com/fanchanyu/ouvoca/blob/main/docs/INSTALL_TROUBLESHOOTING_ZH.md
+    about: 按「症狀」分類的排錯手冊，90% 的安裝問題看前 3 條就解決。看完還是不行，再回來開 Bug Report。 / Symptom-indexed troubleshooting guide; 90% of install issues are fixed by the top 3 items. Still stuck? Then file a bug report.
+
+  - name: 💬 使用問題 / 一般討論 — Usage questions & general discussion
+    url: https://github.com/fanchanyu/ouvoca/discussions
+    about: 「這個功能怎麼用？」「該怎麼設定比較好？」「我們廠適合這樣做嗎？」這類問題請到 Discussions，不用開 issue。 / For how-to questions, setup advice, and open-ended discussion — no issue needed.
+
+  - name: 🔒 資安漏洞回報 — Report a security vulnerability
+    url: https://github.com/fanchanyu/ouvoca/blob/main/SECURITY.md
+    about: ⚠️ 請不要開公開 issue。依 SECURITY.md 私下 email 維護者，72 小時內回覆。 / Do NOT open a public issue. Follow SECURITY.md to email the maintainer privately; response within 72 hours.
+
+  - name: 💼 商業授權諮詢 — Commercial license inquiry
+    url: https://github.com/fanchanyu/ouvoca/issues/new?template=commercial-license-inquiry.yml
+    about: 要做 SaaS、閉源轉售、多廠集團部署，或公司政策不准用 AGPL？走這張表單申請商業授權。 / For SaaS, closed-source resale, multi-site group deployment, or AGPL-restricted policies.
+
+  - name: "✍️ 第一次貢獻 · CLA 確認 — First contribution: CLA acknowledgement"
+    url: https://github.com/fanchanyu/ouvoca/issues/new?template=cla-acknowledgement.yml
+    about: 送出第一個 PR 之前，請先開 CLA 確認 issue，並記得每個 commit 都用 `git commit -s`。 / Before your first PR, file a CLA acknowledgement and sign every commit with `git commit -s`.

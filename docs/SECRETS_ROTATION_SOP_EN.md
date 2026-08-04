@@ -8,9 +8,9 @@
 ## 📑 Contents
 
 1. [Secrets Catalog & Rotation Cycles](#1-secrets-catalog--rotation-cycles)
-2. [JWT_SECRET Rotation (90 days)](#2-jwt_secret-rotation-90-days)
+2. [JWT_SECRET Rotation (90 days)](#2-jwtsecret-rotation-90-days)
 3. [PostgreSQL Password Rotation (6 months)](#3-postgresql-password-rotation-6-months)
-4. [LLM_API_KEY Rotation (yearly / emergency)](#4-llm_api_key-rotation)
+4. [LLM_API_KEY Rotation (yearly / emergency)](#4-llmapikey-rotation)
 5. [TLS Certificate Rotation (90 days)](#5-tls-certificate-rotation-90-days)
 6. [WireGuard Public Key Rotation (yearly)](#6-wireguard-public-key-rotation-yearly)
 7. [Emergency Response: Secret Leak](#7-emergency-response-secret-leak)

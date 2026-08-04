@@ -1,5 +1,7 @@
 # 📜 Ouvoca 版本更新紀錄（白話版）
 
+**繁體中文** | [English](./CHANGELOG_EN.md)
+
 > ⬅️ 回到 [README](../README.md) · English changelog: 尚未提供（歡迎 PR）
 >
 > 🇹🇼 **不講工程術語，只說「你能用到什麼」**。每條修復都按「你會看到什麼差別」描述。

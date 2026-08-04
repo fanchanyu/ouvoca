@@ -1,0 +1,137 @@
+name: 💡 功能建議 / Feature Request
+description: 現在做起來很卡、想要多一個功能？講給我們聽
+title: "[Feature] "
+labels: ["type/feature", "status/triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        歡迎提建議 🙏 Ouvoca 是為了**台灣 50–100 人的中小製造廠**做的，
+        所以「我們廠現在怎麼做事」這種故事，比「請加一個按鈕」有用一百倍。
+
+        **不用會寫程式，也不用想好怎麼做。** 你只要把「現在很卡」講清楚，剩下交給我們。
+
+        > 💡 **先看一下**：這個功能會不會已經有了？
+        > 試著直接問 Ouvoca 的 AI 助理（例如「幫我查上個月哪個客戶買最多」），
+        > 很多事情不用新功能，打字問就能做。
+        >
+        > 也可以先搜尋 [現有的 issues](https://github.com/fanchanyu/ouvoca/issues?q=is%3Aissue)，
+        > 有人提過的話，去按 👍 比開新單更有效。
+
+        ---
+
+        Ouvoca is built for **Taiwanese SMB manufacturers (50–100 staff)**, so a story about how
+        your shop floor actually works beats "please add a button" every time.
+
+        You don't need to know how to code, and you don't need to design the solution —
+        just describe the pain clearly. Try asking the built-in AI assistant first; many
+        things don't need a new feature at all.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 開單前確認 / Pre-flight checks
+      options:
+        - label: 我搜尋過 [現有 issues](https://github.com/fanchanyu/ouvoca/issues?q=is%3Aissue)，沒有人提過一樣的建議 / I searched existing issues and found no duplicate
+          required: true
+        - label: 我了解這個 issue 是公開的，不會在裡面貼客戶名稱、報價金額或員工個資 / I understand this issue is public and will not post customer names, prices, or personal data
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你現在遇到什麼問題？ / What problem are you hitting?
+      description: |
+        **請講情境，不要直接講功能。** 什麼時候會卡？卡多久？誰在卡？
+        講得越像真實故事，我們越容易做對。
+
+        Describe the situation, not the solution. When does it happen, how long does it take,
+        and who is stuck? Real stories produce better features.
+      placeholder: |
+        例：每個月初，會計要把上個月所有出貨單一張一張對發票，
+        50 幾張單子要對兩個小時，常常對到眼花，上個月還漏開了一張發票被客戶催。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 你希望 Ouvoca 怎麼做？ / What would you like Ouvoca to do?
+      description: |
+        想到多少寫多少，不用完整。「我也不知道怎麼做比較好」也是可以接受的答案 —— 直接寫就好。
+
+        Write as much or as little as you have. "I don't know how it should work" is a fine answer.
+      placeholder: |
+        例：希望有一個「本月未開發票的出貨單」清單，可以一次全選、一次開，
+        開完自動標記，這樣就不用一張一張對。
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: 現在你怎麼繞過去？ / How do you work around it today?
+      description: |
+        現在是用 Excel？用手抄？用另一套系統？還是根本沒辦法只好放棄？
+        這一欄能讓我們判斷這件事到底有多痛。
+
+        Excel? Pen and paper? Another system? Or you just gave up?
+        This tells us how much the problem actually hurts.
+      placeholder: |
+        例：用 Excel 開一張表手動勾，每個月重打一次，勾完再登入財政部平台一張張開。
+    validations:
+      required: true
+
+  - type: dropdown
+    id: beneficiary
+    attributes:
+      label: 這個功能主要幫到誰？ / Who mainly benefits?
+      description: 可以只選最主要的一個，其他的在下面補充 / Pick the primary one; mention others below
+      options:
+        - 老闆 / 管理層（看數字、做決策）— Owner / management
+        - 現場 / 生產 / 倉庫（排程、領料、進出貨）— Shop floor / production / warehouse
+        - 會計 / 財務（發票、對帳、成本）— Accounting / finance
+        - 業務 / 採購（報價、訂單、詢價）— Sales / purchasing
+        - IT / 導入人員（安裝、串接、權限）— IT / implementation
+        - 其他 / Other（請在補充說明描述）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: 這件事多常發生？ / How often does this come up?
+      options:
+        - 每天好幾次 / Many times a day
+        - 每天一次左右 / About once a day
+        - 每週 / Weekly
+        - 每月（月結、報稅等）/ Monthly (month-end close, tax filing)
+        - 偶爾（一季或更久一次）/ Occasionally (quarterly or less)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: 你願意幫忙嗎？（選填，完全不影響我們是否採納）/ Would you like to help? (optional)
+      description: |
+        願意的話請先讀 [`CONTRIBUTING.md`](https://github.com/fanchanyu/ouvoca/blob/main/CONTRIBUTING.md)；
+        第一次貢獻要先開 [CLA 確認 issue](https://github.com/fanchanyu/ouvoca/issues/new?template=cla-acknowledgement.yml)。
+
+        If yes, read CONTRIBUTING.md first; first-time contributors must file a CLA acknowledgement issue.
+      options:
+        - 不了，我只是提建議 / No thanks — just suggesting
+        - 可以幫忙測試 / 回饋使用心得 / I can help test and give feedback
+        - 可以幫忙寫文件 / 翻譯 / I can help with docs or translation
+        - 我想自己動手寫這個功能 / I'd like to implement it myself
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: 補充說明（選填）/ Anything else (optional)
+      description: |
+        例如：你的產業（CNC／PCB／食品⋯）、廠內幾個人會用到、現在有沒有串其他系統、
+        有沒有參考的畫面或別套軟體的做法（可以貼截圖，記得先遮掉機密資訊）。
+
+        e.g. your industry, how many people would use it, systems you already integrate with,
+        or screenshots of how other software solves it (redact anything confidential).

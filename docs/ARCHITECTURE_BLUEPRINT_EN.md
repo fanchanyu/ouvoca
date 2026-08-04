@@ -18,7 +18,7 @@
 5. [Secrets Management](#5-secrets-management)
 6. [HA Blueprint (1 → 1000 customers)](#6-ha-blueprint)
 7. [DR with RPO/RTO](#7-dr-with-rporto)
-8. [Multi-tenant Isolation 4-Layer Defense](#8-multi-tenant-isolation)
+8. [Multi-tenant Isolation 4-Layer Defense](#8-multi-tenant-isolation-4-layer-defense)
 9. [Observability Three Pillars](#9-observability)
 10. [Cost-of-Ownership Evolution](#10-cost-of-ownership)
 

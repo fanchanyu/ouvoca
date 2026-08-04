@@ -13,7 +13,7 @@
 1. [Phase 1 總目標 + 成功標準](#1-phase-1-總目標)
 2. [Day 1：Tool Registry + Risk-Tier 框架](#day-1tool-registry--risk-tier)
 3. [Day 2：ConfirmCard Schema + 前端元件](#day-2confirmcard-schema--前端元件)
-4. [Day 3：第一個 hard-write tool](#day-3第一個-hard-write-tool)
+4. [Day 3：第一個 hard-write tool](#day-3第一個-hard-write-tool--createpurchaseorderwithconfirm)
 5. [Day 4：Slot-filling 反問機制](#day-4slot-filling-反問)
 6. [Day 5：E2E Demo + 錄影](#day-5e2e-demo--錄影)
 7. [跨日通用 Test 計畫](#7-跨日通用-test-計畫)

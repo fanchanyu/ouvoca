@@ -45,7 +45,7 @@ accurate** — only the per-tool enumeration is behind. For the authoritative cu
 2. [10 Agents in Detail](#2-10-agents-in-detail)
 3. [26 Tools Full List](#3-26-tools-full-list)
 4. [Cost Transparency](#4-cost-transparency)
-5. [Security Design (4 Layers)](#5-security-design)
+5. [Security Design (4 Layers)](#5-security-design-4-layers)
 6. [High-Risk Actions](#6-high-risk-actions)
 7. [DecisionLog Audit Trail](#7-decisionlog-audit-trail)
 8. [AI Refusal List](#8-ai-refusal-list)

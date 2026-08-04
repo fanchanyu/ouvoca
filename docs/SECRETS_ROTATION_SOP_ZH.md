@@ -8,9 +8,9 @@
 ## 📑 目錄
 
 1. [Secrets 清單與輪換週期](#1-secrets-清單與輪換週期)
-2. [JWT_SECRET 輪換（90 天）](#2-jwt_secret-輪換90-天)
+2. [JWT_SECRET 輪換（90 天）](#2-jwtsecret-輪換90-天)
 3. [PostgreSQL 密碼輪換（半年）](#3-postgresql-密碼輪換半年)
-4. [LLM_API_KEY 輪換（年度 / 緊急）](#4-llm_api_key-輪換)
+4. [LLM_API_KEY 輪換（年度 / 緊急）](#4-llmapikey-輪換)
 5. [TLS 憑證輪換（90 天）](#5-tls-憑證輪換90-天)
 6. [WireGuard 公鑰輪換（年度）](#6-wireguard-公鑰輪換年度)
 7. [緊急應變：Secret 外洩怎辦](#7-緊急應變secret-外洩)

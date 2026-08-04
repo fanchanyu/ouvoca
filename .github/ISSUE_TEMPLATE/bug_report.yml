@@ -1,0 +1,212 @@
+name: 🐛 問題回報 / Bug Report
+description: 軟體壞掉、算錯、裝不起來？填這份，維護者才不用一直回頭問你
+title: "[Bug] "
+labels: ["type/bug", "status/triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感謝你回報問題 🙏 你多花 3 分鐘填清楚，我們就少花 3 天猜。
+
+        **先等一下 —— 這兩種情況請不要開在這裡：**
+
+        | 情況 | 請改去 |
+        |---|---|
+        | 🔒 資安漏洞（可以偷看別人資料、繞過權限） | [`SECURITY.md`](https://github.com/fanchanyu/ouvoca/blob/main/SECURITY.md) 私下回報，**不要**公開 |
+        | 🧯 裝不起來、卡在安裝畫面 | 先翻 [安裝排錯指南](https://github.com/fanchanyu/ouvoca/blob/main/docs/INSTALL_TROUBLESHOOTING_ZH.md)，90% 的安裝問題前 3 條就解決了 |
+
+        > ⚠️ **這個 issue 是公開的，全世界都看得到。**
+        > 貼錯誤訊息、截圖之前請先把這些遮掉／刪掉：
+        > **API Key、密碼、JWT token、資料庫連線字串、客戶名稱、報價金額、統一編號、員工個資。**
+        > 需要提供機密資料時，請在下面寫「有機密資料」，等維護者私下聯絡你。
+
+        ---
+
+        Thanks for filing a bug 🙏 Three minutes of detail here saves us three days of guessing.
+
+        **Do NOT open a public issue for:** security vulnerabilities (use
+        [`SECURITY.md`](https://github.com/fanchanyu/ouvoca/blob/main/SECURITY.md) instead).
+        For install failures, check the
+        [troubleshooting guide](https://github.com/fanchanyu/ouvoca/blob/main/docs/INSTALL_TROUBLESHOOTING_ZH.md) first.
+
+        > ⚠️ **This issue is public.** Redact API keys, passwords, JWT tokens, DB connection
+        > strings, customer names, prices, and any personal data before pasting anything.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 開單前確認 / Pre-flight checks
+      description: 三個都打勾才送出，可以省掉一半的來回 / Please tick all three before submitting
+      options:
+        - label: 我搜尋過 [現有 issues](https://github.com/fanchanyu/ouvoca/issues?q=is%3Aissue)，沒有人回報過同樣的問題 / I searched existing issues and found no duplicate
+          required: true
+        - label: 我確認這**不是**資安漏洞（如果是，我會改走 SECURITY.md）/ This is NOT a security vulnerability
+          required: true
+        - label: 我會把 API Key、密碼、客戶資料等敏感內容遮掉再貼上 / I will redact all secrets and customer data
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Ouvoca 版本 / Ouvoca version
+      description: |
+        **最準的做法**：Ouvoca 啟動之後，用瀏覽器打開 <http://localhost:8000/api/health>，
+        把畫面上 `"version"` 後面那串貼過來（例：`3.70.0`）。
+        也可以進 **⚙️ 設定 → ℹ️ 系統資訊 → 版本** 看，但以 `/api/health` 顯示的為準。
+
+        Open <http://localhost:8000/api/health> in your browser and copy the `"version"` value.
+        The **⚙️ Settings → ℹ️ System Info** panel also shows a version, but `/api/health` is authoritative.
+      placeholder: 例 / e.g.：3.70.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: 你是怎麼安裝的？ / How did you install Ouvoca?
+      description: 不確定的話，回想你當初點了哪個檔案 / If unsure, recall which file you double-clicked
+      options:
+        - 一鍵安裝 install_easy.bat / install_easy.sh（One-click installer）
+        - 標準安裝 install.bat / install.sh（Standard installer）
+        - Docker（docker-compose.yml / docker-compose.prod.yml）
+        - 開發模式 start_dev.bat / 自己跑 uvicorn + npm run dev（Dev mode from source）
+        - 其他 / Other（請在「補充說明」欄位描述）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 作業系統 / Operating system
+      options:
+        - Windows 10
+        - Windows 11
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 重現步驟 / Steps to reproduce
+      description: |
+        像教同事操作一樣，一步一步寫。**從打開 Ouvoca 開始寫**，不要跳步驟。
+        如果是跟 AI 助理對話出的問題，請把你當時打的那句話原文貼上來。
+
+        Write it like you're teaching a colleague — start from opening Ouvoca, don't skip steps.
+        If the bug came from the AI assistant, paste your exact prompt.
+      placeholder: |
+        1. 打開 Ouvoca（瀏覽器進 http://localhost:5173），用 admin 帳號登入
+        2. 左邊選單點「銷售」→「報價單」
+        3. 點右上角「新增報價單」
+        4. 客戶選「長江精密」，品項加「軸承 6204」數量 100
+        5. 按「儲存」
+        6. 就跳出紅色錯誤了
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 你預期會發生什麼？ / Expected behaviour
+      description: 照理說按下去之後應該要怎樣 / What should have happened
+      placeholder: |
+        例：報價單應該存檔成功，並產生單號 QT-2026-0001，然後跳回報價單清單。
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 實際上發生什麼？ / What actually happened
+      description: |
+        實際看到的畫面、跳出來的字、或是「什麼都沒發生」也算。
+        歡迎附截圖（把畫面拖進這個框就會自動上傳）——但記得先遮掉客戶名稱和金額。
+
+        Describe what you actually saw. "Nothing happened" is a valid answer.
+        You can drag-and-drop screenshots into this box — but redact customer names and amounts first.
+      placeholder: |
+        例：畫面卡在轉圈圈約 10 秒，然後跳出紅色橫幅「儲存失敗」，報價單清單裡沒有這筆。
+        重新整理之後也沒有。
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-log
+    attributes:
+      label: 錯誤訊息 / Error message
+      description: |
+        **這欄會自動套用程式碼格式，直接貼原文就好，不用自己加反引號。**
+
+        去哪裡抄錯誤訊息？
+        - **黑色視窗（終端機／命令提示字元）**：跑 `start.bat` / `start.sh` 之後留在背景那個黑底白字的視窗，把最後 30 行貼過來
+        - **瀏覽器**：按 `F12` → 點上方 `Console` 分頁 → 把紅色的字貼過來
+        - **Docker**：`docker compose logs --tail=50`
+
+        再說一次：**貼之前先把 API Key、密碼、token、客戶資料改成 `<redacted>`。**
+
+        This field is auto-formatted as code — paste raw text, no backticks needed.
+        Grab logs from the terminal window, the browser console (`F12` → Console),
+        or `docker compose logs --tail=50`. **Redact all secrets before pasting.**
+      placeholder: |
+        Traceback (most recent call last):
+          File "/app/backend/app/api/sales.py", line 123, in create_quotation
+            ...
+        sqlalchemy.exc.IntegrityError: NOT NULL constraint failed: quotations.tenant_id
+      render: shell
+
+  - type: dropdown
+    id: gates
+    attributes:
+      label: 有跑過 `bash scripts/run_gates.sh` 嗎？ / Did you run `bash scripts/run_gates.sh`?
+      description: |
+        這是專案的**自證閘**，會一次跑完 4 道檢查：
+        Gate 1 編譯閘、Gate 2 行為閘、Gate 3 文件閘、Gate 4 治理閘。
+        不是開發者、看不懂這句話 → 選「沒跑過」就好，完全不影響我們處理。
+
+        This runs the project's 4 self-verification gates (compile / behavior / doc / governance).
+        Not a developer? Just pick "haven't run it" — it won't slow down triage.
+      options:
+        - 沒跑過（我不是開發者）/ Haven't run it — not a developer
+        - 跑過，4 道 gate 全綠 / Ran it — all 4 gates passed
+        - 跑過，有 gate 沒過（失敗內容已貼在上面錯誤訊息欄）/ Ran it — some gate failed (output pasted above)
+        - 跑不起來（腳本本身就報錯）/ Can't run it — the script itself errors out
+    validations:
+      required: true
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: 多常發生？ / How often does it happen?
+      options:
+        - 每次都這樣（100%）/ Every single time
+        - 大部分時候會 / Most of the time
+        - 偶爾才會 / Occasionally
+        - 只發生過一次 / Happened once
+    validations:
+      required: true
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: 對工廠營運的影響 / Business impact
+      description: 幫我們排優先順序 / Helps us prioritise
+      options:
+        - 🔴 停擺：整套系統不能用 / Blocker — the whole system is unusable
+        - 🟠 嚴重：某個部門做不了事 / Major — one department is blocked
+        - 🟡 普通：有替代做法，但很麻煩 / Moderate — there's a painful workaround
+        - 🟢 輕微：不影響作業（畫面歪掉、錯字等）/ Minor — cosmetic only
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: 補充說明（選填）/ Anything else (optional)
+      description: |
+        例如：什麼時候開始的、之前更新過什麼、公司網路有沒有擋、外接了哪套系統（鼎新／正航等）、
+        有沒有機密資料需要私下提供。
+
+        e.g. when it started, what you updated recently, corporate network restrictions,
+        external systems you've connected, or whether you have confidential data to share privately.

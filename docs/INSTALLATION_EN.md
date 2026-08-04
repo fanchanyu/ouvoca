@@ -15,7 +15,7 @@ thing to do up front** to work around them. These are bugs in the scripts, not p
 |---|---|---|---|
 | 1 | Double-clicking `install_easy.bat` flashes a black window and closes; nothing is installed | Route A (Windows) | Fix one line → [steps](#a0-fix-one-line-first-required) |
 | 2 | `install.bat` spins for 60 seconds at "Waiting for backend" and fails | Routes B, C | Create a `.env` by hand → [steps](#b1-create-two-env-files-by-hand-required) |
-| 3 | You put `LLM_API_KEY` in `backend/.env` as documented, and the AI assistant still does nothing | Routes B, C | Use the in-app settings page, or the root `.env` → [details](#2-llm_api_key-for-the-ai-assistant) |
+| 3 | You put `LLM_API_KEY` in `backend/.env` as documented, and the AI assistant still does nothing | Routes B, C | Use the in-app settings page, or the root `.env` → [details](#2-llmapikey-for-the-ai-assistant) |
 
 > 💡 **Want the fastest path?** Single machine, trying it out → **Route A**.
 > Already have Docker, or need the War Room / multi-plant nodes → **Route B**.
