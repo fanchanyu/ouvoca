@@ -338,7 +338,7 @@ Step 3️⃣  等 10–20 分鐘 → 瀏覽器自動打開 → 登入 admin / ad
 |---|---|
 | 🗂 **先看這份：全部文件的總索引** | **[`docs/README.md`](./docs/README.md)** — `docs/` 底下 100 份說明文件一次列完，每份標 🟢🟡🔴 告訴你「這份還能不能信」，並依**老闆 / 現場員工 / IT / 開發者 / English** 五種身分各給一條閱讀路線。不知道該看哪一份就從這裡開始 |
 | 📖 **這套系統有哪些功能** | [`docs/FEATURES_ZH.md`](./docs/FEATURES_ZH.md) — 每個功能對到哪支 API / 哪一頁 |
-| 📜 **每一版改了什麼** | [`docs/CHANGELOG_ZH.md`](./docs/CHANGELOG_ZH.md) — 白話版版本紀錄（v3.49 → v3.70） |
+| 📜 **每一版改了什麼** | [`docs/CHANGELOG_ZH.md`](./docs/CHANGELOG_ZH.md) — 白話版版本紀錄（v3.0 → v3.70）｜[English](./docs/CHANGELOG_EN.md) |
 | 🆘 **裝不起來 / 常見問題** | [`docs/INSTALL_TROUBLESHOOTING_ZH.md`](./docs/INSTALL_TROUBLESHOOTING_ZH.md) — 症狀對解法 + 14 題 FAQ |
 | 📕 **74 份雙語 PDF** | [`docs/DOCUMENT_INDEX.md`](./docs/DOCUMENT_INDEX.md) — 產品說明書 / 操作手冊 / 學術論文 / 法律聲明 |
 | 🏛️ **家規怎麼用** | [`docs/HOUSE_RULES_GUIDE_ZH.md`](./docs/HOUSE_RULES_GUIDE_ZH.md) |
@@ -420,7 +420,7 @@ SQLite（開發）/ PostgreSQL（正式）｜ LLM 預設 DeepSeek，可換 OpenA
 | **v3.69**（2026-08-04） | 效能健檢：181 個外鍵欄位補複合索引（實測 2 萬筆明細快約 1,030 倍）· 消滅 N+1 · 稽核只記寫入動作 |
 | **v3.68**（2026-08-04） | Turnkey 開機即用六套件補完：23 條家規 · 檢驗報告 / 盤點表 PDF · 86 科科目表 · 5 行業種子 |
 
-📜 **完整版本紀錄（v3.49 → v3.70，白話版）→ [`docs/CHANGELOG_ZH.md`](./docs/CHANGELOG_ZH.md)**
+📜 **完整版本紀錄（v3.0 → v3.70，白話版）→ [`docs/CHANGELOG_ZH.md`](./docs/CHANGELOG_ZH.md)** ｜ [English](./docs/CHANGELOG_EN.md)
 
 ---
 

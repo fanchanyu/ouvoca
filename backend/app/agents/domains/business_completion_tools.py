@@ -759,21 +759,54 @@ async def _create_pick_task(db, user, so_no: str, operator_keyword: str = ""):
 
     async def execute():
         from app.services.warehouse import create_pick_task
-        created = []
+        from app.models.inventory import Part
+        from app.models.product import Product
+        from app.models.warehouse import BinLocation
+
+        created: list[str] = []
+        skipped: list[str] = []
         for item in so.items:
+            # SO 行是「產品」，揀貨單要的是「料件」。
+            # 沿用出貨的既有約定：product.product_no == part.part_no
+            prod = (await db.execute(
+                select(Product).where(Product.id == item.product_id)
+            )).scalar_one_or_none()
+            if prod is None:
+                continue
+            part = (await db.execute(
+                select(Part).where(Part.part_no == prod.product_no)
+            )).scalar_one_or_none()
+            if part is None:
+                skipped.append(f"{prod.product_no}（找不到對應料件）")
+                continue
+
+            # bin_location_id 是 NOT NULL —— 找該料件所在的儲位
+            bin_loc = (await db.execute(
+                select(BinLocation)
+                .where(BinLocation.part_id == part.id, BinLocation.is_active == True)  # noqa: E712
+                .limit(1)
+            )).scalar_one_or_none()
+            if bin_loc is None:
+                skipped.append(f"{part.part_no}（尚未設定儲位）")
+                continue
+
             pt = await create_pick_task(db, {
-                "pick_no": f"PICK-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:4]}",
                 "so_id": so.id,
-                "part_id": item.product_id,  # SO item product → pick part
-                "requested_qty": item.ordered_qty,
-                "operator_id": operator_id,
+                "part_id": part.id,
+                "bin_location_id": bin_loc.id,
+                "qty_to_pick": item.ordered_qty,
+                "assigned_to": operator_id,
                 "status": "pending",
             }, user=user)
             created.append(pt.pick_no)
+
+        msg = f"✅ 已為 SO {so.so_no} 建立 {len(created)} 個揀貨任務"
+        if skipped:
+            msg += f"\n⚠️ 有 {len(skipped)} 行未建立：" + "、".join(skipped)
         return {
             "so_no": so.so_no, "tasks_created": len(created),
-            "task_nos": created,
-            "message": f"✅ 已為 SO {so.so_no} 建立 {len(created)} 個揀貨任務",
+            "task_nos": created, "skipped": skipped,
+            "message": msg,
         }
 
     await stash_card(card, execute)
@@ -809,7 +842,7 @@ async def _query_pending_pick_tasks(db, user, operator_keyword: str = None):
 
     lines = [f"📦 **待揀任務 ({len(rows)})**：\n"]
     for r in rows:
-        lines.append(f"  • {r.pick_no} 需揀 {r.requested_qty or 0:g} (狀態: {r.status})")
+        lines.append(f"  • {r.pick_no} 需揀 {r.qty_to_pick or 0:g} (狀態: {r.status})")
     return {"summary": "\n".join(lines),
             "raw": {"count": len(rows), "tasks": [r.pick_no for r in rows]}}
 

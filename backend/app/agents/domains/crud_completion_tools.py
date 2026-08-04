@@ -568,7 +568,7 @@ async def _complete_pick_with_confirm(db, user, pick_no: str, picked_qty: float)
     if pick.status in ("completed", "cancelled"):
         return {"error": f"揀貨單狀態 {pick.status!r}，不可重複完成"}
 
-    requested = pick.requested_qty or 0
+    requested = pick.qty_to_pick or 0
     diff = picked_qty - requested
     diff_icon = "✅" if diff == 0 else ("⚠️" if abs(diff) <= requested * 0.05 else "❌")
 

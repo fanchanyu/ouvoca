@@ -7,8 +7,8 @@
 > Built for 50–100 person manufacturers. **Free for up to 20 concurrent users.**
 
 [![CI](https://github.com/fanchanyu/ouvoca/actions/workflows/ci.yml/badge.svg)](https://github.com/fanchanyu/ouvoca/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-880%20passing-brightgreen)](#-developer-guide)
-[![Version](https://img.shields.io/badge/version-3.70.0-blueviolet)](#-project-stats)
+[![Tests](https://img.shields.io/badge/tests-880%20passing-brightgreen)](./docs/CHANGELOG_EN.md)
+[![Version](https://img.shields.io/badge/version-3.70.0-blueviolet)](./docs/CHANGELOG_EN.md)
 [![API](https://img.shields.io/badge/REST%20endpoints-242-informational)](./docs/API_REFERENCE.md)
 [![Tables](https://img.shields.io/badge/tables-107-informational)](./docs/ARCHITECTURE_BLUEPRINT_EN.md)
 [![AI tools](https://img.shields.io/badge/AI%20tools-201-orange)](./docs/AGENT_CATALOG_EN.md)
@@ -44,7 +44,7 @@
 |---|---|
 | 🗂 **[`docs/README.md`](./docs/README.md)** | **The master index — read this first.** All 100 documents under `docs/`, each tagged 🟢 current / 🟡 partly stale / 🔴 known-outdated so you know what to trust, with a reading path per reader type and a dedicated **English Readers** section that also names the 21 documents which exist in Chinese only |
 | 📕 [`docs/DOCUMENT_INDEX.md`](./docs/DOCUMENT_INDEX.md) | The 74 bilingual PDFs, per-file — for printing or taking to a shop floor with no network |
-| 📜 [`docs/CHANGELOG_ZH.md`](./docs/CHANGELOG_ZH.md) | Plain-language release notes, v3.49 → v3.70 (Chinese only) |
+| 📜 [`docs/CHANGELOG_EN.md`](./docs/CHANGELOG_EN.md) | Plain-language release notes in English, v3.0 → v3.70 — what changed and what you'll notice, with a glossary of the Taiwan-specific terms (GUI uniform invoice, 401/405 VAT return, 統編) ｜ [繁體中文](./docs/CHANGELOG_ZH.md) |
 
 ---
 

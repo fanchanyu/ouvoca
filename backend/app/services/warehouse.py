@@ -39,12 +39,15 @@ async def list_bins(db: AsyncSession, zone_id: Optional[str] = None) -> List[Bin
 
 
 async def create_pick_task(db: AsyncSession, data: dict, user: Optional[dict] = None) -> PickTask:
-    task = PickTask(
-        id=str(uuid.uuid4()),
-        pick_no=f"PICK-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
-        assigned_to=(user or {}).get("employee_id"),
-        **data,
-    )
+    # 先組 dict 再展開 —— 原本寫成 PickTask(id=…, pick_no=…, assigned_to=…, **data)，
+    # 呼叫端只要在 data 裡帶了 pick_no 或 assigned_to 就會 TypeError（重複的關鍵字引數）。
+    payload = {
+        "id": str(uuid.uuid4()),
+        "pick_no": f"PICK-{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}",
+        "assigned_to": (user or {}).get("employee_id"),
+        **data,   # 呼叫端可覆寫上述預設
+    }
+    task = PickTask(**payload)
     db.add(task)
     await db.commit()
     await db.refresh(task)

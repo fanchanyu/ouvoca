@@ -316,7 +316,7 @@ These have **no English twin at all**. Use machine translation, or ask us.
 
 | 這份在講什麼 | 什麼時候看 | 中文 | English | 狀態 |
 |---|---|---|---|:---:|
-| **版本更新紀錄（白話版）** — 每個版本「你會看到什麼差別」，含版本號怎麼看 | 升級後想知道多了什麼 | [`CHANGELOG_ZH.md`](./CHANGELOG_ZH.md) | ❌ 無英文版 | 🟢 |
+| **版本更新紀錄（白話版）** — 每個版本「你會看到什麼差別」，含版本號怎麼看 | 升級後想知道多了什麼 | [`CHANGELOG_ZH.md`](./CHANGELOG_ZH.md) | [`CHANGELOG_EN.md`](./CHANGELOG_EN.md) | 🟢 |
 | **LLM 評比報告** — 主流 LLM 在 ERP 場景的實測比較 | 選要用哪家 AI | [`LLM_BENCHMARK_REPORT_ZH.md`](./LLM_BENCHMARK_REPORT_ZH.md) | [`LLM_BENCHMARK_REPORT_EN.md`](./LLM_BENCHMARK_REPORT_EN.md) | 🟡 |
 | **v3.60 交付報告** — P0 資安缺陷修復、外部 DB、系統組態的落地紀錄 | 想知道 v3.60 做了什麼 | [`V360_DELIVERY_REPORT_ZH.md`](./V360_DELIVERY_REPORT_ZH.md) | ❌ 無英文版 | 🟢 |
 | **程式碼自查報告** — 2026-05-14 的跨檔案靜態審查 | 追歷史 | [`CODE_REVIEW_REPORT.md`](./CODE_REVIEW_REPORT.md) | ❌ 無英文版 | 📦 |
